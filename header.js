@@ -16,7 +16,7 @@
 const HEADER_PATH = 'header.html';
 const WIDTH = 420;
 const STEP = 4;
-const PULSE_AMP = 2.6; // lower amplitude for a subtler breath
+const PULSE_AMP = 1.3; // half the current breathing amplitude
 const PULSE_WAVELENGTH = 0.06;
 const EVENT_DURATION = 2.0;
 
@@ -37,6 +37,7 @@ const eventConfig = {
 };
 
 let paths = [];
+let originalDs = [];
 let time = 0;
 const state = {
   base: true,
@@ -85,6 +86,10 @@ function eventWeight(elapsed) {
 }
 
 function buildPath(i, t) {
+  if (!state.pulse && !state.event) {
+    return originalDs[i] || '';
+  }
+
   let d = '';
   const cfg = waveConfig[i];
   const elapsed = t - eventStart;
@@ -178,6 +183,7 @@ function setupWaveAnimation() {
   paths = Array.from(document.querySelectorAll('.wave'));
   if (!paths.length) return;
 
+  originalDs = paths.map((p) => p.getAttribute('d'));
   setupControls();
   setupSuffixCycle();
   animate();
