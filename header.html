@@ -22,15 +22,20 @@
         <div class="brand-name">RESONANT</div>
       </div>
       <div class="brand-energy">
-        <div class="brand-xp">XP</div>
-        <div class="word-orbit">
-          <span class="orbit-word orbit-word-1">E<span class="orbit-xp">XP</span><span>ERTISE</span></span>
-          <span class="orbit-word orbit-word-2">E<span class="orbit-xp">XP</span><span>ERIENCE</span></span>
-          <span class="orbit-word orbit-word-3">E<span class="orbit-xp">XP</span><span>OSITION</span></span>
-          <span class="orbit-word orbit-word-4">E<span class="orbit-xp">XP</span><span>PLORATION</span></span>
-          <span class="orbit-word orbit-word-5">E<span class="orbit-xp">XP</span><span>ANSION</span></span>
-          <span class="orbit-word orbit-word-6">E<span class="orbit-xp">XP</span><span>ERIMENT</span></span>
-          <span class="orbit-word orbit-word-7">E<span class="orbit-xp">XP</span><span>PRESSION</span></span>
+        <div class="brand-xp-wrap">
+          <div class="brand-xp">XP</div>
+          <div class="word-slot" aria-label="Rotating word list">
+            <div class="slot-track">
+              <span>ERTISE</span>
+              <span>ERIENCE</span>
+              <span>OSITION</span>
+              <span>PLORATION</span>
+              <span>ANSION</span>
+              <span>ERIMENT</span>
+              <span>PRESSION</span>
+              <span>ERTISE</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -41,5 +46,13 @@
       <a href="xp-framework.html">Framework</a>
       <a href="contact.html">Contact</a>
     </nav>
+    <div class="header-controls">
+      <div class="header-control-group">
+        <button class="control-btn control-type active" data-type="pulse" type="button">Pulse</button>
+        <button class="control-btn control-type" data-type="base" type="button">Base</button>
+        <button class="control-btn control-type" data-type="event" type="button">Event</button>
+      </div>
+      <button class="control-btn control-toggle" data-action="togglePulse" type="button">Pause Pulse</button>
+    </div>
   </div>
 </header>
