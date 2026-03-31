@@ -37,28 +37,22 @@
 .wave-3,
 .wave-4,
 .wave-5 {
-  animation: wave-cycle 10s linear infinite;
+  /* Wave path animation is handled by JS for transient overlay motion.
+     The static SVG base form remains unchanged. */
+  animation: none;
 }
 
-.wave-2 {
-  animation-delay: -0.25s;
-}
-
-.wave-3 {
-  animation-delay: -0.5s;
-}
-
-.wave-4 {
-  animation-delay: -0.75s;
-}
-
+.wave-2,
+.wave-3,
+.wave-4,
 .wave-5 {
-  animation-delay: -1s;
+  /* Removed staggered CSS keyframe animation; JS now controls wave movement. */
 }
 
 .note-group {
   opacity: 0;
-  animation: note-fade 10s linear infinite;
+  /* note-fade animation disabled for a cleaner, JS-focused header motion layer */
+  animation: none;
 }
 
 .note {
@@ -97,8 +91,9 @@
   color: #111827;
   z-index: 5;
   pointer-events: none;
-  opacity: 0;
-  animation: xp-pop 2.5s ease forwards;
+  opacity: 1;
+  animation: none;
+  /* XP is shown statically; the wave motion is the transient energy overlay. */
 }
 
 .word-orbit {
@@ -118,9 +113,10 @@
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
   font-weight: 700;
   font-size: 1rem;
-  opacity: 0;
+  opacity: 1;
   color: #7c9cf6;
-  animation: orbit-reveal 14s ease-in-out infinite;
+  animation: none;
+  /* Orbit labels remain visible without CSS reveal animation. */
 }
 
 .orbit-word:nth-child(odd) {

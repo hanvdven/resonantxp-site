@@ -1,3 +1,11 @@
+/*
+  logo/animation.css
+  - wave-cycle: CSS animation path experiment (commented out in favor of JS overlay).
+  - note-fade: decorative opacity cycle for note markers.
+  - xp-pop: brand XP reveal animation.
+  - orbit-reveal: orbit text reveal animation.
+*/
+
 @keyframes wave-cycle {
   0%, 18%, 25%, 45%, 52%, 72%, 79%, 100% {
     transform: translateX(0) scaleX(1) scaleY(1);
