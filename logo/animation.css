@@ -1,9 +1,8 @@
 /*
   logo/animation.css
-  - wave-cycle: CSS animation path experiment (commented out in favor of JS overlay).
+  - wave-cycle: DEPRECATED CSS path animation. Waves are now animated by JS geometry.
   - note-fade: decorative opacity cycle for note markers.
-  - xp-pop: brand XP reveal animation.
-  - orbit-reveal: orbit text reveal animation.
+  - xp-pop: DEPRECATED keyframe no longer used.
 */
 
 @keyframes wave-cycle {
@@ -41,30 +40,6 @@
     opacity: 0;
   }
   82%, 90% {
-    opacity: 1;
-  }
-}
-
-@keyframes xp-pop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.75);
-  }
-  60% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes orbit-reveal {
-  0%, 12%, 88%, 100% {
-    opacity: 0;
-  }
-  15%, 60% {
     opacity: 1;
   }
 }

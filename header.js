@@ -16,23 +16,23 @@
 const HEADER_PATH = 'header.html';
 const WIDTH = 420;
 const STEP = 4;
-const PULSE_AMP = 5.2; // more visible breathing motion
+const PULSE_AMP = 2.6; // lower amplitude for a subtler breath
 const PULSE_WAVELENGTH = 0.06;
 const EVENT_DURATION = 2.0;
 
 const baseYs = [34, 52, 70, 88, 106];
 const waveConfig = [
-  { speed: 0.25, phase: 0.0, direction: 1 },
-  { speed: 0.18, phase: 1.2, direction: -1 },
-  { speed: 0.22, phase: 2.4, direction: 1 },
-  { speed: 0.16, phase: 3.1, direction: -1 },
-  { speed: 0.20, phase: 4.0, direction: 1 }
+  { speed: 0.75, phase: 0.0, direction: 1 },
+  { speed: 0.54, phase: 1.2, direction: -1 },
+  { speed: 0.66, phase: 2.4, direction: 1 },
+  { speed: 0.48, phase: 3.1, direction: -1 },
+  { speed: 0.60, phase: 4.0, direction: 1 }
 ];
 
 const eventConfig = {
   eventAmp: 6,
   eventWavelength: 0.08,
-  eventSpeed: 1.2,
+  eventSpeed: 3.6,
   eventPhase: 0.0
 };
 
@@ -42,6 +42,13 @@ const state = {
   base: true,
   pulse: true,
   event: false
+};
+const suffixWords = ['EXPERIENCE', 'EXPLORE', 'EXPAND', 'EXPERTISE'];
+const suffixState = {
+  index: 0,
+  transitioning: false,
+  intervalId: null,
+  transitionTimeout: null
 };
 let eventStart = 0;
 let currentMode = 'pulse';
@@ -90,6 +97,32 @@ function buildPath(i, t) {
   }
 
   return d;
+}
+
+function updateSuffix() {
+  const suffix = document.querySelector('.xp-suffix');
+  if (!suffix) return;
+
+  suffix.textContent = suffixWords[suffixState.index];
+  suffix.classList.toggle('enter', !suffixState.transitioning);
+  suffix.classList.toggle('exit', suffixState.transitioning);
+}
+
+function cycleSuffix() {
+  suffixState.transitioning = true;
+  updateSuffix();
+
+  clearTimeout(suffixState.transitionTimeout);
+  suffixState.transitionTimeout = setTimeout(() => {
+    suffixState.index = (suffixState.index + 1) % suffixWords.length;
+    suffixState.transitioning = false;
+    updateSuffix();
+  }, 400);
+}
+
+function setupSuffixCycle() {
+  updateSuffix();
+  suffixState.intervalId = setInterval(cycleSuffix, 3000);
 }
 
 function updateControlUI() {
@@ -146,6 +179,7 @@ function setupWaveAnimation() {
   if (!paths.length) return;
 
   setupControls();
+  setupSuffixCycle();
   animate();
 }
 
@@ -195,20 +229,9 @@ const HEADER_FALLBACK = `
         <div class="brand-name">RESONANT</div>
       </div>
       <div class="brand-energy">
-        <div class="brand-xp-wrap">
-          <div class="brand-xp">XP</div>
-          <div class="word-slot" aria-label="Rotating word list">
-            <div class="slot-track">
-              <span>ERTISE</span>
-              <span>ERIENCE</span>
-              <span>OSITION</span>
-              <span>PLORATION</span>
-              <span>ANSION</span>
-              <span>ERIMENT</span>
-              <span>PRESSION</span>
-              <span>ERTISE</span>
-            </div>
-          </div>
+        <div class="xp-logo" aria-label="XP with suffix">
+          <span class="xp-core">XP</span>
+          <span class="xp-suffix enter">EXPERIENCE</span>
         </div>
       </div>
     </div>

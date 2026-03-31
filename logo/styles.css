@@ -50,13 +50,29 @@
 }
 
 .note-group {
-  opacity: 0;
-  /* note-fade animation disabled for a cleaner, JS-focused header motion layer */
-  animation: none;
+  opacity: 1;
+  /* Notes are now animated via CSS while wave geometry remains JS-controlled. */
 }
 
 .note {
   opacity: 0;
+  animation: note-fade 6s ease-in-out infinite;
+}
+
+.note-1 {
+  animation-delay: 0s;
+}
+
+.note-2 {
+  animation-delay: 1.1s;
+}
+
+.note-3 {
+  animation-delay: 2.4s;
+}
+
+.note-4 {
+  animation-delay: 3.6s;
 }
 
 .brand-name {
@@ -73,67 +89,55 @@
 .brand-energy {
   position: relative;
   width: min(26rem, 100%);
-  height: 12rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.brand-xp-wrap {
+.xp-logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
 }
 
-.brand-xp {
+.xp-core {
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
   font-weight: 900;
   font-size: clamp(5rem, 10vw, 7rem);
   line-height: 0.85;
   color: #111827;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 1;
-  animation: none;
-  margin: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.word-slot {
-  position: relative;
-  overflow: hidden;
-  width: 10rem;
-  height: 3.1rem;
-  border-left: 1px solid rgba(37, 99, 235, 0.12);
-  padding-left: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.slot-track {
-  display: flex;
-  flex-direction: column;
-  animation: slot-spin 8s steps(7) infinite;
-}
-
-.slot-track span {
-  display: block;
-  height: 3.1rem;
-  line-height: 3.1rem;
+.xp-suffix {
+  display: inline-block;
+  width: 11rem;
+  text-align: left;
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #2563eb;
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
 }
 
-@keyframes slot-spin {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-21.7rem);
-  }
+.xp-suffix.exit {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(-4px);
+}
+
+.xp-suffix.enter {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0px);
 }
 
 
@@ -148,13 +152,5 @@
 
   .brand-energy {
     height: 14rem;
-  }
-
-  .brand-xp {
-    font-size: clamp(4rem, 18vw, 6.5rem);
-  }
-
-  .orbit-word {
-    font-size: 0.88rem;
   }
 }
