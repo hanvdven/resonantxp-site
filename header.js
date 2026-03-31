@@ -64,7 +64,7 @@ function eventEnvelope(elapsed) {
   return Math.sin(ratio * Math.PI);
 }
 
-function eventPulse(x, t) {
+function eventPulse(x, t, cfg) {
   if (!state.event) return 0;
   const elapsed = t - eventStart;
   if (elapsed >= EVENT_DURATION) {
@@ -74,7 +74,7 @@ function eventPulse(x, t) {
 
   const envelope = eventEnvelope(elapsed);
   return (
-    Math.sin(x * eventConfig.eventWavelength - t * eventConfig.eventSpeed + eventConfig.eventPhase) *
+    Math.sin(x * eventConfig.eventWavelength * cfg.direction - t * eventConfig.eventSpeed + cfg.phase + eventConfig.eventPhase) *
     eventConfig.eventAmp *
     envelope
   );
@@ -97,7 +97,7 @@ function buildPath(i, t) {
 
   for (let x = 0; x <= WIDTH; x += STEP) {
     const baseY = baseYs[i];
-    const y = baseY + pulse(x, t, cfg) * (1 - weight) + eventPulse(x, t);
+    const y = baseY + pulse(x, t, cfg) * (1 - weight) + eventPulse(x, t, cfg);
     d += x === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
   }
 
@@ -109,11 +109,16 @@ function updateSuffix() {
   if (!suffix) return;
 
   suffix.textContent = suffixWords[suffixState.index];
+  const nextIndex = (suffixState.index + 1) % suffixWords.length;
+  suffix.dataset.next = suffixWords[nextIndex];
   suffix.classList.toggle('enter', !suffixState.transitioning);
   suffix.classList.toggle('exit', suffixState.transitioning);
 }
 
 function cycleSuffix() {
+  const suffix = document.querySelector('.xp-suffix');
+  if (!suffix) return;
+
   suffixState.transitioning = true;
   updateSuffix();
 

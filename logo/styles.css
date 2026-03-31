@@ -113,6 +113,7 @@
 }
 
 .xp-suffix {
+  position: relative;
   display: inline-block;
   width: 11rem;
   text-align: left;
@@ -128,16 +129,40 @@
   transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
 }
 
+.xp-suffix::before {
+  content: attr(data-next);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  color: #2563eb;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(4px);
+  transition: opacity 400ms ease, filter 400ms ease, transform 400ms ease;
+  pointer-events: none;
+}
+
 .xp-suffix.exit {
   opacity: 0;
   filter: blur(6px);
   transform: translateY(-4px);
 }
 
+.xp-suffix.exit::before {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0px);
+}
+
 .xp-suffix.enter {
   opacity: 1;
   filter: blur(0px);
   transform: translateY(0px);
+}
+
+.xp-suffix.enter::before {
+  opacity: 0;
 }
 
 
