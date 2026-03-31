@@ -16,28 +16,30 @@
 const HEADER_PATH = 'header.html';
 const WIDTH = 420;
 const STEP = 4;
-const PULSE_AMP = 1.3; // half the current breathing amplitude
+const PULSE_AMP = 1.56; // 20% higher amplitude for the additive pulse
 const PULSE_WAVELENGTH = 0.06;
 const EVENT_DURATION = 2.0;
 
 const baseYs = [34, 52, 70, 88, 106];
 const waveConfig = [
-  { speed: 0.75, phase: 0.0, direction: 1 },
-  { speed: 0.54, phase: 1.2, direction: -1 },
-  { speed: 0.66, phase: 2.4, direction: 1 },
-  { speed: 0.48, phase: 3.1, direction: -1 },
-  { speed: 0.60, phase: 4.0, direction: 1 }
+  { speed: 0.975, phase: 0.0, direction: 1 },
+  { speed: 0.702, phase: 1.2, direction: -1 },
+  { speed: 0.858, phase: 2.4, direction: 1 },
+  { speed: 0.624, phase: 3.1, direction: -1 },
+  { speed: 0.78, phase: 4.0, direction: 1 }
 ];
 
 const eventConfig = {
   eventAmp: 6,
-  eventWavelength: 0.08,
+  eventWavelength: 0.06,
   eventSpeed: 3.6,
   eventPhase: 0.0
 };
 
 let paths = [];
 let originalDs = [];
+let baselineSamples = [];
+let baselineSvg = null;
 let time = 0;
 const state = {
   base: true,
@@ -85,6 +87,35 @@ function eventWeight(elapsed) {
   return ratio * ratio * (3 - 2 * ratio);
 }
 
+function getBaselineY(i, x) {
+  const samples = baselineSamples[i];
+  if (!samples || !samples.length) {
+    return baseYs[i];
+  }
+
+  let left = 0;
+  let right = samples.length - 1;
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    if (samples[mid].x < x) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+
+  if (left === 0) {
+    return samples[0].y;
+  }
+
+  const prev = samples[left - 1];
+  const next = samples[left];
+  const range = next.x - prev.x;
+  return range === 0
+    ? prev.y
+    : prev.y + ((x - prev.x) / range) * (next.y - prev.y);
+}
+
 function buildPath(i, t) {
   if (!state.pulse && !state.event) {
     return originalDs[i] || '';
@@ -96,7 +127,7 @@ function buildPath(i, t) {
   const weight = state.event ? eventWeight(elapsed) : 0;
 
   for (let x = 0; x <= WIDTH; x += STEP) {
-    const baseY = baseYs[i];
+    const baseY = getBaselineY(i, x);
     const y = baseY + pulse(x, t, cfg) * (1 - weight) + eventPulse(x, t, cfg);
     d += x === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
   }
@@ -184,11 +215,49 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
+function samplePath(path) {
+  const length = path.getTotalLength();
+  const sampleCount = Math.ceil(WIDTH / STEP) * 2;
+  const points = [];
+
+  for (let i = 0; i <= sampleCount; i += 1) {
+    const point = path.getPointAtLength((i / sampleCount) * length);
+    points.push({ x: point.x, y: point.y });
+  }
+
+  return points;
+}
+
+function createBaselineSampler() {
+  if (baselineSvg) return;
+
+  baselineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  baselineSvg.setAttribute('width', '0');
+  baselineSvg.setAttribute('height', '0');
+  baselineSvg.style.position = 'absolute';
+  baselineSvg.style.width = '0';
+  baselineSvg.style.height = '0';
+  baselineSvg.style.overflow = 'hidden';
+  baselineSvg.style.pointerEvents = 'none';
+  baselineSvg.style.visibility = 'hidden';
+  document.body.appendChild(baselineSvg);
+}
+
 function setupWaveAnimation() {
   paths = Array.from(document.querySelectorAll('.wave'));
   if (!paths.length) return;
 
   originalDs = paths.map((p) => p.getAttribute('d'));
+  createBaselineSampler();
+  baselineSamples = paths.map((path) => {
+    const clone = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    clone.setAttribute('d', path.getAttribute('d'));
+    baselineSvg.appendChild(clone);
+    const samples = samplePath(clone);
+    baselineSvg.removeChild(clone);
+    return samples;
+  });
+
   setupControls();
   setupSuffixCycle();
   animate();
