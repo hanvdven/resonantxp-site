@@ -78,8 +78,7 @@ img {
 .brand-lines span {
   width: 100%;
   height: 1px;
-  background: #2563eb;
-  border-radius: 999px;
+  background: center/100% 100% no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 10'%3E%3Cpath d='M0 5 C40 2 80 8 120 5 S200 2 240 5 S320 2 360 5' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .brand-name {
@@ -89,6 +88,7 @@ img {
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: #2563eb;
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 
 .brand-xp {
@@ -98,16 +98,21 @@ img {
   gap: 0.65rem;
 }
 
+.brand-xp-large,
+.carousel-xp {
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 800;
+  color: #111827;
+}
+
 .brand-xp-large {
   font-size: clamp(4.2rem, 7vw, 6.5rem);
-  font-weight: 800;
   line-height: 0.85;
-  color: #111827;
 }
 
 .brand-carousel {
   overflow: hidden;
-  height: 1.45rem;
+  height: 1.65rem;
 }
 
 .brand-carousel-inner {
@@ -116,12 +121,20 @@ img {
   animation: carousel-words 14s steps(7, end) infinite;
 }
 
-.brand-carousel-inner span {
-  min-height: 1.45rem;
-  display: flex;
+.carousel-item {
+  min-height: 1.65rem;
+  display: inline-flex;
   align-items: center;
+  gap: 0.45rem;
+}
+
+.carousel-item span {
   color: #334155;
   font-size: 0.95rem;
+}
+
+.carousel-xp {
+  color: #111827;
 }
 
 @keyframes carousel-words {
