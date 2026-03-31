@@ -1,0 +1,189 @@
+.brand-block {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  gap: 1.5rem;
+  padding-top: 0.5rem;
+}
+
+.brand-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-frame {
+  width: min(18rem, 100%);
+}
+
+.logo-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.wave {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 2;
+  opacity: 0.92;
+  vector-effect: non-scaling-stroke;
+  transform-origin: center;
+}
+
+.wave-1,
+.wave-2,
+.wave-3,
+.wave-4,
+.wave-5 {
+  animation: wave-cycle 10s linear infinite;
+}
+
+.wave-2 {
+  animation-delay: -0.25s;
+}
+
+.wave-3 {
+  animation-delay: -0.5s;
+}
+
+.wave-4 {
+  animation-delay: -0.75s;
+}
+
+.wave-5 {
+  animation-delay: -1s;
+}
+
+.note-group {
+  opacity: 0;
+  animation: note-fade 10s linear infinite;
+}
+
+.note {
+  opacity: 0;
+}
+
+.brand-name {
+  width: min(18rem, 100%);
+  text-align: center;
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.brand-energy {
+  position: relative;
+  width: min(28rem, 100%);
+  height: 18rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-xp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 900;
+  font-size: clamp(6rem, 11vw, 10rem);
+  line-height: 0.85;
+  color: #111827;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  animation: xp-pop 2.5s ease forwards;
+}
+
+.word-orbit {
+  position: absolute;
+  inset: 0;
+}
+
+.orbit-word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 700;
+  font-size: 1rem;
+  opacity: 0;
+  color: #7c9cf6;
+  animation: orbit-reveal 14s ease-in-out infinite;
+}
+
+.orbit-word:nth-child(odd) {
+  color: #7c9cf6;
+}
+
+.orbit-word:nth-child(even) {
+  color: #2563eb;
+}
+
+.orbit-word-1 {
+  transform: translate(-50%, -50%) rotate(-80deg) translate(7.4rem) rotate(80deg);
+  animation-delay: 0s;
+}
+
+.orbit-word-2 {
+  transform: translate(-50%, -50%) rotate(-40deg) translate(7.4rem) rotate(40deg);
+  animation-delay: 1.4s;
+}
+
+.orbit-word-3 {
+  transform: translate(-50%, -50%) rotate(0deg) translate(7.4rem) rotate(0deg);
+  animation-delay: 2.8s;
+}
+
+.orbit-word-4 {
+  transform: translate(-50%, -50%) rotate(40deg) translate(7.4rem) rotate(-40deg);
+  animation-delay: 4.2s;
+}
+
+.orbit-word-5 {
+  transform: translate(-50%, -50%) rotate(80deg) translate(7.4rem) rotate(-80deg);
+  animation-delay: 5.6s;
+}
+
+.orbit-word-6 {
+  transform: translate(-50%, -50%) rotate(120deg) translate(7.4rem) rotate(-120deg);
+  animation-delay: 7s;
+}
+
+.orbit-word-7 {
+  transform: translate(-50%, -50%) rotate(160deg) translate(7.4rem) rotate(-160deg);
+  animation-delay: 8.4s;
+}
+
+@media (max-width: 720px) {
+  .logo-frame {
+    width: min(14rem, 100%);
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+  }
+
+  .brand-energy {
+    height: 14rem;
+  }
+
+  .brand-xp {
+    font-size: clamp(4rem, 18vw, 6.5rem);
+  }
+
+  .orbit-word {
+    font-size: 0.88rem;
+  }
+}

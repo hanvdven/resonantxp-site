@@ -1,3 +1,6 @@
+@import url("logo/styles.css");
+@import url("logo/animation.css");
+
 :root {
   color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -52,9 +55,11 @@ img {
 }
 
 .brand-block {
-  display: grid;
-  place-items: center;
-  gap: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
 }
 
 .brand-mark {
@@ -87,9 +92,11 @@ img {
 }
 
 .brand-xp {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
+  min-width: 22rem;
 }
 
 .brand-xp-logo {
@@ -101,7 +108,7 @@ img {
 }
 
 .brand-carousel {
-  width: min(36rem, 100%);
+  width: min(34rem, 100%);
 }
 
 .carousel-row {
@@ -111,8 +118,8 @@ img {
 
 .carousel-track {
   display: grid;
-  gap: 0.35rem;
-  animation: carousel-scroll 21s steps(7, end) infinite;
+  gap: 0;
+  animation: carousel-scroll 21s linear infinite;
 }
 
 .carousel-row:nth-child(2) .carousel-track {
@@ -156,7 +163,7 @@ img {
     transform: translateY(0);
   }
   to {
-    transform: translateY(calc(-3rem * 4));
+    transform: translateY(calc(-3rem * 7));
   }
 }
 

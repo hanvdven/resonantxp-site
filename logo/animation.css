@@ -1,0 +1,62 @@
+@keyframes wave-cycle {
+  0%, 18%, 25%, 45%, 52%, 72%, 79%, 100% {
+    transform: translateX(0) scaleX(1) scaleY(1);
+  }
+  20%, 22% {
+    transform: translateX(4px) scaleX(1.02);
+  }
+  23%, 24% {
+    transform: translateX(-4px) scaleX(0.98);
+  }
+  40%, 42% {
+    transform: scaleX(1.12);
+  }
+  43%, 44% {
+    transform: scaleX(0.95);
+  }
+  60%, 62% {
+    transform: scaleY(1.18);
+  }
+  63%, 64% {
+    transform: scaleY(0.8);
+  }
+  80%, 82% {
+    transform: scaleY(0.28);
+  }
+  83%, 88% {
+    transform: scaleY(0.28) translateX(0);
+  }
+}
+
+@keyframes note-fade {
+  0%, 78%, 95%, 100% {
+    opacity: 0;
+  }
+  82%, 90% {
+    opacity: 1;
+  }
+}
+
+@keyframes xp-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.75);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes orbit-reveal {
+  0%, 12%, 88%, 100% {
+    opacity: 0;
+  }
+  15%, 60% {
+    opacity: 1;
+  }
+}
