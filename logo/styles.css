@@ -72,95 +72,70 @@
 
 .brand-energy {
   position: relative;
-  width: min(28rem, 100%);
-  height: 18rem;
+  width: min(26rem, 100%);
+  height: 12rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.brand-xp-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .brand-xp {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
   font-weight: 900;
-  font-size: clamp(6rem, 11vw, 10rem);
+  font-size: clamp(5rem, 10vw, 7rem);
   line-height: 0.85;
   color: #111827;
   z-index: 5;
   pointer-events: none;
   opacity: 1;
   animation: none;
-  /* XP is shown statically; the wave motion is the transient energy overlay. */
+  margin: 0;
 }
 
-.word-orbit {
-  position: absolute;
-  inset: 0;
-}
-
-.orbit-word {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform-origin: center center;
-  display: inline-flex;
+.word-slot {
+  position: relative;
+  overflow: hidden;
+  width: 10rem;
+  height: 3.1rem;
+  border-left: 1px solid rgba(37, 99, 235, 0.12);
+  padding-left: 1rem;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  text-transform: uppercase;
+}
+
+.slot-track {
+  display: flex;
+  flex-direction: column;
+  animation: slot-spin 8s steps(7) infinite;
+}
+
+.slot-track span {
+  display: block;
+  height: 3.1rem;
+  line-height: 3.1rem;
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
   font-weight: 700;
-  font-size: 1rem;
-  opacity: 1;
-  color: #7c9cf6;
-  animation: none;
-  /* Orbit labels remain visible without CSS reveal animation. */
-}
-
-.orbit-word:nth-child(odd) {
-  color: #7c9cf6;
-}
-
-.orbit-word:nth-child(even) {
+  font-size: 1.05rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
   color: #2563eb;
 }
 
-.orbit-word-1 {
-  transform: translate(-50%, -50%) rotate(-80deg) translate(7.4rem) rotate(80deg);
-  animation-delay: 0s;
+@keyframes slot-spin {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-21.7rem);
+  }
 }
 
-.orbit-word-2 {
-  transform: translate(-50%, -50%) rotate(-40deg) translate(7.4rem) rotate(40deg);
-  animation-delay: 1.4s;
-}
-
-.orbit-word-3 {
-  transform: translate(-50%, -50%) rotate(0deg) translate(7.4rem) rotate(0deg);
-  animation-delay: 2.8s;
-}
-
-.orbit-word-4 {
-  transform: translate(-50%, -50%) rotate(40deg) translate(7.4rem) rotate(-40deg);
-  animation-delay: 4.2s;
-}
-
-.orbit-word-5 {
-  transform: translate(-50%, -50%) rotate(80deg) translate(7.4rem) rotate(-80deg);
-  animation-delay: 5.6s;
-}
-
-.orbit-word-6 {
-  transform: translate(-50%, -50%) rotate(120deg) translate(7.4rem) rotate(-120deg);
-  animation-delay: 7s;
-}
-
-.orbit-word-7 {
-  transform: translate(-50%, -50%) rotate(160deg) translate(7.4rem) rotate(-160deg);
-  animation-delay: 8.4s;
-}
 
 @media (max-width: 720px) {
   .logo-frame {
