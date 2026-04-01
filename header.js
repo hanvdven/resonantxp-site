@@ -4,61 +4,81 @@
     The header is a shared static anchor and the motion is a separate overlay layer.
 
  2. TWO-LAYER MOTION MODEL
-    - Layer A: continuous breathing pulse wave (this implementation)
-    - Layer B: episodic event pulses (later, additive)
+    - Layer A: continuous breathing pulse wave
+    - Layer B: episodic event pulses
 
  3. ANIMATION TYPES
     - base: the existing SVG path identity
     - pulse: slow, permanent, low-amplitude breathing
-    - event: transient 1-2s motion bursts on top of the pulse layer
+    - event: transient 4s motion bursts on top of the pulse layer
 */
 
 const HEADER_PATH = 'header.html';
+const PLACEHOLDER_SELECTOR = '#site-header';
+const SELECTORS = {
+  wave: '.wave',
+  suffix: '.xp-suffix'
+};
 const WIDTH = 420;
 const STEP = 4;
-const PULSE_AMP = 1.56; // 20% higher amplitude for the additive pulse
+const PULSE_AMP = 1.56;
 const PULSE_WAVELENGTH = 0.06;
-const EVENT_DURATION = 2.0;
+const EVENT_DURATION = 4.0;
 
 const baseYs = [34, 52, 70, 88, 106];
 const waveConfig = [
-  { speed: 0.975, phase: 0.0, direction: 1 },
-  { speed: 0.702, phase: 1.2, direction: -1 },
-  { speed: 0.858, phase: 2.4, direction: 1 },
-  { speed: 0.624, phase: 3.1, direction: -1 },
-  { speed: 0.78, phase: 4.0, direction: 1 }
+  { speed: 2.2, phase: 0.0, direction: 1 },
+  { speed: 1.58, phase: 1.2, direction: -1 },
+  { speed: 1.94, phase: 2.4, direction: 1 },
+  { speed: 1.41, phase: 3.1, direction: -1 },
+  { speed: 1.76, phase: 4.0, direction: 1 }
 ];
 
 const eventConfig = {
   eventAmp: 6,
   eventWavelength: 0.06,
-  eventSpeed: 3.6,
+  eventSpeed: 4.05,
   eventPhase: 0.0
 };
+
+const suffixWords = [ 'LORATION', 'ERIENCE','ANSION', 'RESSION','ERTISE','OSURE',];
 
 let paths = [];
 let originalDs = [];
 let baselineSamples = [];
 let baselineSvg = null;
 let time = 0;
-const state = {
-  base: true,
-  pulse: true,
-  event: false
-};
-const suffixWords = ['EXPERIENCE', 'EXPLORE', 'EXPAND', 'EXPERTISE'];
-const suffixState = {
+let eventStart = 0;
+let eventTimeoutId = null;
+let nextEventTimeoutId = null;
+let suffixState = {
   index: 0,
   transitioning: false,
   intervalId: null,
-  transitionTimeout: null
+  timeoutId: null
 };
-let eventStart = 0;
-let currentMode = 'pulse';
+const state = {
+  pulse: true,
+  event: false,
+  eventVariant: 'all',
+  eventWaveIndex: null
+};
+
+function getElement(selector) {
+  return document.querySelector(selector);
+}
+
+function getElements(selector) {
+  return Array.from(document.querySelectorAll(selector));
+}
 
 function pulse(x, t, cfg) {
-  if (!state.pulse) return 0;
-  return Math.sin(x * PULSE_WAVELENGTH * cfg.direction + t * cfg.speed + cfg.phase) * PULSE_AMP;
+  const amplitude =
+    PULSE_AMP * (0.9 + 0.4 * Math.sin(t * 0.33 + cfg.phase * 0.5));
+
+  return (
+    Math.sin(x * PULSE_WAVELENGTH * cfg.direction + t * cfg.speed + cfg.phase) * amplitude
+  );
 }
 
 function eventEnvelope(elapsed) {
@@ -66,35 +86,63 @@ function eventEnvelope(elapsed) {
   return Math.sin(ratio * Math.PI);
 }
 
-function eventPulse(x, t, cfg) {
+function eventPulse(x, t, cfg, index) {
   if (!state.event) return 0;
+  if (state.eventVariant === 'single' && index !== state.eventWaveIndex) return 0;
+
   const elapsed = t - eventStart;
   if (elapsed >= EVENT_DURATION) {
-    state.event = false;
     return 0;
   }
 
-  const envelope = eventEnvelope(elapsed);
+  const speed =
+    state.eventVariant === 'single' && index === state.eventWaveIndex
+      ? eventConfig.eventSpeed * 1.8
+      : eventConfig.eventSpeed;
+
+  const amplitude =
+    state.eventVariant === 'single' && index === state.eventWaveIndex
+      ? eventConfig.eventAmp * 1.3
+      : eventConfig.eventAmp;
+
   return (
-    Math.sin(x * eventConfig.eventWavelength * cfg.direction - t * eventConfig.eventSpeed + cfg.phase + eventConfig.eventPhase) *
-    eventConfig.eventAmp *
-    envelope
+    Math.sin(
+      x * eventConfig.eventWavelength * cfg.direction - t * speed + cfg.phase + eventConfig.eventPhase
+    ) * amplitude * eventEnvelope(elapsed)
   );
 }
 
-function eventWeight(elapsed) {
-  const ratio = Math.min(elapsed / EVENT_DURATION, 1);
-  return ratio * ratio * (3 - 2 * ratio);
+function endEvent() {
+  state.event = false;
+  state.eventWaveIndex = null;
+  scheduleNextEvent();
 }
 
-function getBaselineY(i, x) {
-  const samples = baselineSamples[i];
-  if (!samples || !samples.length) {
-    return baseYs[i];
+function scheduleNextEvent() {
+  clearTimeout(nextEventTimeoutId);
+  nextEventTimeoutId = setTimeout(triggerEvent, 8000 + Math.random() * 4000);
+}
+
+function triggerEvent() {
+  eventStart = time;
+  state.event = true;
+  state.eventVariant = Math.random() < 0.5 ? 'all' : 'single';
+  state.eventWaveIndex =
+    state.eventVariant === 'single' ? Math.floor(Math.random() * paths.length) : null;
+
+  clearTimeout(eventTimeoutId);
+  eventTimeoutId = setTimeout(endEvent, EVENT_DURATION * 1000);
+}
+
+function getBaselineY(index, x) {
+  const samples = baselineSamples[index];
+  if (!samples?.length) {
+    return baseYs[index];
   }
 
   let left = 0;
   let right = samples.length - 1;
+
   while (left < right) {
     const mid = Math.floor((left + right) / 2);
     if (samples[mid].x < x) {
@@ -111,50 +159,64 @@ function getBaselineY(i, x) {
   const prev = samples[left - 1];
   const next = samples[left];
   const range = next.x - prev.x;
-  return range === 0
-    ? prev.y
-    : prev.y + ((x - prev.x) / range) * (next.y - prev.y);
+  return range === 0 ? prev.y : prev.y + ((x - prev.x) / range) * (next.y - prev.y);
 }
 
-function buildPath(i, t) {
+function buildPath(index, t) {
   if (!state.pulse && !state.event) {
-    return originalDs[i] || '';
+    return originalDs[index] || '';
   }
 
-  let d = '';
-  const cfg = waveConfig[i];
-  const elapsed = t - eventStart;
-  const weight = state.event ? eventWeight(elapsed) : 0;
+  const cfg = waveConfig[index];
+  const segments = [];
 
   for (let x = 0; x <= WIDTH; x += STEP) {
-    const baseY = getBaselineY(i, x);
-    const y = baseY + pulse(x, t, cfg) * (1 - weight) + eventPulse(x, t, cfg);
-    d += x === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+    const baseY = getBaselineY(index, x);
+    const y = baseY + pulse(x, t, cfg) + eventPulse(x, t, cfg, index);
+    segments.push(`${x === 0 ? 'M' : 'L'} ${x} ${y}`);
   }
 
-  return d;
+  return segments.join(' ');
+}
+
+function buildContributionPath(index, t, includePulse, includeEvent) {
+  const cfg = waveConfig[index];
+  const segments = [];
+
+  for (let x = 0; x <= WIDTH; x += STEP) {
+    const baseY = getBaselineY(index, x);
+    let y = baseY;
+    if (includePulse) {
+      y += pulse(x, t, cfg);
+    }
+    if (includeEvent) {
+      y += eventPulse(x, t, cfg, index);
+    }
+    segments.push(`${x === 0 ? 'M' : 'L'} ${x} ${y}`);
+  }
+
+  return segments.join(' ');
 }
 
 function updateSuffix() {
-  const suffix = document.querySelector('.xp-suffix');
+  const suffix = getElement(SELECTORS.suffix);
   if (!suffix) return;
 
   suffix.textContent = suffixWords[suffixState.index];
-  const nextIndex = (suffixState.index + 1) % suffixWords.length;
-  suffix.dataset.next = suffixWords[nextIndex];
+  suffix.dataset.next = suffixWords[(suffixState.index + 1) % suffixWords.length];
   suffix.classList.toggle('enter', !suffixState.transitioning);
   suffix.classList.toggle('exit', suffixState.transitioning);
 }
 
 function cycleSuffix() {
-  const suffix = document.querySelector('.xp-suffix');
+  const suffix = getElement(SELECTORS.suffix);
   if (!suffix) return;
 
   suffixState.transitioning = true;
   updateSuffix();
 
-  clearTimeout(suffixState.transitionTimeout);
-  suffixState.transitionTimeout = setTimeout(() => {
+  clearTimeout(suffixState.timeoutId);
+  suffixState.timeoutId = setTimeout(() => {
     suffixState.index = (suffixState.index + 1) % suffixWords.length;
     suffixState.transitioning = false;
     updateSuffix();
@@ -166,50 +228,11 @@ function setupSuffixCycle() {
   suffixState.intervalId = setInterval(cycleSuffix, 3000);
 }
 
-function updateControlUI() {
-  const typeButtons = document.querySelectorAll('.control-type');
-  typeButtons.forEach((button) => {
-    button.classList.toggle('active', button.dataset.type === currentMode);
-  });
-
-  const toggle = document.querySelector('.control-toggle');
-  if (toggle) {
-    toggle.textContent = state.pulse ? 'Pause Pulse' : 'Play Pulse';
-  }
-}
-
-function setMode(mode) {
-  currentMode = mode;
-  state.base = true;
-  state.pulse = mode === 'pulse' || mode === 'event';
-  state.event = mode === 'event';
-  updateControlUI();
-}
-
-function triggerEvent() {
-  state.event = true;
-  eventStart = time;
-  setMode('event');
-}
-
-function togglePulse() {
-  state.pulse = !state.pulse;
-  if (!state.pulse) {
-    state.event = false;
-    currentMode = 'base';
-  } else if (state.event) {
-    currentMode = 'event';
-  } else {
-    currentMode = 'pulse';
-  }
-  updateControlUI();
-}
-
 function animate() {
   time += 0.016;
 
-  paths.forEach((p, i) => {
-    p.setAttribute('d', buildPath(i, time));
+  paths.forEach((path, index) => {
+    path.setAttribute('d', buildPath(index, time));
   });
 
   requestAnimationFrame(animate);
@@ -218,14 +241,11 @@ function animate() {
 function samplePath(path) {
   const length = path.getTotalLength();
   const sampleCount = Math.ceil(WIDTH / STEP) * 2;
-  const points = [];
 
-  for (let i = 0; i <= sampleCount; i += 1) {
-    const point = path.getPointAtLength((i / sampleCount) * length);
-    points.push({ x: point.x, y: point.y });
-  }
-
-  return points;
+  return Array.from({ length: sampleCount + 1 }, (_, index) => {
+    const point = path.getPointAtLength((index / sampleCount) * length);
+    return { x: point.x, y: point.y };
+  });
 }
 
 function createBaselineSampler() {
@@ -244,11 +264,12 @@ function createBaselineSampler() {
 }
 
 function setupWaveAnimation() {
-  paths = Array.from(document.querySelectorAll('.wave'));
+  paths = getElements(SELECTORS.wave);
   if (!paths.length) return;
 
-  originalDs = paths.map((p) => p.getAttribute('d'));
+  originalDs = paths.map((path) => path.getAttribute('d'));
   createBaselineSampler();
+
   baselineSamples = paths.map((path) => {
     const clone = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     clone.setAttribute('d', path.getAttribute('d'));
@@ -258,30 +279,18 @@ function setupWaveAnimation() {
     return samples;
   });
 
-  setupControls();
   setupSuffixCycle();
+  attachLogoEvents();
+  scheduleNextEvent();
   animate();
 }
 
-function setupControls() {
-  const typeButtons = document.querySelectorAll('.control-type');
-  typeButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const type = button.dataset.type;
-      if (type === 'event') {
-        triggerEvent();
-      } else {
-        setMode(type);
-      }
-    });
-  });
+function attachLogoEvents() {
+  const logoFrame = getElement('.logo-frame');
+  if (!logoFrame) return;
 
-  const toggle = document.querySelector('.control-toggle');
-  if (toggle) {
-    toggle.addEventListener('click', togglePulse);
-  }
-
-  updateControlUI();
+  logoFrame.style.cursor = 'pointer';
+  logoFrame.addEventListener('click', triggerEvent);
 }
 
 const HEADER_FALLBACK = `
@@ -309,9 +318,10 @@ const HEADER_FALLBACK = `
         <div class="brand-name">RESONANT</div>
       </div>
       <div class="brand-energy">
-        <div class="xp-logo" aria-label="XP with suffix">
+        <div class="xp-logo" aria-label="E-XP wordmark">
+          <span class="xp-prefix">E</span>
           <span class="xp-core">XP</span>
-          <span class="xp-suffix enter">EXPERIENCE</span>
+          <span class="xp-suffix enter">ERIENCE</span>
         </div>
       </div>
     </div>
@@ -322,20 +332,12 @@ const HEADER_FALLBACK = `
       <a href="xp-framework.html">Framework</a>
       <a href="contact.html">Contact</a>
     </nav>
-    <div class="header-controls">
-      <div class="header-control-group">
-        <button class="control-btn control-type active" data-type="pulse" type="button">Pulse</button>
-        <button class="control-btn control-type" data-type="base" type="button">Base</button>
-        <button class="control-btn control-type" data-type="event" type="button">Event</button>
-      </div>
-      <button class="control-btn control-toggle" data-action="togglePulse" type="button">Pause Pulse</button>
-    </div>
   </div>
 </header>
 `;
 
 function insertHeader() {
-  const placeholder = document.querySelector('#site-header');
+  const placeholder = getElement(PLACEHOLDER_SELECTOR);
   if (!placeholder) return;
 
   fetch(HEADER_PATH)

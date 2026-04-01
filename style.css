@@ -41,8 +41,8 @@ img {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(14px);
-  background: rgba(247, 250, 252, 0.96);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  background: transparent;
+  border-bottom: none;
 }
 
 .header-inner {
@@ -83,12 +83,15 @@ img {
 
 .brand-name {
   width: 100%;
-  font-size: 1rem;
+  text-align: center;
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
   font-weight: 700;
-  letter-spacing: 0.35em;
+  letter-spacing: 1.75em;
   text-transform: uppercase;
   color: #2563eb;
-  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-family: 'Californian FB', Georgia, Cambria, 'Times New Roman', Times, serif;
+  white-space: nowrap;
+  padding-inline: 0;
 }
 
 .brand-xp {
@@ -826,5 +829,40 @@ body.framework-page {
 
   .framework-title {
     font-size: 2.6rem;
+  }
+}
+.scene-text {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.scene-line {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeLine 0.8s ease forwards;
+}
+
+.scene-line:nth-child(1) { animation-delay: 0.2s; }
+.scene-line:nth-child(2) { animation-delay: 0.6s; }
+.scene-line:nth-child(3) { animation-delay: 1.2s; }
+.scene-line:nth-child(4) { animation-delay: 1.8s; }
+
+.scene-accent {
+  font-weight: 600;
+}
+
+.scene-shift {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  opacity: 0;
+  animation: fadeLine 1s ease forwards;
+  animation-delay: 2.4s;
+}
+
+@keyframes fadeLine {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
