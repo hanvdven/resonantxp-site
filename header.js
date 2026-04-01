@@ -1,31 +1,20 @@
-/*
- 1. CORE DECISION
-    We keep the SVG markup untouched.
-    The header is a shared static anchor and the motion is a separate overlay layer.
-
- 2. TWO-LAYER MOTION MODEL
-    - Layer A: continuous breathing pulse wave
-    - Layer B: episodic event pulses
-
- 3. ANIMATION TYPES
-    - base: the existing SVG path identity
-    - pulse: slow, permanent, low-amplitude breathing
-    - event: transient 4s motion bursts on top of the pulse layer
-*/
-
 const HEADER_PATH = 'header.html';
 const PLACEHOLDER_SELECTOR = '#site-header';
 const SELECTORS = {
   wave: '.wave',
   suffix: '.xp-suffix'
 };
+
 const WIDTH = 420;
 const STEP = 4;
+
 const PULSE_AMP = 1.56;
 const PULSE_WAVELENGTH = 0.06;
+
 const EVENT_DURATION = 4.0;
 
 const baseYs = [34, 52, 70, 88, 106];
+
 const waveConfig = [
   { speed: 2.2, phase: 0.0, direction: 1 },
   { speed: 1.58, phase: 1.2, direction: -1 },
@@ -41,29 +30,28 @@ const eventConfig = {
   eventPhase: 0.0
 };
 
-const suffixWords = [ 'LORATION', 'ERIENCE','ANSION', 'RESSION','ERTISE','OSURE',];
+const suffixWords = ['LORATION', 'ERIENCE', 'ANSION', 'RESSION', 'ERTISE', 'OSURE'];
 
 let paths = [];
 let originalDs = [];
 let baselineSamples = [];
 let baselineSvg = null;
+
 let time = 0;
-let eventStart = 0;
-let eventTimeoutId = null;
-let nextEventTimeoutId = null;
+
+// ===== EVENT SYSTEM =====
+let activeEvents = [];
+let clickLocked = false;
+
+// ===== SUFFIX =====
 let suffixState = {
   index: 0,
   transitioning: false,
   intervalId: null,
   timeoutId: null
 };
-const state = {
-  pulse: true,
-  event: false,
-  eventVariant: 'all',
-  eventWaveIndex: null
-};
 
+// ===== HELPERS =====
 function getElement(selector) {
   return document.querySelector(selector);
 }
@@ -72,138 +60,232 @@ function getElements(selector) {
   return Array.from(document.querySelectorAll(selector));
 }
 
+// ===== BASE PULSE =====
 function pulse(x, t, cfg) {
   const amplitude =
     PULSE_AMP * (0.9 + 0.4 * Math.sin(t * 0.33 + cfg.phase * 0.5));
 
-  return (
-    Math.sin(x * PULSE_WAVELENGTH * cfg.direction + t * cfg.speed + cfg.phase) * amplitude
-  );
+  return Math.sin(x * PULSE_WAVELENGTH * cfg.direction + t * cfg.speed + cfg.phase) * amplitude;
 }
 
-function eventEnvelope(elapsed) {
-  const ratio = Math.min(elapsed / EVENT_DURATION, 1);
-  return Math.sin(ratio * Math.PI);
+// ===== SMOOTHSTEP =====
+function smoothstep(x) {
+  return x * x * (3 - 2 * x);
 }
 
-function eventPulse(x, t, cfg, index) {
-  if (!state.event) return 0;
-  if (state.eventVariant === 'single' && index !== state.eventWaveIndex) return 0;
+// ===== EVENT CREATION =====
+function createEvent(waveCount) {
+  const r = Math.random();
 
-  const elapsed = t - eventStart;
-  if (elapsed >= EVENT_DURATION) {
-    return 0;
+  let waveTargets;
+
+  if (r < 0.65) {
+    waveTargets = "all";
+  } else if (r < 0.85) {
+    waveTargets = "two";
+  } else {
+    waveTargets = "one";
   }
 
-  const speed =
-    state.eventVariant === 'single' && index === state.eventWaveIndex
-      ? eventConfig.eventSpeed * 1.8
-      : eventConfig.eventSpeed;
+  let pickedWave = null;
 
-  const amplitude =
-    state.eventVariant === 'single' && index === state.eventWaveIndex
-      ? eventConfig.eventAmp * 1.3
-      : eventConfig.eventAmp;
+  if (waveTargets === "one") {
+    pickedWave = Math.floor(Math.random() * waveCount);
+  }
 
-  return (
-    Math.sin(
-      x * eventConfig.eventWavelength * cfg.direction - t * speed + cfg.phase + eventConfig.eventPhase
-    ) * amplitude * eventEnvelope(elapsed)
-  );
+  // --- amplitude scaling ---
+  let ampScale;
+  if (waveTargets === "two") ampScale = 1.3;
+  else if (waveTargets === "one") ampScale = 1.5;
+  else ampScale = 1.0;
+
+  // --- frequency regime ---
+  const highSpeedMode = Math.random() < 0.1;
+
+  const speedBase = highSpeedMode ? 1.5 : 1.0;
+  const ampBase = highSpeedMode ? 0.8 : 1.0;
+
+  // --- per-wave randomness ---
+  const directionMap = [];
+  const speedMap = [];
+  const ampMap = [];
+
+  for (let i = 0; i < waveCount; i++) {
+    // direction: -1 or +1
+    directionMap[i] = Math.random() < 0.5 ? -1 : 1;
+
+    // speed scaling 50% - 150%
+    speedMap[i] = speedBase * (0.7 + 0.7 * Math.random());
+
+    // amplitude scaling 50% - 150%
+    ampMap[i] = ampBase * (0.7 + 0.7 * Math.random());
+  }
+
+  return {
+    start: time,
+    duration: 1.5,
+    waveTargets,
+    _pickedWave: pickedWave,
+    ampScale,
+    speedBase,
+    directionMap,
+    speedMap,
+    ampMap
+  };
 }
 
-function endEvent() {
-  state.event = false;
-  state.eventWaveIndex = null;
-  scheduleNextEvent();
+// ===== AMPLITUDE ENVELOPE =====
+function eventAmplitudeEnvelope(event) {
+  const t = time - event.start;
+
+  const inPhase = Math.min(t / 1.0, 1);
+  const outPhase = Math.min((event.duration - t) / 1.0, 1);
+
+  return smoothstep(Math.min(inPhase, outPhase));
 }
 
-function scheduleNextEvent() {
-  clearTimeout(nextEventTimeoutId);
-  nextEventTimeoutId = setTimeout(triggerEvent, 8000 + Math.random() * 4000);
+// ===== EVENT PULSE (MULTI EVENT ADDITIVE SYSTEM) =====
+function eventPulse(x, t, cfg, index) {
+  let sum = 0;
+
+
+  for (const event of activeEvents) {
+    const elapsed = time - event.start;
+    if (elapsed < 0 || elapsed > event.duration) continue;
+
+    // --- wave selection logic ---
+    if (event.waveTargets === "one" && index !== event._pickedWave) continue;
+    if (event.waveTargets === "two" && index > 1) continue;
+
+    const ampEnv = eventAmplitudeEnvelope(event);
+
+    // --- direction per wave ---
+    const speed = event.speedMap[index] ?? eventConfig.eventSpeed;
+    const amp = event.ampMap[index] ?? 1;
+    const dir = event.directionMap[index] ?? 1;
+
+    const finalAmp =
+      amp *
+      event.ampScale *
+      ampEnv;
+
+    sum += Math.sin(
+      x * eventConfig.eventWavelength * dir -
+      t * speed +
+      cfg.phase +
+      eventConfig.eventPhase
+    ) * finalAmp;
+  }
+
+  return sum;
 }
 
+// ===== EVENT TRIGGER =====
 function triggerEvent() {
-  eventStart = time;
-  state.event = true;
-  state.eventVariant = Math.random() < 0.5 ? 'all' : 'single';
-  state.eventWaveIndex =
-    state.eventVariant === 'single' ? Math.floor(Math.random() * paths.length) : null;
+  if (clickLocked) return;
 
-  clearTimeout(eventTimeoutId);
-  eventTimeoutId = setTimeout(endEvent, EVENT_DURATION * 1000);
+  clickLocked = true;
+  setTimeout(() => (clickLocked = false), 500);
+
+  const event = createEvent(paths.length);
+
+  activeEvents.push(event);
+
+  if (activeEvents.length > 3) {
+    activeEvents.shift();
+  }
 }
 
+// ===== BASELINE =====
 function getBaselineY(index, x) {
   const samples = baselineSamples[index];
-  if (!samples?.length) {
-    return baseYs[index];
-  }
+  if (!samples?.length) return baseYs[index];
 
   let left = 0;
   let right = samples.length - 1;
 
   while (left < right) {
     const mid = Math.floor((left + right) / 2);
-    if (samples[mid].x < x) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
+    if (samples[mid].x < x) left = mid + 1;
+    else right = mid;
   }
 
-  if (left === 0) {
-    return samples[0].y;
-  }
+  if (left === 0) return samples[0].y;
 
   const prev = samples[left - 1];
   const next = samples[left];
   const range = next.x - prev.x;
-  return range === 0 ? prev.y : prev.y + ((x - prev.x) / range) * (next.y - prev.y);
+
+  return range === 0
+    ? prev.y
+    : prev.y + ((x - prev.x) / range) * (next.y - prev.y);
 }
 
+// ===== PATH =====
 function buildPath(index, t) {
-  if (!state.pulse && !state.event) {
-    return originalDs[index] || '';
-  }
-
   const cfg = waveConfig[index];
   const segments = [];
 
   for (let x = 0; x <= WIDTH; x += STEP) {
     const baseY = getBaselineY(index, x);
-    const y = baseY + pulse(x, t, cfg) + eventPulse(x, t, cfg, index);
+
+    const y =
+      baseY +
+      pulse(x, t, cfg) +
+      eventPulse(x, t, cfg, index);
+
     segments.push(`${x === 0 ? 'M' : 'L'} ${x} ${y}`);
   }
 
   return segments.join(' ');
 }
 
-function buildContributionPath(index, t, includePulse, includeEvent) {
-  const cfg = waveConfig[index];
-  const segments = [];
+// ===== ANIMATION LOOP =====
+function animate() {
+  time += 0.016;
 
-  for (let x = 0; x <= WIDTH; x += STEP) {
-    const baseY = getBaselineY(index, x);
-    let y = baseY;
-    if (includePulse) {
-      y += pulse(x, t, cfg);
-    }
-    if (includeEvent) {
-      y += eventPulse(x, t, cfg, index);
-    }
-    segments.push(`${x === 0 ? 'M' : 'L'} ${x} ${y}`);
-  }
+  activeEvents = activeEvents.filter(
+    (e) => time - e.start < e.duration
+  );
 
-  return segments.join(' ');
+  paths.forEach((path, index) => {
+    path.setAttribute('d', buildPath(index, time));
+  });
+
+  requestAnimationFrame(animate);
 }
 
+// ===== SAMPLING =====
+function samplePath(path) {
+  const length = path.getTotalLength();
+  const sampleCount = Math.ceil(WIDTH / STEP) * 2;
+
+  return Array.from({ length: sampleCount + 1 }, (_, i) => {
+    const p = path.getPointAtLength((i / sampleCount) * length);
+    return { x: p.x, y: p.y };
+  });
+}
+
+function createBaselineSampler() {
+  if (baselineSvg) return;
+
+  baselineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  baselineSvg.style.width = '0';
+  baselineSvg.style.height = '0';
+  baselineSvg.style.position = 'absolute';
+  baselineSvg.style.visibility = 'hidden';
+  document.body.appendChild(baselineSvg);
+}
+
+// ===== SUFFIX =====
 function updateSuffix() {
   const suffix = getElement(SELECTORS.suffix);
   if (!suffix) return;
 
   suffix.textContent = suffixWords[suffixState.index];
-  suffix.dataset.next = suffixWords[(suffixState.index + 1) % suffixWords.length];
+  suffix.dataset.next =
+    suffixWords[(suffixState.index + 1) % suffixWords.length];
+
   suffix.classList.toggle('enter', !suffixState.transitioning);
   suffix.classList.toggle('exit', suffixState.transitioning);
 }
@@ -216,6 +298,7 @@ function cycleSuffix() {
   updateSuffix();
 
   clearTimeout(suffixState.timeoutId);
+
   suffixState.timeoutId = setTimeout(() => {
     suffixState.index = (suffixState.index + 1) % suffixWords.length;
     suffixState.transitioning = false;
@@ -228,63 +311,7 @@ function setupSuffixCycle() {
   suffixState.intervalId = setInterval(cycleSuffix, 3000);
 }
 
-function animate() {
-  time += 0.016;
-
-  paths.forEach((path, index) => {
-    path.setAttribute('d', buildPath(index, time));
-  });
-
-  requestAnimationFrame(animate);
-}
-
-function samplePath(path) {
-  const length = path.getTotalLength();
-  const sampleCount = Math.ceil(WIDTH / STEP) * 2;
-
-  return Array.from({ length: sampleCount + 1 }, (_, index) => {
-    const point = path.getPointAtLength((index / sampleCount) * length);
-    return { x: point.x, y: point.y };
-  });
-}
-
-function createBaselineSampler() {
-  if (baselineSvg) return;
-
-  baselineSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  baselineSvg.setAttribute('width', '0');
-  baselineSvg.setAttribute('height', '0');
-  baselineSvg.style.position = 'absolute';
-  baselineSvg.style.width = '0';
-  baselineSvg.style.height = '0';
-  baselineSvg.style.overflow = 'hidden';
-  baselineSvg.style.pointerEvents = 'none';
-  baselineSvg.style.visibility = 'hidden';
-  document.body.appendChild(baselineSvg);
-}
-
-function setupWaveAnimation() {
-  paths = getElements(SELECTORS.wave);
-  if (!paths.length) return;
-
-  originalDs = paths.map((path) => path.getAttribute('d'));
-  createBaselineSampler();
-
-  baselineSamples = paths.map((path) => {
-    const clone = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    clone.setAttribute('d', path.getAttribute('d'));
-    baselineSvg.appendChild(clone);
-    const samples = samplePath(clone);
-    baselineSvg.removeChild(clone);
-    return samples;
-  });
-
-  setupSuffixCycle();
-  attachLogoEvents();
-  scheduleNextEvent();
-  animate();
-}
-
+// ===== INIT =====
 function attachLogoEvents() {
   const logoFrame = getElement('.logo-frame');
   if (!logoFrame) return;
@@ -293,69 +320,42 @@ function attachLogoEvents() {
   logoFrame.addEventListener('click', triggerEvent);
 }
 
-const HEADER_FALLBACK = `
-<header class="site-header">
-  <div class="container header-inner">
-    <div class="brand-block">
-      <div class="brand-visual">
-        <div class="logo-frame">
-          <svg class="logo-svg" viewBox="0 0 420 120" aria-hidden="true">
-            <g class="waves">
-              <path class="wave wave-1" d="M0 34 C35 22 70 46 105 34 S175 22 210 34 S280 22 315 34 S385 22 420 34" />
-              <path class="wave wave-2" d="M0 52 C35 42 70 58 105 52 S175 42 210 52 S280 42 315 52 S385 42 420 52" />
-              <path class="wave wave-3" d="M0 70 C35 60 70 80 105 70 S175 60 210 70 S280 60 315 70 S385 60 420 70" />
-              <path class="wave wave-4" d="M0 88 C35 76 70 96 105 88 S175 76 210 88 S280 76 315 88 S385 76 420 88" />
-              <path class="wave wave-5" d="M0 106 C35 92 70 112 105 106 S175 92 210 106 S280 92 315 106 S385 92 420 106" />
-            </g>
-            <g class="note-group">
-              <circle class="note note-1" cx="78" cy="76" r="3" />
-              <circle class="note note-2" cx="170" cy="68" r="3" />
-              <circle class="note note-3" cx="260" cy="82" r="3" />
-              <circle class="note note-4" cx="330" cy="60" r="3" />
-            </g>
-          </svg>
-        </div>
-        <div class="brand-name">RESONANT</div>
-      </div>
-      <div class="brand-energy">
-        <div class="xp-logo" aria-label="E-XP wordmark">
-          <span class="xp-prefix">E</span>
-          <span class="xp-core">XP</span>
-          <span class="xp-suffix enter">ERIENCE</span>
-        </div>
-      </div>
-    </div>
-    <nav class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="experiences.html">Experiences</a>
-      <a href="field-notes.html">Field Notes</a>
-      <a href="xp-framework.html">Framework</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </div>
-</header>
-`;
+function setupWaveAnimation() {
+  paths = getElements(SELECTORS.wave);
+  if (!paths.length) return;
 
+  originalDs = paths.map((p) => p.getAttribute('d'));
+
+  createBaselineSampler();
+
+  baselineSamples = paths.map((path) => {
+    const clone = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    clone.setAttribute('d', path.getAttribute('d'));
+    baselineSvg.appendChild(clone);
+
+    const samples = samplePath(clone);
+
+    baselineSvg.removeChild(clone);
+    return samples;
+  });
+
+  setupSuffixCycle();
+  attachLogoEvents();
+  animate();
+}
+
+// ===== HEADER =====
 function insertHeader() {
   const placeholder = getElement(PLACEHOLDER_SELECTOR);
   if (!placeholder) return;
 
   fetch(HEADER_PATH)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Header fetch failed: ${response.status}`);
-      }
-      return response.text();
-    })
+    .then((r) => r.text())
     .then((html) => {
       placeholder.innerHTML = html;
       setupWaveAnimation();
     })
-    .catch((error) => {
-      console.warn('Header load failed, using inline fallback:', error);
-      placeholder.innerHTML = HEADER_FALLBACK;
-      setupWaveAnimation();
-    });
+    .catch(() => console.warn('Header load failed'));
 }
 
 insertHeader();
