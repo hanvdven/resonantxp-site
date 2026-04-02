@@ -30,15 +30,138 @@ const waveConfig = [
 ];
 const eventConfig = { eventWavelength: 0.06, eventPhase: 0.0 };
 
-// ===== WORD LIST =====
-const suffixWords = ['EXPERIENCE','EXPOSURE','EXPLORATION','EXPANSION','EXPRESSION','EXPERTISE'];
-const XP_LEFT = 28;   // px van links waar XP verankerd is
-const TOTAL_W = 420;  // breedte van het blok
+// ===== CONSTANTEN LETTER MORPH =====
+const MORPH_WORDS  = ['EXPERIENCE','EXPOSURE','EXPLORATION','EXPANSION','EXPRESSION','EXPERTISE'];
+const TOTAL_W      = 420;
+const XP_LEFT      = 48;
+const FADE_OUT_DUR = 2400;
+const FADE_IN_DUR  = 2200;
+const OVERLAP      = 600;
+const STAGGER      = 35;
+
+// ===== FLOAT STATES =====
+const floatStates = new Map();
+function getFloatState(id) {
+  if (!floatStates.has(id)) floatStates.set(id, {
+    phaseY: Math.random()*Math.PI*2, speedY: 1.1+Math.random()*0.8,  ampY: (1.0+Math.random())*0.4,
+    phaseX: Math.random()*Math.PI*2, speedX: 0.65+Math.random()*0.5, ampX: (0.6+Math.random()*0.7)*0.4,
+  });
+  return floatStates.get(id);
+}
+const globalFloat = {
+  phaseY: Math.random()*Math.PI*2, speedY: 0.55+Math.random()*0.25, ampY: 1.0+Math.random(),
+  phaseX: Math.random()*Math.PI*2, speedX: 0.32+Math.random()*0.18, ampX: 0.6+Math.random()*0.7,
+};
+
+// ===== FADE HELPER =====
+function fadeLayer(layer, toVisible, duration) {
+  if (toVisible) {
+    layer.style.opacity = '0';
+    layer.style.filter  = 'blur(6px)';
+  }
+  void layer.offsetWidth;
+  const ease = `${duration}ms cubic-bezier(0.4,0,0.2,1)`;
+  layer.style.transition = `opacity ${ease}, filter ${ease}`;
+  layer.style.opacity = toVisible ? '1' : '0';
+  layer.style.filter  = toVisible ? 'blur(0px)' : 'blur(6px)';
+}
+
+// ===== SLOTS BOUWEN =====
+function buildSlots(container, text, availableW, idPrefix, visible) {
+  container.innerHTML = '';
+  if (!text.length) return [];
+  const slotW = availableW / text.length;
+  return text.split('').map((ch, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'xp-letter-slot';
+    slot.style.width = slotW + 'px';
+    slot.dataset.id  = idPrefix + i;
+    const a = document.createElement('span'); a.className = 'xp-letter-layer';
+    const b = document.createElement('span'); b.className = 'xp-letter-layer';
+    a.textContent   = ch;
+    a.style.opacity = visible ? '1' : '0';
+    a.style.filter  = visible ? 'blur(0px)' : 'blur(6px)';
+    b.textContent   = ''; b.style.opacity = '0'; b.style.filter = 'blur(6px)';
+    slot.appendChild(a); slot.appendChild(b);
+    container.appendChild(slot);
+    return slot;
+  });
+}
+
+let prefixSlots = [], suffixSlots = [], morphWordIdx = 0;
+
+function splitMorphWord(w) {
+  const i = w.indexOf('XP');
+  return i === -1 ? {prefix:w,suffix:''} : {prefix:w.slice(0,i),suffix:w.slice(i+2)};
+}
+
+function positionSides() {
+  const xpW  = document.getElementById('xp-core').getBoundingClientRect().width;
+  const preAv = XP_LEFT;
+  const sufAv = TOTAL_W - XP_LEFT - xpW;
+  const preEl = document.getElementById('xp-prefix');
+  const sufEl = document.getElementById('xp-suffix');
+  document.getElementById('xp-core').style.left = XP_LEFT + 'px';
+  preEl.style.left = '0px'; preEl.style.width = preAv + 'px';
+  preEl.style.justifyContent = 'flex-end';
+  sufEl.style.left = (XP_LEFT + xpW) + 'px'; sufEl.style.width = sufAv + 'px';
+  return { preAv, sufAv };
+}
+
+function rebuildMorphSlots(wordIdx) {
+  const { preAv, sufAv } = positionSides();
+  const { prefix, suffix } = splitMorphWord(MORPH_WORDS[wordIdx]);
+  prefixSlots = buildSlots(document.getElementById('xp-prefix'), prefix, preAv, 'pre', true);
+  suffixSlots = buildSlots(document.getElementById('xp-suffix'), suffix, sufAv, 'suf', true);
+}
+
+function morphToWord(newIdx) {
+  const { prefix: np, suffix: ns } = splitMorphWord(MORPH_WORDS[newIdx]);
+  const { preAv, sufAv } = positionSides();
+  const allCurrent = [...prefixSlots, ...suffixSlots];
+  const maxStagger  = allCurrent.length * STAGGER;
+
+  // fade out
+  allCurrent.forEach((slot, i) => {
+    const layers = slot.querySelectorAll('.xp-letter-layer');
+    const active = parseFloat(layers[0].style.opacity ?? '1') > 0.5 ? layers[0] : layers[1];
+    setTimeout(() => fadeLayer(active, false, FADE_OUT_DUR), i * STAGGER + Math.random() * 30);
+  });
+
+  // bouw nieuw + fade in, met overlap
+  setTimeout(() => {
+    prefixSlots = buildSlots(document.getElementById('xp-prefix'), np, preAv, 'pre', false);
+    suffixSlots = buildSlots(document.getElementById('xp-suffix'), ns, sufAv, 'suf', false);
+    [...prefixSlots, ...suffixSlots].forEach((slot, i) => {
+      const layer = slot.querySelectorAll('.xp-letter-layer')[0];
+      setTimeout(() => fadeLayer(layer, true, FADE_IN_DUR), i * STAGGER + Math.random() * 40);
+    });
+    morphWordIdx = newIdx;
+  }, maxStagger + FADE_OUT_DUR - OVERLAP);
+}
+
+// ===== FLOAT LOOP =====
+let morphFloatT = 0, morphFloatLast = null;
+function morphFloatLoop(ts) {
+  if (morphFloatLast !== null) morphFloatT += (ts - morphFloatLast) * 0.001;
+  morphFloatLast = ts;
+  const gY = Math.sin(morphFloatT*globalFloat.speedY+globalFloat.phaseY)*globalFloat.ampY;
+  const gX = Math.sin(morphFloatT*globalFloat.speedX+globalFloat.phaseX)*globalFloat.ampX;
+  const gt = `translateZ(0) translate(${gX}px, calc(-50% + ${gY}px))`;
+  document.getElementById('xp-prefix').style.transform = gt;
+  document.getElementById('xp-suffix').style.transform = gt;
+  [...prefixSlots,...suffixSlots].forEach(slot => {
+    const fs = getFloatState(slot.dataset.id);
+    const y  = Math.sin(morphFloatT*fs.speedY+fs.phaseY)*fs.ampY;
+    const x  = Math.sin(morphFloatT*fs.speedX+fs.phaseX)*fs.ampX;
+    slot.style.transform = `translateZ(0) translate(${x}px,${y}px)`;
+  });
+  requestAnimationFrame(morphFloatLoop);
+}
 
 // ===== STATE =====
 let wavePaths = [], baselineSamples = [], baselineSvg = null, waveTime = 0;
 let activeEvents = [], clickLocked = false;
-let prefixSlots = [], suffixSlots = [], currentWordIdx = 0;
 let floatTime = 0, floatLastTs = null;
 
 // ===== HELPERS =====
@@ -47,140 +170,6 @@ function randRange(a, b) { return a + Math.random() * (b - a); }
 function getEl(sel) { return document.querySelector(sel); }
 function getEls(sel) { return Array.from(document.querySelectorAll(sel)); }
 
-// ===== FLOAT STATES =====
-const floatStates = new Map();
-function getFloatState(id) {
-  if (!floatStates.has(id)) floatStates.set(id, {
-    phaseY: Math.random()*Math.PI*2, speedY: 1.1+Math.random()*0.8,  ampY: (1.0+Math.random()*1.0)*0.4,
-    phaseX: Math.random()*Math.PI*2, speedX: 0.65+Math.random()*0.5, ampX: (0.6+Math.random()*0.7)*0.4,
-  });
-  return floatStates.get(id);
-}
-const globalFloat = {
-  phaseY: Math.random()*Math.PI*2, speedY: 0.55+Math.random()*0.25, ampY: 1.0+Math.random()*1.0,
-  phaseX: Math.random()*Math.PI*2, speedX: 0.32+Math.random()*0.18, ampX: 0.6+Math.random()*0.7,
-};
-
-// ===== LETTER MORPH =====
-function crossfadeTo(slot, newChar, duration = 2100) {
-  const layers = slot.querySelectorAll('.xp-letter-layer');
-  const a = layers[0], b = layers[1];
-  const active   = parseFloat(a.style.opacity ?? '1') > 0.5 ? a : b;
-  const inactive = active === a ? b : a;
-  inactive.textContent = newChar || '';
-  inactive.style.transition = 'none';
-  inactive.style.opacity = '0';
-  inactive.style.filter  = 'blur(6px)';
-  void inactive.offsetWidth;
-  const ease = `${duration}ms cubic-bezier(0.4,0,0.2,1)`;
-  inactive.style.transition = `opacity ${ease}, filter ${ease}`;
-  active.style.transition   = `opacity ${ease}, filter ${ease}`;
-  inactive.style.opacity = newChar ? '1' : '0';
-  inactive.style.filter  = 'blur(0px)';
-  active.style.opacity   = '0';
-  active.style.filter    = 'blur(5px)';
-}
-
-function buildSlots(container, text, availableW, idPrefix) {
-  container.innerHTML = '';
-  if (!text.length) return [];
-  const slotW = availableW / text.length;
-  return text.split('').map((ch, i) => {
-    const slot = document.createElement('div');
-    slot.className = 'xp-letter-slot';
-    slot.style.width  = slotW + 'px';
-    slot.style.height = '5rem';
-    slot.dataset.id   = idPrefix + i;
-    const a = document.createElement('span'); a.className = 'xp-letter-layer';
-    const b = document.createElement('span'); b.className = 'xp-letter-layer';
-    a.textContent = ch; a.style.opacity = '1'; a.style.filter = 'blur(0px)';
-    b.style.opacity = '0'; b.style.filter = 'blur(6px)';
-    slot.appendChild(a); slot.appendChild(b);
-    container.appendChild(slot);
-    return slot;
-  });
-}
-
-function splitWord(w) {
-  const i = w.indexOf('XP');
-  return i === -1 ? { prefix: w, suffix: '' } : { prefix: w.slice(0, i), suffix: w.slice(i + 2) };
-}
-
-function getXpWidth() {
-  const core = getEl('#xp-core');
-  return core ? core.getBoundingClientRect().width : 90;
-}
-
-function rebuildSlots(wordIdx) {
-  const xpW    = getXpWidth();
-  const preAv  = XP_LEFT;
-  const sufAv  = TOTAL_W - XP_LEFT - xpW;
-  const sufEl  = getEl('#xp-suffix');
-  const preEl  = getEl('#xp-prefix');
-  if (!sufEl || !preEl) return;
-  sufEl.style.left  = (XP_LEFT + xpW) + 'px';
-  preEl.style.left  = '0px';
-  preEl.style.width = preAv + 'px';
-  const { prefix, suffix } = splitWord(suffixWords[wordIdx]);
-  prefixSlots = buildSlots(preEl, prefix, preAv, 'pre');
-  suffixSlots = buildSlots(sufEl, suffix, sufAv, 'suf');
-}
-
-function morphToWord(newIdx) {
-  const { prefix: np, suffix: ns } = splitWord(suffixWords[newIdx]);
-  const xpW   = getXpWidth();
-  const preAv = XP_LEFT;
-  const sufAv = TOTAL_W - XP_LEFT - xpW;
-  const preEl = getEl('#xp-prefix');
-  const sufEl = getEl('#xp-suffix');
-
-  if (np.length !== prefixSlots.length) {
-    prefixSlots = buildSlots(preEl, np, preAv, 'pre');
-  } else {
-    const sw = preAv / np.length;
-    prefixSlots.forEach((slot, i) => {
-      slot.style.width = sw + 'px';
-      setTimeout(() => crossfadeTo(slot, np[i] ?? ''), i * 45 + Math.random() * 55);
-    });
-  }
-
-  if (ns.length !== suffixSlots.length) {
-    const oldSlots = [...suffixSlots];
-    oldSlots.forEach((slot, i) => setTimeout(() => crossfadeTo(slot, ''), i * 30));
-    setTimeout(() => { suffixSlots = buildSlots(sufEl, ns, sufAv, 'suf'); }, 500);
-  } else {
-    const sw = sufAv / ns.length;
-    suffixSlots.forEach((slot, i) => {
-      slot.style.width = sw + 'px';
-      setTimeout(() => crossfadeTo(slot, ns[i] ?? ''), i * 45 + Math.random() * 55);
-    });
-  }
-  currentWordIdx = newIdx;
-}
-
-// ===== FLOAT LOOP =====
-function floatLoop(ts) {
-  if (floatLastTs !== null) floatTime += (ts - floatLastTs) * 0.001;
-  floatLastTs = ts;
-
-  const gY = Math.sin(floatTime * globalFloat.speedY + globalFloat.phaseY) * globalFloat.ampY;
-  const gX = Math.sin(floatTime * globalFloat.speedX + globalFloat.phaseX) * globalFloat.ampX;
-  const gt = `translateZ(0) translate(${gX}px, calc(-50% + ${gY}px))`;
-
-  const preEl = getEl('#xp-prefix');
-  const sufEl = getEl('#xp-suffix');
-  if (preEl) preEl.style.transform = gt;
-  if (sufEl) sufEl.style.transform = gt;
-
-  [...prefixSlots, ...suffixSlots].forEach(slot => {
-    const fs = getFloatState(slot.dataset.id);
-    const y  = Math.sin(floatTime * fs.speedY + fs.phaseY) * fs.ampY;
-    const x  = Math.sin(floatTime * fs.speedX + fs.phaseX) * fs.ampX;
-    slot.style.transform = `translateZ(0) translate(${x}px, ${y}px)`;
-  });
-
-  requestAnimationFrame(floatLoop);
-}
 
 // ===== WAVE ENGINE =====
 function wavePulse(x, t, cfg) {
@@ -312,12 +301,11 @@ function setupHeader() {
   setTimeout(() => { triggerEvent(true); scheduleNext(); }, 2000);
   waveAnimate();
 
-  // XP letter morph
-  rebuildSlots(0);
-  requestAnimationFrame(floatLoop);
-
-  let wordIdx = 1;
-  setInterval(() => { morphToWord(wordIdx % suffixWords.length); wordIdx++; }, 5000);
+  // letter morph init
+  rebuildMorphSlots(0);
+  requestAnimationFrame(morphFloatLoop);
+  let morphIdx = 1;
+  setInterval(() => { morphToWord(morphIdx % MORPH_WORDS.length); morphIdx++; }, 6000);
 }
 
 function insertHeader() {

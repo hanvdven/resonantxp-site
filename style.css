@@ -279,7 +279,9 @@ img {
   left: 50%;
   transform: translate(-50%, -40%) translateZ(0);
   white-space: nowrap;
-  font-family: 'Indie Flower', cursive;
+  font-family: 'Californian FB', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
   font-size: 3rem;
   color: #2563eb;
   pointer-events: none;
