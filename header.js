@@ -34,10 +34,10 @@ const eventConfig = { eventWavelength: 0.06, eventPhase: 0.0 };
 const MORPH_WORDS   = ['EXPERIENCE','EXPOSURE','EXPLORATION','EXPANSION','EXPRESSION','EXPERTISE'];
 const TOTAL_W       = 420;
 const XP_LEFT       = 48;
-const FADE_OUT_DUR  = 2400;
-const FADE_IN_DUR   = 2200;
+const FADE_OUT_DUR  = 1000;
+const FADE_IN_DUR   = 1500;
 const OVERLAP       = 600;
-const STAGGER       = 35;
+const STAGGER       = 100;
  
 // ===== WAVE STATE =====
 let wavePaths       = [];
@@ -163,37 +163,64 @@ function rebuildMorphSlots(wordIdx) {
 function morphToWord(newIdx) {
   const { prefix: np, suffix: ns } = splitMorphWord(MORPH_WORDS[newIdx]);
   const { preAv, sufAv } = positionSides();
-  const allCurrent = [...prefixSlots, ...suffixSlots];
-  const maxStagger  = allCurrent.length * STAGGER;
- 
-  // stap 1: fade out alle huidige letters — elk via fadeLayer
-  allCurrent.forEach((slot, i) => {
+
+  const allOld = [...prefixSlots, ...suffixSlots];
+
+  // fade out oude letters, verwijder na afloop
+  allOld.forEach((slot, i) => {
     const layers = slot.querySelectorAll('.xp-letter-layer');
     const active = parseFloat(layers[0].style.opacity ?? '1') > 0.5
       ? layers[0] : layers[1];
+    setTimeout(() => {
+      fadeLayer(active, false, FADE_OUT_DUR);
+      setTimeout(() => slot.remove(), FADE_OUT_DUR + 100);
+    }, i * STAGGER + Math.random() * 30);
+  });
+
+  // nieuwe slots als absolute overlay op dezelfde positie
+  prefixSlots = buildSlotsOverlay(getEl('#xp-prefix'), np, preAv, 'pre');
+  suffixSlots = buildSlotsOverlay(getEl('#xp-suffix'), ns, sufAv, 'suf');
+
+  // fade in nieuwe letters tegelijk met fade-out
+  [...prefixSlots, ...suffixSlots].forEach((slot, i) => {
+    const layer = slot.querySelectorAll('.xp-letter-layer')[0];
     setTimeout(
-      () => fadeLayer(active, false, FADE_OUT_DUR),
-      i * STAGGER + Math.random() * 30
+      () => fadeLayer(layer, true, FADE_IN_DUR),
+      i * STAGGER + Math.random() * 40
     );
   });
- 
-  // stap 2: bouw nieuwe slots + fade in, met overlap op fade-out
-  setTimeout(() => {
-    const preEl = getEl('#xp-prefix');
-    const sufEl = getEl('#xp-suffix');
-    prefixSlots = buildSlots(preEl, np, preAv, 'pre', false);
-    suffixSlots = buildSlots(sufEl, ns, sufAv, 'suf', false);
- 
-    [...prefixSlots, ...suffixSlots].forEach((slot, i) => {
-      const layer = slot.querySelectorAll('.xp-letter-layer')[0];
-      setTimeout(
-        () => fadeLayer(layer, true, FADE_IN_DUR),
-        i * STAGGER + Math.random() * 40
-      );
-    });
- 
-    morphWordIdx = newIdx;
-  }, maxStagger + FADE_OUT_DUR - OVERLAP);
+
+  morphWordIdx = newIdx;
+}
+
+// nieuwe slots als absolute overlay — ze nemen geen ruimte in de flex-flow
+function buildSlotsOverlay(container, text, availableW, idPrefix) {
+  if (!text.length) return [];
+  const slotW = availableW / text.length;
+  return text.split('').map((ch, i) => {
+    const slot = document.createElement('div');
+    slot.className      = 'xp-letter-slot';
+    slot.style.width    = slotW + 'px';
+    slot.style.position = 'absolute';
+    slot.style.left     = (i * slotW) + 'px';
+    slot.style.top      = '0';
+    slot.style.height   = '100%';
+    slot.dataset.id     = idPrefix + i;
+
+    const a = document.createElement('span'); a.className = 'xp-letter-layer';
+    const b = document.createElement('span'); b.className = 'xp-letter-layer';
+    a.textContent   = ch;
+    a.style.opacity = '0';
+    a.style.filter  = 'blur(6px)';
+    b.textContent   = '';
+    b.style.opacity = '0';
+    b.style.filter  = 'blur(6px)';
+
+    slot.appendChild(a);
+    slot.appendChild(b);
+    container.appendChild(slot);
+    return slot;
+  });
 }
  
 // ===== MORPH: FLOAT LOOP =====
