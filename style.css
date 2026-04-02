@@ -1,5 +1,7 @@
 @import url("logo/styles.css");
 @import url("logo/animation.css");
+@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+
 
 :root {
   color-scheme: light;
@@ -12,6 +14,110 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* ===== FONT IMPORTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+/* ===== CSS VARIABELEN ===== */
+:root {
+  /* fonts */
+  --font-logo:    'Californian FB', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-heading: 'Linden Hill', Georgia, 'Times New Roman', serif;
+  --font-body:    'Martel Sans', system-ui, sans-serif;
+  --font-accent:  'Averia Serif Libre', Georgia, serif;
+
+  /* type scale */
+  --text-xs:   0.78rem;
+  --text-sm:   0.9rem;
+  --text-base: 1rem;
+  --text-lg:   1.1rem;
+  --text-xl:   1.45rem;
+  --text-2xl:  1.8rem;
+  --text-3xl:  2.8rem;
+
+  /* weights */
+  --weight-light:   300;
+  --weight-regular: 400;
+  --weight-semi:    600;
+  --weight-bold:    800;
+}
+
+/* ===== BASE ===== */
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: #475569;
+}
+
+/* ===== HEADINGS ===== */
+h1 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-3xl);
+  line-height: 1.15;
+  color: #111827;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-2xl);
+  line-height: 1.25;
+  color: #111827;
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-weight: var(--weight-semi);
+  font-size: var(--text-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+/* ===== LOGO ===== */
+.brand-name,
+.xp-core {
+  font-family: var(--font-logo);
+}
+
+/* ===== ACCENT (Averia) ===== */
+blockquote,
+.scene-line,
+.scene-shift {
+  font-family: var(--font-accent);
+  font-weight: var(--weight-regular);
+  font-style: italic;
+}
+
+blockquote {
+  font-size: var(--text-xl);
+  line-height: 1.55;
+  color: #2563eb;
+  border-left: 2px solid #2563eb;
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+/* accent tag — bijv. Field Notes labels */
+.accent-tag {
+  font-family: var(--font-accent);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  color: #2563eb;
+  letter-spacing: 0.04em;
+}
+
+/* lichte accentzin */
+.accent-light {
+  font-family: var(--font-accent);
+  font-weight: var(--weight-light);
+  font-size: var(--text-lg);
+  line-height: 1.65;
+  color: #334155;
 }
 
 body {
@@ -94,22 +200,6 @@ img {
   padding-inline: 0;
 }
 
-.brand-xp {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  min-width: 22rem;
-}
-
-.brand-xp-logo {
-  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
-  font-weight: 900;
-  font-size: clamp(5rem, 9vw, 8rem);
-  line-height: 0.85;
-  color: #111827;
-}
-
 .brand-carousel {
   width: min(34rem, 100%);
 }
@@ -141,25 +231,63 @@ img {
   gap: 0.55rem;
 }
 
-.carousel-left,
-.carousel-right,
-.carousel-xp {
-  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
-  font-weight: 700;
-  font-size: 1.1rem;
+/* XP blok */
+.brand-energy {
+  display: flex;
+  align-items: center;
 }
 
-.row-light .carousel-left,
-.row-light .carousel-right,
-.row-light .carousel-xp {
-  color: #7c9cf6;
+.xp-block {
+  width: 420px;
+  height: 5rem;
+  position: relative;
+  overflow: visible;
 }
 
-.row-strong .carousel-left,
-.row-strong .carousel-right,
-.row-strong .carousel-xp {
+.xp-core {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 900;
+  font-size: 5.2rem;
+  color: #111827;
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+  z-index: 2;
+}
+
+.xp-side {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  will-change: transform;
+}
+
+.xp-letter-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.xp-letter-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%) translateZ(0);
+  white-space: nowrap;
+  font-family: 'Indie Flower', cursive;
+  font-size: 3rem;
   color: #2563eb;
+  pointer-events: none;
+  will-change: opacity, filter;
+  line-height: 1;
 }
+/* Verwijder oude xp-suffix/prefix/core animatie-classes */
+.xp-suffix.enter, .xp-suffix.exit { all: unset; }
 
 @keyframes carousel-scroll {
   from {
