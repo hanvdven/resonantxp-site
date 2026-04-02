@@ -4,20 +4,20 @@ const SELECTORS = { wave: '.wave', suffix: '.xp-suffix' };
 
 const WIDTH = 420;
 const STEP = 4;
-const PULSE_AMP = 2.1;
+const PULSE_AMP = 2.0;
 const PULSE_WAVELENGTH = 0.06;
 const FADE_IN  = 0.5;
 const FADE_OUT = 1.0;
 
-const BASE_SPEED = 4.0 * 1.3 * 0.8;  // 4.16
-const BASE_AMP   = 4.0 * 1.4 * 0.9;  // 5.04
-const HIGH_SPEED_MULT = 10;
+const BASE_SPEED = 4.0;  // 4.16
+const BASE_AMP   = 4.0;  // 5.04
+const HIGH_SPEED_MULT = 8;
 const HIGH_AMP_MULT   = 0.5;
 
 const DURATION_HIGH     = 4.0;
-const DURATION_NORM_MIN = 4.0;
-const DURATION_NORM_MAX = 7.0;
-const AUTO_MIN = 5.0;
+const DURATION_NORM_MIN = 3.0;
+const DURATION_NORM_MAX = 6.0;
+const AUTO_MIN = 6.0;
 const AUTO_MAX = 10.0;
 
 const baseYs = [34, 52, 70, 88, 106];
@@ -66,7 +66,7 @@ function createEvent(waveCount, forceHigh = false) {
   const waveTargets = r < 0.65 ? 'all' : r < 0.85 ? 'two' : 'one';
   const pickedWave  = waveTargets === 'one' ? Math.floor(Math.random() * waveCount) : null;
   const ampScale    = waveTargets === 'two' ? 1.3 : waveTargets === 'one' ? 1.5 : 1.0;
-  const highSpeedMode = forceHigh || Math.random() < 0.1;
+  const highSpeedMode = forceHigh || Math.random() < 0.15;
   const speedBase   = highSpeedMode ? BASE_SPEED * HIGH_SPEED_MULT : BASE_SPEED;
   const ampBase     = highSpeedMode ? HIGH_AMP_MULT : BASE_AMP;
   const duration    = highSpeedMode ? DURATION_HIGH : randRange(DURATION_NORM_MIN, DURATION_NORM_MAX);
