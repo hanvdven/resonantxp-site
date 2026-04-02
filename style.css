@@ -238,58 +238,32 @@ img {
 }
 
 .xp-block {
-  width: 420px;
-  height: 5rem;
-  position: relative;
-  overflow: visible;
+  width: 420px; height: 5.5rem;
+  position: relative; overflow: visible;
 }
-
 .xp-core {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: 900;
-  font-size: 5.2rem;
-  color: #111827;
-  position: absolute;
-  left: 28px;
-  top: 50%;
-  transform: translateY(-50%);
-  line-height: 1;
-  z-index: 2;
-}
-
-.xp-side {
-  position: absolute;
-  top: 50%;
-  display: flex;
-  align-items: center;
-  will-change: transform;
-}
-
-.xp-letter-slot {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  will-change: transform;
-}
-
-.xp-letter-layer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -40%) translateZ(0);
-  white-space: nowrap;
   font-family: 'Californian FB', 'Palatino Linotype', Palatino, Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 3rem;
-  color: #2563eb;
-  pointer-events: none;
-  will-change: opacity, filter;
-  line-height: 1;
+  font-weight: 900; font-size: 5.2rem; color: #111827;
+  line-height: 1; position: absolute; top: 50%;
+  transform: translateY(-50%); z-index: 2;
 }
-/* Verwijder oude xp-suffix/prefix/core animatie-classes */
-.xp-suffix.enter, .xp-suffix.exit { all: unset; }
+.xp-side {
+  position: absolute; top: 50%;
+  display: flex; align-items: center; overflow: visible;
+}
+.xp-letter-slot {
+  position: relative; display: flex; align-items: center;
+  justify-content: center; height: 4.5rem;
+  overflow: visible; will-change: transform; flex-shrink: 0;
+}
+.xp-letter-layer {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) translateZ(0);
+  font-family: 'Californian FB', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-style: italic; font-weight: 400; font-size: 3rem;
+  color: #2563eb; line-height: 1; white-space: nowrap;
+  pointer-events: none; will-change: opacity, filter;
+}
 
 @keyframes carousel-scroll {
   from {
