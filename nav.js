@@ -1,91 +1,90 @@
 // ============================================================
-// nav.js — client-side routing
-// Laadt alleen <main> bij navigatie, header blijft intact.
-// Overgang: fade through dark (optie C)
+// nav.js — client-side routing (true crossfade)
+// Header blijft staan, alleen <main> fade
+// Background + header kleuren transitionen via CSS
 // ============================================================
 
-const FADE_DURATION    = 280;  // fade out/in van <main>
-const THROUGH_DURATION = 320;  // duur van het donkere vlak
+const FADE_DURATION = 280;
 
-// ===== DARK OVERLAY =====
-// Eén overlay-div die over de hele pagina ligt tijdens de overgang
-const overlay = document.createElement('div');
-overlay.style.cssText = `
-  position: fixed;
-  inset: 0;
-  background: #06070d;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 9999;
-  transition: opacity ${THROUGH_DURATION}ms cubic-bezier(0.4,0,0.2,1);
-`;
-document.documentElement.appendChild(overlay);
-
-function overlayFadeIn() {
-  return new Promise(resolve => {
-    overlay.style.opacity = '1';
-    setTimeout(resolve, THROUGH_DURATION);
-  });
-}
-
-function overlayFadeOut() {
-  overlay.style.opacity = '0';
-}
-
-// ===== SCROLL GEHEUGEN =====
 const scrollMemory = new Map();
+let isNavigating = false;
 
+// ===== SCROLL =====
 function saveScroll() {
-  scrollMemory.set(window.location.pathname, window.scrollY);
+  scrollMemory.set(location.pathname, window.scrollY);
 }
 
 function restoreScroll(url) {
-  const saved = scrollMemory.get(new URL(url, location.origin).pathname);
+  const path = new URL(url, location.origin).pathname;
+  const saved = scrollMemory.get(path);
   window.scrollTo({ top: saved ?? 0, behavior: 'instant' });
 }
 
 // ===== NAVIGATIE =====
-let isNavigating = false;
-
 async function navigateTo(url, pushState = true) {
   if (isNavigating) return;
+
   const targetPath = new URL(url, location.origin).pathname;
   if (targetPath === location.pathname && pushState) return;
 
   isNavigating = true;
   saveScroll();
 
+  const currentMain = document.querySelector('main');
+
   try {
-    // stap 1: overlay fadet naar donker
-    await overlayFadeIn();
+    // 🔥 1. start fetch meteen (parallel)
+    const fetchPromise = fetch(url).then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    });
 
-    // stap 2: fetch nieuwe pagina (terwijl scherm donker is)
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const html = await res.text();
+    // 🔥 2. fade out current main
+    if (currentMain) {
+      currentMain.style.opacity = '0';
+    }
 
-    const parser  = new DOMParser();
-    const doc     = parser.parseFromString(html, 'text/html');
+    // wacht exact fade duration
+    await new Promise(r => setTimeout(r, FADE_DURATION));
+
+    // 🔥 3. wacht op HTML (als nog niet klaar)
+    const html = await fetchPromise;
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
     const newMain = doc.querySelector('main');
     if (!newMain) throw new Error('Geen <main> gevonden');
 
-    // stap 3: swap content terwijl scherm donker is — geen zichtbaar knipogen
+    // 🔥 4. update body class (→ triggert background transition)
     document.body.className = doc.body.className;
-    const currentMain = document.querySelector('main');
-    if (currentMain) currentMain.replaceWith(newMain);
-    else document.body.appendChild(newMain);
+
+    // 🔥 5. swap main (onzichtbaar)
+    newMain.style.opacity = '0';
+
+    if (currentMain) {
+      currentMain.replaceWith(newMain);
+    } else {
+      document.body.appendChild(newMain);
+    }
 
     document.title = doc.title;
-    if (pushState) history.pushState({ url }, '', url);
+
+    if (pushState) {
+      history.pushState({ url }, '', url);
+    }
+
     restoreScroll(url);
     updateActiveNav(url);
 
-    // stap 4: overlay fadet terug naar transparant
-    overlayFadeOut();
+    // force reflow (belangrijk voor animatie)
+    newMain.offsetHeight;
+
+    // 🔥 6. fade in nieuwe main
+    newMain.style.opacity = '1';
 
   } catch (err) {
-    console.warn('nav.js: fallback', err);
-    overlayFadeOut();
+    console.warn('nav.js fallback', err);
     window.location.href = url;
     return;
   } finally {
@@ -93,16 +92,17 @@ async function navigateTo(url, pushState = true) {
   }
 }
 
-// ===== ACTIVE NAV =====
+// ===== NAV STATE =====
 function updateActiveNav(url) {
   const path = new URL(url, location.origin).pathname;
+
   document.querySelectorAll('.nav-links a').forEach(link => {
     const linkPath = new URL(link.href, location.origin).pathname;
     link.classList.toggle('active', linkPath === path);
   });
 }
 
-// ===== LINK INTERCEPTIE =====
+// ===== LINK INTERCEPT =====
 function isInternalLink(href) {
   if (!href) return false;
   if (href.startsWith('http') || href.startsWith('//')) return false;
@@ -112,15 +112,18 @@ function isInternalLink(href) {
 
 document.addEventListener('click', e => {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
   const link = e.target.closest('a');
   if (!link) return;
+
   const href = link.getAttribute('href');
   if (!isInternalLink(href)) return;
+
   e.preventDefault();
   navigateTo(href);
-}, true); // capture phase — vangt ook header-links op
+}, true);
 
-// ===== POPSTATE =====
+// ===== HISTORY =====
 window.addEventListener('popstate', e => {
   const url = e.state?.url ?? location.pathname;
   navigateTo(url, false);

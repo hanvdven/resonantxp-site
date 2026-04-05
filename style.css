@@ -1,6 +1,8 @@
 @import url("logo/styles.css");
 @import url("logo/animation.css");
 @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+/* ===== FONT IMPORTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
 
 :root {
@@ -30,28 +32,11 @@
   line-height: 1.6;
   color: #1f2937;
   background: #f7fafc;
-}
 
-main {
-  opacity: 1;
-  will-change: opacity;
-}
+  --transition-duration: 320ms;
+  --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-* {
-  box-sizing: border-box;
-}
-
-.nav-links a.active {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-/* ===== FONT IMPORTS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
-
-/* ===== CSS VARIABELEN ===== */
-:root {
-  /* fonts */
+    /* fonts */
   --font-logo: 'Californian FB', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --font-heading: 'Linden Hill', Georgia, 'Times New Roman', serif;
   --font-body: 'Martel Sans', system-ui, sans-serif;
@@ -72,6 +57,24 @@ main {
   --weight-semi: 600;
   --weight-bold: 800;
 }
+}
+
+main {
+  opacity: 1;
+  will-change: opacity;
+  transition: opacity 280ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.nav-links a.active {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+
 
 /* ===== BASE ===== */
 body {
@@ -80,6 +83,7 @@ body {
   font-size: var(--text-base);
   line-height: 1.8;
   color: #475569;
+  transition: background-color 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== HEADINGS ===== */
@@ -114,14 +118,56 @@ h3 {
   font-family: var(--font-logo);
 }
 
+
+
 /* ===== ACCENT (Averia) ===== */
+
+.scene {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.offset-1 { margin-left: 24px; }
+.offset-2 { margin-left: 48px; }
+
+
+.scene-line {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  line-height: 1.5;
+  font-family: var(--font-heading);
+  color: var(--text-accent);
+}
+
+.scene-line.accent {
+  font-family: var(--font-accent);
+  color: var(--blue1);
+  font-style: italic;
+}
+
+.scene-line:nth-child(1) { animation-delay: 1.0s; }
+.scene-line:nth-child(2) { animation-delay: 2.6s; }
+.scene-line:nth-child(3) { animation-delay: 4.6s; }
+.scene-line:nth-child(4) { animation-delay: 7.0s; }
+.scene-line:nth-child(5) { animation-delay: 9.6s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 blockquote,
-.scene-line,
 .scene-shift {
   font-family: var(--font-accent);
   font-weight: var(--weight-regular);
   font-style: italic;
 }
+
 
 blockquote {
   font-size: var(--text-xl);
@@ -130,6 +176,14 @@ blockquote {
   border-left: 2px solid var(--blue1);
   padding-left: 1.25rem;
   margin: 1.5rem 0;
+}
+
+.scene-break {
+  height: 60px;
+}
+
+.scene-break {
+  height: 60px;
 }
 
 /* accent tag — bijv. Field Notes labels */
@@ -179,6 +233,9 @@ img {
   backdrop-filter: blur(14px);
   background: transparent;
   border-bottom: none;
+  transition: 
+    background-color var(--transition-duration) var(--transition-ease),
+    color var(--transition-duration) var(--transition-ease);
 }
 
 .header-inner {
@@ -740,7 +797,8 @@ body.field-notes-page {
 }
 
 .note-card-inner {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.72s cubic-bezier(0.4, 0, 0.2, 1);
@@ -751,7 +809,8 @@ body.field-notes-page {
 }
 
 .note-card-face {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   border-radius: 24px;
   padding: 1.5rem 2rem;
   backface-visibility: hidden;
@@ -763,16 +822,17 @@ body.field-notes-page {
 }
 
 .note-card-front {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   transition: background 0.3s ease;
 }
+
 .note-card:hover .note-card-front {
-  background: rgba(255,255,255,0.09);
+  background: rgba(255, 255, 255, 0.09);
 }
 
 .note-card-back {
   transform: rotateY(180deg);
-  background: rgba(255,255,255,0.10);
+  background: rgba(255, 255, 255, 0.10);
 }
 
 .note-card-title {
@@ -780,12 +840,13 @@ body.field-notes-page {
   font-size: 0.62rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(248,250,252,0.3);
+  color: rgba(248, 250, 252, 0.3);
   margin-bottom: 0.5rem;
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
+
 .note-card:hover .note-card-title {
   opacity: 1;
   transform: translateY(0);
@@ -808,7 +869,7 @@ body.field-notes-page {
   font-size: 0.62rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(248,250,252,0.32);
+  color: rgba(248, 250, 252, 0.32);
   margin-bottom: 0.75rem;
 }
 
@@ -816,7 +877,7 @@ body.field-notes-page {
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: clamp(0.88rem, 1.5vw, 1rem);
   line-height: 1.75;
-  color: rgba(248,250,252,0.72);
+  color: rgba(248, 250, 252, 0.72);
   font-weight: 300;
   display: -webkit-box;
   -webkit-line-clamp: 4;
@@ -855,6 +916,7 @@ body.field-notes-page .xp-letter-layer {
 body.field-notes-page .nav-links a {
   color: rgba(255, 255, 255, 0.6);
 }
+
 body.field-notes-page .nav-links a:hover {
   color: #ffffff;
 }
@@ -1156,28 +1218,6 @@ body.framework-page {
   margin-bottom: 2rem;
 }
 
-.scene-line {
-  opacity: 0;
-  transform: translateY(10px);
-  animation: fadeLine 0.8s ease forwards;
-}
-
-.scene-line:nth-child(1) {
-  animation-delay: 0.2s;
-}
-
-.scene-line:nth-child(2) {
-  animation-delay: 0.6s;
-}
-
-.scene-line:nth-child(3) {
-  animation-delay: 1.2s;
-}
-
-.scene-line:nth-child(4) {
-  animation-delay: 1.8s;
-}
-
 .scene-accent {
   font-weight: 600;
 }
@@ -1190,9 +1230,9 @@ body.framework-page {
   animation-delay: 2.4s;
 }
 
-@keyframes fadeLine {
+/* @keyframes fadeLine {
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
