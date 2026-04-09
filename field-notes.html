@@ -90,10 +90,6 @@
       line-height: 1.15;
       color: #ffffff;
       letter-spacing: -0.03em;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
     .note-card-context {
       font-family: 'Martel Sans', system-ui, sans-serif;
@@ -441,14 +437,32 @@
     threshold: 1.0
   });
 
+  function fitCardText(card) {
+    const front = card.querySelector('.note-card-front');
+    if (!front) return;
+    const textEl = front.querySelector('.note-card-text, .action-text, .joke-text');
+    if (!textEl) return;
+    if (front.scrollHeight <= front.clientHeight) return;
+    const MIN_PX = 16;
+    let size = parseFloat(getComputedStyle(textEl).fontSize);
+    while (front.scrollHeight > front.clientHeight && size > MIN_PX) {
+      size -= 1;
+      textEl.style.fontSize = size + 'px';
+    }
+  }
+
   function renderBatch() {
     const end = Math.min(rendered + BATCH, shuffled.length);
+    const newCards = [];
     for (let i = rendered; i < end; i++) {
       const card = buildCard(shuffled[i]);
       card.style.animationDelay = ((i - rendered) * 120) + 'ms';
       deck.appendChild(card);
+      newCards.push(card);
     }
     rendered = end;
+
+    requestAnimationFrame(() => newCards.forEach(fitCardText));
 
     if (rendered < shuffled.length) {
       deck.appendChild(sentinel);
