@@ -90,10 +90,6 @@
       line-height: 1.15;
       color: #ffffff;
       letter-spacing: -0.03em;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
     .note-card-context {
       font-family: 'Martel Sans', system-ui, sans-serif;
@@ -171,7 +167,7 @@
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
     .note-card.animating {
-      animation: cardSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: cardSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
   </style>
 </head>
@@ -437,18 +433,36 @@
     }
   }, {
     root: null,
-    rootMargin: '0px',
-    threshold: 1.0
+    rootMargin: '200px',
+    threshold: 0
   });
+
+  function fitCardText(card) {
+    const front = card.querySelector('.note-card-front');
+    if (!front) return;
+    const textEl = front.querySelector('.note-card-text, .action-text, .joke-text');
+    if (!textEl) return;
+    if (front.scrollHeight <= front.clientHeight) return;
+    const MIN_PX = 16;
+    let size = parseFloat(getComputedStyle(textEl).fontSize);
+    while (front.scrollHeight > front.clientHeight && size > MIN_PX) {
+      size -= 1;
+      textEl.style.fontSize = size + 'px';
+    }
+  }
 
   function renderBatch() {
     const end = Math.min(rendered + BATCH, shuffled.length);
+    const newCards = [];
     for (let i = rendered; i < end; i++) {
       const card = buildCard(shuffled[i]);
-      card.style.animationDelay = ((i - rendered) * 120) + 'ms';
+      card.style.animationDelay = ((i - rendered) * 200) + 'ms';
       deck.appendChild(card);
+      newCards.push(card);
     }
     rendered = end;
+
+    requestAnimationFrame(() => newCards.forEach(fitCardText));
 
     if (rendered < shuffled.length) {
       deck.appendChild(sentinel);
@@ -459,7 +473,28 @@
     }
   }
 
-  renderBatch();
+  // =============================================
+  // LOAD CHECK — wait for fonts before first render
+  // =============================================
+  let started = false;
+
+  function start() {
+    if (started) return;
+    started = true;
+    renderBatch();
+  }
+
+  // Render once custom fonts are confirmed loaded so fitCardText
+  // measures with the real typeface. After fonts settle, re-fit
+  // any cards that may have rendered with fallback metrics.
+  document.fonts.ready.then(() => {
+    start();
+    setTimeout(() => deck.querySelectorAll('.note-card').forEach(fitCardText), 100);
+  });
+
+  // Fallback: if fonts.ready is blocked (slow CDN, offline, etc.)
+  // start rendering after 2s regardless.
+  setTimeout(start, 2000);
   </script>
 </body>
 </html>
