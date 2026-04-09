@@ -433,8 +433,8 @@
     }
   }, {
     root: null,
-    rootMargin: '0px',
-    threshold: 1.0
+    rootMargin: '200px',
+    threshold: 0
   });
 
   function fitCardText(card) {
@@ -473,7 +473,28 @@
     }
   }
 
-  renderBatch();
+  // =============================================
+  // LOAD CHECK — wait for fonts before first render
+  // =============================================
+  let started = false;
+
+  function start() {
+    if (started) return;
+    started = true;
+    renderBatch();
+  }
+
+  // Render once custom fonts are confirmed loaded so fitCardText
+  // measures with the real typeface. After fonts settle, re-fit
+  // any cards that may have rendered with fallback metrics.
+  document.fonts.ready.then(() => {
+    start();
+    setTimeout(() => deck.querySelectorAll('.note-card').forEach(fitCardText), 100);
+  });
+
+  // Fallback: if fonts.ready is blocked (slow CDN, offline, etc.)
+  // start rendering after 2s regardless.
+  setTimeout(start, 2000);
   </script>
 </body>
 </html>
