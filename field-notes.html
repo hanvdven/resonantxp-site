@@ -167,7 +167,7 @@
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
     .note-card.animating {
-      animation: cardSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: cardSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
   </style>
 </head>
@@ -456,7 +456,7 @@
     const newCards = [];
     for (let i = rendered; i < end; i++) {
       const card = buildCard(shuffled[i]);
-      card.style.animationDelay = ((i - rendered) * 120) + 'ms';
+      card.style.animationDelay = ((i - rendered) * 200) + 'ms';
       deck.appendChild(card);
       newCards.push(card);
     }

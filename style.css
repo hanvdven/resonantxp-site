@@ -211,6 +211,60 @@ section p {
 }
 
 
+/* ===== HOME PAGE ===== */
+.narrow {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Recognition & naming sections — short statements, centered */
+.section-recognition,
+.section-naming {
+  text-align: center;
+}
+
+.lead {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.2;
+  color: #111827;
+}
+
+.subtle {
+  margin: 0;
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: #64748b;
+}
+
+/* Modifier for softened scene lines and standalone soft text */
+.soft {
+  color: rgba(71, 85, 105, 0.6);
+}
+
+/* Situations — centered column, preserves offset rhythm within it */
+.situations {
+  max-width: 580px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.situations p {
+  margin: 0;
+  font-size: clamp(1rem, 1.6vw, 1.1rem);
+  line-height: 1.75;
+  color: #334155;
+}
+
+.cta-minimal {
+  text-align: center;
+}
+
+
 /* ===== HEADER / NAV ===== */
 .site-header {
   position: sticky;

@@ -270,8 +270,7 @@ function singleEventPulse(x, t, cfg, idx, ev) {
   const elapsed = waveTime - ev.start;
   const endTime = ev.forcedEndAt ?? (ev.start + ev.duration);
   if (elapsed < 0 || waveTime > endTime) return 0;
-  if (ev.waveTargets === 'one' && idx !== ev._pickedWave) return 0;
-  if (ev.waveTargets === 'two' && idx > 1) return 0;
+  if ((ev.waveTargets === 'one' || ev.waveTargets === 'two') && !ev._pickedWaves.includes(idx)) return 0;
   return Math.sin(
     x * eventConfig.eventWavelength * ev.directionMap[idx]
     - t * ev.speedMap[idx]
@@ -329,10 +328,21 @@ function samplePath(path) {
   });
 }
  
+function pickRandomWaves(count, n) {
+  const pool = Array.from({ length: count }, (_, i) => i);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, n);
+}
+
 function createEvent(waveCount) {
   const r           = Math.random();
   const waveTargets = r < 0.65 ? 'all' : r < 0.85 ? 'two' : 'one';
-  const pickedWave  = waveTargets === 'one' ? Math.floor(Math.random() * waveCount) : null;
+  const pickedWaves = waveTargets === 'one' ? pickRandomWaves(waveCount, 1)
+                    : waveTargets === 'two' ? pickRandomWaves(waveCount, 2)
+                    : null;
   const ampScale    = waveTargets === 'two' ? 1.3 : waveTargets === 'one' ? 1.5 : 1.0;
   const highSpeed   = Math.random() < 0.1;
   const speedBase   = highSpeed ? BASE_SPEED * HIGH_SPEED_MULT : BASE_SPEED;
@@ -346,7 +356,7 @@ function createEvent(waveCount) {
   }
   return {
     start: waveTime, duration, forcedEndAt: null,
-    waveTargets, _pickedWave: pickedWave, ampScale, highSpeed,
+    waveTargets, _pickedWaves: pickedWaves, ampScale, highSpeed,
     directionMap: dM, speedMap: sM, ampMap: aM
   };
 }
