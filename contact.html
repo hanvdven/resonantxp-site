@@ -1,67 +1,147 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonant XP | Contact</title>
+  <title>Resonant XP | Begin the conversation</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
+  <script src="nav.js" defer></script>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main>
-    <section class="section section-intro">
-      <div class="container">
-        <div class="section-title">
-          <p class="eyebrow">Contact</p>
-          <h1>Start de conversatie over leiderschap en ontwikkeling.</h1>
-          <p>Laat je gegevens achter en ik neem snel contact op voor een vrijblijvend gesprek.</p>
-        </div>
+
+    <section class="hero scene-hero">
+      <div class="scene">
+        <p class="scene-line">Something is happening</p>
+        <p class="scene-line offset-1">in your organisation.</p>
+        <p class="scene-line accent">Maybe it is already visible.</p>
+        <p class="scene-line offset-2">Maybe it is only a feeling.</p>
+        <p class="scene-line soft">Either way — it is worth a conversation.</p>
       </div>
     </section>
 
-    <section class="section section-form">
-      <div class="container form-wrapper">
-        <form class="contact-form" action="#" method="post">
-          <label>
-            Naam
-            <input type="text" name="name" placeholder="Jouw naam" required />
-          </label>
-          <label>
-            E-mail
-            <input type="email" name="email" placeholder="naam@voorbeeld.nl" required />
-          </label>
-          <label>
-            Organisatie
-            <input type="text" name="organization" placeholder="Bedrijfsnaam" />
-          </label>
-          <label>
-            Bericht
-            <textarea name="message" rows="5" placeholder="Wat wil je bespreken?" required></textarea>
-          </label>
-          <button class="button button-primary" type="submit">Verstuur bericht</button>
+    <section class="section section-contact-form">
+      <div class="container contact-form-wrapper">
+
+        <!--
+          FORMSPREE SETUP:
+          1. Go to https://formspree.io and sign in with hanvdven@gmail.com
+          2. Create a new form — copy the form endpoint
+             (looks like https://formspree.io/f/xyzabcde)
+          3. Replace YOUR_FORMSPREE_ID in the action below with your endpoint ID
+        -->
+        <form class="contact-form"
+              action="https://formspree.io/f/YOUR_FORMSPREE_ID"
+              method="POST">
+
+          <input type="hidden" name="_subject" value="New conversation — Resonant XP" />
+
+          <div class="cf-field">
+            <label class="cf-label" for="cf-situation">What is happening?</label>
+            <p class="cf-hint">You don't need to be precise. A direction is enough.</p>
+            <textarea id="cf-situation" name="situation" rows="4" required
+              placeholder="Describe the situation in your organisation…"></textarea>
+          </div>
+
+          <div class="cf-row">
+            <div class="cf-field">
+              <label class="cf-label" for="cf-name">Your name</label>
+              <input id="cf-name" type="text" name="name" required placeholder="Name" />
+            </div>
+            <div class="cf-field">
+              <label class="cf-label" for="cf-email">Your email</label>
+              <input id="cf-email" type="email" name="email" required placeholder="email@example.com" />
+            </div>
+          </div>
+
+          <div class="cf-field">
+            <label class="cf-label">Where are you based?</label>
+            <div class="cf-where">
+              <label class="cf-where-option">
+                <input type="radio" name="location" value="Belgium" checked />
+                <span>Belgium</span>
+              </label>
+              <label class="cf-where-option">
+                <input type="radio" name="location" value="Netherlands" />
+                <span>Netherlands</span>
+              </label>
+              <label class="cf-where-option">
+                <input type="radio" name="location" value="Elsewhere" />
+                <span>Elsewhere</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="cf-field">
+            <label class="cf-label">Preferred language</label>
+            <div class="cf-where">
+              <label class="cf-where-option">
+                <input type="radio" name="language" value="English" checked />
+                <span>English</span>
+              </label>
+              <label class="cf-where-option">
+                <input type="radio" name="language" value="Dutch" />
+                <span>Nederlands</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="cf-submit">
+            <button class="button button-primary" type="submit">Begin the conversation.</button>
+          </div>
+
         </form>
+
+        <div class="contact-thanks" hidden>
+          <p class="lead">Received.</p>
+          <p class="subtle">Something will happen next.</p>
+        </div>
+
       </div>
     </section>
 
-    <section class="section section-cta">
-      <div class="container cta-card">
-        <div>
-          <h2>Resonant leiderschap begint met een goed gesprek.</h2>
-          <p>Ik help je graag om stappen te zetten die echt resoneren.</p>
-        </div>
-        <a class="button button-secondary" href="index.html">Terug naar home</a>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>Resonant XP — Training & coaching voor leiders</p>
-      <a href="contact.html">contact@resonantxp.nl</a>
+      <p>Resonant XP — Belgium &amp; Netherlands · EN · NL</p>
+      <a href="mailto:contact@resonantxp.com">contact@resonantxp.com</a>
     </div>
   </footer>
+
+  <script>
+  const form = document.querySelector('.contact-form');
+  const thanks = document.querySelector('.contact-thanks');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('[type=submit]');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          form.hidden = true;
+          thanks.hidden = false;
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Begin the conversation.';
+        }
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Begin the conversation.';
+      }
+    });
+  }
+  </script>
+
 </body>
 </html>

@@ -809,14 +809,210 @@ body.framework-page {
 }
 
 .subprinciples {
-  margin-top: 1.5rem;
-  color: var(--blue1);
-  opacity: 0.35;
-  transition: opacity 0.25s ease;
+  margin-top: 2rem;
+  padding-top: 0;
+  border-top: 1px solid rgba(37, 99, 235, 0.15);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.45s ease, max-height 0.45s ease, padding-top 0.45s ease;
 }
 
 .stage-card:hover .subprinciples {
   opacity: 1;
+  max-height: 320px;
+  padding-top: 1.5rem;
+}
+
+.subprinciples-label {
+  margin: 0 0 0.6rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--blue1);
+  opacity: 0.6;
+}
+
+.subprinciples-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.subprinciples-list li {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #334155;
+  font-style: italic;
+}
+
+
+/* ===== EXPERIENCES PAGE ===== */
+.xp-section {
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.xp-title {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  color: #111827;
+  line-height: 1.2;
+}
+
+.xp-body {
+  max-width: 38rem;
+  color: #334155;
+  margin: 0 0 1.75rem;
+}
+
+.xp-traits {
+  margin: 0 0 1.5rem;
+}
+
+.xp-trait {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  color: #475569;
+}
+
+.xp-note {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: clamp(1rem, 1.6vw, 1.1rem);
+  color: var(--blue1);
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+
+/* ===== CONTACT PAGE ===== */
+.section-contact-form {
+  padding-top: 0;
+}
+
+.contact-form-wrapper {
+  max-width: 640px;
+}
+
+.contact-form {
+  display: grid;
+  gap: 2rem;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cf-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.cf-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: #f8fafc;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--blue1);
+  background: #ffffff;
+}
+
+.contact-form textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.65;
+}
+
+.cf-where {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.cf-where-option {
+  cursor: pointer;
+  position: relative;
+}
+
+.cf-where-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cf-where-option span {
+  display: block;
+  padding: 0.35rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+
+.cf-where-option input[type="radio"]:checked + span {
+  border-color: var(--blue1);
+  color: var(--blue1);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.cf-submit {
+  padding-top: 0.5rem;
+}
+
+.contact-thanks {
+  text-align: center;
+  padding: 5rem 0;
+}
+
+.contact-thanks .subtle {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .cf-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .framework-footer {
