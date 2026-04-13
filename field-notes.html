@@ -167,8 +167,16 @@
       from { opacity: 0; transform: translateY(40px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
+    @keyframes cardSlideOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-20px) scale(0.96); }
+    }
     .note-card.animating {
       animation: cardSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .note-card.leaving {
+      animation: cardSlideOut 0.4s cubic-bezier(0.4, 0, 0.8, 0) forwards;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -292,16 +300,43 @@
     return a;
   }
 
-  const shuffled = shuffle(allNotes);
-  let rendered = 0;
-  const BATCH = 4;
+  // =============================================
+  // STATE
+  // =============================================
+  const MAX_VISIBLE = 5;
+  const pool = shuffle(allNotes);
+  let poolIdx = 0;
+  let visible = []; // { note, el, flipped }
+
+  const deck = document.getElementById('note-deck');
+
+  function nextFromPool() {
+    return poolIdx < pool.length ? pool[poolIdx++] : null;
+  }
 
   // =============================================
-  // CARD BUILDERS
+  // FIT TEXT
+  // =============================================
+  function fitCardText(card) {
+    const front = card.querySelector('.note-card-front');
+    if (!front) return;
+    const textEl = front.querySelector('.note-card-text, .action-text, .joke-text');
+    if (!textEl) return;
+    if (front.scrollHeight <= front.clientHeight) return;
+    const MIN_PX = 16;
+    let size = parseFloat(getComputedStyle(textEl).fontSize);
+    while (front.scrollHeight > front.clientHeight && size > MIN_PX) {
+      size -= 1;
+      textEl.style.fontSize = size + 'px';
+    }
+  }
+
+  // =============================================
+  // CARD DOM BUILDERS (no events)
   // =============================================
   function buildTextCard(note) {
     const wrap = document.createElement('div');
-    wrap.className = 'note-card animating';
+    wrap.className = 'note-card';
     wrap.setAttribute('tabindex', '0');
     wrap.innerHTML = `
       <div class="note-card-scene">
@@ -321,7 +356,7 @@
 
   function buildActionCard(note) {
     const wrap = document.createElement('div');
-    wrap.className = 'note-card animating';
+    wrap.className = 'note-card';
     wrap.setAttribute('tabindex', '0');
     wrap.innerHTML = `
       <div class="note-card-scene">
@@ -341,7 +376,7 @@
 
   function buildJokeCard(note) {
     const wrap = document.createElement('div');
-    wrap.className = 'note-card animating';
+    wrap.className = 'note-card';
     wrap.setAttribute('tabindex', '0');
     wrap.innerHTML = `
       <div class="note-card-scene">
@@ -360,7 +395,7 @@
 
   function buildImageCard(note) {
     const wrap = document.createElement('div');
-    wrap.className = 'note-card animating';
+    wrap.className = 'note-card';
     wrap.setAttribute('tabindex', '0');
     wrap.innerHTML = `
       <div class="note-card-scene card-image">
@@ -401,104 +436,94 @@
     return wrap;
   }
 
-  function buildCard(note) {
-    let wrap;
-    if (note.type === 'action')     wrap = buildActionCard(note);
-    else if (note.type === 'joke')  wrap = buildJokeCard(note);
-    else if (note.type === 'image') wrap = buildImageCard(note);
-    else                            wrap = buildTextCard(note);
+  // =============================================
+  // REMOVE ENTRY
+  // =============================================
+  function removeEntry(entry, delay) {
+    visible = visible.filter(v => v !== entry);
+    setTimeout(() => {
+      entry.el.classList.add('leaving');
+      entry.el.addEventListener('animationend', () => {
+        entry.el.remove();
+        fillToMax();
+      }, { once: true });
+    }, delay || 0);
+  }
 
-    const toggle = () => {
-      const isFlipped = wrap.classList.contains('flipped');
-      document.querySelectorAll('.note-card.flipped').forEach(c => {
-        if (c !== wrap) c.classList.remove('flipped');
-      });
-      wrap.classList.toggle('flipped', !isFlipped);
+  // =============================================
+  // SPAWN CARD (DOM + events + state entry)
+  // =============================================
+  function spawnCard(note, animDelay) {
+    let el;
+    if (note.type === 'action')     el = buildActionCard(note);
+    else if (note.type === 'joke')  el = buildJokeCard(note);
+    else if (note.type === 'image') el = buildImageCard(note);
+    else                            el = buildTextCard(note);
+
+    el.classList.add('animating');
+    if (animDelay) el.style.animationDelay = animDelay + 'ms';
+    deck.appendChild(el);
+
+    const entry = { note, el, flipped: false };
+
+    const handleClick = () => {
+      if (!entry.flipped) {
+        // OPEN: flip card, then remove 1–4 other visible cards
+        entry.flipped = true;
+        el.classList.add('flipped');
+        const others = visible.filter(v => v !== entry && !v.flipped);
+        const count = Math.min(others.length, 1 + Math.floor(Math.random() * 4));
+        shuffle([...others]).slice(0, count).forEach((v, i) => removeEntry(v, i * 90));
+      } else {
+        // CLOSE: remove this card — no going back
+        removeEntry(entry);
+      }
     };
-    wrap.addEventListener('click', toggle);
-    wrap.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+
+    el.addEventListener('click', handleClick);
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); }
     });
-    wrap.addEventListener('animationend', () => wrap.classList.remove('animating'), { once: true });
-    return wrap;
+    el.addEventListener('animationend', () => {
+      el.classList.remove('animating');
+      el.style.animationDelay = '';
+      fitCardText(el);
+    }, { once: true });
+
+    return entry;
   }
 
   // =============================================
-  // LAZY LOAD — sentinel beweegt mee na elk batch
+  // FILL VISIBLE UP TO MAX
   // =============================================
-  const deck = document.getElementById('note-deck');
-
-  const sentinel = document.createElement('div');
-  sentinel.style.height = '20px';
-
-  const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && rendered < shuffled.length) {
-      observer.unobserve(sentinel);
-      renderBatch();
-    }
-  }, {
-    root: null,
-    rootMargin: '200px',
-    threshold: 0
-  });
-
-  function fitCardText(card) {
-    const front = card.querySelector('.note-card-front');
-    if (!front) return;
-    const textEl = front.querySelector('.note-card-text, .action-text, .joke-text');
-    if (!textEl) return;
-    if (front.scrollHeight <= front.clientHeight) return;
-    const MIN_PX = 16;
-    let size = parseFloat(getComputedStyle(textEl).fontSize);
-    while (front.scrollHeight > front.clientHeight && size > MIN_PX) {
-      size -= 1;
-      textEl.style.fontSize = size + 'px';
-    }
-  }
-
-  function renderBatch() {
-    const end = Math.min(rendered + BATCH, shuffled.length);
-    const newCards = [];
-    for (let i = rendered; i < end; i++) {
-      const card = buildCard(shuffled[i]);
-      card.style.animationDelay = ((i - rendered) * 200) + 'ms';
-      deck.appendChild(card);
-      newCards.push(card);
-    }
-    rendered = end;
-
-    requestAnimationFrame(() => newCards.forEach(fitCardText));
-
-    if (rendered < shuffled.length) {
-      deck.appendChild(sentinel);
-      observer.observe(sentinel);
-    } else {
-      sentinel.remove();
-      observer.disconnect();
+  function fillToMax() {
+    let added = 0;
+    while (visible.length < MAX_VISIBLE) {
+      const note = nextFromPool();
+      if (!note) break;
+      const entry = spawnCard(note, added * 120);
+      visible.push(entry);
+      added++;
     }
   }
 
   // =============================================
-  // LOAD CHECK — wait for fonts before first render
+  // INITIAL LOAD — wait for fonts
   // =============================================
   let started = false;
 
   function start() {
     if (started) return;
     started = true;
-    renderBatch();
+    fillToMax();
   }
 
-  // Render once custom fonts are confirmed loaded so fitCardText
-  // measures with the real typeface. After fonts settle, re-fit
-  // any cards that may have rendered with fallback metrics.
   document.fonts.ready.then(() => {
     start();
     setTimeout(() => deck.querySelectorAll('.note-card').forEach(fitCardText), 100);
   });
 
-  // Fallback: if fonts.ready is blocked (slow CDN, offline, etc.)
-  // start rendering after 2s regardless.
+  // Fallback if fonts.ready is slow
   setTimeout(start, 2000);
   </script>
 </body>
