@@ -398,7 +398,7 @@ section p {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) translateZ(0);
-  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  font-family: var(--font-accent);
   font-weight: 400;
   font-style: italic;
   font-size: 3rem;
