@@ -311,6 +311,7 @@
     const pool = shuffle(allNotes);
     let poolIdx = 0;
     let visible = []; // { note, el, flipped, removing }
+    let pendingRemovals = 0; // fillToMax waits until this reaches 0
 
     const deck = document.getElementById('note-deck');
 
@@ -442,53 +443,66 @@
     }
 
     // =============================================
-    // REMOVE ENTRY (slow height collapse)
+    // COLLAPSE CARD — two-phase: fade out, then space collapses
+    // Calls done() when the element can be removed.
+    // =============================================
+    function collapseCard(el, done) {
+      const h = el.getBoundingClientRect().height;
+      el.style.height = h + 'px';
+      el.style.overflow = 'hidden';
+      el.style.pointerEvents = 'none';
+      requestAnimationFrame(() => {
+        // Phase 1: fade out + subtle lift (0.3s)
+        el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-10px) scale(0.97)';
+        // Phase 2: collapse space so remaining cards slide up smoothly (starts at 280ms)
+        setTimeout(() => {
+          el.style.transition = 'height 0.45s cubic-bezier(0.4,0,0.2,1), margin-bottom 0.45s cubic-bezier(0.4,0,0.2,1)';
+          el.style.height = '0';
+          el.style.marginBottom = '0';
+          // Done after collapse finishes (~450ms) + small buffer
+          setTimeout(done, 480);
+        }, 280);
+      });
+    }
+
+    // =============================================
+    // REMOVE ENTRY
+    // Increments pendingRemovals; fillToMax() fires only when all reach 0.
     // =============================================
     function removeEntry(entry, delay) {
       if (entry.removing) return;
       entry.removing = true;
       visible = visible.filter(v => v !== entry);
+      pendingRemovals++;
       setTimeout(() => {
-        const el = entry.el;
-        const h = el.getBoundingClientRect().height;
-        el.style.height = h + 'px';
-        el.style.overflow = 'hidden';
-        el.style.pointerEvents = 'none';
-        requestAnimationFrame(() => {
-          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, height 0.7s ease 0.1s, margin-bottom 0.7s ease 0.1s';
-          el.style.opacity = '0';
-          el.style.transform = 'translateY(-14px) scale(0.97)';
-          el.style.height = '0';
-          el.style.marginBottom = '0';
+        collapseCard(entry.el, () => {
+          entry.el.remove();
+          pendingRemovals--;
+          if (pendingRemovals === 0) fillToMax();
         });
-        setTimeout(() => { el.remove(); fillToMax(); }, 900);
       }, delay || 0);
     }
 
     // =============================================
-    // UNFLIP AND REMOVE (flip back first, then collapse)
+    // UNFLIP AND REMOVE — flip back first, then collapse
     // =============================================
     function unflipAndRemove(entry, delay) {
       if (entry.removing) return;
       entry.removing = true;
       visible = visible.filter(v => v !== entry);
+      pendingRemovals++;
       setTimeout(() => {
         entry.el.classList.remove('flipped');
+        // Wait for flip-back CSS transition (0.72s) to complete
         setTimeout(() => {
-          const el = entry.el;
-          const h = el.getBoundingClientRect().height;
-          el.style.height = h + 'px';
-          el.style.overflow = 'hidden';
-          el.style.pointerEvents = 'none';
-          requestAnimationFrame(() => {
-            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease, height 0.7s ease 0.1s, margin-bottom 0.7s ease 0.1s';
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(-14px) scale(0.97)';
-            el.style.height = '0';
-            el.style.marginBottom = '0';
+          collapseCard(entry.el, () => {
+            entry.el.remove();
+            pendingRemovals--;
+            if (pendingRemovals === 0) fillToMax();
           });
-          setTimeout(() => { el.remove(); fillToMax(); }, 900);
-        }, 750);
+        }, 720);
       }, delay || 0);
     }
 
@@ -556,7 +570,7 @@
     }
 
     // =============================================
-    // INITIAL LOAD — wait for fonts
+    // INITIAL LOAD
     // =============================================
     let started = false;
 
@@ -566,13 +580,14 @@
       fillToMax();
     }
 
-    document.fonts.ready.then(() => {
-      start();
-      setTimeout(() => deck.querySelectorAll('.note-card').forEach(fitCardText), 100);
-    });
+    // Start immediately — works for direct page load and SPA re-execution via nav.js.
+    // setTimeout(0) defers one tick so the DOM settles before cards are spawned.
+    setTimeout(start, 0);
 
-    // Fallback if fonts.ready is slow
-    setTimeout(start, 2000);
+    // Re-check text fit once fonts are confirmed loaded
+    document.fonts.ready.then(() => {
+      deck.querySelectorAll('.note-card').forEach(fitCardText);
+    });
     </script>
 
   </main>
