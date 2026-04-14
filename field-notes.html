@@ -570,7 +570,7 @@
     }
 
     // =============================================
-    // INITIAL LOAD — wait for fonts
+    // INITIAL LOAD
     // =============================================
     let started = false;
 
@@ -580,13 +580,14 @@
       fillToMax();
     }
 
-    document.fonts.ready.then(() => {
-      start();
-      setTimeout(() => deck.querySelectorAll('.note-card').forEach(fitCardText), 100);
-    });
+    // Start immediately — works for direct page load and SPA re-execution via nav.js.
+    // setTimeout(0) defers one tick so the DOM settles before cards are spawned.
+    setTimeout(start, 0);
 
-    // Fallback if fonts.ready is slow
-    setTimeout(start, 2000);
+    // Re-check text fit once fonts are confirmed loaded
+    document.fonts.ready.then(() => {
+      deck.querySelectorAll('.note-card').forEach(fitCardText);
+    });
     </script>
 
   </main>
