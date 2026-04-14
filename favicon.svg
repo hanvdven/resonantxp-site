@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" ry="12" fill="#ffffff"/>
-  <path d="M6 20 C18 12 30 28 58 18" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" opacity="0.95"/>
-  <path d="M6 28 C18 18 30 34 58 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" opacity="0.85"/>
-  <path d="M6 36 C18 26 30 42 58 32" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" opacity="0.75"/>
-  <path d="M6 44 C18 34 30 50 58 40" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" opacity="0.65"/>
-  <path d="M6 52 C18 42 30 58 58 48" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+  <rect width="420" height="120" rx="18" fill="#1a1f2e"/>
+  <path d="M0 34 C35 22 70 46 105 34 S175 22 210 34 S280 22 315 34 S385 22 420 34" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.95"/>
+  <path d="M0 52 C35 42 70 58 105 52 S175 42 210 52 S280 42 315 52 S385 42 420 52" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.82"/>
+  <path d="M0 70 C35 60 70 80 105 70 S175 60 210 70 S280 60 315 70 S385 60 420 70" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.69"/>
+  <path d="M0 88 C35 76 70 96 105 88 S175 76 210 88 S280 76 315 88 S385 76 420 88" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.56"/>
+  <path d="M0 106 C35 92 70 112 105 106 S175 92 210 106 S280 92 315 106 S385 92 420 106" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.43"/>
 </svg>
