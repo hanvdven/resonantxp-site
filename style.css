@@ -1,8 +1,7 @@
 /* ===== IMPORTS ===== */
 @import url("logo/styles.css");
 @import url("logo/animation.css");
-@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+/* Google Fonts are loaded via <link> in each page <head> for faster first paint */
 
 
 /* ===== VARIABLES ===== */
@@ -144,11 +143,13 @@ blockquote {
   font-style: italic;
 }
 
-.scene-line:nth-child(1) { animation-delay: 1.0s; }
-.scene-line:nth-child(2) { animation-delay: 2.6s; }
-.scene-line:nth-child(3) { animation-delay: 4.6s; }
-.scene-line:nth-child(4) { animation-delay: 7.0s; }
-.scene-line:nth-child(5) { animation-delay: 9.6s; }
+/* Delays for pages where scene-lines are children 1–5 (e.g. experiences.html).
+   On index.html, inline style="animation-delay:Xs" overrides these per element. */
+.scene-line:nth-child(1) { animation-delay: 0.4s; }
+.scene-line:nth-child(2) { animation-delay: 1.2s; }
+.scene-line:nth-child(3) { animation-delay: 2.2s; }
+.scene-line:nth-child(4) { animation-delay: 3.2s; }
+.scene-line:nth-child(5) { animation-delay: 4.2s; }
 
 .scene-break {
   height: 60px;
@@ -208,6 +209,9 @@ section p {
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 2rem;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 
@@ -271,6 +275,9 @@ section p {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: rgba(71, 85, 105, 0.45);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .section-who {
@@ -1097,6 +1104,60 @@ body.framework-page {
 
 .cf-submit {
   padding-top: 0.5rem;
+}
+
+.cf-gdpr {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: rgba(71, 85, 105, 0.55);
+}
+
+.cf-gdpr a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cf-fallback {
+  margin: 2rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(71, 85, 105, 0.6);
+}
+
+.cf-fallback a {
+  color: var(--blue1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ===== PRIVACY PAGE ===== */
+.privacy-body h2 {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #475569;
+  margin: 2rem 0 0.5rem;
+  font-weight: 600;
+}
+
+.privacy-body p,
+.privacy-body ul {
+  font-size: var(--text-sm);
+  line-height: 1.75;
+  color: #475569;
+  margin: 0 0 0.5rem;
+}
+
+.privacy-body ul {
+  padding-left: 1.25rem;
+}
+
+.privacy-body a {
+  color: var(--blue1);
+  text-underline-offset: 2px;
+  text-decoration: underline;
 }
 
 .contact-thanks {

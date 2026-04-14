@@ -68,6 +68,14 @@ async function navigateTo(url, pushState = true) {
       document.body.appendChild(newMain);
     }
 
+    // Re-execute inline scripts from new main (needed for pages like field-notes)
+    newMain.querySelectorAll('script:not([src])').forEach(s => {
+      const clone = document.createElement('script');
+      clone.textContent = s.textContent;
+      document.head.appendChild(clone);
+      document.head.removeChild(clone);
+    });
+
     document.title = doc.title;
 
     if (pushState) {
