@@ -14,174 +14,204 @@
   <script src="nav.js" defer></script>
   <style data-page-style>
     /* ===================================================
-       CONTACT — THEATRE SCRIPT FORMAT
-       Character names centred; dialogue in a column.
+       CONTACT — CELTX STAGE PLAY FORMAT
+       Courier font · white page on grey surround
+       Character names centred · dialogue in narrower column
        =================================================== */
 
-    .script-page {
-      max-width: 600px;
+    /* ── Outer environment (grey like a script editor) ── */
+    .celtx-env {
+      background: #c0c0c0;
+      min-height: 100vh;
+      padding: calc(var(--header-h, 80px) + 2.5rem) 1rem 5rem;
+    }
+
+    /* ── The white script page ───────────────────────── */
+    .celtx-paper {
+      position: relative;
+      background: #ffffff;
+      max-width: 700px;
       margin: 0 auto;
-      padding: calc(var(--header-h, 80px) + 3rem) 2rem 8rem;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-    }
-
-    /* ── Opening stage direction ─────────────────────── */
-    .script-slug {
-      text-align: center;
-      font-size: 0.72rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: #94a3b8;
-      margin: 0 0 3.5rem;
-    }
-
-    /* ── Block = one exchange ────────────────────────── */
-    .script-block {
-      margin-bottom: 2.8rem;
-    }
-
-    /* ── Stage directions (italic, muted, bracketed) ─── */
-    .sd {
-      font-style: italic;
-      color: #94a3b8;
-      font-size: 0.8rem;
-      margin: 0.35rem 0 0;
-      line-height: 1.5;
-    }
-
-    /* ── Character name — CENTRED ────────────────────── */
-    .char {
-      display: block;
-      text-align: center;
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      margin: 0 0 0.4rem;
-    }
-    .char-chorus { color: #1e293b; }
-    .char-user   { color: #94a3b8; }
-
-    /* ── Dialogue ────────────────────────────────────── */
-    .dial {
-      display: block;
-      /* screenplay dialogue column: indented ~25% from each side */
-      margin: 0 auto;
-      max-width: 72%;
-      text-align: left;
-    }
-    .dial-chorus {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(1.05rem, 2vw, 1.4rem);
-      font-style: italic;
-      color: #1e293b;
+      padding: 72px 88px 96px;
+      box-shadow:
+        0 1px 3px rgba(0,0,0,0.22),
+        0 6px 28px rgba(0,0,0,0.14);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
       line-height: 1.35;
-    }
-    .dial-user {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.88rem;
-      font-weight: 300;
-      color: #64748b;
-      line-height: 1.7;
-      white-space: pre-wrap;
+      color: #000000;
     }
 
-    /* ── Inputs ──────────────────────────────────────── */
-    .script-input-wrap {
-      margin: 0.2rem auto 0;
-      max-width: 72%; /* same column as dialogue */
+    /* ── Page number (top right) ─────────────────────── */
+    .celtx-pagenum {
+      position: absolute;
+      top: 40px;
+      right: 88px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
+      color: #000;
     }
 
-    .script-input {
+    /* ── Scene heading / slug line ───────────────────── */
+    .celtx-slug {
+      text-transform: uppercase;
+      text-decoration: underline;
+      margin: 0 0 2em;
+      font-size: 12pt;
+      font-weight: normal;
+      letter-spacing: 0;
+    }
+
+    /* ── One exchange block ──────────────────────────── */
+    .celtx-block {
+      margin-bottom: 0;
+    }
+
+    /* ── Action / scene description (full width) ─────── */
+    .celtx-action {
+      margin: 0 0 1em;
+      font-style: italic;
+      color: #444;
+    }
+
+    /* ── Character name — centered, ALL CAPS ─────────── */
+    .celtx-char {
+      display: block;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: normal;
+      margin: 1.5em 0 0;
+      font-size: 12pt;
+      letter-spacing: 0;
+    }
+    /* Distinguish user character visually (lighter weight) */
+    .celtx-char-user { color: #333; }
+    .celtx-char-chorus { color: #000; }
+
+    /* ── Dialogue (centered column ~65% wide) ────────── */
+    .celtx-dial {
+      display: block;
+      margin: 0 auto;
+      max-width: 65%;
+      text-align: left;
+      font-size: 12pt;
+      font-weight: normal;
+    }
+    .celtx-dial-chorus { color: #000; }
+    .celtx-dial-user   { color: #444; font-style: italic; }
+
+    /* ── Parenthetical stage direction ──────────────── */
+    .celtx-paren {
+      display: block;
+      margin: 0 auto;
+      max-width: 52%;
+      text-align: left;
+      font-style: italic;
+      color: #555;
+      font-size: 12pt;
+    }
+
+    /* ── Input — within dialogue column ─────────────── */
+    .celtx-input-col {
+      display: block;
+      margin: 0 auto;
+      max-width: 65%;
+    }
+
+    .celtx-input {
       display: block;
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1px solid #e2e8f0;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.88rem;
-      color: #1e293b;
-      padding: 0.15rem 0 0.35rem;
+      border-bottom: 1px solid #888;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
+      color: #000;
+      padding: 0 0 2px;
       outline: none;
       resize: none;
-      line-height: 1.7;
-      transition: border-bottom-color 0.2s;
+      line-height: 1.35;
+      overflow-y: hidden;
     }
-    .script-input:focus { border-bottom-color: #94a3b8; }
+    .celtx-input:focus { border-bottom-color: #000; }
 
-    .script-textarea { overflow-y: hidden; min-height: 1.7em; }
-
-    /* ── Continue cue ────────────────────────────────── */
-    .script-cue {
+    /* ── Continue cue (right-aligned, like a director's mark) */
+    .celtx-cue {
       display: block;
-      width: 100%;
       text-align: right;
-      margin-top: 0.55rem;
+      margin-top: 6px;
       background: none;
       border: none;
       cursor: pointer;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #cbd5e1;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10pt;
+      color: #999;
       padding: 0;
-      transition: color 0.2s;
+      width: 100%;
+      transition: color 0.15s;
     }
-    .script-cue:hover { color: #475569; }
+    .celtx-cue:hover { color: #000; }
 
-    /* ── Options (ripple in) ─────────────────────────── */
+    /* ── Options (ripple in, italic like script choices) */
     @keyframes rippleIn {
-      from { opacity: 0; transform: translateY(5px); }
+      from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .script-options {
-      margin: 0.2rem auto 0;
-      max-width: 72%;
+    .celtx-options {
+      display: block;
+      margin: 0 auto;
+      max-width: 65%;
     }
 
-    .script-option {
+    .celtx-option {
       display: block;
       width: 100%;
       background: none;
       border: none;
       cursor: pointer;
       text-align: left;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
       font-style: italic;
-      font-size: 1rem;
-      color: #94a3b8;
-      padding: 0.2rem 0;
+      color: #666;
+      padding: 0;
+      line-height: 1.5;
       opacity: 0;
-      animation: rippleIn 0.35s ease forwards;
-      transition: color 0.2s;
+      animation: rippleIn 0.3s ease forwards;
+      transition: color 0.15s;
     }
-    .script-option:hover { color: #1e293b; }
+    .celtx-option:hover { color: #000; }
 
-    /* ── Send wrap ───────────────────────────────────── */
-    .script-send-wrap {
-      margin: 1.5rem auto 0;
-      max-width: 72%;
+    /* ── Send button row ─────────────────────────────── */
+    .celtx-send-col {
+      display: block;
+      margin: 1.5em auto 0;
+      max-width: 65%;
     }
 
-    /* ── History — faded back ────────────────────────── */
-    #scriptHistory .script-block { opacity: 0.45; }
+    /* ── History — faded ─────────────────────────────── */
+    #scriptHistory .celtx-block { opacity: 0.45; }
 
-    /* ── Footer note ─────────────────────────────────── */
-    .script-foot {
-      text-align: center;
-      margin-top: 5rem;
-      font-size: 0.76rem;
+    /* ── Fallback at bottom ──────────────────────────── */
+    .celtx-foot {
+      margin-top: 4em;
+      font-size: 10pt;
       font-style: italic;
-      color: #94a3b8;
+      color: #888;
+      text-align: center;
     }
-    .script-foot a { text-decoration: underline; text-underline-offset: 2px; }
+    .celtx-foot a { text-decoration: underline; color: #888; }
 
-    @media (max-width: 480px) {
-      .script-page { padding-left: 1.2rem; padding-right: 1.2rem; }
-      .dial, .script-input-wrap, .script-options, .script-send-wrap { max-width: 90%; }
+    /* ── Mobile adjustments ──────────────────────────── */
+    @media (max-width: 600px) {
+      .celtx-paper { padding: 48px 32px 64px; }
+      .celtx-pagenum { right: 32px; top: 24px; }
+      .celtx-dial,
+      .celtx-paren,
+      .celtx-input-col,
+      .celtx-options,
+      .celtx-send-col { max-width: 90%; }
     }
   </style>
 </head>
@@ -190,15 +220,19 @@
   <div id="site-header"></div>
 
   <main style="position: relative; z-index: 1;">
-    <div class="script-page">
+    <div class="celtx-env">
+      <div class="celtx-paper">
 
-      <p class="script-slug">[ An organisation in motion. ]</p>
+        <span class="celtx-pagenum">1.</span>
 
-      <div id="scriptHistory"></div>
-      <div id="scriptCurrent"></div>
+        <p class="celtx-slug">An Organisation In Motion.</p>
 
-      <p class="script-foot">[ Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a> ]</p>
+        <div id="scriptHistory"></div>
+        <div id="scriptCurrent"></div>
 
+        <p class="celtx-foot">(Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>)</p>
+
+      </div>
     </div>
 
     <script>
@@ -212,10 +246,10 @@
 
       const STEPS = [
         {
-          name:      'situation',
-          chorus:    'What is it?',
-          direction: '[ You don\'t need to be precise. A direction is enough. ]',
-          type:      'textarea'
+          name:   'situation',
+          chorus: 'What is it?',
+          paren:  '(You don\'t need to be precise. A direction is enough.)',
+          type:   'textarea'
         },
         {
           name:   'name',
@@ -253,51 +287,50 @@
         });
       }
 
-      // ── Build blocks ──────────────────────────────────
-      function makeChar(cls, text) {
-        const el = document.createElement('span');
-        el.className = 'char ' + cls;
-        el.textContent = text;
-        return el;
-      }
-
+      // ── Build chorus block ────────────────────────────
       function makeChorusBlock(step) {
         const wrap = document.createElement('div');
-        wrap.className = 'script-block script-chorus';
+        wrap.className = 'celtx-block celtx-chorus';
 
-        wrap.appendChild(makeChar('char-chorus', 'CHORUS'));
+        const name = document.createElement('span');
+        name.className = 'celtx-char celtx-char-chorus';
+        name.textContent = 'CHORUS';
+        wrap.appendChild(name);
 
-        const line = document.createElement('span');
-        line.className = 'dial dial-chorus';
-        line.textContent = step.chorus;
-        wrap.appendChild(line);
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial celtx-dial-chorus';
+        dial.textContent = step.chorus;
+        wrap.appendChild(dial);
 
-        if (step.direction) {
-          const dir = document.createElement('p');
-          dir.className = 'sd';
-          dir.textContent = step.direction;
-          wrap.appendChild(dir);
+        if (step.paren) {
+          const par = document.createElement('span');
+          par.className = 'celtx-paren';
+          par.textContent = step.paren;
+          wrap.appendChild(par);
         }
 
         return wrap;
       }
 
-      function makeUserInputBlock(step) {
+      // ── Build user input block ────────────────────────
+      function makeUserBlock(step) {
         const wrap = document.createElement('div');
-        wrap.className = 'script-block script-user-input';
+        wrap.className = 'celtx-block celtx-user-input';
 
-        const nameEl = makeChar('char-user js-user-name', userLabel());
-        wrap.appendChild(nameEl);
+        const name = document.createElement('span');
+        name.className = 'celtx-char celtx-char-user js-user-name';
+        name.textContent = userLabel();
+        wrap.appendChild(name);
 
         if (step.type === 'textarea') {
-          const inputWrap = document.createElement('div');
-          inputWrap.className = 'script-input-wrap';
+          const col = document.createElement('div');
+          col.className = 'celtx-input-col';
 
           const ta = document.createElement('textarea');
-          ta.className = 'script-input script-textarea';
+          ta.className = 'celtx-input';
           ta.rows = 1;
           ta.required = true;
-          inputWrap.appendChild(ta);
+          col.appendChild(ta);
 
           ta.addEventListener('input', () => {
             ta.style.height = 'auto';
@@ -305,12 +338,12 @@
           });
 
           const cue = document.createElement('button');
-          cue.className = 'script-cue';
+          cue.className = 'celtx-cue';
           cue.type = 'button';
-          cue.textContent = 'continue →';
-          inputWrap.appendChild(cue);
+          cue.textContent = 'continue >';
+          col.appendChild(cue);
 
-          wrap.appendChild(inputWrap);
+          wrap.appendChild(col);
 
           const commit = () => { const v = ta.value.trim(); if (v) doCommit(step, v); };
           cue.addEventListener('click', commit);
@@ -320,22 +353,22 @@
           setTimeout(() => ta.focus(), 80);
 
         } else if (step.type === 'text' || step.type === 'email') {
-          const inputWrap = document.createElement('div');
-          inputWrap.className = 'script-input-wrap';
+          const col = document.createElement('div');
+          col.className = 'celtx-input-col';
 
           const inp = document.createElement('input');
           inp.type = step.type;
-          inp.className = 'script-input';
+          inp.className = 'celtx-input';
           inp.required = true;
-          inputWrap.appendChild(inp);
+          col.appendChild(inp);
 
           const cue = document.createElement('button');
-          cue.className = 'script-cue';
+          cue.className = 'celtx-cue';
           cue.type = 'button';
-          cue.textContent = 'continue →';
-          inputWrap.appendChild(cue);
+          cue.textContent = 'continue >';
+          col.appendChild(cue);
 
-          wrap.appendChild(inputWrap);
+          wrap.appendChild(col);
 
           const commit = () => {
             const v = inp.value.trim();
@@ -351,10 +384,10 @@
 
         } else if (step.type === 'options') {
           const opts = document.createElement('div');
-          opts.className = 'script-options';
+          opts.className = 'celtx-options';
           step.options.forEach((opt, i) => {
             const btn = document.createElement('button');
-            btn.className = 'script-option';
+            btn.className = 'celtx-option';
             btn.type = 'button';
             btn.textContent = opt;
             btn.style.animationDelay = (i * 90) + 'ms';
@@ -377,18 +410,24 @@
         }
 
         // Move chorus block to history
-        const chorusEl = currEl.querySelector('.script-chorus');
+        const chorusEl = currEl.querySelector('.celtx-chorus');
         if (chorusEl) histEl.appendChild(chorusEl);
 
         // Completed user response
-        const doneBlock = document.createElement('div');
-        doneBlock.className = 'script-block';
-        doneBlock.appendChild(makeChar('char-user js-user-name', userLabel()));
+        const done = document.createElement('div');
+        done.className = 'celtx-block';
+
+        const doneName = document.createElement('span');
+        doneName.className = 'celtx-char celtx-char-user js-user-name';
+        doneName.textContent = userLabel();
+
         const doneDial = document.createElement('span');
-        doneDial.className = 'dial dial-user';
+        doneDial.className = 'celtx-dial celtx-dial-user';
         doneDial.textContent = value;
-        doneBlock.appendChild(doneDial);
-        histEl.appendChild(doneBlock);
+
+        done.appendChild(doneName);
+        done.appendChild(doneDial);
+        histEl.appendChild(done);
 
         currEl.innerHTML = '';
         stepIdx++;
@@ -397,7 +436,7 @@
         else showSubmit();
       }
 
-      // ── Show next step ─────────────────────────────────
+      // ── Show step ─────────────────────────────────────
       function showStep() {
         const step = STEPS[stepIdx];
 
@@ -408,12 +447,12 @@
         setTimeout(() => { cb.style.opacity = '1'; }, 150);
 
         setTimeout(() => {
-          const ib = makeUserInputBlock(step);
-          ib.style.opacity = '0';
-          ib.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(ib);
+          const ub = makeUserBlock(step);
+          ub.style.opacity = '0';
+          ub.style.transition = 'opacity 0.4s ease';
+          currEl.appendChild(ub);
           requestAnimationFrame(() => requestAnimationFrame(() => {
-            ib.style.opacity = '1';
+            ub.style.opacity = '1';
           }));
         }, 520);
       }
@@ -421,42 +460,46 @@
       // ── Submit step ────────────────────────────────────
       function showSubmit() {
         const block = document.createElement('div');
-        block.className = 'script-block';
-        block.appendChild(makeChar('char-chorus', 'CHORUS'));
+        block.className = 'celtx-block';
 
-        const line = document.createElement('span');
-        line.className = 'dial dial-chorus';
-        line.textContent = 'Something will happen next.';
-        block.appendChild(line);
+        const name = document.createElement('span');
+        name.className = 'celtx-char celtx-char-chorus';
+        name.textContent = 'CHORUS';
 
-        const dir = document.createElement('p');
-        dir.className = 'sd';
-        dir.textContent = '[ Your details are used only to respond to your message. ]';
-        block.appendChild(dir);
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial celtx-dial-chorus';
+        dial.textContent = 'Something will happen next.';
 
+        const par = document.createElement('span');
+        par.className = 'celtx-paren';
+        par.textContent = '(Your details are used only to respond to your message.)';
+
+        block.appendChild(name);
+        block.appendChild(dial);
+        block.appendChild(par);
         block.style.opacity = '0';
         block.style.transition = 'opacity 0.4s ease';
         currEl.appendChild(block);
         setTimeout(() => { block.style.opacity = '1'; }, 150);
 
         setTimeout(() => {
-          const sendWrap = document.createElement('div');
-          sendWrap.className = 'script-send-wrap';
+          const col = document.createElement('div');
+          col.className = 'celtx-send-col';
 
-          const sendBtn = document.createElement('button');
-          sendBtn.className = 'button button-primary';
-          sendBtn.type = 'button';
-          sendBtn.textContent = 'Send.';
-          sendWrap.appendChild(sendBtn);
+          const btn = document.createElement('button');
+          btn.className = 'button button-primary';
+          btn.type = 'button';
+          btn.textContent = 'Send.';
+          col.appendChild(btn);
 
-          sendWrap.style.opacity = '0';
-          sendWrap.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(sendWrap);
+          col.style.opacity = '0';
+          col.style.transition = 'opacity 0.4s ease';
+          currEl.appendChild(col);
           requestAnimationFrame(() => requestAnimationFrame(() => {
-            sendWrap.style.opacity = '1';
+            col.style.opacity = '1';
           }));
 
-          sendBtn.addEventListener('click', () => submitForm(sendBtn));
+          btn.addEventListener('click', () => submitForm(btn));
         }, 520);
       }
 
@@ -471,21 +514,20 @@
 
         try {
           const res = await fetch('https://formspree.io/f/xdaynqov', {
-            method: 'POST',
-            body: fd,
+            method: 'POST', body: fd,
             headers: { Accept: 'application/json' }
           });
 
           if (res.ok) {
             currEl.innerHTML = '';
-            const closing = document.createElement('p');
-            closing.className = 'sd';
-            closing.style.textAlign = 'center';
-            closing.textContent = '[ End of scene one. ]';
-            closing.style.opacity = '0';
-            closing.style.transition = 'opacity 0.5s ease';
-            currEl.appendChild(closing);
-            setTimeout(() => { closing.style.opacity = '1'; }, 100);
+            const fin = document.createElement('p');
+            fin.className = 'celtx-action';
+            fin.style.textAlign = 'center';
+            fin.textContent = '(End of scene one.)';
+            fin.style.opacity = '0';
+            fin.style.transition = 'opacity 0.5s ease';
+            currEl.appendChild(fin);
+            setTimeout(() => { fin.style.opacity = '1'; }, 100);
           } else {
             btn.disabled = false;
             btn.textContent = 'Try again.';
