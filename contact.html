@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resonant XP | Begin the conversation</title>
-  <meta name="description" content="Start a conversation about designing an experience for your leadership team or organisation. Belgium, Netherlands and Germany." />
+  <meta name="description" content="Start a conversation about designing an experience for your leadership team or organisation." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Martel+Sans:wght@300;400;600;800&family=Linden+Hill:ital@0;1&display=swap" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
@@ -15,107 +15,134 @@
   <style data-page-style>
     /* ===================================================
        CONTACT — CELTX STAGE PLAY FORMAT
-       Courier font · white page on grey surround
-       Character names centred · dialogue in narrower column
+       Left-flush character names · indented dialogue
+       Courier New throughout · white page
        =================================================== */
 
-    /* ── Outer environment (grey like a script editor) ── */
     .celtx-env {
-      background: #c0c0c0;
-      min-height: 100vh;
-      padding: calc(var(--header-h, 80px) + 2.5rem) 1rem 5rem;
-    }
-
-    /* ── The white script page ───────────────────────── */
-    .celtx-paper {
-      position: relative;
       background: #ffffff;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 72px 88px 96px;
-      box-shadow:
-        0 1px 3px rgba(0,0,0,0.22),
-        0 6px 28px rgba(0,0,0,0.14);
+      min-height: 100vh;
+      padding: calc(var(--header-h, 80px) + 3rem) 1rem 8rem;
+    }
+
+    /* ── Script page (content area with margins) ──────── */
+    .celtx-paper {
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
-      line-height: 1.35;
+      line-height: 1.5;
       color: #000000;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 48px;
     }
 
-    /* ── Page number (top right) ─────────────────────── */
-    .celtx-pagenum {
-      position: absolute;
-      top: 40px;
-      right: 88px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 12pt;
-      color: #000;
-    }
-
-    /* ── Scene heading / slug line ───────────────────── */
-    .celtx-slug {
-      text-transform: uppercase;
-      text-decoration: underline;
-      margin: 0 0 2em;
-      font-size: 12pt;
-      font-weight: normal;
-      letter-spacing: 0;
-    }
-
-    /* ── One exchange block ──────────────────────────── */
-    .celtx-block {
-      margin-bottom: 0;
-    }
-
-    /* ── Action / scene description (full width) ─────── */
-    .celtx-action {
-      margin: 0 0 1em;
-      font-style: italic;
-      color: #444;
-    }
-
-    /* ── Character name — centered, ALL CAPS ─────────── */
-    .celtx-char {
+    /* ── ACT / SCENE headings — centered, underlined ──── */
+    .celtx-act,
+    .celtx-scene {
       display: block;
       text-align: center;
+      text-decoration: underline;
+      font-weight: normal;
+      margin: 0 0 0.8em;
+      font-size: 12pt;
+    }
+
+    /* ── Scene description — italic, indented ─────────── */
+    .celtx-sd {
+      display: block;
+      font-style: italic;
+      padding-left: 3em;
+      padding-right: 3em;
+      margin: 0 0 2.5em;
+      color: #222;
+    }
+
+    /* ── Exchange block ───────────────────────────────── */
+    .celtx-block { margin: 0; }
+
+    /* ── Character name — LEFT FLUSH, all caps ────────── */
+    .celtx-char {
+      display: block;
+      text-align: left;
       text-transform: uppercase;
       font-weight: normal;
-      margin: 1.5em 0 0;
+      margin: 1.6em 0 0;
       font-size: 12pt;
       letter-spacing: 0;
     }
-    /* Distinguish user character visually (lighter weight) */
-    .celtx-char-user { color: #333; }
+
+    /* CHORUS — plain Courier */
     .celtx-char-chorus { color: #000; }
 
-    /* ── Dialogue (centered column ~65% wide) ────────── */
+    /* YOU — Averia Serif Libre italic, blue, clickable */
+    .celtx-char-you {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      color: #2563eb;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+
+    /* Name-entry hint beneath first YOU */
+    .celtx-name-hint {
+      display: block;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9pt;
+      font-style: italic;
+      color: #94a3b8;
+      margin: 0 0 0;
+    }
+    .celtx-name-hint.hidden { display: none; }
+
+    /* Inline name input (replaces YOU text on click) */
+    .celtx-name-inp {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #2563eb;
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 12pt;
+      color: #2563eb;
+      outline: none;
+      width: 14em;
+      padding: 0;
+      text-transform: uppercase;
+    }
+    .celtx-name-inp::placeholder {
+      color: #93c5fd;
+      text-transform: none;
+    }
+
+    /* ── Dialogue — indented one tab stop ─────────────── */
     .celtx-dial {
       display: block;
-      margin: 0 auto;
-      max-width: 65%;
+      padding-left: 3em;
       text-align: left;
+      margin: 0;
       font-size: 12pt;
-      font-weight: normal;
     }
-    .celtx-dial-chorus { color: #000; }
-    .celtx-dial-user   { color: #444; font-style: italic; }
+    .celtx-dial-user {
+      font-style: italic;
+      color: #333;
+    }
 
-    /* ── Parenthetical stage direction ──────────────── */
+    /* ── Parenthetical ────────────────────────────────── */
     .celtx-paren {
       display: block;
-      margin: 0 auto;
-      max-width: 52%;
-      text-align: left;
+      padding-left: 3em;
       font-style: italic;
       color: #555;
       font-size: 12pt;
+      margin: 0;
     }
 
-    /* ── Input — within dialogue column ─────────────── */
+    /* ── Input field ──────────────────────────────────── */
     .celtx-input-col {
       display: block;
-      margin: 0 auto;
-      max-width: 65%;
+      padding-left: 3em;
+      padding-right: 1em;
     }
 
     .celtx-input {
@@ -123,46 +150,42 @@
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1px solid #888;
+      border-bottom: 1px solid #555;
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
       color: #000;
       padding: 0 0 2px;
       outline: none;
       resize: none;
-      line-height: 1.35;
+      line-height: 1.5;
       overflow-y: hidden;
     }
     .celtx-input:focus { border-bottom-color: #000; }
 
-    /* ── Continue cue (right-aligned, like a director's mark) */
+    /* ── Continue cue — right-aligned ────────────────── */
     .celtx-cue {
       display: block;
       text-align: right;
-      margin-top: 6px;
+      margin-top: 5px;
       background: none;
       border: none;
       cursor: pointer;
       font-family: 'Courier New', Courier, monospace;
-      font-size: 10pt;
-      color: #999;
+      font-size: 9pt;
+      color: #aaa;
       padding: 0;
       width: 100%;
       transition: color 0.15s;
     }
     .celtx-cue:hover { color: #000; }
 
-    /* ── Options (ripple in, italic like script choices) */
+    /* ── Options — ripple in ──────────────────────────── */
     @keyframes rippleIn {
       from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .celtx-options {
-      display: block;
-      margin: 0 auto;
-      max-width: 65%;
-    }
+    .celtx-options { padding-left: 3em; }
 
     .celtx-option {
       display: block;
@@ -176,42 +199,34 @@
       font-style: italic;
       color: #666;
       padding: 0;
-      line-height: 1.5;
+      line-height: 1.6;
       opacity: 0;
       animation: rippleIn 0.3s ease forwards;
       transition: color 0.15s;
     }
     .celtx-option:hover { color: #000; }
 
-    /* ── Send button row ─────────────────────────────── */
+    /* ── Send button ──────────────────────────────────── */
     .celtx-send-col {
-      display: block;
-      margin: 1.5em auto 0;
-      max-width: 65%;
+      padding-left: 3em;
+      margin-top: 1.5em;
     }
 
-    /* ── History — faded ─────────────────────────────── */
-    #scriptHistory .celtx-block { opacity: 0.45; }
+    /* ── History — faded ──────────────────────────────── */
+    #scriptHistory .celtx-block { opacity: 0.38; }
 
-    /* ── Fallback at bottom ──────────────────────────── */
+    /* ── Foot note ────────────────────────────────────── */
     .celtx-foot {
-      margin-top: 4em;
-      font-size: 10pt;
+      margin-top: 5em;
+      font-size: 9pt;
       font-style: italic;
-      color: #888;
+      color: #bbb;
       text-align: center;
     }
-    .celtx-foot a { text-decoration: underline; color: #888; }
+    .celtx-foot a { color: #bbb; text-decoration: underline; }
 
-    /* ── Mobile adjustments ──────────────────────────── */
-    @media (max-width: 600px) {
-      .celtx-paper { padding: 48px 32px 64px; }
-      .celtx-pagenum { right: 32px; top: 24px; }
-      .celtx-dial,
-      .celtx-paren,
-      .celtx-input-col,
-      .celtx-options,
-      .celtx-send-col { max-width: 90%; }
+    @media (max-width: 560px) {
+      .celtx-paper { padding: 0 20px; }
     }
   </style>
 </head>
@@ -223,9 +238,10 @@
     <div class="celtx-env">
       <div class="celtx-paper">
 
-        <span class="celtx-pagenum">1.</span>
+        <span class="celtx-act">ACT I</span>
+        <span class="celtx-scene">Scene 1</span>
 
-        <p class="celtx-slug">An Organisation In Motion.</p>
+        <span class="celtx-sd">An organisation in motion. Something is already under way. Whether it is named or not is still unclear.</span>
 
         <div id="scriptHistory"></div>
         <div id="scriptCurrent"></div>
@@ -240,9 +256,10 @@
       const histEl = document.getElementById('scriptHistory');
       const currEl = document.getElementById('scriptCurrent');
 
-      let userName = null;
-      let stepIdx  = 0;
-      const formData = {};
+      let userName    = null;
+      let firstHintEl = null;  // "(click to enter your name)" hint
+      let stepIdx     = 0;
+      const formData  = {};
 
       const STEPS = [
         {
@@ -252,15 +269,19 @@
           type:   'textarea'
         },
         {
-          name:   'name',
-          chorus: 'Who are you?',
-          type:   'text',
-          isName: true
-        },
-        {
           name:   'email',
           chorus: 'And how do I reach you?',
           type:   'email'
+        },
+        {
+          name:   'organisation',
+          chorus: 'And your organisation?',
+          type:   'text'
+        },
+        {
+          name:   'role',
+          chorus: 'What is your role there?',
+          type:   'text'
         },
         {
           name:    'location',
@@ -278,16 +299,73 @@
 
       // ── Helpers ──────────────────────────────────────
       function userLabel() {
-        return userName ? userName.split(' ')[0].toUpperCase() : '[NAAM]';
+        return userName
+          ? userName.split(' ')[0].toUpperCase()
+          : 'YOU';
       }
 
-      function updateNames() {
-        document.querySelectorAll('.js-user-name').forEach(el => {
-          el.textContent = userLabel();
+      function syncAllYouLabels() {
+        document.querySelectorAll('.js-you-label').forEach(el => {
+          if (!el.querySelector('input')) {   // don't overwrite active input
+            el.textContent = userLabel();
+          }
+        });
+        if (firstHintEl) firstHintEl.classList.add('hidden');
+      }
+
+      // ── YOU label (name-editable) ─────────────────────
+      function makeYouLabel(isFirst) {
+        const labelEl = document.createElement('span');
+        labelEl.className = 'celtx-char celtx-char-you js-you-label';
+        labelEl.textContent = userLabel();
+
+        labelEl.addEventListener('click', () => activateName(labelEl));
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(labelEl);
+
+        if (isFirst) {
+          const hint = document.createElement('span');
+          hint.className = 'celtx-name-hint' + (userName ? ' hidden' : '');
+          hint.textContent = '(click to enter your name)';
+          firstHintEl = hint;
+          wrapper.appendChild(hint);
+        }
+
+        return wrapper;
+      }
+
+      function activateName(labelEl) {
+        if (labelEl.querySelector('input')) return; // already active
+        const prev = labelEl.textContent;
+
+        const inp = document.createElement('input');
+        inp.className  = 'celtx-name-inp';
+        inp.type       = 'text';
+        inp.placeholder = 'your name';
+
+        labelEl.textContent = '';
+        labelEl.appendChild(inp);
+        inp.focus();
+
+        const confirm = () => {
+          const v = inp.value.trim();
+          if (v) {
+            userName = v;
+            formData['name'] = v;
+          }
+          labelEl.textContent = userLabel();
+          syncAllYouLabels();
+        };
+
+        inp.addEventListener('blur', confirm);
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
+          if (e.key === 'Escape') { labelEl.textContent = prev; }
         });
       }
 
-      // ── Build chorus block ────────────────────────────
+      // ── Chorus block ─────────────────────────────────
       function makeChorusBlock(step) {
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block celtx-chorus';
@@ -298,7 +376,7 @@
         wrap.appendChild(name);
 
         const dial = document.createElement('span');
-        dial.className = 'celtx-dial celtx-dial-chorus';
+        dial.className = 'celtx-dial';
         dial.textContent = step.chorus;
         wrap.appendChild(dial);
 
@@ -312,15 +390,12 @@
         return wrap;
       }
 
-      // ── Build user input block ────────────────────────
-      function makeUserBlock(step) {
+      // ── User input block ──────────────────────────────
+      function makeUserBlock(step, isFirst) {
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block celtx-user-input';
 
-        const name = document.createElement('span');
-        name.className = 'celtx-char celtx-char-user js-user-name';
-        name.textContent = userLabel();
-        wrap.appendChild(name);
+        wrap.appendChild(makeYouLabel(isFirst));
 
         if (step.type === 'textarea') {
           const col = document.createElement('div');
@@ -329,7 +404,6 @@
           const ta = document.createElement('textarea');
           ta.className = 'celtx-input';
           ta.rows = 1;
-          ta.required = true;
           col.appendChild(ta);
 
           ta.addEventListener('input', () => {
@@ -357,9 +431,8 @@
           col.className = 'celtx-input-col';
 
           const inp = document.createElement('input');
-          inp.type = step.type;
+          inp.type      = step.type;
           inp.className = 'celtx-input';
-          inp.required = true;
           col.appendChild(inp);
 
           const cue = document.createElement('button');
@@ -400,16 +473,10 @@
         return wrap;
       }
 
-      // ── Commit a step ─────────────────────────────────
+      // ── Commit ────────────────────────────────────────
       function doCommit(step, value) {
         formData[step.name] = value;
 
-        if (step.isName) {
-          userName = value;
-          updateNames();
-        }
-
-        // Move chorus block to history
         const chorusEl = currEl.querySelector('.celtx-chorus');
         if (chorusEl) histEl.appendChild(chorusEl);
 
@@ -418,8 +485,10 @@
         done.className = 'celtx-block';
 
         const doneName = document.createElement('span');
-        doneName.className = 'celtx-char celtx-char-user js-user-name';
+        doneName.className = 'celtx-char celtx-char-you js-you-label';
         doneName.textContent = userLabel();
+        doneName.style.cursor = 'pointer';
+        doneName.addEventListener('click', () => activateName(doneName));
 
         const doneDial = document.createElement('span');
         doneDial.className = 'celtx-dial celtx-dial-user';
@@ -436,19 +505,20 @@
         else showSubmit();
       }
 
-      // ── Show step ─────────────────────────────────────
+      // ── Show next step ─────────────────────────────────
       function showStep() {
-        const step = STEPS[stepIdx];
+        const step   = STEPS[stepIdx];
+        const isFirst = stepIdx === 0;
 
         const cb = makeChorusBlock(step);
-        cb.style.opacity = '0';
+        cb.style.opacity    = '0';
         cb.style.transition = 'opacity 0.4s ease';
         currEl.appendChild(cb);
         setTimeout(() => { cb.style.opacity = '1'; }, 150);
 
         setTimeout(() => {
-          const ub = makeUserBlock(step);
-          ub.style.opacity = '0';
+          const ub = makeUserBlock(step, isFirst);
+          ub.style.opacity    = '0';
           ub.style.transition = 'opacity 0.4s ease';
           currEl.appendChild(ub);
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -467,7 +537,7 @@
         name.textContent = 'CHORUS';
 
         const dial = document.createElement('span');
-        dial.className = 'celtx-dial celtx-dial-chorus';
+        dial.className = 'celtx-dial';
         dial.textContent = 'Something will happen next.';
 
         const par = document.createElement('span');
@@ -477,7 +547,7 @@
         block.appendChild(name);
         block.appendChild(dial);
         block.appendChild(par);
-        block.style.opacity = '0';
+        block.style.opacity    = '0';
         block.style.transition = 'opacity 0.4s ease';
         currEl.appendChild(block);
         setTimeout(() => { block.style.opacity = '1'; }, 150);
@@ -492,7 +562,7 @@
           btn.textContent = 'Send.';
           col.appendChild(btn);
 
-          col.style.opacity = '0';
+          col.style.opacity    = '0';
           col.style.transition = 'opacity 0.4s ease';
           currEl.appendChild(col);
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -503,9 +573,9 @@
         }, 520);
       }
 
-      // ── Submit to Formspree ────────────────────────────
+      // ── Formspree ─────────────────────────────────────
       async function submitForm(btn) {
-        btn.disabled = true;
+        btn.disabled    = true;
         btn.textContent = 'Sending…';
 
         const fd = new FormData();
@@ -520,25 +590,25 @@
 
           if (res.ok) {
             currEl.innerHTML = '';
-            const fin = document.createElement('p');
-            fin.className = 'celtx-action';
-            fin.style.textAlign = 'center';
+            const fin = document.createElement('span');
+            fin.className   = 'celtx-sd';
+            fin.style.marginTop = '2em';
             fin.textContent = '(End of scene one.)';
-            fin.style.opacity = '0';
+            fin.style.opacity    = '0';
             fin.style.transition = 'opacity 0.5s ease';
             currEl.appendChild(fin);
             setTimeout(() => { fin.style.opacity = '1'; }, 100);
           } else {
-            btn.disabled = false;
+            btn.disabled    = false;
             btn.textContent = 'Try again.';
           }
         } catch {
-          btn.disabled = false;
+          btn.disabled    = false;
           btn.textContent = 'Try again.';
         }
       }
 
-      // ── Header height → --header-h ────────────────────
+      // ── Header height ─────────────────────────────────
       const headerEl = document.getElementById('site-header');
       if (headerEl) {
         const setH = () =>
