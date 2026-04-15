@@ -3,18 +3,18 @@
   <circle cx="200" cy="200" r="200" fill="white"/>
 
   <!-- Waves -->
-  <path d="M0 110 C60 80 120 140 200 110 S340 80 400 110"
-        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <path d="M0 90  C80 50 160 130 240 90  S360 50 400 90"
+        fill="none" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
 
-  <path d="M0 160 C60 130 120 190 200 160 S340 130 400 160"
-        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <path d="M0 150 C80 110 160 190 240 150 S360 110 400 150"
+        fill="none" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
 
-  <path d="M0 210 C60 180 120 240 200 210 S340 180 400 210"
-        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <path d="M0 210 C80 170 160 250 240 210 S360 170 400 210"
+        fill="none" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
 
-  <path d="M0 260 C60 230 120 290 200 260 S340 230 400 260"
-        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <path d="M0 270 C80 230 160 310 240 270 S360 230 400 270"
+        fill="none" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
 
-  <path d="M0 310 C60 280 120 340 200 310 S340 280 400 310"
-        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+  <path d="M0 330 C80 290 160 370 240 330 S360 290 400 330"
+        fill="none" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
 </svg>
