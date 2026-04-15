@@ -12,6 +12,22 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
+  <style>
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .page-bg svg { width: 100%; height: 100%; }
+    .page-wave {
+      fill: none;
+      stroke: rgba(37,99,235,0.2);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+  </style>
 </head>
 
 <body>
@@ -19,7 +35,11 @@
   <!-- HEADER -->
   <div id="site-header"></div>
 
-  <main>
+  <main style="position: relative; z-index: 1;">
+
+    <div class="page-bg">
+      <svg id="indexBgSvg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    </div>
 
     <!-- HERO -->
     <section class="hero scene-hero">
@@ -131,6 +151,45 @@
 
   </main>
 
+
+  <script>
+  (function() {
+    const svg = document.getElementById('indexBgSvg');
+    if (!svg) return;
+    const W = 1440, H = 900, STEP = 6, N = 12;
+    const waveLines = [], waveConfigs = [];
+    for (let i = 0; i < N; i++) {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'page-wave');
+      svg.appendChild(path);
+      waveLines.push(path);
+      waveConfigs.push({
+        baseY:      (H / (N - 1)) * i,
+        speed:      0.08 + Math.random() * 0.06,
+        phase:      Math.random() * Math.PI * 2,
+        amp:        12 + Math.random() * 18,
+        wavelength: 0.003 + Math.random() * 0.002,
+        direction:  Math.random() < 0.5 ? 1 : -1,
+      });
+    }
+    let t = 0;
+    function animateBg() {
+      if (!svg.isConnected) return;
+      t += 0.024;
+      waveLines.forEach((path, i) => {
+        const cfg = waveConfigs[i];
+        const pts = [];
+        for (let x = 0; x <= W; x += STEP) {
+          const y = cfg.baseY + Math.sin(x * cfg.wavelength * cfg.direction + t * cfg.speed + cfg.phase) * cfg.amp;
+          pts.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`);
+        }
+        path.setAttribute('d', pts.join(' '));
+      });
+      requestAnimationFrame(animateBg);
+    }
+    animateBg();
+  })();
+  </script>
 
   <!-- FOOTER -->
   <footer class="site-footer">
