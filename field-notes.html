@@ -16,7 +16,7 @@
     .fn-bg {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: -1;
       pointer-events: none;
       overflow: hidden;
     }
@@ -26,84 +26,23 @@
     }
     .fn-wave {
       fill: none;
-      stroke: rgba(255,255,255,0.045);
-      stroke-width: 1.2;
+      stroke: rgba(255,255,255,0.12);
+      stroke-width: 2.2;
       stroke-linecap: round;
     }
     .field-notes-main {
       position: relative;
       z-index: 1;
     }
-    /* ===== INTRO CARD ===== */
-    .fn-intro-gate {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    .fn-intro-card {
-      cursor: pointer;
-      outline: none;
-      margin-bottom: 2.5rem;
-    }
-    .fn-intro-card-scene {
-      height: 190px;
-      perspective: 1400px;
-      overflow: hidden;
-      border-radius: 28px;
-    }
-    .fn-intro-card-inner {
-      width: 100%; height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.72s cubic-bezier(0.4,0,0.2,1);
-    }
-    .fn-intro-card.flipped .fn-intro-card-inner { transform: rotateY(180deg); }
-    .fn-intro-card-face {
-      position: absolute; inset: 0;
-      border-radius: 28px;
-      padding: 1.5rem 2rem;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      overflow: hidden;
-    }
-    .fn-intro-card-front {
-      background: rgba(255,255,255,0.06);
-      transition: background 0.3s ease;
-    }
-    .fn-intro-card:hover .fn-intro-card-front { background: rgba(255,255,255,0.09); }
-    .fn-intro-card-back {
-      transform: rotateY(180deg);
-      background: rgba(255,255,255,0.10);
-    }
-    .fn-intro-text {
-      font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(2rem, 4.2vw, 3.3rem);
-      line-height: 1.15;
-      color: #ffffff;
-      letter-spacing: -0.03em;
-    }
-    .fn-intro-insight {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: clamp(0.88rem, 1.5vw, 1rem);
-      line-height: 1.75;
-      color: rgba(248,250,252,0.72);
-      font-weight: 300;
-      margin-top: 1rem;
-    }
     /* ===== FIXED 5-SLOT GRID ===== */
     .note-deck {
       display: grid;
       grid-template-columns: 1fr;
       gap: 2.5rem;
-      padding: 0;
       max-width: 720px;
       margin: 0 auto;
-      min-height: calc((190px + 2.5rem) * 5 - 2.5rem); /* Fixed height for 5 cards */
-      padding: 0 1.5rem;
+      min-height: calc((190px + 2.5rem) * 5 - 2.5rem);
+      padding: 2rem 1.5rem 0;
     }
     .note-card {
       cursor: pointer;
@@ -178,21 +117,13 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    /* Fade-in from bottom */
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .note-card.entering {
       animation: fadeInUp 0.5s ease forwards;
     }
-    /* Empty slot (placeholder) */
     .note-slot-empty {
       opacity: 0;
       pointer-events: none;
@@ -210,32 +141,7 @@
       <svg id="bgSvg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
     </div>
 
-    <div class="field-notes-hero">
-      <div class="container field-notes-container">
-        <p class="field-notes-label">Field Notes</p>
-        <p class="field-notes-intro">Fragments extracted from experience design, facilitation, and human systems in motion. Not explanations. Residues.</p>
-        <p class="field-notes-sub">What remains after clarity has already happened.</p>
-      </div>
-    </div>
-
-    <!-- Intro gate card -->
-    <div class="fn-intro-gate">
-      <button class="fn-intro-card" id="introCard" type="button">
-        <div class="fn-intro-card-scene">
-          <div class="fn-intro-card-inner">
-            <div class="fn-intro-card-face fn-intro-card-front">
-              <p class="fn-intro-text">Begin</p>
-            </div>
-            <div class="fn-intro-card-face fn-intro-card-back">
-              <p class="fn-intro-insight">Fragments from experience design, facilitation, and human systems. Each one is a moment of clarity extracted from practice. Click to enter.</p>
-            </div>
-          </div>
-        </div>
-      </button>
-    </div>
-
-    <!-- Fixed 5-slot deck (hidden until intro is clicked) -->
-    <div class="note-deck" id="note-deck" style="display:none;">
+    <div class="note-deck" id="note-deck">
       <div class="note-slot" id="slot-0"></div>
       <div class="note-slot" id="slot-1"></div>
       <div class="note-slot" id="slot-2"></div>
@@ -243,7 +149,7 @@
       <div class="note-slot" id="slot-4"></div>
     </div>
 
-    <div class="fn-cta-wrap container" id="fnCta" style="display:none;">
+    <div class="fn-cta-wrap container" id="fnCta">
       <a href="contact.html" class="fn-cta-link">Something resonates? Reach out. →</a>
     </div>
 
@@ -275,7 +181,7 @@
     let t = 0;
     function animateBg() {
       if (!svg.isConnected) return;
-      t += 0.008;
+      t += 0.024;
       waveLines.forEach((path, i) => {
         const cfg = waveConfigs[i];
         const pts = [];
@@ -319,7 +225,7 @@
     { type: 'text', title: "perspective",       front: "How would you explain this meeting to someone who had never been to a meeting?",                          back: "The stranger's gaze is a design tool. What looks normal from inside often looks absurd from outside. That gap is where the work begins." },
     { type: 'text', title: "adaptability",      front: "You cannot plan for uncertainty. You can practice adaptability.",                                         back: "Preparation is not prediction. It is building the capacity to move well when movement is required." },
     { type: 'text', title: "emergence",         front: "The users who were not supposed to be there built the product's future.",                               back: "Lego's adult fan community was not a strategic target. The company did not design for them and initially did not court them. Adult sets are now one of their fastest-growing lines. The behaviour that looks like an edge case is sometimes the signal." },
-    { type: 'text', title: "decisions",        front: "Most of what gets called decision-making is decision-confirming.",                                         back: "Research on group cognition shows that by the time a choice reaches formal discussion, the outcome is often already settled — shaped by prior conversations, power dynamics, and unspoken assumptions. The meeting is the ritual. The decision happened earlier." },
+    { type: 'text', title: "decisions",         front: "Most of what gets called decision-making is decision-confirming.",                                        back: "Research on group cognition shows that by the time a choice reaches formal discussion, the outcome is often already settled — shaped by prior conversations, power dynamics, and unspoken assumptions. The meeting is the ritual. The decision happened earlier." },
     { type: 'text', title: "blank",             front: ".",                                                                                                      back: "Sometimes the most important thing in a session is the moment nobody knows what to say next. This was that moment." },
   ];
 
@@ -341,12 +247,10 @@
   const MAX_VISIBLE = 5;
   const pool = shuffle(allNotes);
   let poolIdx = 0;
-  let slots = [{}, {}, {}, {}, {}]; // { note, el, flipped }
-  let introOpen = false;
+  let slots = [{}, {}, {}, {}, {}];
 
   const deck = document.getElementById('note-deck');
   const fnCta = document.getElementById('fnCta');
-  const introCard = document.getElementById('introCard');
 
   function nextFromPool() {
     return poolIdx < pool.length ? pool[poolIdx++] : null;
@@ -381,23 +285,18 @@
   // SPAWN CARD INTO SLOT
   // =============================================
   function spawnIntoSlot(slotIdx, note, delay) {
-    const slot = slots[slotIdx];
     const el = buildCard(note);
-
     const slotEl = document.getElementById(`slot-${slotIdx}`);
     slotEl.innerHTML = '';
     slotEl.appendChild(el);
 
-    if (delay) {
-      el.style.animationDelay = delay + 'ms';
-    }
+    if (delay) el.style.animationDelay = delay + 'ms';
 
     const entry = { note, el, flipped: false };
     slots[slotIdx] = entry;
 
     const handleClick = () => {
       if (!entry.flipped) {
-        // Open: flip this card, close all others
         entry.flipped = true;
         el.classList.add('flipped');
         for (let i = 0; i < MAX_VISIBLE; i++) {
@@ -407,7 +306,6 @@
           }
         }
       } else {
-        // Close: unflip
         entry.flipped = false;
         el.classList.remove('flipped');
       }
@@ -430,28 +328,7 @@
     }
   }
 
-  // =============================================
-  // INTRO CARD CLICK
-  // =============================================
-  introCard.addEventListener('click', () => {
-    if (!introOpen) {
-      introOpen = true;
-      introCard.classList.add('flipped');
-      setTimeout(() => {
-        document.getElementById('fn-intro-gate').style.display = 'none';
-        deck.style.display = 'grid';
-        fnCta.style.display = 'block';
-        fillAllSlots();
-      }, 360);
-    }
-  });
-
-  introCard.addEventListener('keydown', e => {
-    if ((e.key === 'Enter' || e.key === ' ') && !introOpen) {
-      e.preventDefault();
-      introCard.click();
-    }
-  });
+  fillAllSlots();
   </script>
 
 </body>
