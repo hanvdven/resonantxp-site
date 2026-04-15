@@ -12,69 +12,84 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
-  <style>
+  <style data-page-style>
     /* ===================================================
-       CONTACT — THEATRE SCRIPT
+       CONTACT — THEATRE SCRIPT FORMAT
+       Character names centred; dialogue in a column.
        =================================================== */
 
-    .script-stage {
-      max-width: 560px;
+    .script-page {
+      max-width: 600px;
       margin: 0 auto;
-      padding: calc(var(--header-h, 80px) + 3.5rem) 2rem 8rem;
+      padding: calc(var(--header-h, 80px) + 3rem) 2rem 8rem;
+      font-family: 'Martel Sans', system-ui, sans-serif;
     }
 
-    /* ── Stage directions ──────────────────────────── */
-    .script-direction {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.8rem;
+    /* ── Opening stage direction ─────────────────────── */
+    .script-slug {
+      text-align: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0 0 3.5rem;
+    }
+
+    /* ── Block = one exchange ────────────────────────── */
+    .script-block {
+      margin-bottom: 2.8rem;
+    }
+
+    /* ── Stage directions (italic, muted, bracketed) ─── */
+    .sd {
       font-style: italic;
       color: #94a3b8;
-      margin: 0 0 0.5rem;
-      letter-spacing: 0.01em;
+      font-size: 0.8rem;
+      margin: 0.35rem 0 0;
+      line-height: 1.5;
     }
 
-    /* ── Script block (one exchange) ───────────────── */
-    .script-block {
-      margin-bottom: 2.2rem;
-    }
-
-    /* ── Character names ───────────────────────────── */
-    .script-char {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.58rem;
+    /* ── Character name — CENTRED ────────────────────── */
+    .char {
+      display: block;
+      text-align: center;
+      font-size: 0.6rem;
       font-weight: 600;
-      letter-spacing: 0.38em;
+      letter-spacing: 0.4em;
       text-transform: uppercase;
-      margin: 0 0 0.2rem;
+      margin: 0 0 0.4rem;
     }
-    .script-char-chorus { color: #1e293b; }
-    .script-char-user   { color: #94a3b8; }
+    .char-chorus { color: #1e293b; }
+    .char-user   { color: #94a3b8; }
 
-    /* ── Dialogue lines ────────────────────────────── */
-    .script-line {
-      margin: 0;
-      padding-left: 2rem;
+    /* ── Dialogue ────────────────────────────────────── */
+    .dial {
+      display: block;
+      /* screenplay dialogue column: indented ~25% from each side */
+      margin: 0 auto;
+      max-width: 72%;
+      text-align: left;
     }
-    .script-line-chorus {
+    .dial-chorus {
       font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+      font-size: clamp(1.05rem, 2vw, 1.4rem);
       font-style: italic;
       color: #1e293b;
       line-height: 1.35;
     }
-    .script-line-user {
+    .dial-user {
       font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 300;
       color: #64748b;
-      line-height: 1.65;
+      line-height: 1.7;
       white-space: pre-wrap;
     }
 
-    /* ── User input area ───────────────────────────── */
-    .script-input-area {
-      padding-left: 2rem;
-      margin-top: 0.1rem;
+    /* ── Inputs ──────────────────────────────────────── */
+    .script-input-wrap {
+      margin: 0.2rem auto 0;
+      max-width: 72%; /* same column as dialogue */
     }
 
     .script-input {
@@ -85,31 +100,29 @@
       border-bottom: 1px solid #e2e8f0;
       font-family: 'Martel Sans', system-ui, sans-serif;
       font-weight: 300;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #1e293b;
       padding: 0.15rem 0 0.35rem;
       outline: none;
       resize: none;
-      line-height: 1.65;
+      line-height: 1.7;
       transition: border-bottom-color 0.2s;
     }
-    .script-input:focus {
-      border-bottom-color: #94a3b8;
-    }
-    .script-textarea {
-      overflow-y: hidden;
-      min-height: 1.8em;
-    }
+    .script-input:focus { border-bottom-color: #94a3b8; }
 
-    /* ── Continue cue ──────────────────────────────── */
+    .script-textarea { overflow-y: hidden; min-height: 1.7em; }
+
+    /* ── Continue cue ────────────────────────────────── */
     .script-cue {
-      display: inline-block;
-      margin-top: 0.6rem;
+      display: block;
+      width: 100%;
+      text-align: right;
+      margin-top: 0.55rem;
       background: none;
       border: none;
       cursor: pointer;
       font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: #cbd5e1;
@@ -118,15 +131,15 @@
     }
     .script-cue:hover { color: #475569; }
 
-    /* ── Option buttons (ripple in) ────────────────── */
+    /* ── Options (ripple in) ─────────────────────────── */
     @keyframes rippleIn {
       from { opacity: 0; transform: translateY(5px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
     .script-options {
-      padding-left: 2rem;
-      margin-top: 0.1rem;
+      margin: 0.2rem auto 0;
+      max-width: 72%;
     }
 
     .script-option {
@@ -147,35 +160,28 @@
     }
     .script-option:hover { color: #1e293b; }
 
-    /* ── Send button wrap ──────────────────────────── */
+    /* ── Send wrap ───────────────────────────────────── */
     .script-send-wrap {
-      padding-left: 2rem;
-      margin-top: 1.8rem;
+      margin: 1.5rem auto 0;
+      max-width: 72%;
     }
 
-    /* ── History — faded ───────────────────────────── */
-    #scriptHistory .script-block {
-      opacity: 0.5;
-    }
+    /* ── History — faded back ────────────────────────── */
+    #scriptHistory .script-block { opacity: 0.45; }
 
-    /* ── Fallback ──────────────────────────────────── */
-    .script-fallback {
+    /* ── Footer note ─────────────────────────────────── */
+    .script-foot {
+      text-align: center;
       margin-top: 5rem;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-style: italic;
       color: #94a3b8;
     }
-    .script-fallback a {
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
+    .script-foot a { text-decoration: underline; text-underline-offset: 2px; }
 
     @media (max-width: 480px) {
-      .script-stage {
-        padding-left: 1.2rem;
-        padding-right: 1.2rem;
-      }
+      .script-page { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .dial, .script-input-wrap, .script-options, .script-send-wrap { max-width: 90%; }
     }
   </style>
 </head>
@@ -184,342 +190,327 @@
   <div id="site-header"></div>
 
   <main style="position: relative; z-index: 1;">
-    <div class="script-stage">
+    <div class="script-page">
 
-      <p class="script-direction">[An organisation in motion.]</p>
+      <p class="script-slug">[ An organisation in motion. ]</p>
 
       <div id="scriptHistory"></div>
       <div id="scriptCurrent"></div>
 
-      <p class="script-fallback">[Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>]</p>
+      <p class="script-foot">[ Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a> ]</p>
 
     </div>
-  </main>
 
-  <script>
-  (function () {
-    const histEl = document.getElementById('scriptHistory');
-    const currEl = document.getElementById('scriptCurrent');
+    <script>
+    (function () {
+      const histEl = document.getElementById('scriptHistory');
+      const currEl = document.getElementById('scriptCurrent');
 
-    let userName = null;
-    let stepIdx  = 0;
-    const formData = {};
+      let userName = null;
+      let stepIdx  = 0;
+      const formData = {};
 
-    const STEPS = [
-      {
-        name:      'situation',
-        chorus:    'What is it?',
-        direction: '[You don\'t need to be precise. A direction is enough.]',
-        type:      'textarea'
-      },
-      {
-        name:   'name',
-        chorus: 'Who are you?',
-        type:   'text',
-        isName: true
-      },
-      {
-        name:   'email',
-        chorus: 'And how do I reach you?',
-        type:   'email'
-      },
-      {
-        name:    'location',
-        chorus:  'Where are you?',
-        type:    'options',
-        options: ['Belgium', 'Netherlands', 'Germany', 'Other']
-      },
-      {
-        name:    'language',
-        chorus:  'In which language?',
-        type:    'options',
-        options: ['English', 'Nederlands', 'Deutsch']
+      const STEPS = [
+        {
+          name:      'situation',
+          chorus:    'What is it?',
+          direction: '[ You don\'t need to be precise. A direction is enough. ]',
+          type:      'textarea'
+        },
+        {
+          name:   'name',
+          chorus: 'Who are you?',
+          type:   'text',
+          isName: true
+        },
+        {
+          name:   'email',
+          chorus: 'And how do I reach you?',
+          type:   'email'
+        },
+        {
+          name:    'location',
+          chorus:  'Where are you?',
+          type:    'options',
+          options: ['Belgium', 'Netherlands', 'Germany', 'Other']
+        },
+        {
+          name:    'language',
+          chorus:  'In which language?',
+          type:    'options',
+          options: ['English', 'Nederlands', 'Deutsch']
+        }
+      ];
+
+      // ── Helpers ──────────────────────────────────────
+      function userLabel() {
+        return userName ? userName.split(' ')[0].toUpperCase() : '[NAAM]';
       }
-    ];
 
-    // ── Helpers ──────────────────────────────────────────
-    function userLabel() {
-      return userName ? userName.split(' ')[0].toUpperCase() : '[NAAM]';
-    }
+      function updateNames() {
+        document.querySelectorAll('.js-user-name').forEach(el => {
+          el.textContent = userLabel();
+        });
+      }
 
-    function updateNames() {
-      document.querySelectorAll('.js-user-name').forEach(el => {
-        el.textContent = userLabel();
-      });
-    }
+      // ── Build blocks ──────────────────────────────────
+      function makeChar(cls, text) {
+        const el = document.createElement('span');
+        el.className = 'char ' + cls;
+        el.textContent = text;
+        return el;
+      }
 
-    // ── Build blocks ─────────────────────────────────────
-    function makeChorusBlock(step) {
-      const wrap = document.createElement('div');
-      wrap.className = 'script-block script-chorus';
+      function makeChorusBlock(step) {
+        const wrap = document.createElement('div');
+        wrap.className = 'script-block script-chorus';
 
-      const char = document.createElement('p');
-      char.className = 'script-char script-char-chorus';
-      char.textContent = 'CHORUS';
+        wrap.appendChild(makeChar('char-chorus', 'CHORUS'));
 
-      const line = document.createElement('p');
-      line.className = 'script-line script-line-chorus';
-      line.textContent = step.chorus;
+        const line = document.createElement('span');
+        line.className = 'dial dial-chorus';
+        line.textContent = step.chorus;
+        wrap.appendChild(line);
 
-      wrap.appendChild(char);
-      wrap.appendChild(line);
+        if (step.direction) {
+          const dir = document.createElement('p');
+          dir.className = 'sd';
+          dir.textContent = step.direction;
+          wrap.appendChild(dir);
+        }
 
-      if (step.direction) {
+        return wrap;
+      }
+
+      function makeUserInputBlock(step) {
+        const wrap = document.createElement('div');
+        wrap.className = 'script-block script-user-input';
+
+        const nameEl = makeChar('char-user js-user-name', userLabel());
+        wrap.appendChild(nameEl);
+
+        if (step.type === 'textarea') {
+          const inputWrap = document.createElement('div');
+          inputWrap.className = 'script-input-wrap';
+
+          const ta = document.createElement('textarea');
+          ta.className = 'script-input script-textarea';
+          ta.rows = 1;
+          ta.required = true;
+          inputWrap.appendChild(ta);
+
+          ta.addEventListener('input', () => {
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+          });
+
+          const cue = document.createElement('button');
+          cue.className = 'script-cue';
+          cue.type = 'button';
+          cue.textContent = 'continue →';
+          inputWrap.appendChild(cue);
+
+          wrap.appendChild(inputWrap);
+
+          const commit = () => { const v = ta.value.trim(); if (v) doCommit(step, v); };
+          cue.addEventListener('click', commit);
+          ta.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+          });
+          setTimeout(() => ta.focus(), 80);
+
+        } else if (step.type === 'text' || step.type === 'email') {
+          const inputWrap = document.createElement('div');
+          inputWrap.className = 'script-input-wrap';
+
+          const inp = document.createElement('input');
+          inp.type = step.type;
+          inp.className = 'script-input';
+          inp.required = true;
+          inputWrap.appendChild(inp);
+
+          const cue = document.createElement('button');
+          cue.className = 'script-cue';
+          cue.type = 'button';
+          cue.textContent = 'continue →';
+          inputWrap.appendChild(cue);
+
+          wrap.appendChild(inputWrap);
+
+          const commit = () => {
+            const v = inp.value.trim();
+            if (!v) return;
+            if (step.type === 'email' && !v.includes('@')) { inp.focus(); return; }
+            doCommit(step, v);
+          };
+          cue.addEventListener('click', commit);
+          inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+          });
+          setTimeout(() => inp.focus(), 80);
+
+        } else if (step.type === 'options') {
+          const opts = document.createElement('div');
+          opts.className = 'script-options';
+          step.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'script-option';
+            btn.type = 'button';
+            btn.textContent = opt;
+            btn.style.animationDelay = (i * 90) + 'ms';
+            btn.addEventListener('click', () => doCommit(step, opt));
+            opts.appendChild(btn);
+          });
+          wrap.appendChild(opts);
+        }
+
+        return wrap;
+      }
+
+      // ── Commit a step ─────────────────────────────────
+      function doCommit(step, value) {
+        formData[step.name] = value;
+
+        if (step.isName) {
+          userName = value;
+          updateNames();
+        }
+
+        // Move chorus block to history
+        const chorusEl = currEl.querySelector('.script-chorus');
+        if (chorusEl) histEl.appendChild(chorusEl);
+
+        // Completed user response
+        const doneBlock = document.createElement('div');
+        doneBlock.className = 'script-block';
+        doneBlock.appendChild(makeChar('char-user js-user-name', userLabel()));
+        const doneDial = document.createElement('span');
+        doneDial.className = 'dial dial-user';
+        doneDial.textContent = value;
+        doneBlock.appendChild(doneDial);
+        histEl.appendChild(doneBlock);
+
+        currEl.innerHTML = '';
+        stepIdx++;
+
+        if (stepIdx < STEPS.length) showStep();
+        else showSubmit();
+      }
+
+      // ── Show next step ─────────────────────────────────
+      function showStep() {
+        const step = STEPS[stepIdx];
+
+        const cb = makeChorusBlock(step);
+        cb.style.opacity = '0';
+        cb.style.transition = 'opacity 0.4s ease';
+        currEl.appendChild(cb);
+        setTimeout(() => { cb.style.opacity = '1'; }, 150);
+
+        setTimeout(() => {
+          const ib = makeUserInputBlock(step);
+          ib.style.opacity = '0';
+          ib.style.transition = 'opacity 0.4s ease';
+          currEl.appendChild(ib);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            ib.style.opacity = '1';
+          }));
+        }, 520);
+      }
+
+      // ── Submit step ────────────────────────────────────
+      function showSubmit() {
+        const block = document.createElement('div');
+        block.className = 'script-block';
+        block.appendChild(makeChar('char-chorus', 'CHORUS'));
+
+        const line = document.createElement('span');
+        line.className = 'dial dial-chorus';
+        line.textContent = 'Something will happen next.';
+        block.appendChild(line);
+
         const dir = document.createElement('p');
-        dir.className = 'script-direction';
-        dir.textContent = step.direction;
-        wrap.appendChild(dir);
+        dir.className = 'sd';
+        dir.textContent = '[ Your details are used only to respond to your message. ]';
+        block.appendChild(dir);
+
+        block.style.opacity = '0';
+        block.style.transition = 'opacity 0.4s ease';
+        currEl.appendChild(block);
+        setTimeout(() => { block.style.opacity = '1'; }, 150);
+
+        setTimeout(() => {
+          const sendWrap = document.createElement('div');
+          sendWrap.className = 'script-send-wrap';
+
+          const sendBtn = document.createElement('button');
+          sendBtn.className = 'button button-primary';
+          sendBtn.type = 'button';
+          sendBtn.textContent = 'Send.';
+          sendWrap.appendChild(sendBtn);
+
+          sendWrap.style.opacity = '0';
+          sendWrap.style.transition = 'opacity 0.4s ease';
+          currEl.appendChild(sendWrap);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            sendWrap.style.opacity = '1';
+          }));
+
+          sendBtn.addEventListener('click', () => submitForm(sendBtn));
+        }, 520);
       }
 
-      return wrap;
-    }
+      // ── Submit to Formspree ────────────────────────────
+      async function submitForm(btn) {
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
 
-    function makeUserInputBlock(step) {
-      const wrap = document.createElement('div');
-      wrap.className = 'script-block script-user-input';
+        const fd = new FormData();
+        Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
+        fd.append('_subject', 'New conversation — Resonant XP');
 
-      const char = document.createElement('p');
-      char.className = 'script-char script-char-user js-user-name';
-      char.textContent = userLabel();
-      wrap.appendChild(char);
+        try {
+          const res = await fetch('https://formspree.io/f/xdaynqov', {
+            method: 'POST',
+            body: fd,
+            headers: { Accept: 'application/json' }
+          });
 
-      const area = document.createElement('div');
-      area.className = 'script-input-area';
-      wrap.appendChild(area);
-
-      if (step.type === 'textarea') {
-        const ta = document.createElement('textarea');
-        ta.className = 'script-input script-textarea';
-        ta.rows = 1;
-        ta.required = true;
-        area.appendChild(ta);
-
-        // Auto-resize
-        ta.addEventListener('input', () => {
-          ta.style.height = 'auto';
-          ta.style.height = ta.scrollHeight + 'px';
-        });
-
-        const cue = document.createElement('button');
-        cue.className = 'script-cue';
-        cue.type = 'button';
-        cue.textContent = 'continue →';
-        area.appendChild(cue);
-
-        const commit = () => {
-          const val = ta.value.trim();
-          if (val) doCommit(step, val);
-        };
-        cue.addEventListener('click', commit);
-        ta.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
-        });
-
-        setTimeout(() => ta.focus(), 80);
-
-      } else if (step.type === 'text' || step.type === 'email') {
-        const inp = document.createElement('input');
-        inp.type  = step.type;
-        inp.className = 'script-input';
-        inp.required  = true;
-        area.appendChild(inp);
-
-        const cue = document.createElement('button');
-        cue.className = 'script-cue';
-        cue.type = 'button';
-        cue.textContent = 'continue →';
-        area.appendChild(cue);
-
-        const commit = () => {
-          const val = inp.value.trim();
-          if (!val) return;
-          if (step.type === 'email' && !val.includes('@')) { inp.focus(); return; }
-          doCommit(step, val);
-        };
-        cue.addEventListener('click', commit);
-        inp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); commit(); }
-        });
-
-        setTimeout(() => inp.focus(), 80);
-
-      } else if (step.type === 'options') {
-        const opts = document.createElement('div');
-        opts.className = 'script-options';
-
-        step.options.forEach((opt, i) => {
-          const btn = document.createElement('button');
-          btn.className = 'script-option';
-          btn.type = 'button';
-          btn.textContent = opt;
-          btn.style.animationDelay = (i * 90) + 'ms';
-          btn.addEventListener('click', () => doCommit(step, opt));
-          opts.appendChild(btn);
-        });
-
-        area.appendChild(opts);
-      }
-
-      return wrap;
-    }
-
-    // ── Commit a step ─────────────────────────────────────
-    function doCommit(step, value) {
-      formData[step.name] = value;
-
-      if (step.isName) {
-        userName = value;
-        updateNames(); // retroactively update all [NAAM] labels in DOM
-      }
-
-      // Move chorus block to history
-      const chorusEl = currEl.querySelector('.script-chorus');
-      if (chorusEl) histEl.appendChild(chorusEl);
-
-      // Add completed user response to history
-      const doneUser = document.createElement('div');
-      doneUser.className = 'script-block';
-
-      const doneChar = document.createElement('p');
-      doneChar.className = 'script-char script-char-user js-user-name';
-      doneChar.textContent = userLabel();
-
-      const doneLine = document.createElement('p');
-      doneLine.className = 'script-line script-line-user';
-      doneLine.textContent = value;
-
-      doneUser.appendChild(doneChar);
-      doneUser.appendChild(doneLine);
-      histEl.appendChild(doneUser);
-
-      // Clear current
-      currEl.innerHTML = '';
-
-      stepIdx++;
-      if (stepIdx < STEPS.length) {
-        showStep();
-      } else {
-        showSubmit();
-      }
-    }
-
-    // ── Show next step ─────────────────────────────────────
-    function showStep() {
-      const step = STEPS[stepIdx];
-
-      // Chorus block fades in
-      const cb = makeChorusBlock(step);
-      cb.style.opacity   = '0';
-      cb.style.transition = 'opacity 0.4s ease';
-      currEl.appendChild(cb);
-      setTimeout(() => { cb.style.opacity = '1'; }, 150);
-
-      // User input block appears slightly after
-      setTimeout(() => {
-        const ib = makeUserInputBlock(step);
-        ib.style.opacity   = '0';
-        ib.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(ib);
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          ib.style.opacity = '1';
-        }));
-      }, 520);
-    }
-
-    // ── Submit step ────────────────────────────────────────
-    function showSubmit() {
-      const block = document.createElement('div');
-      block.className = 'script-block';
-
-      const char = document.createElement('p');
-      char.className = 'script-char script-char-chorus';
-      char.textContent = 'CHORUS';
-
-      const line = document.createElement('p');
-      line.className = 'script-line script-line-chorus';
-      line.textContent = 'Something will happen next.';
-
-      const dir = document.createElement('p');
-      dir.className = 'script-direction';
-      dir.textContent = '[Your details are used only to respond to your message.]';
-
-      block.appendChild(char);
-      block.appendChild(line);
-      block.appendChild(dir);
-      block.style.opacity   = '0';
-      block.style.transition = 'opacity 0.4s ease';
-      currEl.appendChild(block);
-      setTimeout(() => { block.style.opacity = '1'; }, 150);
-
-      setTimeout(() => {
-        const sendWrap = document.createElement('div');
-        sendWrap.className = 'script-send-wrap';
-
-        const sendBtn = document.createElement('button');
-        sendBtn.className = 'button button-primary';
-        sendBtn.type = 'button';
-        sendBtn.textContent = 'Send.';
-        sendWrap.appendChild(sendBtn);
-
-        sendWrap.style.opacity   = '0';
-        sendWrap.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(sendWrap);
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          sendWrap.style.opacity = '1';
-        }));
-
-        sendBtn.addEventListener('click', () => submitForm(sendBtn));
-      }, 520);
-    }
-
-    // ── Submit to Formspree ────────────────────────────────
-    async function submitForm(btn) {
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-
-      const fd = new FormData();
-      Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
-      fd.append('_subject', 'New conversation — Resonant XP');
-
-      try {
-        const res = await fetch('https://formspree.io/f/xdaynqov', {
-          method: 'POST',
-          body: fd,
-          headers: { Accept: 'application/json' }
-        });
-
-        if (res.ok) {
-          currEl.innerHTML = '';
-          const closing = document.createElement('p');
-          closing.className = 'script-direction';
-          closing.textContent = '[End of scene one.]';
-          closing.style.opacity   = '0';
-          closing.style.transition = 'opacity 0.5s ease';
-          currEl.appendChild(closing);
-          setTimeout(() => { closing.style.opacity = '1'; }, 100);
-        } else {
+          if (res.ok) {
+            currEl.innerHTML = '';
+            const closing = document.createElement('p');
+            closing.className = 'sd';
+            closing.style.textAlign = 'center';
+            closing.textContent = '[ End of scene one. ]';
+            closing.style.opacity = '0';
+            closing.style.transition = 'opacity 0.5s ease';
+            currEl.appendChild(closing);
+            setTimeout(() => { closing.style.opacity = '1'; }, 100);
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'Try again.';
+          }
+        } catch {
           btn.disabled = false;
           btn.textContent = 'Try again.';
         }
-      } catch {
-        btn.disabled = false;
-        btn.textContent = 'Try again.';
       }
-    }
 
-    // ── Header height → --header-h ────────────────────────
-    const headerEl = document.getElementById('site-header');
-    if (headerEl) {
-      const setH = () =>
-        document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
-      setH();
-      new ResizeObserver(setH).observe(headerEl);
-    }
+      // ── Header height → --header-h ────────────────────
+      const headerEl = document.getElementById('site-header');
+      if (headerEl) {
+        const setH = () =>
+          document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+        setH();
+        new ResizeObserver(setH).observe(headerEl);
+      }
 
-    // ── Init ──────────────────────────────────────────────
-    showStep();
-  })();
-  </script>
+      // ── Init ──────────────────────────────────────────
+      showStep();
+    })();
+    </script>
+
+  </main>
 
 </body>
 </html>

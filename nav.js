@@ -56,7 +56,16 @@ async function navigateTo(url, pushState = true) {
     const newMain = doc.querySelector('main');
     if (!newMain) throw new Error('Geen <main> gevonden');
 
-    // 🔥 4. update body class (→ triggert background transition)
+    // 🔥 4. swap page-specific <style> blocks
+    document.querySelectorAll('style[data-page-style]').forEach(s => s.remove());
+    doc.querySelectorAll('head style[data-page-style]').forEach(s => {
+      const el = document.createElement('style');
+      el.textContent = s.textContent;
+      el.setAttribute('data-page-style', '');
+      document.head.appendChild(el);
+    });
+
+    // update body class (→ triggert background transition)
     document.body.className = doc.body.className;
 
     // 🔥 5. swap main (onzichtbaar)
