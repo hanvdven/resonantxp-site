@@ -1,15 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
-  <!-- White circle -->
-  <circle cx="200" cy="200" r="150" fill="white"/>
+  <!-- Full-bleed circle -->
+  <circle cx="200" cy="200" r="200" fill="white"/>
 
   <!-- Waves -->
-  <path d="M60 140 C110 120 160 160 210 140 S310 120 340 140" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.95"/>
-  
-  <path d="M60 170 C110 150 160 190 210 170 S310 150 340 170" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
-  
-  <path d="M60 200 C110 180 160 220 210 200 S310 180 340 200" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.69"/>
-  
-  <path d="M60 230 C110 210 160 250 210 230 S310 210 340 230" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.56"/>
-  
-  <path d="M60 260 C110 240 160 280 210 260 S310 240 340 260" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.43"/>
+  <path d="M0 110 C60 80 120 140 200 110 S340 80 400 110"
+        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+
+  <path d="M0 160 C60 130 120 190 200 160 S340 130 400 160"
+        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+
+  <path d="M0 210 C60 180 120 240 200 210 S340 180 400 210"
+        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+
+  <path d="M0 260 C60 230 120 290 200 260 S340 230 400 260"
+        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
+
+  <path d="M0 310 C60 280 120 340 200 310 S340 280 400 310"
+        fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity="1"/>
 </svg>
