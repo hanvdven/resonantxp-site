@@ -34,20 +34,80 @@
       position: relative;
       z-index: 1;
     }
-    .note-deck {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      padding: 0 0 6rem;
+    /* ===== INTRO CARD ===== */
+    .fn-intro-gate {
       max-width: 720px;
       margin: 0 auto;
+      padding: 0 1.5rem;
     }
-    .note-card {
+    .fn-intro-card {
       cursor: pointer;
       outline: none;
       margin-bottom: 2.5rem;
     }
-    .note-card-scene {
+    .fn-intro-card-scene {
+      height: 190px;
+      perspective: 1400px;
+      overflow: hidden;
+      border-radius: 28px;
+    }
+    .fn-intro-card-inner {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.72s cubic-bezier(0.4,0,0.2,1);
+    }
+    .fn-intro-card.flipped .fn-intro-card-inner { transform: rotateY(180deg); }
+    .fn-intro-card-face {
+      position: absolute; inset: 0;
+      border-radius: 28px;
+      padding: 1.5rem 2rem;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .fn-intro-card-front {
+      background: rgba(255,255,255,0.06);
+      transition: background 0.3s ease;
+    }
+    .fn-intro-card:hover .fn-intro-card-front { background: rgba(255,255,255,0.09); }
+    .fn-intro-card-back {
+      transform: rotateY(180deg);
+      background: rgba(255,255,255,0.10);
+    }
+    .fn-intro-text {
+      font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
+      font-size: clamp(2rem, 4.2vw, 3.3rem);
+      line-height: 1.15;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+    .fn-intro-insight {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: clamp(0.88rem, 1.5vw, 1rem);
+      line-height: 1.75;
+      color: rgba(248,250,252,0.72);
+      font-weight: 300;
+      margin-top: 1rem;
+    }
+    /* ===== FIXED 5-SLOT GRID ===== */
+    .note-deck {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 0;
+      max-width: 720px;
+      margin: 0 auto;
+      min-height: calc((190px + 2.5rem) * 5 - 2.5rem); /* Fixed height for 5 cards */
+      padding: 0 1.5rem;
+    }
+    .note-card {
+      cursor: pointer;
+      outline: none;
       height: 190px;
       perspective: 1400px;
       overflow: hidden;
@@ -118,64 +178,24 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .note-card-scene.card-image { height: 220px; }
-    .note-card-front.card-image-front {
-      padding: 0;
-      justify-content: flex-end;
-      background: #0d1117;
+    /* Fade-in from bottom */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .card-image-label {
-      padding: 1.25rem 2rem;
-      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-      border-radius: 0 0 28px 28px;
+    .note-card.entering {
+      animation: fadeInUp 0.5s ease forwards;
     }
-    .card-image-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 28px;
-      overflow: hidden;
-    }
-    .note-card-front.card-action-front {
-      background: rgba(255,255,255,0.08);
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .action-text {
-      font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
-      line-height: 1.15;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-    }
-    .action-sub {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(248,250,252,0.35);
-      margin-top: 0.6rem;
-    }
-    .note-card-front.card-joke-front {
-      background: rgba(255,255,255,0.05);
-      justify-content: center;
-    }
-    .joke-text {
-      font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(1.2rem, 2.4vw, 1.8rem);
-      line-height: 1.4;
-      color: rgba(255,255,255,0.85);
-      letter-spacing: -0.02em;
-      font-style: italic;
-    }
-    @keyframes cardSlideIn {
-      from { opacity: 0; transform: translateY(40px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .note-card.animating {
-      animation: cardSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    /* Empty slot (placeholder) */
+    .note-slot-empty {
+      opacity: 0;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -198,399 +218,241 @@
       </div>
     </div>
 
-    <div class="container">
-      <div class="note-deck" id="note-deck"></div>
+    <!-- Intro gate card -->
+    <div class="fn-intro-gate">
+      <button class="fn-intro-card" id="introCard" type="button">
+        <div class="fn-intro-card-scene">
+          <div class="fn-intro-card-inner">
+            <div class="fn-intro-card-face fn-intro-card-front">
+              <p class="fn-intro-text">Begin</p>
+            </div>
+            <div class="fn-intro-card-face fn-intro-card-back">
+              <p class="fn-intro-insight">Fragments from experience design, facilitation, and human systems. Each one is a moment of clarity extracted from practice. Click to enter.</p>
+            </div>
+          </div>
+        </div>
+      </button>
     </div>
 
-    <div class="fn-cta-wrap container">
+    <!-- Fixed 5-slot deck (hidden until intro is clicked) -->
+    <div class="note-deck" id="note-deck" style="display:none;">
+      <div class="note-slot" id="slot-0"></div>
+      <div class="note-slot" id="slot-1"></div>
+      <div class="note-slot" id="slot-2"></div>
+      <div class="note-slot" id="slot-3"></div>
+      <div class="note-slot" id="slot-4"></div>
+    </div>
+
+    <div class="fn-cta-wrap container" id="fnCta" style="display:none;">
       <a href="contact.html" class="fn-cta-link">Something resonates? Reach out. →</a>
     </div>
 
-    <script>
-    // =============================================
-    // BACKGROUND WAVES
-    // =============================================
-    (function() {
-      const svg = document.getElementById('bgSvg');
-      if (!svg) return;
-      const W = 1440, H = 900, STEP = 6, N = 12;
-      const waveLines = [], waveConfigs = [];
-      for (let i = 0; i < N; i++) {
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('class', 'fn-wave');
-        svg.appendChild(path);
-        waveLines.push(path);
-        waveConfigs.push({
-          baseY:      (H / (N - 1)) * i,
-          speed:      0.08 + Math.random() * 0.06,
-          phase:      Math.random() * Math.PI * 2,
-          amp:        12 + Math.random() * 18,
-          wavelength: 0.003 + Math.random() * 0.002,
-          direction:  Math.random() < 0.5 ? 1 : -1,
-        });
-      }
-      let t = 0;
-      function animateBg() {
-        if (!svg.isConnected) return;
-        t += 0.008;
-        waveLines.forEach((path, i) => {
-          const cfg = waveConfigs[i];
-          const pts = [];
-          for (let x = 0; x <= W; x += STEP) {
-            const y = cfg.baseY + Math.sin(x * cfg.wavelength * cfg.direction + t * cfg.speed + cfg.phase) * cfg.amp;
-            pts.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`);
-          }
-          path.setAttribute('d', pts.join(' '));
-        });
-        requestAnimationFrame(animateBg);
-      }
-      animateBg();
-    })();
-
-    // =============================================
-    // CARD DATA
-    // =============================================
-    const allNotes = [
-      { type: 'text', title: "stillness",         front: "You feel the impulse to stand up — why do you stay still?",                                               back: "Stillness is not neutrality. It is a decision made so many times it stopped feeling like one. The body remembers what the mind has agreed to forget." },
-      { type: 'text', title: "authority",         front: "The most powerful person in the room says nothing.",                                                      back: "Power that needs to speak is already defending itself. Notice who controls the silence — that is where the real authority lives." },
-      { type: 'text', title: "change",            front: "You have known for months. What are you waiting for?",                                                    back: "The gap between knowing and moving is not ignorance. It is the weight of everything that would have to be different — including who you would have to become." },
-      { type: 'text', title: "presence",          front: "Everybody is in the room. Nobody is present.",                                                           back: "Presence is not attendance. It is the willingness to be changed by what is happening. Most meetings are designed to prevent exactly that." },
-      { type: 'text', title: "conflict",          front: "They agree. That is the problem.",                                                                       back: "Consensus reached too quickly is usually fear that found a polite form. The moment everyone nods is sometimes the moment the real conversation ends." },
-      { type: 'text', title: "threshold",         front: "What would you say if you knew everyone already knew?",                                                   back: "Groups develop elaborate rituals to avoid naming what they already sense. The naming does not cause the ending — it simply allows it to become real." },
-      { type: 'text', title: "memory",            front: "You remember the feeling perfectly. Not a single word.",                                                  back: "The body encodes experience at a resolution the mind cannot reach. What people carry from an encounter is almost never the content." },
-      { type: 'text', title: "resistance",        front: "The harder you push, the stiller they become.",                                                          back: "Resistance is information, not obstruction. It is the system telling you something your design did not account for." },
-      { type: 'text', title: "design",            front: "What if the thing that went wrong was the most important thing?",                                         back: "The unplanned moment is often the one that matters. Design creates conditions — it does not control what emerges. That is both the limitation and the whole point." },
-      { type: 'text', title: "attention",         front: "What were you noticing, while you were busy noticing that?",                                              back: "Every act of attention is also an act of exclusion. The experienced facilitator is not the one who sees everything — it is the one who has learned what they tend to miss." },
-      { type: 'text', title: "silence",           front: "When a group becomes silent, something has been recognised but not yet made speakable.",                  back: "The facilitator's job in that moment is not to fill the silence. It is to make the silence safe enough to enter." },
-      { type: 'text', title: "language",          front: "Language is often used to delay perception.",                                                            back: "Watch for fluency without commitment. The more polished the words, the more carefully you should listen for what is not said." },
-      { type: 'text', title: "conversation",      front: "In most conversations, what is not said is already doing the real work.",                                 back: "The unspoken shapes the room before anyone opens their mouth. Name it carefully — or let it name you." },
-      { type: 'text', title: "pressure",          front: "Pressure does not reveal truth. It removes alternatives.",                                               back: "What remains under pressure is not necessarily authentic. It is simply what survives. Design pressure wisely." },
-      { type: 'text', title: "experience design", front: "People do not change when they understand.",                                                             back: "They change when their behaviour becomes impossible to continue. Design the situation, not the message." },
-      { type: 'text', title: "group attention",   front: "Most misalignment is not disagreement. It is unsynchronised attention.",                                  back: "Before solving the conflict, check whether everyone is even looking at the same thing. Often they are not." },
-      { type: 'text', title: "system quality",    front: "The quality of a system is revealed in how quickly it adapts to discomfort.",                             back: "Resilience is not the absence of tension. It is the speed at which tension becomes useful information." },
-      { type: 'text', title: "AI",                front: "What would you ask a system that has read everything humans have written — but experienced nothing?",     back: "AI is not a mirror. It is an average. What it reflects back is the statistical centre of human thought — not its edges, not its silences, not its embodied knowing." },
-      { type: 'text', title: "AI",                front: "If a machine can predict your next decision, are you still making it?",                                   back: "Autonomy is not the absence of influence. It is the awareness of it. The question is not whether AI shapes your thinking — it is whether you notice when it does." },
-      { type: 'text', title: "future",            front: "The future is already present in the room. It is just not evenly distributed yet.",                       back: "Some people in your organisation are already living in the next version of the world. The question is whether anyone is listening to them." },
-      { type: 'text', title: "future",            front: "What are you optimising for that will matter less in ten years than it does today?",                      back: "Every strategy is a bet on what will stay constant. Name the assumptions underneath yours — before someone else names them for you." },
-      { type: 'text', title: "perspective",       front: "How would a five-year-old explain what your organisation actually does?",                                 back: "Simplification is not dumbing down. It is the discipline of keeping only what is true. Children are ruthless editors of pretension." },
-      { type: 'text', title: "perspective",       front: "How would you explain this meeting to someone who had never been to a meeting?",                          back: "The stranger's gaze is a design tool. What looks normal from inside often looks absurd from outside. That gap is where the work begins." },
-      { type: 'text', title: "adaptability",      front: "You cannot plan for uncertainty. You can practice adaptability.",                                         back: "Preparation is not prediction. It is building the capacity to move well when movement is required." },
-      { type: 'text', title: "emergence",         front: "The users who were not supposed to be there built the product's future.",                               back: "Lego's adult fan community was not a strategic target. The company did not design for them and initially did not court them. Adult sets are now one of their fastest-growing lines. The behaviour that looks like an edge case is sometimes the signal." },
-      { type: 'text', title: "decisions",        front: "Most of what gets called decision-making is decision-confirming.",                                         back: "Research on group cognition shows that by the time a choice reaches formal discussion, the outcome is often already settled — shaped by prior conversations, power dynamics, and unspoken assumptions. The meeting is the ritual. The decision happened earlier." },
-      { type: 'text', title: "blank",             front: ".",                                                                                                      back: "Sometimes the most important thing in a session is the moment nobody knows what to say next. This was that moment." },
-      { type: 'action',
-        front: "Stand up. Right now.",
-        back: "You just made a physical decision. That is already leadership. Sit down again — but notice what it cost you to stand.",
-        actionSub: "a physical experiment" },
-      { type: 'joke',
-        title: "strategy",
-        front: "A consultant walked into a bar. The bartender asked: 'What would you like?' The consultant said: 'What do others usually have?'",
-        back: "Benchmarking is not a strategy. It is a way of avoiding the question of what you actually believe." },
-      { type: 'image',
-        title: "trace",
-        front: "Something happened here.",
-        back: "Experience leaves a trace even when we cannot name it. The residue is the evidence. Look for what you are still carrying." },
-    ];
-
-    // =============================================
-    // SHUFFLE
-    // =============================================
-    function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    // =============================================
-    // STATE
-    // =============================================
-    const MAX_VISIBLE = 5;
-    const pool = shuffle(allNotes);
-    let poolIdx = 0;
-    let visible = []; // { note, el, flipped, removing }
-    let pendingRemovals = 0; // fillToMax waits until this reaches 0
-
-    const deck = document.getElementById('note-deck');
-
-    function nextFromPool() {
-      return poolIdx < pool.length ? pool[poolIdx++] : null;
-    }
-
-    // =============================================
-    // FIT TEXT
-    // =============================================
-    function fitCardText(card) {
-      const front = card.querySelector('.note-card-front');
-      if (!front) return;
-      const textEl = front.querySelector('.note-card-text, .action-text, .joke-text');
-      if (!textEl) return;
-      if (front.scrollHeight <= front.clientHeight) return;
-      const MIN_PX = 16;
-      let size = parseFloat(getComputedStyle(textEl).fontSize);
-      while (front.scrollHeight > front.clientHeight && size > MIN_PX) {
-        size -= 1;
-        textEl.style.fontSize = size + 'px';
-      }
-    }
-
-    // =============================================
-    // CARD DOM BUILDERS
-    // =============================================
-    function buildTextCard(note) {
-      const wrap = document.createElement('div');
-      wrap.className = 'note-card';
-      wrap.setAttribute('tabindex', '0');
-      wrap.innerHTML = `
-        <div class="note-card-scene">
-          <div class="note-card-inner">
-            <div class="note-card-face note-card-front">
-              <div class="note-card-title">${note.title}</div>
-              <p class="note-card-text">${note.front}</p>
-            </div>
-            <div class="note-card-face note-card-back">
-              <span class="note-card-context">${note.title}</span>
-              <p class="note-card-insight">${note.back}</p>
-            </div>
-          </div>
-        </div>`;
-      return wrap;
-    }
-
-    function buildActionCard(note) {
-      const wrap = document.createElement('div');
-      wrap.className = 'note-card';
-      wrap.setAttribute('tabindex', '0');
-      wrap.innerHTML = `
-        <div class="note-card-scene">
-          <div class="note-card-inner">
-            <div class="note-card-face note-card-front card-action-front">
-              <p class="action-text">${note.front}</p>
-              <p class="action-sub">${note.actionSub}</p>
-            </div>
-            <div class="note-card-face note-card-back">
-              <span class="note-card-context">experience</span>
-              <p class="note-card-insight">${note.back}</p>
-            </div>
-          </div>
-        </div>`;
-      return wrap;
-    }
-
-    function buildJokeCard(note) {
-      const wrap = document.createElement('div');
-      wrap.className = 'note-card';
-      wrap.setAttribute('tabindex', '0');
-      wrap.innerHTML = `
-        <div class="note-card-scene">
-          <div class="note-card-inner">
-            <div class="note-card-face note-card-front card-joke-front">
-              <p class="joke-text">${note.front}</p>
-            </div>
-            <div class="note-card-face note-card-back">
-              <span class="note-card-context">${note.title}</span>
-              <p class="note-card-insight">${note.back}</p>
-            </div>
-          </div>
-        </div>`;
-      return wrap;
-    }
-
-    function buildImageCard(note) {
-      const wrap = document.createElement('div');
-      wrap.className = 'note-card';
-      wrap.setAttribute('tabindex', '0');
-      wrap.innerHTML = `
-        <div class="note-card-scene card-image">
-          <div class="note-card-inner">
-            <div class="note-card-face note-card-front card-image-front">
-              <svg class="card-image-svg" viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect width="720" height="220" fill="#0a0c14"/>
-                <path id="traceWave" d="M60 110 C120 80 180 140 240 110 S360 80 420 110 S540 80 600 110 S660 140 700 110" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>
-                <circle id="traceDot" cx="60" cy="110" r="3" fill="rgba(255,255,255,0.6)"/>
-                <path d="M380 155 C390 148 400 152 398 162 C396 170 385 173 378 168 C368 175 358 170 360 160 C355 155 360 145 368 147 C370 140 380 140 380 148 Z" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-              </svg>
-              <div class="card-image-label">
-                <div class="note-card-title" style="opacity:1;transform:none;margin:0 0 0.25rem;">${note.title}</div>
-                <p class="note-card-text" style="font-size:clamp(1.2rem,2.5vw,1.8rem);">${note.front}</p>
-              </div>
-            </div>
-            <div class="note-card-face note-card-back">
-              <span class="note-card-context">${note.title}</span>
-              <p class="note-card-insight">${note.back}</p>
-            </div>
-          </div>
-        </div>`;
-      setTimeout(() => {
-        const dot = wrap.querySelector('#traceDot');
-        const pathEl = wrap.querySelector('#traceWave');
-        if (!dot || !pathEl) return;
-        const len = pathEl.getTotalLength();
-        let progress = 0;
-        function animDot() {
-          if (!dot.isConnected) return;
-          progress = (progress + 0.002) % 1;
-          const pt = pathEl.getPointAtLength(progress * len);
-          dot.setAttribute('cx', pt.x);
-          dot.setAttribute('cy', pt.y);
-          requestAnimationFrame(animDot);
-        }
-        animDot();
-      }, 300);
-      return wrap;
-    }
-
-    // =============================================
-    // COLLAPSE CARD — two-phase: fade out, then space collapses
-    // Calls done() when the element can be removed.
-    // =============================================
-    function collapseCard(el, done) {
-      const h = el.getBoundingClientRect().height;
-      el.style.height = h + 'px';
-      el.style.overflow = 'hidden';
-      el.style.pointerEvents = 'none';
-      requestAnimationFrame(() => {
-        // Phase 1: fade out + subtle lift (0.3s)
-        el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(-10px) scale(0.97)';
-        // Phase 2: collapse space so remaining cards slide up smoothly (starts at 280ms)
-        setTimeout(() => {
-          el.style.transition = 'height 0.45s cubic-bezier(0.4,0,0.2,1), margin-bottom 0.45s cubic-bezier(0.4,0,0.2,1)';
-          el.style.height = '0';
-          el.style.marginBottom = '0';
-          // Done after collapse finishes (~450ms) + small buffer
-          setTimeout(done, 480);
-        }, 280);
-      });
-    }
-
-    // =============================================
-    // REMOVE ENTRY
-    // Increments pendingRemovals; fillToMax() fires only when all reach 0.
-    // =============================================
-    function removeEntry(entry, delay) {
-      if (entry.removing) return;
-      entry.removing = true;
-      visible = visible.filter(v => v !== entry);
-      pendingRemovals++;
-      setTimeout(() => {
-        collapseCard(entry.el, () => {
-          entry.el.remove();
-          pendingRemovals--;
-          if (pendingRemovals === 0) fillToMax();
-        });
-      }, delay || 0);
-    }
-
-    // =============================================
-    // UNFLIP AND REMOVE — flip back first, then collapse
-    // =============================================
-    function unflipAndRemove(entry, delay) {
-      if (entry.removing) return;
-      entry.removing = true;
-      visible = visible.filter(v => v !== entry);
-      pendingRemovals++;
-      setTimeout(() => {
-        entry.el.classList.remove('flipped');
-        // Wait for flip-back CSS transition (0.72s) to complete
-        setTimeout(() => {
-          collapseCard(entry.el, () => {
-            entry.el.remove();
-            pendingRemovals--;
-            if (pendingRemovals === 0) fillToMax();
-          });
-        }, 720);
-      }, delay || 0);
-    }
-
-    // =============================================
-    // SPAWN CARD (DOM + events + state entry)
-    // =============================================
-    function spawnCard(note, animDelay) {
-      let el;
-      if (note.type === 'action')     el = buildActionCard(note);
-      else if (note.type === 'joke')  el = buildJokeCard(note);
-      else if (note.type === 'image') el = buildImageCard(note);
-      else                            el = buildTextCard(note);
-
-      el.classList.add('animating');
-      if (animDelay) el.style.animationDelay = animDelay + 'ms';
-      deck.appendChild(el);
-
-      const entry = { note, el, flipped: false, removing: false };
-
-      const handleClick = () => {
-        if (entry.removing) return;
-        const flippedOthers   = visible.filter(v => v !== entry && v.flipped);
-        const unflippedOthers = visible.filter(v => v !== entry && !v.flipped);
-
-        if (!entry.flipped) {
-          // Open: flip this card; unflip+remove any other open cards; remove some closed ones
-          entry.flipped = true;
-          el.classList.add('flipped');
-          flippedOthers.forEach((v, i) => unflipAndRemove(v, i * 80));
-          const cascadeDelay = flippedOthers.length > 0 ? 220 : 0;
-          const count = Math.min(unflippedOthers.length, 1 + Math.floor(Math.random() * 4));
-          shuffle([...unflippedOthers]).slice(0, count)
-            .forEach((v, i) => removeEntry(v, cascadeDelay + i * 110));
-        } else {
-          // Close: remove this card — no going back
-          removeEntry(entry);
-        }
-      };
-
-      el.addEventListener('click', handleClick);
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); }
-      });
-      el.addEventListener('animationend', () => {
-        el.classList.remove('animating');
-        el.style.animationDelay = '';
-        fitCardText(el);
-      }, { once: true });
-
-      return entry;
-    }
-
-    // =============================================
-    // FILL VISIBLE UP TO MAX
-    // =============================================
-    function fillToMax() {
-      let added = 0;
-      while (visible.length < MAX_VISIBLE) {
-        const note = nextFromPool();
-        if (!note) break;
-        const entry = spawnCard(note, added * 180);
-        visible.push(entry);
-        added++;
-      }
-    }
-
-    // =============================================
-    // INITIAL LOAD
-    // =============================================
-    let started = false;
-
-    function start() {
-      if (started) return;
-      started = true;
-      fillToMax();
-    }
-
-    // Start immediately — works for direct page load and SPA re-execution via nav.js.
-    // setTimeout(0) defers one tick so the DOM settles before cards are spawned.
-    setTimeout(start, 0);
-
-    // Re-check text fit once fonts are confirmed loaded
-    document.fonts.ready.then(() => {
-      deck.querySelectorAll('.note-card').forEach(fitCardText);
-    });
-    </script>
-
   </main>
+
+  <script>
+  // =============================================
+  // BACKGROUND WAVES
+  // =============================================
+  (function() {
+    const svg = document.getElementById('bgSvg');
+    if (!svg) return;
+    const W = 1440, H = 900, STEP = 6, N = 12;
+    const waveLines = [], waveConfigs = [];
+    for (let i = 0; i < N; i++) {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('class', 'fn-wave');
+      svg.appendChild(path);
+      waveLines.push(path);
+      waveConfigs.push({
+        baseY:      (H / (N - 1)) * i,
+        speed:      0.08 + Math.random() * 0.06,
+        phase:      Math.random() * Math.PI * 2,
+        amp:        12 + Math.random() * 18,
+        wavelength: 0.003 + Math.random() * 0.002,
+        direction:  Math.random() < 0.5 ? 1 : -1,
+      });
+    }
+    let t = 0;
+    function animateBg() {
+      if (!svg.isConnected) return;
+      t += 0.008;
+      waveLines.forEach((path, i) => {
+        const cfg = waveConfigs[i];
+        const pts = [];
+        for (let x = 0; x <= W; x += STEP) {
+          const y = cfg.baseY + Math.sin(x * cfg.wavelength * cfg.direction + t * cfg.speed + cfg.phase) * cfg.amp;
+          pts.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`);
+        }
+        path.setAttribute('d', pts.join(' '));
+      });
+      requestAnimationFrame(animateBg);
+    }
+    animateBg();
+  })();
+
+  // =============================================
+  // FIELD NOTES DATA
+  // =============================================
+  const allNotes = [
+    { type: 'text', title: "stillness",         front: "You feel the impulse to stand up — why do you stay still?",                                               back: "Stillness is not neutrality. It is a decision made so many times it stopped feeling like one. The body remembers what the mind has agreed to forget." },
+    { type: 'text', title: "authority",         front: "The most powerful person in the room says nothing.",                                                      back: "Power that needs to speak is already defending itself. Notice who controls the silence — that is where the real authority lives." },
+    { type: 'text', title: "change",            front: "You have known for months. What are you waiting for?",                                                    back: "The gap between knowing and moving is not ignorance. It is the weight of everything that would have to be different — including who you would have to become." },
+    { type: 'text', title: "presence",          front: "Everybody is in the room. Nobody is present.",                                                           back: "Presence is not attendance. It is the willingness to be changed by what is happening. Most meetings are designed to prevent exactly that." },
+    { type: 'text', title: "conflict",          front: "They agree. That is the problem.",                                                                       back: "Consensus reached too quickly is usually fear that found a polite form. The moment everyone nods is sometimes the moment the real conversation ends." },
+    { type: 'text', title: "threshold",         front: "What would you say if you knew everyone already knew?",                                                   back: "Groups develop elaborate rituals to avoid naming what they already sense. The naming does not cause the ending — it simply allows it to become real." },
+    { type: 'text', title: "memory",            front: "You remember the feeling perfectly. Not a single word.",                                                  back: "The body encodes experience at a resolution the mind cannot reach. What people carry from an encounter is almost never the content." },
+    { type: 'text', title: "resistance",        front: "The harder you push, the stiller they become.",                                                          back: "Resistance is information, not obstruction. It is the system telling you something your design did not account for." },
+    { type: 'text', title: "design",            front: "What if the thing that went wrong was the most important thing?",                                         back: "The unplanned moment is often the one that matters. Design creates conditions — it does not control what emerges. That is both the limitation and the whole point." },
+    { type: 'text', title: "attention",         front: "What were you noticing, while you were busy noticing that?",                                              back: "Every act of attention is also an act of exclusion. The experienced facilitator is not the one who sees everything — it is the one who has learned what they tend to miss." },
+    { type: 'text', title: "silence",           front: "When a group becomes silent, something has been recognised but not yet made speakable.",                  back: "The facilitator's job in that moment is not to fill the silence. It is to make the silence safe enough to enter." },
+    { type: 'text', title: "language",          front: "Language is often used to delay perception.",                                                            back: "Watch for fluency without commitment. The more polished the words, the more carefully you should listen for what is not said." },
+    { type: 'text', title: "conversation",      front: "In most conversations, what is not said is already doing the real work.",                                 back: "The unspoken shapes the room before anyone opens their mouth. Name it carefully — or let it name you." },
+    { type: 'text', title: "pressure",          front: "Pressure does not reveal truth. It removes alternatives.",                                               back: "What remains under pressure is not necessarily authentic. It is simply what survives. Design pressure wisely." },
+    { type: 'text', title: "experience design", front: "People do not change when they understand.",                                                             back: "They change when their behaviour becomes impossible to continue. Design the situation, not the message." },
+    { type: 'text', title: "group attention",   front: "Most misalignment is not disagreement. It is unsynchronised attention.",                                  back: "Before solving the conflict, check whether everyone is even looking at the same thing. Often they are not." },
+    { type: 'text', title: "system quality",    front: "The quality of a system is revealed in how quickly it adapts to discomfort.",                             back: "Resilience is not the absence of tension. It is the speed at which tension becomes useful information." },
+    { type: 'text', title: "AI",                front: "What would you ask a system that has read everything humans have written — but experienced nothing?",     back: "AI is not a mirror. It is an average. What it reflects back is the statistical centre of human thought — not its edges, not its silences, not its embodied knowing." },
+    { type: 'text', title: "AI",                front: "If a machine can predict your next decision, are you still making it?",                                   back: "Autonomy is not the absence of influence. It is the awareness of it. The question is not whether AI shapes your thinking — it is whether you notice when it does." },
+    { type: 'text', title: "future",            front: "The future is already present in the room. It is just not evenly distributed yet.",                       back: "Some people in your organisation are already living in the next version of the world. The question is whether anyone is listening to them." },
+    { type: 'text', title: "future",            front: "What are you optimising for that will matter less in ten years than it does today?",                      back: "Every strategy is a bet on what will stay constant. Name the assumptions underneath yours — before someone else names them for you." },
+    { type: 'text', title: "perspective",       front: "How would a five-year-old explain what your organisation actually does?",                                 back: "Simplification is not dumbing down. It is the discipline of keeping only what is true. Children are ruthless editors of pretension." },
+    { type: 'text', title: "perspective",       front: "How would you explain this meeting to someone who had never been to a meeting?",                          back: "The stranger's gaze is a design tool. What looks normal from inside often looks absurd from outside. That gap is where the work begins." },
+    { type: 'text', title: "adaptability",      front: "You cannot plan for uncertainty. You can practice adaptability.",                                         back: "Preparation is not prediction. It is building the capacity to move well when movement is required." },
+    { type: 'text', title: "emergence",         front: "The users who were not supposed to be there built the product's future.",                               back: "Lego's adult fan community was not a strategic target. The company did not design for them and initially did not court them. Adult sets are now one of their fastest-growing lines. The behaviour that looks like an edge case is sometimes the signal." },
+    { type: 'text', title: "decisions",        front: "Most of what gets called decision-making is decision-confirming.",                                         back: "Research on group cognition shows that by the time a choice reaches formal discussion, the outcome is often already settled — shaped by prior conversations, power dynamics, and unspoken assumptions. The meeting is the ritual. The decision happened earlier." },
+    { type: 'text', title: "blank",             front: ".",                                                                                                      back: "Sometimes the most important thing in a session is the moment nobody knows what to say next. This was that moment." },
+  ];
+
+  // =============================================
+  // SHUFFLE
+  // =============================================
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // =============================================
+  // STATE
+  // =============================================
+  const MAX_VISIBLE = 5;
+  const pool = shuffle(allNotes);
+  let poolIdx = 0;
+  let slots = [{}, {}, {}, {}, {}]; // { note, el, flipped }
+  let introOpen = false;
+
+  const deck = document.getElementById('note-deck');
+  const fnCta = document.getElementById('fnCta');
+  const introCard = document.getElementById('introCard');
+
+  function nextFromPool() {
+    return poolIdx < pool.length ? pool[poolIdx++] : null;
+  }
+
+  // =============================================
+  // BUILD CARD
+  // =============================================
+  function buildCard(note) {
+    const wrap = document.createElement('div');
+    wrap.className = 'note-card entering';
+    wrap.setAttribute('tabindex', '0');
+
+    if (note.type === 'text') {
+      wrap.innerHTML = `
+        <div class="note-card-inner">
+          <div class="note-card-face note-card-front">
+            <div class="note-card-title">${note.title}</div>
+            <p class="note-card-text">${note.front}</p>
+          </div>
+          <div class="note-card-face note-card-back">
+            <span class="note-card-context">${note.title}</span>
+            <p class="note-card-insight">${note.back}</p>
+          </div>
+        </div>`;
+    }
+
+    return wrap;
+  }
+
+  // =============================================
+  // SPAWN CARD INTO SLOT
+  // =============================================
+  function spawnIntoSlot(slotIdx, note, delay) {
+    const slot = slots[slotIdx];
+    const el = buildCard(note);
+
+    const slotEl = document.getElementById(`slot-${slotIdx}`);
+    slotEl.innerHTML = '';
+    slotEl.appendChild(el);
+
+    if (delay) {
+      el.style.animationDelay = delay + 'ms';
+    }
+
+    const entry = { note, el, flipped: false };
+    slots[slotIdx] = entry;
+
+    const handleClick = () => {
+      if (!entry.flipped) {
+        // Open: flip this card, close all others
+        entry.flipped = true;
+        el.classList.add('flipped');
+        for (let i = 0; i < MAX_VISIBLE; i++) {
+          if (i !== slotIdx && slots[i].flipped) {
+            slots[i].flipped = false;
+            slots[i].el.classList.remove('flipped');
+          }
+        }
+      } else {
+        // Close: unflip
+        entry.flipped = false;
+        el.classList.remove('flipped');
+      }
+    };
+
+    el.addEventListener('click', handleClick);
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); }
+    });
+  }
+
+  // =============================================
+  // FILL ALL SLOTS
+  // =============================================
+  function fillAllSlots() {
+    for (let i = 0; i < MAX_VISIBLE; i++) {
+      const note = nextFromPool();
+      if (!note) break;
+      spawnIntoSlot(i, note, i * 120);
+    }
+  }
+
+  // =============================================
+  // INTRO CARD CLICK
+  // =============================================
+  introCard.addEventListener('click', () => {
+    if (!introOpen) {
+      introOpen = true;
+      introCard.classList.add('flipped');
+      setTimeout(() => {
+        document.getElementById('fn-intro-gate').style.display = 'none';
+        deck.style.display = 'grid';
+        fnCta.style.display = 'block';
+        fillAllSlots();
+      }, 360);
+    }
+  });
+
+  introCard.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && !introOpen) {
+      e.preventDefault();
+      introCard.click();
+    }
+  });
+  </script>
 
 </body>
 </html>
