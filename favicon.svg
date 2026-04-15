@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">
-  <!-- Background -->
-  <rect width="300" height="450" rx="24" fill="#1a1f2e"/>
-  
+ 
   <!-- White circle -->
   <circle cx="150" cy="225" r="130" fill="white"/>
 
