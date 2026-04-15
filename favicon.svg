@@ -1,8 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
-  <rect width="420" height="120" rx="18" fill="#1a1f2e"/>
-  <path d="M0 34 C35 22 70 46 105 34 S175 22 210 34 S280 22 315 34 S385 22 420 34" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.95"/>
-  <path d="M0 52 C35 42 70 58 105 52 S175 42 210 52 S280 42 315 52 S385 42 420 52" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.82"/>
-  <path d="M0 70 C35 60 70 80 105 70 S175 60 210 70 S280 60 315 70 S385 60 420 70" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.69"/>
-  <path d="M0 88 C35 76 70 96 105 88 S175 76 210 88 S280 76 315 88 S385 76 420 88" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.56"/>
-  <path d="M0 106 C35 92 70 112 105 106 S175 92 210 106 S280 92 315 106 S385 92 420 106" fill="none" stroke="#2563eb" stroke-width="16" stroke-linecap="round" opacity="0.43"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450">
+  <!-- Background -->
+  <rect width="300" height="450" rx="24" fill="#1a1f2e"/>
+  
+  <!-- White circle -->
+  <circle cx="150" cy="225" r="130" fill="white"/>
+
+  <!-- Waves -->
+  <path d="M20 140 C60 120 100 160 140 140 S220 120 260 140" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.95"/>
+  
+  <path d="M20 180 C60 160 100 200 140 180 S220 160 260 180" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+  
+  <path d="M20 220 C60 200 100 240 140 220 S220 200 260 220" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.69"/>
+  
+  <path d="M20 260 C60 240 100 280 140 260 S220 240 260 260" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.56"/>
+  
+  <path d="M20 300 C60 280 100 320 140 300 S220 280 260 300" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" opacity="0.43"/>
 </svg>
