@@ -447,12 +447,16 @@ section p {
 }
 
 .nav-links a[href="field-notes.html"],
-.nav-links a[href="xp-framework.html"] {
+.nav-links a[href="xp-framework.html"],
+.nav-links a[href="about.html"],
+.nav-links a[href="essays.html"] {
   color: rgba(51, 65, 85, 0.6);
 }
 
 .nav-links a[href="field-notes.html"]:hover,
-.nav-links a[href="xp-framework.html"]:hover {
+.nav-links a[href="xp-framework.html"]:hover,
+.nav-links a[href="about.html"]:hover,
+.nav-links a[href="essays.html"]:hover {
   color: #0f172a;
 }
 

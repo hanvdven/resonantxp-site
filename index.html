@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resonant XP | Experience design for leadership teams</title>
   <meta name="description" content="Experience design for leadership teams and organisations in change. We design situations that make real behaviour visible. Belgium, Netherlands and Germany." />
+  <meta property="og:title" content="Resonant XP | Experience design for leadership teams" />
+  <meta property="og:description" content="We design situations that make real behaviour visible — for leadership teams and organisations navigating change." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://resonantxp.com/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Resonant XP" />
+  <meta name="twitter:description" content="Experience design for leadership teams. Belgium · Netherlands · Germany." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
@@ -45,7 +52,7 @@
   </style>
 </head>
 
-<body>
+<body class="home-page">
 
   <!-- HEADER -->
   <div id="site-header"></div>
@@ -166,6 +173,17 @@
 
     <script>
     (function() {
+      // Pause hero animations until after nav.js fade-in (280ms) so they
+      // restart cleanly on SPA navigation instead of playing mid-fade
+      document.querySelectorAll('.scene-line, .hero-actions, .hero-tagline').forEach(el => {
+        el.style.animationPlayState = 'paused';
+      });
+      setTimeout(() => {
+        document.querySelectorAll('.scene-line, .hero-actions, .hero-tagline').forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+      }, 320);
+
       const svg = document.getElementById('indexBgSvg');
       if (!svg) return;
       const W = 1440, H = 900, STEP = 6, N = 12;
@@ -209,6 +227,7 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <p>Resonant XP</p>
+      <a href="privacy.html" style="font-size:0.82rem;color:#94a3b8;">Privacy</a>
     </div>
   </footer>
 
