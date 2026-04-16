@@ -18,17 +18,13 @@
        6 panels · Explore/Expand oscillating · wraps
        =================================================== */
 
-    /* Hide XP morph on this page */
-    body.framework-page .brand-energy { visibility: hidden; }
-
-    /* Mobile: collapse header */
-    @media (max-width: 640px) {
-      body.framework-page .nav-links,
-      body.framework-page .nav-sep,
+    /* Mobile: collapse header only when screen is truly narrow */
+    @media (max-width: 480px) {
+      body.framework-page .nav-links { display: none; }
       body.framework-page .brand-name { display: none; }
       body.framework-page .brand-visual { gap: 0; }
       body.framework-page .header-inner { padding: 0.1rem 1rem; }
-      body.framework-page .logo-frame  { width: 40px; height: auto; }
+      body.framework-page .logo-frame  { width: 36px; height: auto; }
     }
 
     /* ── Layout ─────────────────────────────────────── */
@@ -92,11 +88,11 @@
 
     /* ── Phase label — prominent at top ─────────────── */
     .xp-phase {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: clamp(2.2rem, 5.5vw, 4.2rem);
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      font-family: 'Linden Hill', Georgia, serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: normal;
+      font-style: italic;
+      letter-spacing: 0.01em;
       line-height: 1;
       margin: 0 0 0.5rem;
       flex-shrink: 0;
@@ -209,9 +205,13 @@
       line-height: 1.5;
     }
 
+    /* Expand panels: push content clear of the right-edge fade (10%) */
+    .xp-expand { padding-right: 14vw; padding-left: 6vw; }
+
     /* Reduce offsets on small screens */
     @media (max-width: 640px) {
-      .xp-panel { padding-left: 6vw; padding-right: 6vw; }
+      .xp-panel  { padding-left: 6vw; padding-right: 6vw; }
+      .xp-expand { padding-right: 12vw; padding-left: 4vw; }
     }
 
     /* ── Bottom nav bar ─────────────────────────────── */
