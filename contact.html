@@ -15,8 +15,6 @@
   <style data-page-style>
     /* ===================================================
        CONTACT — CELTX STAGE PLAY FORMAT
-       Left-flush character names · indented dialogue
-       Courier New throughout · white page → BLACKOUT
        =================================================== */
 
     .celtx-env {
@@ -24,9 +22,10 @@
       min-height: 100vh;
       padding: calc(var(--header-h, 80px) + 3rem) 1rem 8rem;
       transition: background-color 1.5s ease;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* ── Script page ─────────────────────────────────── */
     .celtx-paper {
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
@@ -35,11 +34,18 @@
       max-width: 680px;
       margin: 0 auto;
       padding: 0 48px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
     }
 
-    /* ── ACT / SCENE headings ─────────────────────────── */
-    .celtx-act,
-    .celtx-scene {
+    #scriptHistory {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 1rem;
+    }
+
+    .celtx-act, .celtx-scene {
       display: block;
       text-align: center;
       text-decoration: underline;
@@ -48,7 +54,6 @@
       font-size: 12pt;
     }
 
-    /* ── Stage direction ──────────────────────────────── */
     .celtx-sd {
       display: block;
       font-style: italic;
@@ -58,10 +63,9 @@
       color: #222;
     }
 
-    /* ── Exchange block ───────────────────────────────── */
     .celtx-block { margin: 0; }
 
-    /* ── Character name — LEFT FLUSH, all caps ────────── */
+    /* ── Character names ──────────────────────────── */
     .celtx-char {
       display: block;
       text-align: left;
@@ -69,13 +73,10 @@
       font-weight: normal;
       margin: 1.6em 0 0;
       font-size: 12pt;
-      letter-spacing: 0;
     }
 
-    /* RESONA — plain Courier */
     .celtx-char-resona { color: #000; }
 
-    /* YOU — Averia Serif Libre italic, blue, clickable */
     .celtx-char-you {
       font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
@@ -86,7 +87,6 @@
       text-underline-offset: 3px;
     }
 
-    /* Name-entry hint */
     .celtx-name-hint {
       display: block;
       font-family: 'Courier New', Courier, monospace;
@@ -97,7 +97,6 @@
     }
     .celtx-name-hint.hidden { display: none; }
 
-    /* Inline name input */
     .celtx-name-inp {
       background: transparent;
       border: none;
@@ -111,12 +110,9 @@
       padding: 0;
       text-transform: uppercase;
     }
-    .celtx-name-inp::placeholder {
-      color: #93c5fd;
-      text-transform: none;
-    }
+    .celtx-name-inp::placeholder { color: #93c5fd; text-transform: none; }
 
-    /* ── Dialogue ─────────────────────────────────────── */
+    /* ── Dialogue ─────────────────────────────────── */
     .celtx-dial {
       display: block;
       padding-left: 3em;
@@ -124,16 +120,28 @@
       margin: 0;
       font-size: 12pt;
     }
+
+    /* User dialogue — blue, always */
     .celtx-dial-user {
+      color: #2563eb;
       font-style: italic;
-      color: #333;
     }
 
-    /* ── Input field ──────────────────────────────────── */
+    /* Editable history lines */
+    .celtx-dial-user[data-editable] {
+      cursor: pointer;
+    }
+    .celtx-dial-user[data-editable]:hover {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+    }
+
+    /* ── Inputs — no border, blue text ───────────── */
     .celtx-input-col {
       display: block;
       padding-left: 3em;
       padding-right: 1em;
+      margin-top: 1.2em;
     }
 
     .celtx-input {
@@ -141,36 +149,20 @@
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1px solid #555;
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
-      color: #000;
-      padding: 0 0 2px;
+      color: #2563eb;
+      padding: 0;
       outline: none;
       resize: none;
       line-height: 1.5;
       overflow-y: hidden;
+      font-style: italic;
     }
-    .celtx-input:focus { border-bottom-color: #000; }
+    .celtx-input::placeholder { color: #93c5fd; font-style: italic; }
+    .celtx-input:disabled { opacity: 0.35; }
 
-    /* ── Continue cue ─────────────────────────────────── */
-    .celtx-cue {
-      display: block;
-      text-align: right;
-      margin-top: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 9pt;
-      color: #aaa;
-      padding: 0;
-      width: 100%;
-      transition: color 0.15s;
-    }
-    .celtx-cue:hover { color: #000; }
-
-    /* ── Options — ripple in ──────────────────────────── */
+    /* ── Options ─────────────────────────────────── */
     @keyframes rippleIn {
       from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -188,25 +180,26 @@
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
       font-style: italic;
-      color: #666;
+      color: #2563eb;
       padding: 0;
       line-height: 1.6;
       opacity: 0;
       animation: rippleIn 0.3s ease forwards;
       transition: color 0.15s;
     }
-    .celtx-option:hover { color: #000; }
+    .celtx-option:hover { color: #1d4ed8; }
 
-    /* ── Send button ──────────────────────────────────── */
+    /* ── Send button ─────────────────────────────── */
     .celtx-send-col {
       padding-left: 3em;
       margin-top: 1.5em;
     }
 
-    /* ── History — faded ──────────────────────────────── */
-    #scriptHistory .celtx-block { opacity: 0.38; }
+    /* ── History — full opacity, blue user text ──── */
+    #scriptHistory .celtx-block { opacity: 1; }
+    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; }
 
-    /* ── Foot note ────────────────────────────────────── */
+    /* ── Foot note ───────────────────────────────── */
     .celtx-foot {
       margin-top: 5em;
       font-size: 9pt;
@@ -253,6 +246,7 @@
 
       let userName    = null;
       let firstHintEl = null;
+      let situationTA = null; // ref to enable after name entered
       const formData  = {};
 
       // ── Dynamic time stage direction ─────────────────
@@ -291,6 +285,11 @@
           if (!el.querySelector('input')) el.textContent = userLabel();
         });
         if (firstHintEl) firstHintEl.classList.add('hidden');
+        // Enable situation textarea if waiting
+        if (situationTA && userName) {
+          situationTA.disabled = false;
+          situationTA.focus();
+        }
       }
 
       function fadeIn(el, delayMs) {
@@ -302,9 +301,7 @@
       }
 
       function scrollToBottom() {
-        setTimeout(() => {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 120);
+        setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 120);
       }
 
       // ── YOU label (name-editable) ─────────────────────
@@ -329,9 +326,9 @@
         if (labelEl.querySelector('input')) return;
         const prev = labelEl.textContent;
         const inp = document.createElement('input');
-        inp.className  = 'celtx-name-inp';
-        inp.type       = 'text';
-        inp.placeholder = 'your name';
+        inp.className   = 'celtx-name-inp';
+        inp.type        = 'text';
+        inp.placeholder = '... your name';
         labelEl.textContent = '';
         labelEl.appendChild(inp);
         inp.focus();
@@ -374,31 +371,61 @@
         return wrap;
       }
 
-      // ── Intro sequence (auto-play, 3 beats) ──────────
+      // Editable history span for user-provided values
+      function makeEditableLine(initialText, fieldName, prefix) {
+        const wrap = document.createElement('span');
+        wrap.className = 'celtx-dial celtx-dial-user';
+        wrap.setAttribute('data-editable', fieldName);
+        wrap.textContent = prefix ? prefix + initialText : initialText;
+
+        wrap.addEventListener('click', () => {
+          if (wrap.querySelector('input, textarea')) return;
+          const current = formData[fieldName] || initialText;
+          const inp = document.createElement('input');
+          inp.type = fieldName === 'email' ? 'email' : 'text';
+          inp.className = 'celtx-input';
+          inp.value = current;
+          inp.style.display = 'inline';
+          inp.style.width = '100%';
+          wrap.textContent = prefix || '';
+          wrap.appendChild(inp);
+          inp.focus();
+          inp.select();
+          const commit = () => {
+            const v = inp.value.trim() || current;
+            formData[fieldName] = v;
+            wrap.textContent = prefix ? prefix + v : v;
+          };
+          inp.addEventListener('blur', commit);
+          inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
+            if (e.key === 'Escape') { wrap.textContent = prefix ? prefix + current : current; }
+          });
+        });
+        return wrap;
+      }
+
+      // ── Intro sequence ────────────────────────────────
+      // Append all beats to DOM immediately (avoids layout shift while typing)
       const INTRO = [
         { role: 'resona', text: 'Something is different about you.' },
         { role: 'you',    text: 'Yes. I have had a feeling for a while now.' },
         { role: 'resona', text: 'As if you cannot just sit still? That small reflex — a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.' },
       ];
-
       const introTimings = [500, 2000, 3800];
 
       INTRO.forEach((beat, i) => {
-        setTimeout(() => {
-          const el = beat.role === 'resona'
-            ? makeResonaBlock(beat.text)
-            : makeYouStaticBlock(beat.text, false);
-          el.style.opacity = '0';
-          el.style.transition = 'opacity 0.45s ease';
-          histEl.appendChild(el);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            el.style.opacity = '1';
-          }));
-          scrollToBottom();
-        }, introTimings[i]);
+        const el = beat.role === 'resona'
+          ? makeResonaBlock(beat.text)
+          : makeYouStaticBlock(beat.text, false);
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.45s ease';
+        histEl.appendChild(el);
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.style.opacity = '1';
+        })), introTimings[i]);
       });
 
-      // After last beat + reading time → first interactive step
       setTimeout(showSituationStep, 6200);
 
       // ── STEP 1: Situation ─────────────────────────────
@@ -407,58 +434,50 @@
 
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block';
+        wrap.appendChild(makeYouLabel(true)); // show name hint
 
-        // YOU label (first interactive YOU — show name hint)
-        wrap.appendChild(makeYouLabel(true));
-
-        // Prelude line
         const prelude = document.createElement('span');
         prelude.className = 'celtx-dial celtx-dial-user';
-        prelude.textContent = 'Hmm. Let me be a bit more specific.';
+        prelude.textContent = 'Hmm. Let me be a bit more specific:';
         wrap.appendChild(prelude);
 
-        // Textarea
         const col = document.createElement('div');
         col.className = 'celtx-input-col';
+
         const ta = document.createElement('textarea');
         ta.className = 'celtx-input';
         ta.rows = 1;
         ta.placeholder = '...';
+        ta.disabled = !userName;
+        situationTA = ta;
+
         ta.addEventListener('input', () => {
           ta.style.height = 'auto';
           ta.style.height = ta.scrollHeight + 'px';
         });
-        const cue = document.createElement('button');
-        cue.className = 'celtx-cue';
-        cue.type = 'button';
-        cue.textContent = 'continue >';
         col.appendChild(ta);
-        col.appendChild(cue);
         wrap.appendChild(col);
 
         fadeIn(wrap, 150);
         currEl.appendChild(wrap);
-        setTimeout(() => ta.focus(), 300);
+        if (userName) setTimeout(() => ta.focus(), 300);
         scrollToBottom();
 
         const commit = () => {
           const v = ta.value.trim();
           if (!v) return;
           formData['situation'] = v;
+          situationTA = null;
 
-          // Build committed block for history
-          const done = makeYouStaticBlock('Hmm. Let me be a bit more specific.', false);
-          const doneDial = document.createElement('span');
-          doneDial.className = 'celtx-dial celtx-dial-user';
-          doneDial.textContent = v;
-          done.appendChild(doneDial);
+          const done = makeYouStaticBlock('Hmm. Let me be a bit more specific:', false);
+          const editLine = makeEditableLine(v, 'situation', '');
+          done.appendChild(editLine);
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
           showLocationStep();
         };
 
-        cue.addEventListener('click', commit);
         ta.addEventListener('keydown', e => {
           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
         });
@@ -502,26 +521,30 @@
 
       function selectLocation(loc, dialEl, optsEl, wrapEl) {
         formData['location'] = loc;
-
-        // Complete RESONA's line
         dialEl.textContent = `I see. Good fortune you operate in ${loc}.`;
         optsEl.remove();
-
-        // Move RESONA block to history
         histEl.appendChild(wrapEl);
 
-        // Show YOU response
         const youBlock = makeYouStaticBlock('I know right. I love it here.', false);
         youBlock.style.opacity = '0';
         youBlock.style.transition = 'opacity 0.45s ease';
         histEl.appendChild(youBlock);
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          youBlock.style.opacity = '1';
-        }));
+        requestAnimationFrame(() => requestAnimationFrame(() => { youBlock.style.opacity = '1'; }));
 
-        scrollToBottom();
         currEl.innerHTML = '';
-        setTimeout(showEmailStep, 1400);
+        scrollToBottom();
+
+        // RESONA: "So... what are you waiting for."
+        setTimeout(() => {
+          const soBlock = makeResonaBlock('So... what are you waiting for.');
+          soBlock.style.opacity = '0';
+          soBlock.style.transition = 'opacity 0.45s ease';
+          histEl.appendChild(soBlock);
+          requestAnimationFrame(() => requestAnimationFrame(() => { soBlock.style.opacity = '1'; }));
+          scrollToBottom();
+        }, 1000);
+
+        setTimeout(showEmailStep, 2400);
       }
 
       // ── STEP 3: Email + Expectations ─────────────────
@@ -532,36 +555,31 @@
         wrap.className = 'celtx-block';
         wrap.appendChild(makeYouLabel(false));
 
-        // Prelude line
         const prelude = document.createElement('span');
         prelude.className = 'celtx-dial celtx-dial-user';
         prelude.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
         wrap.appendChild(prelude);
 
-        // "They'll reach me at:" label
         const emailLabel = document.createElement('span');
         emailLabel.className = 'celtx-dial celtx-dial-user';
         emailLabel.textContent = "They'll reach me at:";
         wrap.appendChild(emailLabel);
 
-        // Email input
         const emailCol = document.createElement('div');
         emailCol.className = 'celtx-input-col';
         const emailInp = document.createElement('input');
         emailInp.type = 'email';
         emailInp.className = 'celtx-input';
-        emailInp.placeholder = 'email address';
+        emailInp.placeholder = '...';
         emailCol.appendChild(emailInp);
         wrap.appendChild(emailCol);
 
-        // "They'll help me by:" label
         const expLabel = document.createElement('span');
         expLabel.className = 'celtx-dial celtx-dial-user';
-        expLabel.style.marginTop = '0.6em';
+        expLabel.style.marginTop = '0.4em';
         expLabel.textContent = "They'll help me by: (optional)";
         wrap.appendChild(expLabel);
 
-        // Expectations textarea
         const expCol = document.createElement('div');
         expCol.className = 'celtx-input-col';
         const expTa = document.createElement('textarea');
@@ -575,16 +593,6 @@
         expCol.appendChild(expTa);
         wrap.appendChild(expCol);
 
-        // Continue cue
-        const cueCol = document.createElement('div');
-        cueCol.className = 'celtx-input-col';
-        const cue = document.createElement('button');
-        cue.className = 'celtx-cue';
-        cue.type = 'button';
-        cue.textContent = 'continue >';
-        cueCol.appendChild(cue);
-        wrap.appendChild(cueCol);
-
         fadeIn(wrap, 150);
         currEl.appendChild(wrap);
         setTimeout(() => emailInp.focus(), 300);
@@ -597,33 +605,33 @@
           const exp = expTa.value.trim();
           if (exp) formData['expectations'] = exp;
 
-          // Build committed block for history
           const done = document.createElement('div');
           done.className = 'celtx-block';
           done.appendChild(makeYouLabel(false));
-
           const addLine = (text) => {
             const s = document.createElement('span');
             s.className = 'celtx-dial celtx-dial-user';
             s.textContent = text;
             done.appendChild(s);
           };
-
           addLine("I don't know. I have a strange feeling someone will reach out and listen to me.");
-          addLine(`They'll reach me at: ${email}`);
-          if (exp) addLine(`They'll help me by: ${exp}`);
+          done.appendChild(makeEditableLine(email, 'email', "They'll reach me at: "));
+          if (exp) done.appendChild(makeEditableLine(exp, 'expectations', "They'll help me by: "));
 
           histEl.appendChild(done);
           currEl.innerHTML = '';
           showSubmitStep();
         };
 
-        cue.addEventListener('click', commit);
         emailInp.addEventListener('keydown', e => {
           if (e.key === 'Enter') { e.preventDefault(); expTa.focus(); }
         });
         expTa.addEventListener('keydown', e => {
           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        });
+        // Also commit if email is filled and user presses Enter twice (skipping expectations)
+        emailInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); expTa.value ? commit() : expTa.focus(); }
         });
       }
 
@@ -631,13 +639,11 @@
       function showSubmitStep() {
         currEl.innerHTML = '';
 
-        // RESONA
         const resonaBlock = makeResonaBlock('Something shifted. Are you sure you are ready?');
         fadeIn(resonaBlock, 150);
         currEl.appendChild(resonaBlock);
         scrollToBottom();
 
-        // YOU confirm button
         setTimeout(() => {
           const youWrap = document.createElement('div');
           youWrap.className = 'celtx-block';
@@ -676,14 +682,11 @@
           });
 
           if (res.ok) {
-            // Fade out content
             histEl.style.transition = 'opacity 0.6s ease';
             histEl.style.opacity = '0';
             currEl.style.transition = 'opacity 0.6s ease';
             currEl.style.opacity = '0';
-            if (footEl) { footEl.style.opacity = '0'; }
-
-            // BLACKOUT
+            if (footEl) footEl.style.opacity = '0';
             envEl.style.backgroundColor = '#000';
 
             setTimeout(() => {
@@ -694,16 +697,13 @@
 
               const end = document.createElement('span');
               end.className = 'celtx-sd';
-              end.style.color    = '#ffffff';
+              end.style.color     = '#ffffff';
               end.style.marginTop = '3em';
-              end.style.opacity  = '0';
+              end.style.opacity   = '0';
               end.style.transition = 'opacity 0.9s ease';
               end.textContent = '(End of scene one.)';
               currEl.appendChild(end);
-
-              requestAnimationFrame(() => requestAnimationFrame(() => {
-                end.style.opacity = '1';
-              }));
+              requestAnimationFrame(() => requestAnimationFrame(() => { end.style.opacity = '1'; }));
             }, 1400);
 
           } else {
