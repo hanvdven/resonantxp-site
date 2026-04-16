@@ -3,57 +3,46 @@
 ## ✅ Done
 
 - `xp-framework.html`: 6-panel horizontal side-scroll, Explore/Expand oscillating, random questions, wraps
-
----
-
-## experiences.html
-
-**New concept: theatre playbill**
-
-- Replace current panel system (moved to `xp-framework.html`) with a playbill / theatre programme
-- Dark background, white/light typography, classical layout
-- Each XP listed as a production: XP number, title, short description, *what emerges* line
-- CTA to contact at the bottom
+- `experiences.html`: herschreven als theatre playbill (licht thema)
+- `contact.html`: RESONA, dynamische tijds-SD, intro beats, nieuwe scriptflow, BLACKOUT
+- `field-notes.html`: footer dark mode
 
 ---
 
 ## field-notes.html
 
 **Card background color**
-- Current card color is a grey-ish tone; re-achieve that same color using `opacity: 0` (transparent) so the wave background shows through
+- Huidig: `rgba(255,255,255,0.06)` — vervangen door volledig transparant zodat de golven erdoorheen schijnen
 
 **Text size**
-- Text in cards is too large and doesn't fit; reduce to fit the card format
+- Tekst in kaarten te groot; verkleinen zodat het past
 
 **Card interaction (currently broken)**
-- Click a card → remove 1–3 other cards; turn the clicked card over
-- Click any card (including a turned-over one) → remove all turned-over cards; replace all missing cards so there are always 5 visible
-
-**Footer dark mode**
-- The field-notes footer should be dark mode, consistent with the rest of the page
+- Click een kaart → verwijder 1–3 andere kaarten; draai de aangeklikte kaart om
+- Click een andere kaart (of dezelfde) → verwijder alle omgedraaide kaarten; vervang alle missende kaarten zodat er altijd 5 zichtbaar zijn
 
 ---
 
 ## index.html (home)
 
 **Blur column behind hero text**
-- Add a horizontal/vertical column with a backdrop blur behind the hero text lines
-- Prevents animated wave lines from interfering with readability
+- Voeg een kolom met backdrop blur toe achter de hero-tekst
+- Voorkomt dat de animatielijnen de leesbaarheid storen
 
 ---
 
 ## Bugs
 
 **`/field-notes/asdf` → unstyled 404**
-- URL path containing `field-notes/` sub-path triggers something that breaks normal 404 styling
-- Likely the `field-notes` segment in the path overrides routing/styling logic
+- URL-pad met `field-notes/` als sub-pad breekt de normale 404-styling
+- Waarschijnlijk overschrijft het `field-notes`-segment de routing/styling logica
 
 ---
 
 ## 404 page
 
 **Redesign**
-- Remove the slowly-revealed text (reuse from other pages feels generic)
-- Replace with a very large blue inky "404" filling the screen
+- Verwijder de langzaam-onthullende tekst (voelt generiek)
+- Vervang door een heel grote blauwe inkblot "404" die het scherm vult
 - Subline: "you're not supposed to be here"
-- Top navigation lets the user go back — no other CTA needed
+- Navigatie bovenaan laat de gebruiker teruggaan — geen andere CTA nodig
