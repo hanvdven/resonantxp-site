@@ -16,16 +16,17 @@
     /* ===================================================
        CONTACT — CELTX STAGE PLAY FORMAT
        Left-flush character names · indented dialogue
-       Courier New throughout · white page
+       Courier New throughout · white page → BLACKOUT
        =================================================== */
 
     .celtx-env {
       background: #ffffff;
       min-height: 100vh;
       padding: calc(var(--header-h, 80px) + 3rem) 1rem 8rem;
+      transition: background-color 1.5s ease;
     }
 
-    /* ── Script page (content area with margins) ──────── */
+    /* ── Script page ─────────────────────────────────── */
     .celtx-paper {
       font-family: 'Courier New', Courier, monospace;
       font-size: 12pt;
@@ -36,7 +37,7 @@
       padding: 0 48px;
     }
 
-    /* ── ACT / SCENE headings — centered, underlined ──── */
+    /* ── ACT / SCENE headings ─────────────────────────── */
     .celtx-act,
     .celtx-scene {
       display: block;
@@ -47,7 +48,7 @@
       font-size: 12pt;
     }
 
-    /* ── Scene description — italic, indented ─────────── */
+    /* ── Stage direction ──────────────────────────────── */
     .celtx-sd {
       display: block;
       font-style: italic;
@@ -71,8 +72,8 @@
       letter-spacing: 0;
     }
 
-    /* CHORUS — plain Courier */
-    .celtx-char-chorus { color: #000; }
+    /* RESONA — plain Courier */
+    .celtx-char-resona { color: #000; }
 
     /* YOU — Averia Serif Libre italic, blue, clickable */
     .celtx-char-you {
@@ -85,18 +86,18 @@
       text-underline-offset: 3px;
     }
 
-    /* Name-entry hint beneath first YOU */
+    /* Name-entry hint */
     .celtx-name-hint {
       display: block;
       font-family: 'Courier New', Courier, monospace;
       font-size: 9pt;
       font-style: italic;
       color: #94a3b8;
-      margin: 0 0 0;
+      margin: 0;
     }
     .celtx-name-hint.hidden { display: none; }
 
-    /* Inline name input (replaces YOU text on click) */
+    /* Inline name input */
     .celtx-name-inp {
       background: transparent;
       border: none;
@@ -115,7 +116,7 @@
       text-transform: none;
     }
 
-    /* ── Dialogue — indented one tab stop ─────────────── */
+    /* ── Dialogue ─────────────────────────────────────── */
     .celtx-dial {
       display: block;
       padding-left: 3em;
@@ -126,16 +127,6 @@
     .celtx-dial-user {
       font-style: italic;
       color: #333;
-    }
-
-    /* ── Parenthetical ────────────────────────────────── */
-    .celtx-paren {
-      display: block;
-      padding-left: 3em;
-      font-style: italic;
-      color: #555;
-      font-size: 12pt;
-      margin: 0;
     }
 
     /* ── Input field ──────────────────────────────────── */
@@ -162,7 +153,7 @@
     }
     .celtx-input:focus { border-bottom-color: #000; }
 
-    /* ── Continue cue — right-aligned ────────────────── */
+    /* ── Continue cue ─────────────────────────────────── */
     .celtx-cue {
       display: block;
       text-align: right;
@@ -222,6 +213,7 @@
       font-style: italic;
       color: #bbb;
       text-align: center;
+      transition: opacity 0.5s ease;
     }
     .celtx-foot a { color: #bbb; text-decoration: underline; }
 
@@ -235,82 +227,84 @@
   <div id="site-header"></div>
 
   <main style="position: relative; z-index: 1;">
-    <div class="celtx-env">
+    <div class="celtx-env" id="celtxEnv">
       <div class="celtx-paper">
 
         <span class="celtx-act">ACT I</span>
         <span class="celtx-scene">Scene 1</span>
-
-        <span class="celtx-sd">An organisation in motion. Something is already under way. Whether it is named or not is still unclear.</span>
+        <span class="celtx-sd" id="celtxTimeSD"></span>
 
         <div id="scriptHistory"></div>
         <div id="scriptCurrent"></div>
 
-        <p class="celtx-foot">(Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>)</p>
+        <p class="celtx-foot" id="celtxFoot">(Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>)</p>
 
       </div>
     </div>
 
     <script>
     (function () {
+      'use strict';
+
       const histEl = document.getElementById('scriptHistory');
       const currEl = document.getElementById('scriptCurrent');
+      const envEl  = document.getElementById('celtxEnv');
+      const footEl = document.getElementById('celtxFoot');
 
       let userName    = null;
-      let firstHintEl = null;  // "(click to enter your name)" hint
-      let stepIdx     = 0;
+      let firstHintEl = null;
       const formData  = {};
 
-      const STEPS = [
-        {
-          name:   'situation',
-          chorus: 'What is it?',
-          paren:  '(You don\'t need to be precise. A direction is enough.)',
-          type:   'textarea'
-        },
-        {
-          name:   'email',
-          chorus: 'And how do I reach you?',
-          type:   'email'
-        },
-        {
-          name:   'organisation',
-          chorus: 'And your organisation?',
-          type:   'text'
-        },
-        {
-          name:   'role',
-          chorus: 'What is your role there?',
-          type:   'text'
-        },
-        {
-          name:    'location',
-          chorus:  'Where are you?',
-          type:    'options',
-          options: ['Belgium', 'Netherlands', 'Germany', 'Other']
-        },
-        {
-          name:    'language',
-          chorus:  'In which language?',
-          type:    'options',
-          options: ['English', 'Nederlands', 'Deutsch']
-        }
-      ];
+      // ── Dynamic time stage direction ─────────────────
+      (function () {
+        const now  = new Date();
+        const hhmm = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const hour = now.getHours();
+        let detail;
+        if      (hour >= 22 || hour < 5) detail = `It is late. A clock reads ${hhmm}. Someone is still here.`;
+        else if (hour < 9)               detail = `Early. A clock reads ${hhmm}. The day has not decided what it wants to be.`;
+        else if (hour < 12)              detail = `Morning. A clock reads ${hhmm}. The coffee is still warm.`;
+        else if (hour < 14)              detail = `Just after noon. A clock reads ${hhmm}. The sandwich is getting cold.`;
+        else if (hour < 17)              detail = `Afternoon. A clock reads ${hhmm}. The meeting that could have been an email has just ended.`;
+        else if (hour < 20)              detail = `Early evening. A clock reads ${hhmm}. The office is thinning out.`;
+        else                             detail = `Evening. A clock reads ${hhmm}. Someone is still at their desk.`;
+        const el = document.getElementById('celtxTimeSD');
+        if (el) el.textContent = detail;
+      })();
 
-      // ── Helpers ──────────────────────────────────────
+      // ── Header height ─────────────────────────────────
+      const headerEl = document.getElementById('site-header');
+      if (headerEl) {
+        const setH = () =>
+          document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+        setH();
+        new ResizeObserver(setH).observe(headerEl);
+      }
+
+      // ── Helpers ───────────────────────────────────────
       function userLabel() {
-        return userName
-          ? userName.split(' ')[0].toUpperCase()
-          : 'YOU';
+        return userName ? userName.split(' ')[0].toUpperCase() : 'YOU';
       }
 
       function syncAllYouLabels() {
         document.querySelectorAll('.js-you-label').forEach(el => {
-          if (!el.querySelector('input')) {   // don't overwrite active input
-            el.textContent = userLabel();
-          }
+          if (!el.querySelector('input')) el.textContent = userLabel();
         });
         if (firstHintEl) firstHintEl.classList.add('hidden');
+      }
+
+      function fadeIn(el, delayMs) {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.45s ease';
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.style.opacity = '1';
+        })), delayMs || 0);
+      }
+
+      function scrollToBottom() {
+        setTimeout(() => {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 120);
       }
 
       // ── YOU label (name-editable) ─────────────────────
@@ -318,12 +312,9 @@
         const labelEl = document.createElement('span');
         labelEl.className = 'celtx-char celtx-char-you js-you-label';
         labelEl.textContent = userLabel();
-
         labelEl.addEventListener('click', () => activateName(labelEl));
-
         const wrapper = document.createElement('div');
         wrapper.appendChild(labelEl);
-
         if (isFirst) {
           const hint = document.createElement('span');
           hint.className = 'celtx-name-hint' + (userName ? ' hidden' : '');
@@ -331,33 +322,25 @@
           firstHintEl = hint;
           wrapper.appendChild(hint);
         }
-
         return wrapper;
       }
 
       function activateName(labelEl) {
-        if (labelEl.querySelector('input')) return; // already active
+        if (labelEl.querySelector('input')) return;
         const prev = labelEl.textContent;
-
         const inp = document.createElement('input');
         inp.className  = 'celtx-name-inp';
         inp.type       = 'text';
         inp.placeholder = 'your name';
-
         labelEl.textContent = '';
         labelEl.appendChild(inp);
         inp.focus();
-
         const confirm = () => {
           const v = inp.value.trim();
-          if (v) {
-            userName = v;
-            formData['name'] = v;
-          }
+          if (v) { userName = v; formData['name'] = v; }
           labelEl.textContent = userLabel();
           syncAllYouLabels();
         };
-
         inp.addEventListener('blur', confirm);
         inp.addEventListener('keydown', e => {
           if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
@@ -365,218 +348,322 @@
         });
       }
 
-      // ── Chorus block ─────────────────────────────────
-      function makeChorusBlock(step) {
+      // ── Block builders ────────────────────────────────
+      function makeResonaBlock(text) {
         const wrap = document.createElement('div');
-        wrap.className = 'celtx-block celtx-chorus';
-
+        wrap.className = 'celtx-block';
         const name = document.createElement('span');
-        name.className = 'celtx-char celtx-char-chorus';
-        name.textContent = 'CHORUS';
+        name.className = 'celtx-char celtx-char-resona';
+        name.textContent = 'RESONA';
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial';
+        dial.textContent = text;
         wrap.appendChild(name);
-
-        const dial = document.createElement('span');
-        dial.className = 'celtx-dial';
-        dial.textContent = step.chorus;
         wrap.appendChild(dial);
-
-        if (step.paren) {
-          const par = document.createElement('span');
-          par.className = 'celtx-paren';
-          par.textContent = step.paren;
-          wrap.appendChild(par);
-        }
-
         return wrap;
       }
 
-      // ── User input block ──────────────────────────────
-      function makeUserBlock(step, isFirst) {
+      function makeYouStaticBlock(text, isFirst) {
         const wrap = document.createElement('div');
-        wrap.className = 'celtx-block celtx-user-input';
-
+        wrap.className = 'celtx-block';
         wrap.appendChild(makeYouLabel(isFirst));
-
-        if (step.type === 'textarea') {
-          const col = document.createElement('div');
-          col.className = 'celtx-input-col';
-
-          const ta = document.createElement('textarea');
-          ta.className = 'celtx-input';
-          ta.rows = 1;
-          col.appendChild(ta);
-
-          ta.addEventListener('input', () => {
-            ta.style.height = 'auto';
-            ta.style.height = ta.scrollHeight + 'px';
-          });
-
-          const cue = document.createElement('button');
-          cue.className = 'celtx-cue';
-          cue.type = 'button';
-          cue.textContent = 'continue >';
-          col.appendChild(cue);
-
-          wrap.appendChild(col);
-
-          const commit = () => { const v = ta.value.trim(); if (v) doCommit(step, v); };
-          cue.addEventListener('click', commit);
-          ta.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
-          });
-          setTimeout(() => ta.focus(), 80);
-
-        } else if (step.type === 'text' || step.type === 'email') {
-          const col = document.createElement('div');
-          col.className = 'celtx-input-col';
-
-          const inp = document.createElement('input');
-          inp.type      = step.type;
-          inp.className = 'celtx-input';
-          col.appendChild(inp);
-
-          const cue = document.createElement('button');
-          cue.className = 'celtx-cue';
-          cue.type = 'button';
-          cue.textContent = 'continue >';
-          col.appendChild(cue);
-
-          wrap.appendChild(col);
-
-          const commit = () => {
-            const v = inp.value.trim();
-            if (!v) return;
-            if (step.type === 'email' && !v.includes('@')) { inp.focus(); return; }
-            doCommit(step, v);
-          };
-          cue.addEventListener('click', commit);
-          inp.addEventListener('keydown', e => {
-            if (e.key === 'Enter') { e.preventDefault(); commit(); }
-          });
-          setTimeout(() => inp.focus(), 80);
-
-        } else if (step.type === 'options') {
-          const opts = document.createElement('div');
-          opts.className = 'celtx-options';
-          step.options.forEach((opt, i) => {
-            const btn = document.createElement('button');
-            btn.className = 'celtx-option';
-            btn.type = 'button';
-            btn.textContent = opt;
-            btn.style.animationDelay = (i * 90) + 'ms';
-            btn.addEventListener('click', () => doCommit(step, opt));
-            opts.appendChild(btn);
-          });
-          wrap.appendChild(opts);
-        }
-
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial celtx-dial-user';
+        dial.textContent = text;
+        wrap.appendChild(dial);
         return wrap;
       }
 
-      // ── Commit ────────────────────────────────────────
-      function doCommit(step, value) {
-        formData[step.name] = value;
+      // ── Intro sequence (auto-play, 3 beats) ──────────
+      const INTRO = [
+        { role: 'resona', text: 'Something is different about you.' },
+        { role: 'you',    text: 'Yes. I have had a feeling for a while now.' },
+        { role: 'resona', text: 'As if you cannot just sit still? That small reflex — a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.' },
+      ];
 
-        const chorusEl = currEl.querySelector('.celtx-chorus');
-        if (chorusEl) histEl.appendChild(chorusEl);
+      const introTimings = [500, 2000, 3800];
 
-        // Completed user response
-        const done = document.createElement('div');
-        done.className = 'celtx-block';
-
-        const doneName = document.createElement('span');
-        doneName.className = 'celtx-char celtx-char-you js-you-label';
-        doneName.textContent = userLabel();
-        doneName.style.cursor = 'pointer';
-        doneName.addEventListener('click', () => activateName(doneName));
-
-        const doneDial = document.createElement('span');
-        doneDial.className = 'celtx-dial celtx-dial-user';
-        doneDial.textContent = value;
-
-        done.appendChild(doneName);
-        done.appendChild(doneDial);
-        histEl.appendChild(done);
-
-        currEl.innerHTML = '';
-        stepIdx++;
-
-        if (stepIdx < STEPS.length) showStep();
-        else showSubmit();
-      }
-
-      // ── Show next step ─────────────────────────────────
-      function showStep() {
-        const step   = STEPS[stepIdx];
-        const isFirst = stepIdx === 0;
-
-        const cb = makeChorusBlock(step);
-        cb.style.opacity    = '0';
-        cb.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(cb);
-        setTimeout(() => { cb.style.opacity = '1'; }, 150);
-
+      INTRO.forEach((beat, i) => {
         setTimeout(() => {
-          const ub = makeUserBlock(step, isFirst);
-          ub.style.opacity    = '0';
-          ub.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(ub);
+          const el = beat.role === 'resona'
+            ? makeResonaBlock(beat.text)
+            : makeYouStaticBlock(beat.text, false);
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.45s ease';
+          histEl.appendChild(el);
           requestAnimationFrame(() => requestAnimationFrame(() => {
-            ub.style.opacity = '1';
+            el.style.opacity = '1';
           }));
-        }, 520);
+          scrollToBottom();
+        }, introTimings[i]);
+      });
+
+      // After last beat + reading time → first interactive step
+      setTimeout(showSituationStep, 6200);
+
+      // ── STEP 1: Situation ─────────────────────────────
+      function showSituationStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+
+        // YOU label (first interactive YOU — show name hint)
+        wrap.appendChild(makeYouLabel(true));
+
+        // Prelude line
+        const prelude = document.createElement('span');
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = 'Hmm. Let me be a bit more specific.';
+        wrap.appendChild(prelude);
+
+        // Textarea
+        const col = document.createElement('div');
+        col.className = 'celtx-input-col';
+        const ta = document.createElement('textarea');
+        ta.className = 'celtx-input';
+        ta.rows = 1;
+        ta.placeholder = '...';
+        ta.addEventListener('input', () => {
+          ta.style.height = 'auto';
+          ta.style.height = ta.scrollHeight + 'px';
+        });
+        const cue = document.createElement('button');
+        cue.className = 'celtx-cue';
+        cue.type = 'button';
+        cue.textContent = 'continue >';
+        col.appendChild(ta);
+        col.appendChild(cue);
+        wrap.appendChild(col);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        setTimeout(() => ta.focus(), 300);
+        scrollToBottom();
+
+        const commit = () => {
+          const v = ta.value.trim();
+          if (!v) return;
+          formData['situation'] = v;
+
+          // Build committed block for history
+          const done = makeYouStaticBlock('Hmm. Let me be a bit more specific.', false);
+          const doneDial = document.createElement('span');
+          doneDial.className = 'celtx-dial celtx-dial-user';
+          doneDial.textContent = v;
+          done.appendChild(doneDial);
+          histEl.appendChild(done);
+
+          currEl.innerHTML = '';
+          showLocationStep();
+        };
+
+        cue.addEventListener('click', commit);
+        ta.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        });
       }
 
-      // ── Submit step ────────────────────────────────────
-      function showSubmit() {
-        const block = document.createElement('div');
-        block.className = 'celtx-block';
+      // ── STEP 2: Location ──────────────────────────────
+      function showLocationStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
 
         const name = document.createElement('span');
-        name.className = 'celtx-char celtx-char-chorus';
-        name.textContent = 'CHORUS';
+        name.className = 'celtx-char celtx-char-resona';
+        name.textContent = 'RESONA';
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
-        dial.textContent = 'Something will happen next.';
+        dial.textContent = 'I see. Good fortune you operate in...';
 
-        const par = document.createElement('span');
-        par.className = 'celtx-paren';
-        par.textContent = '(Your details are used only to respond to your message.)';
+        const opts = document.createElement('div');
+        opts.className = 'celtx-options';
+        ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((loc, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'celtx-option';
+          btn.type = 'button';
+          btn.textContent = loc;
+          btn.style.animationDelay = (i * 90) + 'ms';
+          btn.addEventListener('click', () => selectLocation(loc, dial, opts, wrap));
+          opts.appendChild(btn);
+        });
 
-        block.appendChild(name);
-        block.appendChild(dial);
-        block.appendChild(par);
-        block.style.opacity    = '0';
-        block.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(block);
-        setTimeout(() => { block.style.opacity = '1'; }, 150);
+        wrap.appendChild(name);
+        wrap.appendChild(dial);
+        wrap.appendChild(opts);
 
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        scrollToBottom();
+      }
+
+      function selectLocation(loc, dialEl, optsEl, wrapEl) {
+        formData['location'] = loc;
+
+        // Complete RESONA's line
+        dialEl.textContent = `I see. Good fortune you operate in ${loc}.`;
+        optsEl.remove();
+
+        // Move RESONA block to history
+        histEl.appendChild(wrapEl);
+
+        // Show YOU response
+        const youBlock = makeYouStaticBlock('I know right. I love it here.', false);
+        youBlock.style.opacity = '0';
+        youBlock.style.transition = 'opacity 0.45s ease';
+        histEl.appendChild(youBlock);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          youBlock.style.opacity = '1';
+        }));
+
+        scrollToBottom();
+        currEl.innerHTML = '';
+        setTimeout(showEmailStep, 1400);
+      }
+
+      // ── STEP 3: Email + Expectations ─────────────────
+      function showEmailStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+        wrap.appendChild(makeYouLabel(false));
+
+        // Prelude line
+        const prelude = document.createElement('span');
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+        wrap.appendChild(prelude);
+
+        // "They'll reach me at:" label
+        const emailLabel = document.createElement('span');
+        emailLabel.className = 'celtx-dial celtx-dial-user';
+        emailLabel.textContent = "They'll reach me at:";
+        wrap.appendChild(emailLabel);
+
+        // Email input
+        const emailCol = document.createElement('div');
+        emailCol.className = 'celtx-input-col';
+        const emailInp = document.createElement('input');
+        emailInp.type = 'email';
+        emailInp.className = 'celtx-input';
+        emailInp.placeholder = 'email address';
+        emailCol.appendChild(emailInp);
+        wrap.appendChild(emailCol);
+
+        // "They'll help me by:" label
+        const expLabel = document.createElement('span');
+        expLabel.className = 'celtx-dial celtx-dial-user';
+        expLabel.style.marginTop = '0.6em';
+        expLabel.textContent = "They'll help me by: (optional)";
+        wrap.appendChild(expLabel);
+
+        // Expectations textarea
+        const expCol = document.createElement('div');
+        expCol.className = 'celtx-input-col';
+        const expTa = document.createElement('textarea');
+        expTa.className = 'celtx-input';
+        expTa.rows = 1;
+        expTa.placeholder = '...';
+        expTa.addEventListener('input', () => {
+          expTa.style.height = 'auto';
+          expTa.style.height = expTa.scrollHeight + 'px';
+        });
+        expCol.appendChild(expTa);
+        wrap.appendChild(expCol);
+
+        // Continue cue
+        const cueCol = document.createElement('div');
+        cueCol.className = 'celtx-input-col';
+        const cue = document.createElement('button');
+        cue.className = 'celtx-cue';
+        cue.type = 'button';
+        cue.textContent = 'continue >';
+        cueCol.appendChild(cue);
+        wrap.appendChild(cueCol);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        setTimeout(() => emailInp.focus(), 300);
+        scrollToBottom();
+
+        const commit = () => {
+          const email = emailInp.value.trim();
+          if (!email || !email.includes('@')) { emailInp.focus(); return; }
+          formData['email'] = email;
+          const exp = expTa.value.trim();
+          if (exp) formData['expectations'] = exp;
+
+          // Build committed block for history
+          const done = document.createElement('div');
+          done.className = 'celtx-block';
+          done.appendChild(makeYouLabel(false));
+
+          const addLine = (text) => {
+            const s = document.createElement('span');
+            s.className = 'celtx-dial celtx-dial-user';
+            s.textContent = text;
+            done.appendChild(s);
+          };
+
+          addLine("I don't know. I have a strange feeling someone will reach out and listen to me.");
+          addLine(`They'll reach me at: ${email}`);
+          if (exp) addLine(`They'll help me by: ${exp}`);
+
+          histEl.appendChild(done);
+          currEl.innerHTML = '';
+          showSubmitStep();
+        };
+
+        cue.addEventListener('click', commit);
+        emailInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); expTa.focus(); }
+        });
+        expTa.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        });
+      }
+
+      // ── STEP 4: Submit ────────────────────────────────
+      function showSubmitStep() {
+        currEl.innerHTML = '';
+
+        // RESONA
+        const resonaBlock = makeResonaBlock('Something shifted. Are you sure you are ready?');
+        fadeIn(resonaBlock, 150);
+        currEl.appendChild(resonaBlock);
+        scrollToBottom();
+
+        // YOU confirm button
         setTimeout(() => {
-          const col = document.createElement('div');
-          col.className = 'celtx-send-col';
+          const youWrap = document.createElement('div');
+          youWrap.className = 'celtx-block';
+          youWrap.appendChild(makeYouLabel(false));
 
+          const sendCol = document.createElement('div');
+          sendCol.className = 'celtx-send-col';
           const btn = document.createElement('button');
           btn.className = 'button button-primary';
           btn.type = 'button';
-          btn.textContent = 'Send.';
-          col.appendChild(btn);
+          btn.textContent = 'I am.';
+          sendCol.appendChild(btn);
+          youWrap.appendChild(sendCol);
 
-          col.style.opacity    = '0';
-          col.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(col);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            col.style.opacity = '1';
-          }));
+          fadeIn(youWrap, 0);
+          currEl.appendChild(youWrap);
+          scrollToBottom();
 
           btn.addEventListener('click', () => submitForm(btn));
-        }, 520);
+        }, 700);
       }
 
-      // ── Formspree ─────────────────────────────────────
+      // ── Formspree submit + BLACKOUT ───────────────────
       async function submitForm(btn) {
         btn.disabled    = true;
-        btn.textContent = 'Sending…';
+        btn.textContent = '...';
 
         const fd = new FormData();
         Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
@@ -589,36 +676,46 @@
           });
 
           if (res.ok) {
-            currEl.innerHTML = '';
-            const fin = document.createElement('span');
-            fin.className   = 'celtx-sd';
-            fin.style.marginTop = '2em';
-            fin.textContent = '(End of scene one.)';
-            fin.style.opacity    = '0';
-            fin.style.transition = 'opacity 0.5s ease';
-            currEl.appendChild(fin);
-            setTimeout(() => { fin.style.opacity = '1'; }, 100);
+            // Fade out content
+            histEl.style.transition = 'opacity 0.6s ease';
+            histEl.style.opacity = '0';
+            currEl.style.transition = 'opacity 0.6s ease';
+            currEl.style.opacity = '0';
+            if (footEl) { footEl.style.opacity = '0'; }
+
+            // BLACKOUT
+            envEl.style.backgroundColor = '#000';
+
+            setTimeout(() => {
+              histEl.innerHTML = '';
+              currEl.innerHTML = '';
+              histEl.style.opacity = '1';
+              currEl.style.opacity = '1';
+
+              const end = document.createElement('span');
+              end.className = 'celtx-sd';
+              end.style.color    = '#ffffff';
+              end.style.marginTop = '3em';
+              end.style.opacity  = '0';
+              end.style.transition = 'opacity 0.9s ease';
+              end.textContent = '(End of scene one.)';
+              currEl.appendChild(end);
+
+              requestAnimationFrame(() => requestAnimationFrame(() => {
+                end.style.opacity = '1';
+              }));
+            }, 1400);
+
           } else {
             btn.disabled    = false;
-            btn.textContent = 'Try again.';
+            btn.textContent = 'I am.';
           }
         } catch {
           btn.disabled    = false;
-          btn.textContent = 'Try again.';
+          btn.textContent = 'I am.';
         }
       }
 
-      // ── Header height ─────────────────────────────────
-      const headerEl = document.getElementById('site-header');
-      if (headerEl) {
-        const setH = () =>
-          document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
-        setH();
-        new ResizeObserver(setH).observe(headerEl);
-      }
-
-      // ── Init ──────────────────────────────────────────
-      showStep();
     })();
     </script>
 
