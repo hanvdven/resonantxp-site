@@ -14,339 +14,261 @@
   <script src="nav.js" defer></script>
   <style data-page-style>
     /* ===================================================
-       EXPERIENCES PAGE — HORIZONTAL PANEL SYSTEM
+       EXPERIENCES — THEATRE PLAYBILL
+       Dark background · Courier + serif mix · programme
        =================================================== */
 
-    /* Hide XP morph animation on this page (replaced by panel questions) */
-    body.experiences-page .brand-energy {
-      visibility: hidden;
+    /* Dark background on body + header */
+    body.experiences-page {
+      background: #0f1117;
     }
-
-    /* Mobile: collapse header to logo mark only */
-    @media (max-width: 640px) {
-      body.experiences-page .nav-links,
-      body.experiences-page .nav-sep,
-      body.experiences-page .brand-name { display: none; }
-      body.experiences-page .brand-visual { gap: 0; }
-      body.experiences-page .header-inner { padding: 0.1rem 1rem; }
-      body.experiences-page .logo-frame  { width: 40px; height: auto; }
+    body.experiences-page #site-header {
+      background: #0f1117;
+      border-bottom-color: #1e293b;
     }
-
-    /* ── Layout ─────────────────────────────────────── */
-    .xp-main {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      overflow: hidden;
+    body.experiences-page .brand-name,
+    body.experiences-page .nav-links a {
+      color: #94a3b8;
     }
-
-    .xp-track {
-      display: flex;
-      height: 100%;
-      transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
+    body.experiences-page .nav-links a:hover,
+    body.experiences-page .nav-links a.active {
+      color: #e2e8f0;
     }
-
-    .xp-panel {
-      width: 100vw;
-      height: 100%;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      padding: var(--header-h, 100px) 10vw 72px;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-
-    .xp-explore { background: #f7f6f3; }
-    .xp-expand  { background: #f0f4fb; }
-
-    /* ── Question + mode label ──────────────────────── */
-    .xp-panel-question {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(1.3rem, 2.4vw, 2rem);
-      font-style: italic;
+    body.experiences-page .nav-sep {
       color: #1e293b;
-      margin: 0 0 0.4rem;
-      line-height: 1.25;
-      flex-shrink: 0;
     }
 
-    .xp-panel-mode {
+    /* ── Page wrapper ────────────────────────────────── */
+    .xp-bill {
+      min-height: 100vh;
+      padding: calc(var(--header-h, 80px) + 4rem) 1rem 7rem;
+    }
+
+    .xp-bill-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
+    }
+
+    /* ── Programme header ────────────────────────────── */
+    .xp-bill-head {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .xp-bill-company {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      color: #2563eb;
+      margin: 0 0 0.5rem;
+      display: block;
+    }
+
+    .xp-bill-season {
       font-family: 'Martel Sans', system-ui, sans-serif;
       font-size: 0.62rem;
-      letter-spacing: 0.32em;
+      letter-spacing: 0.35em;
       text-transform: uppercase;
-      margin: 0 0 2.5rem;
-      flex-shrink: 0;
-    }
-    .xp-explore .xp-panel-mode { color: #94a3b8; }
-    .xp-expand  .xp-panel-mode { color: #2563eb; }
-
-    /* ── Panel content area ─────────────────────────── */
-    .xp-panel-content {
-      flex: 1;
-      overflow: hidden;
+      color: #334155;
+      display: block;
+      margin: 0 0 1.8rem;
     }
 
-    /* Reduce offsets on small screens to avoid overflow */
-    @media (max-width: 640px) {
-      .xp-panel .offset-1 { margin-left: 10px; }
-      .xp-panel .offset-2 { margin-left: 20px; }
+    .xp-bill-strapline {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: #475569;
+      line-height: 1.6;
+      margin: 0;
     }
 
-    /* ── Bottom nav bar ─────────────────────────────── */
-    .xp-bottom {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.8rem 2rem 1.2rem;
-      z-index: 10;
-    }
-
-    .xp-btn {
-      background: none;
+    /* ── Divider ─────────────────────────────────────── */
+    .xp-bill-rule {
       border: none;
-      cursor: pointer;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-      padding: 0.4rem 0.5rem;
-      transition: color 0.2s;
+      border-top: 1px solid #1e293b;
+      margin: 2.2rem 0;
     }
-    .xp-btn-start { color: #94a3b8; }
-    .xp-btn-next  { color: #334155; }
-    .xp-btn-start:hover,
-    .xp-btn-next:hover { color: #1e293b; }
 
-    .xp-dots {
-      display: flex;
-      gap: 7px;
-      align-items: center;
+    /* ── Production block ────────────────────────────── */
+    .xp-production {
+      margin: 0 0 2.5rem;
     }
-    .xp-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #cbd5e1;
-      transition: background 0.3s, transform 0.3s;
+
+    .xp-prod-num {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 0.78rem;
+      color: #2563eb;
+      display: block;
+      margin: 0 0 0.35rem;
+      letter-spacing: 0.08em;
     }
-    .xp-dot.active          { background: #475569; transform: scale(1.45); }
-    .xp-dot.expand.active   { background: #2563eb; }
+
+    .xp-prod-title {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+      font-weight: normal;
+      color: #f1f5f9;
+      margin: 0 0 0.8rem;
+      line-height: 1.2;
+    }
+
+    .xp-prod-desc {
+      font-size: 0.84rem;
+      color: #64748b;
+      line-height: 1.65;
+      margin: 0 0 0.85rem;
+    }
+
+    .xp-prod-emerges {
+      display: block;
+      font-style: italic;
+      font-size: 0.82rem;
+      color: #475569;
+      padding-left: 1.4rem;
+      border-left: 1px solid #1e293b;
+      line-height: 1.5;
+    }
+
+    /* ── Programme footer ────────────────────────────── */
+    .xp-bill-foot {
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .xp-bill-location {
+      font-size: 0.8rem;
+      color: #334155;
+      line-height: 1.9;
+      margin: 0 0 0.2rem;
+    }
+
+    .xp-bill-lang {
+      font-size: 0.78rem;
+      font-style: italic;
+      color: #1e293b;
+      margin: 0 0 2.2rem;
+    }
+
+    .xp-bill-cta {
+      display: inline-block;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #2563eb;
+      text-decoration: none;
+      border: 1px solid #1e3a8a;
+      padding: 0.55rem 1.4rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .xp-bill-cta:hover {
+      color: #93c5fd;
+      border-color: #2563eb;
+    }
+
+    @media (max-width: 560px) {
+      .xp-bill-inner { font-size: 11pt; }
+    }
   </style>
 </head>
 
 <body class="experiences-page">
-
   <div id="site-header"></div>
 
-  <main class="xp-main" id="xpMain">
+  <main style="position: relative; z-index: 1;">
+    <div class="xp-bill">
+      <div class="xp-bill-inner">
 
-    <div class="xp-track" id="xpTrack">
+        <!-- ── Programme header ──────────────────────── -->
+        <header class="xp-bill-head">
+          <span class="xp-bill-company">Resonant XP</span>
+          <span class="xp-bill-season">Season 2025 · 2026</span>
+          <p class="xp-bill-strapline">
+            Experiences are not delivered.<br>
+            They are entered.
+          </p>
+        </header>
 
-      <!-- ── 0 · EXPLORE · Arrival ──────────────────── -->
-      <section class="xp-panel xp-explore">
-        <p class="xp-panel-question">What is actually happening in this room?</p>
-        <p class="xp-panel-mode">Explore</p>
-        <div class="xp-panel-content">
-          <p class="scene-line">Experiences are not delivered.</p>
-          <p class="scene-line offset-1">They are entered.</p>
-          <p class="scene-line accent" style="margin-top:1.5rem;">Each XP is a designed situation.</p>
-          <p class="scene-line offset-2">Behaviour emerges. In real time.</p>
-          <p class="scene-line soft">Participants do not observe.<br>They act inside the system.</p>
-        </div>
-      </section>
+        <hr class="xp-bill-rule" />
 
-      <!-- ── 1 · EXPAND · XP-01 ─────────────────────── -->
-      <section class="xp-panel xp-expand">
-        <p class="xp-panel-question">What becomes possible if behaviour is made visible?</p>
-        <p class="xp-panel-mode">Expand</p>
-        <div class="xp-panel-content">
-          <p class="eyebrow">XP-01</p>
-          <h2 class="xp-title">Leadership Under Pressure</h2>
-          <p class="xp-body">A structured environment where participants must lead without full information, shifting conditions, and competing perspectives.</p>
-          <div class="xp-traits">
-            <p class="xp-trait">Uncertainty as a design element.</p>
-            <p class="xp-trait offset-1">Real-time decision making.</p>
-            <p class="xp-trait offset-2">Visible leadership patterns.</p>
-          </div>
-          <p class="xp-note">What emerges is not theory of leadership — but leadership as behaviour.</p>
-        </div>
-      </section>
+        <!-- ── XP–01 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–01</span>
+          <h2 class="xp-prod-title">Leadership Under Pressure</h2>
+          <p class="xp-prod-desc">
+            A structured environment where participants must lead without full
+            information, shifting conditions, and competing perspectives.
+            Uncertainty is a design element. Decisions are made in real time.
+          </p>
+          <em class="xp-prod-emerges">
+            What emerges is not theory of leadership —<br>
+            but leadership as behaviour.
+          </em>
+        </article>
 
-      <!-- ── 2 · EXPLORE · XP-02 ───────────────────── -->
-      <section class="xp-panel xp-explore">
-        <p class="xp-panel-question">What is the pattern underneath this?</p>
-        <p class="xp-panel-mode">Explore</p>
-        <div class="xp-panel-content">
-          <p class="eyebrow">XP-02</p>
-          <h2 class="xp-title">Collective Intelligence</h2>
-          <p class="xp-body">A dynamic group system where no single participant has control, yet decisions must continuously be made.</p>
-          <div class="xp-traits">
-            <p class="xp-trait">Distributed decision-making.</p>
-            <p class="xp-trait offset-1">Interaction-based emergence.</p>
-            <p class="xp-trait offset-2">Group awareness under pressure.</p>
-          </div>
-          <p class="xp-note">Teams discover how intelligence is not located in individuals — but in interaction.</p>
-        </div>
-      </section>
+        <hr class="xp-bill-rule" />
 
-      <!-- ── 3 · EXPAND · XP-03 ─────────────────────── -->
-      <section class="xp-panel xp-expand">
-        <p class="xp-panel-question">What wants to emerge from here?</p>
-        <p class="xp-panel-mode">Expand</p>
-        <div class="xp-panel-content">
-          <p class="eyebrow">XP-03</p>
-          <h2 class="xp-title">Embodied Communication</h2>
-          <p class="xp-body">A real-time interaction space where clarity, timing, and presence replace explanation as the primary communication tools.</p>
-          <div class="xp-traits">
-            <p class="xp-trait">Non-verbal awareness.</p>
-            <p class="xp-trait offset-1">Instant feedback loops.</p>
-            <p class="xp-trait offset-2">Presence under uncertainty.</p>
-          </div>
-          <p class="xp-note">Communication is not discussed — it is enacted.</p>
-        </div>
-      </section>
+        <!-- ── XP–02 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–02</span>
+          <h2 class="xp-prod-title">Collective Intelligence</h2>
+          <p class="xp-prod-desc">
+            A dynamic group system where no single participant has control,
+            yet decisions must continuously be made. Distributed by design.
+            Group awareness under pressure.
+          </p>
+          <em class="xp-prod-emerges">
+            Intelligence is not located in individuals —<br>
+            but in interaction.
+          </em>
+        </article>
 
-      <!-- ── 4 · EXPLORE · Context ─────────────────── -->
-      <section class="xp-panel xp-explore">
-        <p class="xp-panel-question">What are you noticing right now?</p>
-        <p class="xp-panel-mode">Explore</p>
-        <div class="xp-panel-content">
-          <p class="subtle">Designed and facilitated in Belgium, the Netherlands and Germany.</p>
-          <p class="soft" style="margin-top:0.4rem;font-style:italic;">In Dutch, English and German.</p>
-          <p class="eyebrow" style="margin-top:3rem;">From practice</p>
-          <ul class="ref-list">
-            <li>Organisational transformation — large retail organisation</li>
-            <li>Strategy alignment — retail sector</li>
-            <li>Leadership training and coaching — outcome-focused</li>
-          </ul>
-        </div>
-      </section>
+        <hr class="xp-bill-rule" />
 
-      <!-- ── 5 · EXPAND · CTA ───────────────────────── -->
-      <section class="xp-panel xp-expand">
-        <p class="xp-panel-question">What is one step further than you're willing to go?</p>
-        <p class="xp-panel-mode">Expand</p>
-        <div class="xp-panel-content">
-          <h2 style="font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.2;margin:0 0 1.5rem;max-width:26rem;">
-            Design an experience that changes how people act.
-          </h2>
-          <p class="xp-body" style="max-width:34rem;">If you want predefined training modules, there are many providers. If you want designed behavioural situations — we should talk.</p>
-          <a class="button button-primary" href="contact.html" style="margin-top:2.5rem;display:inline-block;">
-            Start a conversation
-          </a>
-        </div>
-      </section>
+        <!-- ── XP–03 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–03</span>
+          <h2 class="xp-prod-title">Embodied Communication</h2>
+          <p class="xp-prod-desc">
+            A real-time interaction space where clarity, timing, and presence
+            replace explanation as the primary communication tools.
+            Non-verbal awareness. Instant feedback loops.
+          </p>
+          <em class="xp-prod-emerges">
+            Communication is not discussed —<br>
+            it is enacted.
+          </em>
+        </article>
 
-    </div><!-- /xp-track -->
+        <hr class="xp-bill-rule" />
 
-    <!-- ── Bottom navigation ──────────────────────── -->
-    <div class="xp-bottom" id="xpBottom">
-      <button class="xp-btn xp-btn-start" id="xpBtnStart" type="button">← start</button>
-      <div class="xp-dots" id="xpDots"></div>
-      <button class="xp-btn xp-btn-next"  id="xpBtnNext"  type="button">→</button>
+        <!-- ── Footer ────────────────────────────────── -->
+        <footer class="xp-bill-foot">
+          <p class="xp-bill-location">
+            Belgium · Netherlands · Germany
+          </p>
+          <p class="xp-bill-lang">In Dutch, English and German.</p>
+          <a class="xp-bill-cta" href="contact.html">Start a conversation</a>
+        </footer>
+
+      </div>
     </div>
 
     <script>
-  (function () {
-    const track    = document.getElementById('xpTrack');
-    const btnStart = document.getElementById('xpBtnStart');
-    const btnNext  = document.getElementById('xpBtnNext');
-    const dotsEl   = document.getElementById('xpDots');
-    const mainEl   = document.getElementById('xpMain');
-    const panels   = Array.from(track.querySelectorAll('.xp-panel'));
-    const N        = panels.length;
-    let current    = 0;
-
-    // ── Build dots ──────────────────────────────────
-    panels.forEach(p => {
-      const d = document.createElement('span');
-      d.className = 'xp-dot' + (p.classList.contains('xp-expand') ? ' expand' : '');
-      dotsEl.appendChild(d);
-    });
-    const dots = Array.from(dotsEl.children);
-
-    // ── Sync UI to current panel ────────────────────
-    function sync() {
-      dots.forEach((d, i) => d.classList.toggle('active', i === current));
-      btnStart.style.visibility = current > 0 ? 'visible' : 'hidden';
-      btnNext.textContent = current === N - 1 ? 'Reach out →' : '→';
-    }
-
-    // ── Go to panel ─────────────────────────────────
-    function goTo(idx, animated) {
-      current = Math.max(0, Math.min(idx, N - 1));
-      track.style.transition = animated
-        ? 'transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)'
-        : 'none';
-      track.style.transform = `translateX(calc(${-current} * 100vw))`;
-      if (!animated) track.offsetWidth; // force reflow to apply no-transition snap
-      sync();
-    }
-
-    // ── Advance one panel ───────────────────────────
-    function advance() {
-      if (current === N - 1) {
-        if (typeof navigateTo === 'function') navigateTo('contact.html');
-        else window.location.href = 'contact.html';
-        return;
-      }
-      goTo(current + 1, true);
-    }
-
-    // ── Dissolve back to start ───────────────────────
-    function toStart() {
-      if (current === 0) return;
-      mainEl.style.transition = 'opacity 0.25s ease';
-      mainEl.style.opacity    = '0';
-      setTimeout(() => {
-        goTo(0, false);
-        mainEl.style.opacity = '1';
-      }, 260);
-    }
-
-    // ── Buttons ─────────────────────────────────────
-    btnNext.addEventListener('click',  advance);
-    btnStart.addEventListener('click', toStart);
-
-    // ── Keyboard — self-removing ─────────────────────
-    function onKey(e) {
-      if (!document.getElementById('xpTrack')) {
-        document.removeEventListener('keydown', onKey);
-        return;
-      }
-      if (e.key === 'ArrowRight') advance();
-      if (e.key === 'ArrowLeft')  toStart();
-    }
-    document.addEventListener('keydown', onKey);
-
-    // ── Touch swipe ──────────────────────────────────
-    let tx0 = 0;
-    track.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend',   e => {
-      const dx = e.changedTouches[0].clientX - tx0;
-      if (Math.abs(dx) < 40) return;
-      if (dx < 0) advance();
-      else        toStart();
-    }, { passive: true });
-
-    // ── Header height → CSS var ──────────────────────
-    const headerEl = document.getElementById('site-header');
-    if (headerEl) {
-      const applyH = () =>
+    (function () {
+      const headerEl = document.getElementById('site-header');
+      if (!headerEl) return;
+      const setH = () =>
         document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
-      applyH();
-      new ResizeObserver(applyH).observe(headerEl);
-    }
+      setH();
+      new ResizeObserver(setH).observe(headerEl);
+    })();
+    </script>
 
-    // ── Init ─────────────────────────────────────────
-    goTo(0, false);
-  })();
-  </script>
-
-  </main><!-- /xp-main -->
+  </main>
 
 </body>
 </html>
