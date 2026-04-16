@@ -60,6 +60,36 @@
     .xp-explore { background: #f7f6f3; }
     .xp-expand  { background: #f0f4fb; }
 
+    /* ── Right-edge fade to next panel colour ────────── */
+    .xp-panel { position: relative; }
+    .xp-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 10%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .xp-explore::after { background: linear-gradient(to right, transparent, #f0f4fb); }
+    .xp-expand::after  { background: linear-gradient(to right, transparent, #f7f6f3); }
+
+    /* ── Expand panels: right-aligned ────────────────── */
+    .xp-expand .xp-phase,
+    .xp-expand .xp-questions,
+    .xp-expand .xp-panel-content { text-align: right; }
+    .xp-expand .fw-list li {
+      padding-left: 0;
+      padding-right: 1.2em;
+      text-align: right;
+    }
+    .xp-expand .fw-list li::before { left: auto; right: 0; }
+    .xp-expand .fw-principles li {
+      padding-left: 0;
+      padding-right: 1.8em;
+      text-align: right;
+    }
+    .xp-expand .fw-principles li::before { left: auto; right: 0; }
+
     /* ── Phase label — prominent at top ─────────────── */
     .xp-phase {
       font-family: 'Martel Sans', system-ui, sans-serif;
@@ -371,8 +401,14 @@
       const counter = document.getElementById('xpCounter');
       const mainEl  = document.getElementById('xpMain');
       const panels  = Array.from(track.querySelectorAll('.xp-panel'));
-      const N       = panels.length;
-      let current   = 0;
+      const N       = panels.length; // 6 real panels
+
+      // ── Clone panel 0 at end for seamless wrap ──────
+      const clone0 = panels[0].cloneNode(true);
+      clone0.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone0);
+      const TOTAL = N + 1; // 7 slides (6 + clone)
+      let current = 0;
 
       // ── Question pools ──────────────────────────────
       const QUESTIONS = {
@@ -402,11 +438,11 @@
         return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
       }
 
-      // ── Populate question containers ────────────────
-      panels.forEach(panel => {
-        const pool = panel.classList.contains('xp-expand') ? 'expand' : 'explore';
+      // ── Populate question containers (all panels incl. clone) ──
+      [...panels, clone0].forEach(panel => {
         const container = panel.querySelector('[data-pool]');
-        if (!container) return;
+        if (!container || container.children.length) return;
+        const pool = panel.classList.contains('xp-expand') ? 'expand' : 'explore';
         const count = Math.random() < 0.5 ? 2 : 3;
         pickRandom(QUESTIONS[pool], count).forEach(q => {
           const p = document.createElement('p');
@@ -416,7 +452,7 @@
         });
       });
 
-      // ── Build dots ──────────────────────────────────
+      // ── Build dots (N real panels only) ────────────
       panels.forEach(p => {
         const d = document.createElement('span');
         d.className = 'xp-dot' + (p.classList.contains('xp-expand') ? ' expand' : '');
@@ -426,14 +462,15 @@
 
       // ── Sync UI ─────────────────────────────────────
       function sync() {
-        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        const realIdx = current % N;
+        dots.forEach((d, i) => d.classList.toggle('active', i === realIdx));
         counter.textContent =
-          String(current + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+          String(realIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
       }
 
-      // ── Go to panel ─────────────────────────────────
+      // ── Go to slide ──────────────────────────────────
       function goTo(idx, animated) {
-        current = ((idx % N) + N) % N;
+        current = idx;
         track.style.transition = animated
           ? 'transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)'
           : 'none';
@@ -442,10 +479,21 @@
         sync();
       }
 
-      // ── Advance (wraps) ─────────────────────────────
+      // ── Advance — seamless infinite right wrap ───────
       function advance() {
-        goTo(current + 1, true);
+        const next = current + 1;
+        goTo(next, true);
+        if (next === N) {
+          // Arrived at clone of panel 0 — snap silently to real panel 0
+          setTimeout(() => goTo(0, false), 680);
+        }
       }
+
+      // ── Click anywhere on panel → advance ───────────
+      mainEl.addEventListener('click', e => {
+        if (e.target.closest('button, a, input, textarea')) return;
+        advance();
+      });
 
       // ── Button ──────────────────────────────────────
       btnNext.addEventListener('click', advance);
