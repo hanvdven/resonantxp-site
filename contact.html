@@ -4,184 +4,221 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resonant XP | Begin the conversation</title>
-  <meta name="description" content="Start a conversation about designing an experience for your leadership team or organisation. Belgium, Netherlands and Germany." />
+  <meta name="description" content="Start a conversation about designing an experience for your leadership team or organisation." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Martel+Sans:wght@300;400;600;800&family=Linden+Hill:ital@0;1&display=swap" />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
   <style data-page-style>
     /* ===================================================
-       CONTACT — THEATRE SCRIPT FORMAT
-       Character names centred; dialogue in a column.
+       CONTACT — CELTX STAGE PLAY FORMAT
+       Left-flush character names · indented dialogue
+       Courier New throughout · white page → BLACKOUT
        =================================================== */
 
-    .script-page {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: calc(var(--header-h, 80px) + 3rem) 2rem 8rem;
-      font-family: 'Martel Sans', system-ui, sans-serif;
+    .celtx-env {
+      background: #ffffff;
+      min-height: 100vh;
+      padding: calc(var(--header-h, 80px) + 3rem) 1rem 8rem;
+      transition: background-color 1.5s ease;
     }
 
-    /* ── Opening stage direction ─────────────────────── */
-    .script-slug {
-      text-align: center;
-      font-size: 0.72rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: #94a3b8;
-      margin: 0 0 3.5rem;
-    }
-
-    /* ── Block = one exchange ────────────────────────── */
-    .script-block {
-      margin-bottom: 2.8rem;
-    }
-
-    /* ── Stage directions (italic, muted, bracketed) ─── */
-    .sd {
-      font-style: italic;
-      color: #94a3b8;
-      font-size: 0.8rem;
-      margin: 0.35rem 0 0;
+    /* ── Script page ─────────────────────────────────── */
+    .celtx-paper {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
       line-height: 1.5;
+      color: #000000;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 48px;
     }
 
-    /* ── Character name — CENTRED ────────────────────── */
-    .char {
+    /* ── ACT / SCENE headings ─────────────────────────── */
+    .celtx-act,
+    .celtx-scene {
       display: block;
       text-align: center;
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      margin: 0 0 0.4rem;
+      text-decoration: underline;
+      font-weight: normal;
+      margin: 0 0 0.8em;
+      font-size: 12pt;
     }
-    .char-chorus { color: #1e293b; }
-    .char-user   { color: #94a3b8; }
 
-    /* ── Dialogue ────────────────────────────────────── */
-    .dial {
+    /* ── Stage direction ──────────────────────────────── */
+    .celtx-sd {
       display: block;
-      /* screenplay dialogue column: indented ~25% from each side */
-      margin: 0 auto;
-      max-width: 72%;
-      text-align: left;
-    }
-    .dial-chorus {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(1.05rem, 2vw, 1.4rem);
       font-style: italic;
-      color: #1e293b;
-      line-height: 1.35;
-    }
-    .dial-user {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.88rem;
-      font-weight: 300;
-      color: #64748b;
-      line-height: 1.7;
-      white-space: pre-wrap;
+      padding-left: 3em;
+      padding-right: 3em;
+      margin: 0 0 2.5em;
+      color: #222;
     }
 
-    /* ── Inputs ──────────────────────────────────────── */
-    .script-input-wrap {
-      margin: 0.2rem auto 0;
-      max-width: 72%; /* same column as dialogue */
+    /* ── Exchange block ───────────────────────────────── */
+    .celtx-block { margin: 0; }
+
+    /* ── Character name — LEFT FLUSH, all caps ────────── */
+    .celtx-char {
+      display: block;
+      text-align: left;
+      text-transform: uppercase;
+      font-weight: normal;
+      margin: 1.6em 0 0;
+      font-size: 12pt;
+      letter-spacing: 0;
     }
 
-    .script-input {
+    /* RESONA — plain Courier */
+    .celtx-char-resona { color: #000; }
+
+    /* YOU — Averia Serif Libre italic, blue, clickable */
+    .celtx-char-you {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      color: #2563eb;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+
+    /* Name-entry hint */
+    .celtx-name-hint {
+      display: block;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9pt;
+      font-style: italic;
+      color: #94a3b8;
+      margin: 0;
+    }
+    .celtx-name-hint.hidden { display: none; }
+
+    /* Inline name input */
+    .celtx-name-inp {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #2563eb;
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 12pt;
+      color: #2563eb;
+      outline: none;
+      width: 14em;
+      padding: 0;
+      text-transform: uppercase;
+    }
+    .celtx-name-inp::placeholder {
+      color: #93c5fd;
+      text-transform: none;
+    }
+
+    /* ── Dialogue ─────────────────────────────────────── */
+    .celtx-dial {
+      display: block;
+      padding-left: 3em;
+      text-align: left;
+      margin: 0;
+      font-size: 12pt;
+    }
+    .celtx-dial-user {
+      font-style: italic;
+      color: #333;
+    }
+
+    /* ── Input field ──────────────────────────────────── */
+    .celtx-input-col {
+      display: block;
+      padding-left: 3em;
+      padding-right: 1em;
+    }
+
+    .celtx-input {
       display: block;
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1px solid #e2e8f0;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-weight: 300;
-      font-size: 0.88rem;
-      color: #1e293b;
-      padding: 0.15rem 0 0.35rem;
+      border-bottom: 1px solid #555;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
+      color: #000;
+      padding: 0 0 2px;
       outline: none;
       resize: none;
-      line-height: 1.7;
-      transition: border-bottom-color 0.2s;
+      line-height: 1.5;
+      overflow-y: hidden;
     }
-    .script-input:focus { border-bottom-color: #94a3b8; }
+    .celtx-input:focus { border-bottom-color: #000; }
 
-    .script-textarea { overflow-y: hidden; min-height: 1.7em; }
-
-    /* ── Continue cue ────────────────────────────────── */
-    .script-cue {
+    /* ── Continue cue ─────────────────────────────────── */
+    .celtx-cue {
       display: block;
-      width: 100%;
       text-align: right;
-      margin-top: 0.55rem;
+      margin-top: 5px;
       background: none;
       border: none;
       cursor: pointer;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #cbd5e1;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9pt;
+      color: #aaa;
       padding: 0;
-      transition: color 0.2s;
+      width: 100%;
+      transition: color 0.15s;
     }
-    .script-cue:hover { color: #475569; }
+    .celtx-cue:hover { color: #000; }
 
-    /* ── Options (ripple in) ─────────────────────────── */
+    /* ── Options — ripple in ──────────────────────────── */
     @keyframes rippleIn {
-      from { opacity: 0; transform: translateY(5px); }
+      from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .script-options {
-      margin: 0.2rem auto 0;
-      max-width: 72%;
-    }
+    .celtx-options { padding-left: 3em; }
 
-    .script-option {
+    .celtx-option {
       display: block;
       width: 100%;
       background: none;
       border: none;
       cursor: pointer;
       text-align: left;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12pt;
       font-style: italic;
-      font-size: 1rem;
-      color: #94a3b8;
-      padding: 0.2rem 0;
+      color: #666;
+      padding: 0;
+      line-height: 1.6;
       opacity: 0;
-      animation: rippleIn 0.35s ease forwards;
-      transition: color 0.2s;
+      animation: rippleIn 0.3s ease forwards;
+      transition: color 0.15s;
     }
-    .script-option:hover { color: #1e293b; }
+    .celtx-option:hover { color: #000; }
 
-    /* ── Send wrap ───────────────────────────────────── */
-    .script-send-wrap {
-      margin: 1.5rem auto 0;
-      max-width: 72%;
+    /* ── Send button ──────────────────────────────────── */
+    .celtx-send-col {
+      padding-left: 3em;
+      margin-top: 1.5em;
     }
 
-    /* ── History — faded back ────────────────────────── */
-    #scriptHistory .script-block { opacity: 0.45; }
+    /* ── History — faded ──────────────────────────────── */
+    #scriptHistory .celtx-block { opacity: 0.38; }
 
-    /* ── Footer note ─────────────────────────────────── */
-    .script-foot {
-      text-align: center;
-      margin-top: 5rem;
-      font-size: 0.76rem;
+    /* ── Foot note ────────────────────────────────────── */
+    .celtx-foot {
+      margin-top: 5em;
+      font-size: 9pt;
       font-style: italic;
-      color: #94a3b8;
+      color: #bbb;
+      text-align: center;
+      transition: opacity 0.5s ease;
     }
-    .script-foot a { text-decoration: underline; text-underline-offset: 2px; }
+    .celtx-foot a { color: #bbb; text-decoration: underline; }
 
-    @media (max-width: 480px) {
-      .script-page { padding-left: 1.2rem; padding-right: 1.2rem; }
-      .dial, .script-input-wrap, .script-options, .script-send-wrap { max-width: 90%; }
+    @media (max-width: 560px) {
+      .celtx-paper { padding: 0 20px; }
     }
   </style>
 </head>
@@ -190,313 +227,52 @@
   <div id="site-header"></div>
 
   <main style="position: relative; z-index: 1;">
-    <div class="script-page">
+    <div class="celtx-env" id="celtxEnv">
+      <div class="celtx-paper">
 
-      <p class="script-slug">[ An organisation in motion. ]</p>
+        <span class="celtx-act">ACT I</span>
+        <span class="celtx-scene">Scene 1</span>
+        <span class="celtx-sd" id="celtxTimeSD"></span>
 
-      <div id="scriptHistory"></div>
-      <div id="scriptCurrent"></div>
+        <div id="scriptHistory"></div>
+        <div id="scriptCurrent"></div>
 
-      <p class="script-foot">[ Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a> ]</p>
+        <p class="celtx-foot" id="celtxFoot">(Or write directly: <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>)</p>
 
+      </div>
     </div>
 
     <script>
     (function () {
+      'use strict';
+
       const histEl = document.getElementById('scriptHistory');
       const currEl = document.getElementById('scriptCurrent');
+      const envEl  = document.getElementById('celtxEnv');
+      const footEl = document.getElementById('celtxFoot');
 
-      let userName = null;
-      let stepIdx  = 0;
-      const formData = {};
+      let userName    = null;
+      let firstHintEl = null;
+      const formData  = {};
 
-      const STEPS = [
-        {
-          name:      'situation',
-          chorus:    'What is it?',
-          direction: '[ You don\'t need to be precise. A direction is enough. ]',
-          type:      'textarea'
-        },
-        {
-          name:   'name',
-          chorus: 'Who are you?',
-          type:   'text',
-          isName: true
-        },
-        {
-          name:   'email',
-          chorus: 'And how do I reach you?',
-          type:   'email'
-        },
-        {
-          name:    'location',
-          chorus:  'Where are you?',
-          type:    'options',
-          options: ['Belgium', 'Netherlands', 'Germany', 'Other']
-        },
-        {
-          name:    'language',
-          chorus:  'In which language?',
-          type:    'options',
-          options: ['English', 'Nederlands', 'Deutsch']
-        }
-      ];
+      // ── Dynamic time stage direction ─────────────────
+      (function () {
+        const now  = new Date();
+        const hhmm = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const hour = now.getHours();
+        let detail;
+        if      (hour >= 22 || hour < 5) detail = `It is late. A clock reads ${hhmm}. Someone is still here.`;
+        else if (hour < 9)               detail = `Early. A clock reads ${hhmm}. The day has not decided what it wants to be.`;
+        else if (hour < 12)              detail = `Morning. A clock reads ${hhmm}. The coffee is still warm.`;
+        else if (hour < 14)              detail = `Just after noon. A clock reads ${hhmm}. The sandwich is getting cold.`;
+        else if (hour < 17)              detail = `Afternoon. A clock reads ${hhmm}. The meeting that could have been an email has just ended.`;
+        else if (hour < 20)              detail = `Early evening. A clock reads ${hhmm}. The office is thinning out.`;
+        else                             detail = `Evening. A clock reads ${hhmm}. Someone is still at their desk.`;
+        const el = document.getElementById('celtxTimeSD');
+        if (el) el.textContent = detail;
+      })();
 
-      // ── Helpers ──────────────────────────────────────
-      function userLabel() {
-        return userName ? userName.split(' ')[0].toUpperCase() : '[NAAM]';
-      }
-
-      function updateNames() {
-        document.querySelectorAll('.js-user-name').forEach(el => {
-          el.textContent = userLabel();
-        });
-      }
-
-      // ── Build blocks ──────────────────────────────────
-      function makeChar(cls, text) {
-        const el = document.createElement('span');
-        el.className = 'char ' + cls;
-        el.textContent = text;
-        return el;
-      }
-
-      function makeChorusBlock(step) {
-        const wrap = document.createElement('div');
-        wrap.className = 'script-block script-chorus';
-
-        wrap.appendChild(makeChar('char-chorus', 'CHORUS'));
-
-        const line = document.createElement('span');
-        line.className = 'dial dial-chorus';
-        line.textContent = step.chorus;
-        wrap.appendChild(line);
-
-        if (step.direction) {
-          const dir = document.createElement('p');
-          dir.className = 'sd';
-          dir.textContent = step.direction;
-          wrap.appendChild(dir);
-        }
-
-        return wrap;
-      }
-
-      function makeUserInputBlock(step) {
-        const wrap = document.createElement('div');
-        wrap.className = 'script-block script-user-input';
-
-        const nameEl = makeChar('char-user js-user-name', userLabel());
-        wrap.appendChild(nameEl);
-
-        if (step.type === 'textarea') {
-          const inputWrap = document.createElement('div');
-          inputWrap.className = 'script-input-wrap';
-
-          const ta = document.createElement('textarea');
-          ta.className = 'script-input script-textarea';
-          ta.rows = 1;
-          ta.required = true;
-          inputWrap.appendChild(ta);
-
-          ta.addEventListener('input', () => {
-            ta.style.height = 'auto';
-            ta.style.height = ta.scrollHeight + 'px';
-          });
-
-          const cue = document.createElement('button');
-          cue.className = 'script-cue';
-          cue.type = 'button';
-          cue.textContent = 'continue →';
-          inputWrap.appendChild(cue);
-
-          wrap.appendChild(inputWrap);
-
-          const commit = () => { const v = ta.value.trim(); if (v) doCommit(step, v); };
-          cue.addEventListener('click', commit);
-          ta.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
-          });
-          setTimeout(() => ta.focus(), 80);
-
-        } else if (step.type === 'text' || step.type === 'email') {
-          const inputWrap = document.createElement('div');
-          inputWrap.className = 'script-input-wrap';
-
-          const inp = document.createElement('input');
-          inp.type = step.type;
-          inp.className = 'script-input';
-          inp.required = true;
-          inputWrap.appendChild(inp);
-
-          const cue = document.createElement('button');
-          cue.className = 'script-cue';
-          cue.type = 'button';
-          cue.textContent = 'continue →';
-          inputWrap.appendChild(cue);
-
-          wrap.appendChild(inputWrap);
-
-          const commit = () => {
-            const v = inp.value.trim();
-            if (!v) return;
-            if (step.type === 'email' && !v.includes('@')) { inp.focus(); return; }
-            doCommit(step, v);
-          };
-          cue.addEventListener('click', commit);
-          inp.addEventListener('keydown', e => {
-            if (e.key === 'Enter') { e.preventDefault(); commit(); }
-          });
-          setTimeout(() => inp.focus(), 80);
-
-        } else if (step.type === 'options') {
-          const opts = document.createElement('div');
-          opts.className = 'script-options';
-          step.options.forEach((opt, i) => {
-            const btn = document.createElement('button');
-            btn.className = 'script-option';
-            btn.type = 'button';
-            btn.textContent = opt;
-            btn.style.animationDelay = (i * 90) + 'ms';
-            btn.addEventListener('click', () => doCommit(step, opt));
-            opts.appendChild(btn);
-          });
-          wrap.appendChild(opts);
-        }
-
-        return wrap;
-      }
-
-      // ── Commit a step ─────────────────────────────────
-      function doCommit(step, value) {
-        formData[step.name] = value;
-
-        if (step.isName) {
-          userName = value;
-          updateNames();
-        }
-
-        // Move chorus block to history
-        const chorusEl = currEl.querySelector('.script-chorus');
-        if (chorusEl) histEl.appendChild(chorusEl);
-
-        // Completed user response
-        const doneBlock = document.createElement('div');
-        doneBlock.className = 'script-block';
-        doneBlock.appendChild(makeChar('char-user js-user-name', userLabel()));
-        const doneDial = document.createElement('span');
-        doneDial.className = 'dial dial-user';
-        doneDial.textContent = value;
-        doneBlock.appendChild(doneDial);
-        histEl.appendChild(doneBlock);
-
-        currEl.innerHTML = '';
-        stepIdx++;
-
-        if (stepIdx < STEPS.length) showStep();
-        else showSubmit();
-      }
-
-      // ── Show next step ─────────────────────────────────
-      function showStep() {
-        const step = STEPS[stepIdx];
-
-        const cb = makeChorusBlock(step);
-        cb.style.opacity = '0';
-        cb.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(cb);
-        setTimeout(() => { cb.style.opacity = '1'; }, 150);
-
-        setTimeout(() => {
-          const ib = makeUserInputBlock(step);
-          ib.style.opacity = '0';
-          ib.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(ib);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            ib.style.opacity = '1';
-          }));
-        }, 520);
-      }
-
-      // ── Submit step ────────────────────────────────────
-      function showSubmit() {
-        const block = document.createElement('div');
-        block.className = 'script-block';
-        block.appendChild(makeChar('char-chorus', 'CHORUS'));
-
-        const line = document.createElement('span');
-        line.className = 'dial dial-chorus';
-        line.textContent = 'Something will happen next.';
-        block.appendChild(line);
-
-        const dir = document.createElement('p');
-        dir.className = 'sd';
-        dir.textContent = '[ Your details are used only to respond to your message. ]';
-        block.appendChild(dir);
-
-        block.style.opacity = '0';
-        block.style.transition = 'opacity 0.4s ease';
-        currEl.appendChild(block);
-        setTimeout(() => { block.style.opacity = '1'; }, 150);
-
-        setTimeout(() => {
-          const sendWrap = document.createElement('div');
-          sendWrap.className = 'script-send-wrap';
-
-          const sendBtn = document.createElement('button');
-          sendBtn.className = 'button button-primary';
-          sendBtn.type = 'button';
-          sendBtn.textContent = 'Send.';
-          sendWrap.appendChild(sendBtn);
-
-          sendWrap.style.opacity = '0';
-          sendWrap.style.transition = 'opacity 0.4s ease';
-          currEl.appendChild(sendWrap);
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            sendWrap.style.opacity = '1';
-          }));
-
-          sendBtn.addEventListener('click', () => submitForm(sendBtn));
-        }, 520);
-      }
-
-      // ── Submit to Formspree ────────────────────────────
-      async function submitForm(btn) {
-        btn.disabled = true;
-        btn.textContent = 'Sending…';
-
-        const fd = new FormData();
-        Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
-        fd.append('_subject', 'New conversation — Resonant XP');
-
-        try {
-          const res = await fetch('https://formspree.io/f/xdaynqov', {
-            method: 'POST',
-            body: fd,
-            headers: { Accept: 'application/json' }
-          });
-
-          if (res.ok) {
-            currEl.innerHTML = '';
-            const closing = document.createElement('p');
-            closing.className = 'sd';
-            closing.style.textAlign = 'center';
-            closing.textContent = '[ End of scene one. ]';
-            closing.style.opacity = '0';
-            closing.style.transition = 'opacity 0.5s ease';
-            currEl.appendChild(closing);
-            setTimeout(() => { closing.style.opacity = '1'; }, 100);
-          } else {
-            btn.disabled = false;
-            btn.textContent = 'Try again.';
-          }
-        } catch {
-          btn.disabled = false;
-          btn.textContent = 'Try again.';
-        }
-      }
-
-      // ── Header height → --header-h ────────────────────
+      // ── Header height ─────────────────────────────────
       const headerEl = document.getElementById('site-header');
       if (headerEl) {
         const setH = () =>
@@ -505,8 +281,441 @@
         new ResizeObserver(setH).observe(headerEl);
       }
 
-      // ── Init ──────────────────────────────────────────
-      showStep();
+      // ── Helpers ───────────────────────────────────────
+      function userLabel() {
+        return userName ? userName.split(' ')[0].toUpperCase() : 'YOU';
+      }
+
+      function syncAllYouLabels() {
+        document.querySelectorAll('.js-you-label').forEach(el => {
+          if (!el.querySelector('input')) el.textContent = userLabel();
+        });
+        if (firstHintEl) firstHintEl.classList.add('hidden');
+      }
+
+      function fadeIn(el, delayMs) {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.45s ease';
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.style.opacity = '1';
+        })), delayMs || 0);
+      }
+
+      function scrollToBottom() {
+        setTimeout(() => {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 120);
+      }
+
+      // ── YOU label (name-editable) ─────────────────────
+      function makeYouLabel(isFirst) {
+        const labelEl = document.createElement('span');
+        labelEl.className = 'celtx-char celtx-char-you js-you-label';
+        labelEl.textContent = userLabel();
+        labelEl.addEventListener('click', () => activateName(labelEl));
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(labelEl);
+        if (isFirst) {
+          const hint = document.createElement('span');
+          hint.className = 'celtx-name-hint' + (userName ? ' hidden' : '');
+          hint.textContent = '(click to enter your name)';
+          firstHintEl = hint;
+          wrapper.appendChild(hint);
+        }
+        return wrapper;
+      }
+
+      function activateName(labelEl) {
+        if (labelEl.querySelector('input')) return;
+        const prev = labelEl.textContent;
+        const inp = document.createElement('input');
+        inp.className  = 'celtx-name-inp';
+        inp.type       = 'text';
+        inp.placeholder = 'your name';
+        labelEl.textContent = '';
+        labelEl.appendChild(inp);
+        inp.focus();
+        const confirm = () => {
+          const v = inp.value.trim();
+          if (v) { userName = v; formData['name'] = v; }
+          labelEl.textContent = userLabel();
+          syncAllYouLabels();
+        };
+        inp.addEventListener('blur', confirm);
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
+          if (e.key === 'Escape') { labelEl.textContent = prev; }
+        });
+      }
+
+      // ── Block builders ────────────────────────────────
+      function makeResonaBlock(text) {
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+        const name = document.createElement('span');
+        name.className = 'celtx-char celtx-char-resona';
+        name.textContent = 'RESONA';
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial';
+        dial.textContent = text;
+        wrap.appendChild(name);
+        wrap.appendChild(dial);
+        return wrap;
+      }
+
+      function makeYouStaticBlock(text, isFirst) {
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+        wrap.appendChild(makeYouLabel(isFirst));
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial celtx-dial-user';
+        dial.textContent = text;
+        wrap.appendChild(dial);
+        return wrap;
+      }
+
+      // ── Intro sequence (auto-play, 3 beats) ──────────
+      const INTRO = [
+        { role: 'resona', text: 'Something is different about you.' },
+        { role: 'you',    text: 'Yes. I have had a feeling for a while now.' },
+        { role: 'resona', text: 'As if you cannot just sit still? That small reflex — a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.' },
+      ];
+
+      const introTimings = [500, 2000, 3800];
+
+      INTRO.forEach((beat, i) => {
+        setTimeout(() => {
+          const el = beat.role === 'resona'
+            ? makeResonaBlock(beat.text)
+            : makeYouStaticBlock(beat.text, false);
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.45s ease';
+          histEl.appendChild(el);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            el.style.opacity = '1';
+          }));
+          scrollToBottom();
+        }, introTimings[i]);
+      });
+
+      // After last beat + reading time → first interactive step
+      setTimeout(showSituationStep, 6200);
+
+      // ── STEP 1: Situation ─────────────────────────────
+      function showSituationStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+
+        // YOU label (first interactive YOU — show name hint)
+        wrap.appendChild(makeYouLabel(true));
+
+        // Prelude line
+        const prelude = document.createElement('span');
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = 'Hmm. Let me be a bit more specific.';
+        wrap.appendChild(prelude);
+
+        // Textarea
+        const col = document.createElement('div');
+        col.className = 'celtx-input-col';
+        const ta = document.createElement('textarea');
+        ta.className = 'celtx-input';
+        ta.rows = 1;
+        ta.placeholder = '...';
+        ta.addEventListener('input', () => {
+          ta.style.height = 'auto';
+          ta.style.height = ta.scrollHeight + 'px';
+        });
+        const cue = document.createElement('button');
+        cue.className = 'celtx-cue';
+        cue.type = 'button';
+        cue.textContent = 'continue >';
+        col.appendChild(ta);
+        col.appendChild(cue);
+        wrap.appendChild(col);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        setTimeout(() => ta.focus(), 300);
+        scrollToBottom();
+
+        const commit = () => {
+          const v = ta.value.trim();
+          if (!v) return;
+          formData['situation'] = v;
+
+          // Build committed block for history
+          const done = makeYouStaticBlock('Hmm. Let me be a bit more specific.', false);
+          const doneDial = document.createElement('span');
+          doneDial.className = 'celtx-dial celtx-dial-user';
+          doneDial.textContent = v;
+          done.appendChild(doneDial);
+          histEl.appendChild(done);
+
+          currEl.innerHTML = '';
+          showLocationStep();
+        };
+
+        cue.addEventListener('click', commit);
+        ta.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        });
+      }
+
+      // ── STEP 2: Location ──────────────────────────────
+      function showLocationStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+
+        const name = document.createElement('span');
+        name.className = 'celtx-char celtx-char-resona';
+        name.textContent = 'RESONA';
+
+        const dial = document.createElement('span');
+        dial.className = 'celtx-dial';
+        dial.textContent = 'I see. Good fortune you operate in...';
+
+        const opts = document.createElement('div');
+        opts.className = 'celtx-options';
+        ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((loc, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'celtx-option';
+          btn.type = 'button';
+          btn.textContent = loc;
+          btn.style.animationDelay = (i * 90) + 'ms';
+          btn.addEventListener('click', () => selectLocation(loc, dial, opts, wrap));
+          opts.appendChild(btn);
+        });
+
+        wrap.appendChild(name);
+        wrap.appendChild(dial);
+        wrap.appendChild(opts);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        scrollToBottom();
+      }
+
+      function selectLocation(loc, dialEl, optsEl, wrapEl) {
+        formData['location'] = loc;
+
+        // Complete RESONA's line
+        dialEl.textContent = `I see. Good fortune you operate in ${loc}.`;
+        optsEl.remove();
+
+        // Move RESONA block to history
+        histEl.appendChild(wrapEl);
+
+        // Show YOU response
+        const youBlock = makeYouStaticBlock('I know right. I love it here.', false);
+        youBlock.style.opacity = '0';
+        youBlock.style.transition = 'opacity 0.45s ease';
+        histEl.appendChild(youBlock);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          youBlock.style.opacity = '1';
+        }));
+
+        scrollToBottom();
+        currEl.innerHTML = '';
+        setTimeout(showEmailStep, 1400);
+      }
+
+      // ── STEP 3: Email + Expectations ─────────────────
+      function showEmailStep() {
+        currEl.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+        wrap.appendChild(makeYouLabel(false));
+
+        // Prelude line
+        const prelude = document.createElement('span');
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+        wrap.appendChild(prelude);
+
+        // "They'll reach me at:" label
+        const emailLabel = document.createElement('span');
+        emailLabel.className = 'celtx-dial celtx-dial-user';
+        emailLabel.textContent = "They'll reach me at:";
+        wrap.appendChild(emailLabel);
+
+        // Email input
+        const emailCol = document.createElement('div');
+        emailCol.className = 'celtx-input-col';
+        const emailInp = document.createElement('input');
+        emailInp.type = 'email';
+        emailInp.className = 'celtx-input';
+        emailInp.placeholder = 'email address';
+        emailCol.appendChild(emailInp);
+        wrap.appendChild(emailCol);
+
+        // "They'll help me by:" label
+        const expLabel = document.createElement('span');
+        expLabel.className = 'celtx-dial celtx-dial-user';
+        expLabel.style.marginTop = '0.6em';
+        expLabel.textContent = "They'll help me by: (optional)";
+        wrap.appendChild(expLabel);
+
+        // Expectations textarea
+        const expCol = document.createElement('div');
+        expCol.className = 'celtx-input-col';
+        const expTa = document.createElement('textarea');
+        expTa.className = 'celtx-input';
+        expTa.rows = 1;
+        expTa.placeholder = '...';
+        expTa.addEventListener('input', () => {
+          expTa.style.height = 'auto';
+          expTa.style.height = expTa.scrollHeight + 'px';
+        });
+        expCol.appendChild(expTa);
+        wrap.appendChild(expCol);
+
+        // Continue cue
+        const cueCol = document.createElement('div');
+        cueCol.className = 'celtx-input-col';
+        const cue = document.createElement('button');
+        cue.className = 'celtx-cue';
+        cue.type = 'button';
+        cue.textContent = 'continue >';
+        cueCol.appendChild(cue);
+        wrap.appendChild(cueCol);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        setTimeout(() => emailInp.focus(), 300);
+        scrollToBottom();
+
+        const commit = () => {
+          const email = emailInp.value.trim();
+          if (!email || !email.includes('@')) { emailInp.focus(); return; }
+          formData['email'] = email;
+          const exp = expTa.value.trim();
+          if (exp) formData['expectations'] = exp;
+
+          // Build committed block for history
+          const done = document.createElement('div');
+          done.className = 'celtx-block';
+          done.appendChild(makeYouLabel(false));
+
+          const addLine = (text) => {
+            const s = document.createElement('span');
+            s.className = 'celtx-dial celtx-dial-user';
+            s.textContent = text;
+            done.appendChild(s);
+          };
+
+          addLine("I don't know. I have a strange feeling someone will reach out and listen to me.");
+          addLine(`They'll reach me at: ${email}`);
+          if (exp) addLine(`They'll help me by: ${exp}`);
+
+          histEl.appendChild(done);
+          currEl.innerHTML = '';
+          showSubmitStep();
+        };
+
+        cue.addEventListener('click', commit);
+        emailInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); expTa.focus(); }
+        });
+        expTa.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+        });
+      }
+
+      // ── STEP 4: Submit ────────────────────────────────
+      function showSubmitStep() {
+        currEl.innerHTML = '';
+
+        // RESONA
+        const resonaBlock = makeResonaBlock('Something shifted. Are you sure you are ready?');
+        fadeIn(resonaBlock, 150);
+        currEl.appendChild(resonaBlock);
+        scrollToBottom();
+
+        // YOU confirm button
+        setTimeout(() => {
+          const youWrap = document.createElement('div');
+          youWrap.className = 'celtx-block';
+          youWrap.appendChild(makeYouLabel(false));
+
+          const sendCol = document.createElement('div');
+          sendCol.className = 'celtx-send-col';
+          const btn = document.createElement('button');
+          btn.className = 'button button-primary';
+          btn.type = 'button';
+          btn.textContent = 'I am.';
+          sendCol.appendChild(btn);
+          youWrap.appendChild(sendCol);
+
+          fadeIn(youWrap, 0);
+          currEl.appendChild(youWrap);
+          scrollToBottom();
+
+          btn.addEventListener('click', () => submitForm(btn));
+        }, 700);
+      }
+
+      // ── Formspree submit + BLACKOUT ───────────────────
+      async function submitForm(btn) {
+        btn.disabled    = true;
+        btn.textContent = '...';
+
+        const fd = new FormData();
+        Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
+        fd.append('_subject', 'New conversation — Resonant XP');
+
+        try {
+          const res = await fetch('https://formspree.io/f/xdaynqov', {
+            method: 'POST', body: fd,
+            headers: { Accept: 'application/json' }
+          });
+
+          if (res.ok) {
+            // Fade out content
+            histEl.style.transition = 'opacity 0.6s ease';
+            histEl.style.opacity = '0';
+            currEl.style.transition = 'opacity 0.6s ease';
+            currEl.style.opacity = '0';
+            if (footEl) { footEl.style.opacity = '0'; }
+
+            // BLACKOUT
+            envEl.style.backgroundColor = '#000';
+
+            setTimeout(() => {
+              histEl.innerHTML = '';
+              currEl.innerHTML = '';
+              histEl.style.opacity = '1';
+              currEl.style.opacity = '1';
+
+              const end = document.createElement('span');
+              end.className = 'celtx-sd';
+              end.style.color    = '#ffffff';
+              end.style.marginTop = '3em';
+              end.style.opacity  = '0';
+              end.style.transition = 'opacity 0.9s ease';
+              end.textContent = '(End of scene one.)';
+              currEl.appendChild(end);
+
+              requestAnimationFrame(() => requestAnimationFrame(() => {
+                end.style.opacity = '1';
+              }));
+            }, 1400);
+
+          } else {
+            btn.disabled    = false;
+            btn.textContent = 'I am.';
+          }
+        } catch {
+          btn.disabled    = false;
+          btn.textContent = 'I am.';
+        }
+      }
+
     })();
     </script>
 

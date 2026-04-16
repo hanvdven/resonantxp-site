@@ -13,6 +13,21 @@
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
   <style data-page-style>
+    /* Blur column behind hero text */
+    .scene-blur-col {
+      position: relative;
+    }
+    .scene-blur-col::before {
+      content: '';
+      position: absolute;
+      inset: -2rem -2.5rem;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      background: rgba(249,250,251,0.55);
+      border-radius: 4px;
+      z-index: -1;
+    }
+
     .page-bg {
       position: fixed;
       inset: 0;
@@ -43,7 +58,7 @@
 
     <!-- HERO -->
     <section class="hero scene-hero">
-      <div class="scene">
+      <div class="scene scene-blur-col">
 
         <p class="hero-tagline" style="animation-delay:0.2s">Experience design for leadership and teams.</p>
 
