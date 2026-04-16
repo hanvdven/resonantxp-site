@@ -71,13 +71,13 @@
       overflow: hidden;
     }
     .note-card-front {
-      background: rgba(255,255,255,0.06);
+      background: rgba(20,20,20,1);
       transition: background 0.3s ease;
     }
-    .note-card:hover .note-card-front { background: rgba(255,255,255,0.09); }
+    .note-card:hover .note-card-front { background: rgba(28,28,28,1); }
     .note-card-back {
       transform: rotateY(180deg);
-      background: rgba(255,255,255,0.10);
+      background: rgba(25,25,25,1);
     }
     .note-card-title {
       font-family: 'Martel Sans', system-ui, sans-serif;
@@ -93,10 +93,14 @@
     .note-card:hover .note-card-title { opacity: 1; transform: translateY(0); }
     .note-card-text {
       font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(2rem, 4.2vw, 3.3rem);
-      line-height: 1.15;
+      font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+      line-height: 1.35;
       color: #ffffff;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.01em;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .note-card-context {
       font-family: 'Martel Sans', system-ui, sans-serif;
@@ -255,15 +259,14 @@
   // STATE
   // =============================================
   const MAX_VISIBLE = 5;
-  const pool = shuffle(allNotes);
+  let pool = shuffle(allNotes);
   let poolIdx = 0;
-  let slots = [{}, {}, {}, {}, {}];
-
-  const deck = document.getElementById('note-deck');
-  const fnCta = document.getElementById('fnCta');
+  let slots = [null, null, null, null, null]; // null = empty slot
+  let flippedSlots = new Set();               // indices of flipped cards
 
   function nextFromPool() {
-    return poolIdx < pool.length ? pool[poolIdx++] : null;
+    if (poolIdx >= pool.length) { pool = shuffle(allNotes); poolIdx = 0; }
+    return pool[poolIdx++];
   }
 
   // =============================================
@@ -273,22 +276,36 @@
     const wrap = document.createElement('div');
     wrap.className = 'note-card entering';
     wrap.setAttribute('tabindex', '0');
-
-    if (note.type === 'text') {
-      wrap.innerHTML = `
-        <div class="note-card-inner">
-          <div class="note-card-face note-card-front">
-            <div class="note-card-title">${note.title}</div>
-            <p class="note-card-text">${note.front}</p>
-          </div>
-          <div class="note-card-face note-card-back">
-            <span class="note-card-context">${note.title}</span>
-            <p class="note-card-insight">${note.back}</p>
-          </div>
-        </div>`;
-    }
-
+    wrap.innerHTML = `
+      <div class="note-card-inner">
+        <div class="note-card-face note-card-front">
+          <div class="note-card-title">${note.title}</div>
+          <p class="note-card-text">${note.front}</p>
+        </div>
+        <div class="note-card-face note-card-back">
+          <span class="note-card-context">${note.title}</span>
+          <p class="note-card-insight">${note.back}</p>
+        </div>
+      </div>`;
     return wrap;
+  }
+
+  // =============================================
+  // REMOVE A CARD (fade out, clear slot)
+  // =============================================
+  function removeCard(slotIdx) {
+    const entry = slots[slotIdx];
+    if (!entry) return;
+    slots[slotIdx] = null;
+    flippedSlots.delete(slotIdx);
+    const el = entry.el;
+    el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    el.style.opacity    = '0';
+    el.style.transform  = 'translateY(-10px) scale(0.95)';
+    setTimeout(() => {
+      const slotEl = document.getElementById(`slot-${slotIdx}`);
+      if (slotEl) slotEl.innerHTML = '';
+    }, 320);
   }
 
   // =============================================
@@ -299,46 +316,62 @@
     const slotEl = document.getElementById(`slot-${slotIdx}`);
     slotEl.innerHTML = '';
     slotEl.appendChild(el);
-
     if (delay) el.style.animationDelay = delay + 'ms';
 
-    const entry = { note, el, flipped: false };
-    slots[slotIdx] = entry;
+    slots[slotIdx] = { note, el };
 
-    const handleClick = () => {
-      if (!entry.flipped) {
-        entry.flipped = true;
-        el.classList.add('flipped');
-        for (let i = 0; i < MAX_VISIBLE; i++) {
-          if (i !== slotIdx && slots[i].flipped) {
-            slots[i].flipped = false;
-            slots[i].el.classList.remove('flipped');
-          }
-        }
-      } else {
-        entry.flipped = false;
-        el.classList.remove('flipped');
-      }
-    };
-
-    el.addEventListener('click', handleClick);
+    const act = () => handleClick(slotIdx);
+    el.addEventListener('click', act);
     el.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
     });
   }
 
   // =============================================
-  // FILL ALL SLOTS
+  // CLICK HANDLER
   // =============================================
-  function fillAllSlots() {
-    for (let i = 0; i < MAX_VISIBLE; i++) {
-      const note = nextFromPool();
-      if (!note) break;
-      spawnIntoSlot(i, note, i * 120);
+  function handleClick(slotIdx) {
+    if (flippedSlots.size === 0) {
+      // Phase A: flip this card + remove 1–3 other random cards
+      const entry = slots[slotIdx];
+      if (!entry) return;
+      entry.el.classList.add('flipped');
+      flippedSlots.add(slotIdx);
+
+      const others = shuffle(
+        Array.from({ length: MAX_VISIBLE }, (_, i) => i)
+          .filter(i => i !== slotIdx && slots[i])
+      );
+      const count = Math.min(others.length, 1 + Math.floor(Math.random() * 3));
+      others.slice(0, count).forEach(i => removeCard(i));
+
+    } else {
+      // Phase B: remove all flipped cards, then refill to 5
+      [...flippedSlots].forEach(i => removeCard(i));
+      flippedSlots.clear();
+      setTimeout(refillSlots, 380);
     }
   }
 
-  fillAllSlots();
+  // =============================================
+  // REFILL EMPTY SLOTS
+  // =============================================
+  function refillSlots() {
+    let delay = 0;
+    for (let i = 0; i < MAX_VISIBLE; i++) {
+      if (!slots[i]) {
+        spawnIntoSlot(i, nextFromPool(), delay);
+        delay += 110;
+      }
+    }
+  }
+
+  // =============================================
+  // INIT
+  // =============================================
+  for (let i = 0; i < MAX_VISIBLE; i++) {
+    spawnIntoSlot(i, nextFromPool(), i * 120);
+  }
   </script>
 
   </main>
