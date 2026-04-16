@@ -22,6 +22,8 @@
       min-height: 100vh;
       padding: calc(var(--header-h, 80px) + 3rem) 1rem 8rem;
       transition: background-color 1.5s ease;
+      display: flex;
+      flex-direction: column;
     }
 
     .celtx-paper {
@@ -32,6 +34,15 @@
       max-width: 680px;
       margin: 0 auto;
       padding: 0 48px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    #scriptHistory {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 1rem;
     }
 
     .celtx-act, .celtx-scene {
@@ -130,7 +141,7 @@
       display: block;
       padding-left: 3em;
       padding-right: 1em;
-      margin-top: 0.5em;
+      margin-top: 1.2em;
     }
 
     .celtx-input {
@@ -186,6 +197,7 @@
 
     /* ── History — full opacity, blue user text ──── */
     #scriptHistory .celtx-block { opacity: 1; }
+    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; }
 
     /* ── Foot note ───────────────────────────────── */
     .celtx-foot {
