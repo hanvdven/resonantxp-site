@@ -420,7 +420,7 @@ section p {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.4rem;
 }
 
 .nav-links a {
@@ -534,7 +534,7 @@ section p {
 .site-footer {
   border-top: 1px solid rgba(148, 163, 184, 0.18);
   padding: 1.5rem 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: transparent;
 }
 
 .footer-inner {

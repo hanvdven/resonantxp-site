@@ -18,17 +18,13 @@
        6 panels · Explore/Expand oscillating · wraps
        =================================================== */
 
-    /* Hide XP morph on this page */
-    body.framework-page .brand-energy { visibility: hidden; }
-
-    /* Mobile: collapse header */
-    @media (max-width: 640px) {
-      body.framework-page .nav-links,
-      body.framework-page .nav-sep,
+    /* Mobile: collapse header only when screen is truly narrow */
+    @media (max-width: 480px) {
+      body.framework-page .nav-links { display: none; }
       body.framework-page .brand-name { display: none; }
       body.framework-page .brand-visual { gap: 0; }
       body.framework-page .header-inner { padding: 0.1rem 1rem; }
-      body.framework-page .logo-frame  { width: 40px; height: auto; }
+      body.framework-page .logo-frame  { width: 36px; height: auto; }
     }
 
     /* ── Layout ─────────────────────────────────────── */
@@ -209,9 +205,13 @@
       line-height: 1.5;
     }
 
+    /* Expand panels: push content clear of the right-edge fade (10%) */
+    .xp-expand { padding-right: 14vw; padding-left: 6vw; }
+
     /* Reduce offsets on small screens */
     @media (max-width: 640px) {
-      .xp-panel { padding-left: 6vw; padding-right: 6vw; }
+      .xp-panel  { padding-left: 6vw; padding-right: 6vw; }
+      .xp-expand { padding-right: 12vw; padding-left: 4vw; }
     }
 
     /* ── Bottom nav bar ─────────────────────────────── */
