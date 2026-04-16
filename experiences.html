@@ -26,10 +26,10 @@
     }
 
     .xp-bill-inner {
-      max-width: 560px;
+      max-width: 600px;
       margin: 0 auto;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 12pt;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 1rem;
     }
 
     /* ── Programme header ────────────────────────────── */
@@ -58,10 +58,11 @@
     }
 
     .xp-bill-strapline {
-      font-size: 0.82rem;
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-size: 1rem;
       font-style: italic;
       color: #475569;
-      line-height: 1.6;
+      line-height: 1.7;
       margin: 0;
     }
 
@@ -74,43 +75,50 @@
 
     /* ── Production block ────────────────────────────── */
     .xp-production {
-      margin: 0 0 2.5rem;
+      margin: 0 0 4rem;
     }
+    /* Slight horizontal stagger for playfulness */
+    .xp-production:nth-child(odd)  { margin-left: 0; margin-right: 2.5rem; }
+    .xp-production:nth-child(even) { margin-left: 2.5rem; margin-right: 0; }
 
     .xp-prod-num {
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-style: italic;
-      font-size: 0.78rem;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
       color: #2563eb;
       display: block;
-      margin: 0 0 0.35rem;
-      letter-spacing: 0.08em;
+      margin: 0 0 0.5rem;
     }
 
     .xp-prod-title {
       font-family: 'Linden Hill', Georgia, serif;
-      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
       font-weight: normal;
+      font-style: italic;
       color: #1e293b;
-      margin: 0 0 0.8rem;
-      line-height: 1.2;
+      margin: 0 0 1rem;
+      line-height: 1.15;
     }
 
     .xp-prod-desc {
-      font-size: 1.06rem;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 1.0rem;
+      font-weight: 300;
       color: #64748b;
-      line-height: 1.65;
-      margin: 0 0 0.85rem;
+      line-height: 1.75;
+      margin: 0 0 1rem;
     }
 
     .xp-prod-emerges {
       display: block;
+      font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
-      font-size: 1.0rem;
-      color: #475569;
+      font-size: 1.05rem;
+      color: #334155;
       padding-left: 1.4rem;
-      border-left: 1px solid #d1d5db;
-      line-height: 1.5;
+      border-left: 2px solid #2563eb;
+      line-height: 1.6;
     }
 
     /* ── Programme footer ────────────────────────────── */

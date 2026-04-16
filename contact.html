@@ -246,8 +246,9 @@
 
       let userName    = null;
       let firstHintEl = null;
-      let situationTA = null; // ref to enable after name entered
+      let situationTA = null;
       const formData  = {};
+      let introResumed = false; // scoped — resets on each navigation
 
       // ── Dynamic time stage direction ─────────────────
       (function () {
@@ -291,8 +292,8 @@
           situationTA.focus();
         }
         // Continue animation after name entry
-        if (userName && !window._introResumed) {
-          window._introResumed = true;
+        if (userName && !introResumed) {
+          introResumed = true;
           continueAfterName();
         }
       }
