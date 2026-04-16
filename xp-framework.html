@@ -12,127 +12,478 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
+  <style data-page-style>
+    /* ===================================================
+       XP-FRAMEWORK — HORIZONTAL PANEL SYSTEM
+       6 panels · Explore/Expand oscillating · wraps
+       =================================================== */
+
+    /* Hide XP morph on this page */
+    body.framework-page .brand-energy { visibility: hidden; }
+
+    /* Mobile: collapse header */
+    @media (max-width: 640px) {
+      body.framework-page .nav-links,
+      body.framework-page .nav-sep,
+      body.framework-page .brand-name { display: none; }
+      body.framework-page .brand-visual { gap: 0; }
+      body.framework-page .header-inner { padding: 0.1rem 1rem; }
+      body.framework-page .logo-frame  { width: 40px; height: auto; }
+    }
+
+    /* ── Layout ─────────────────────────────────────── */
+    .xp-main {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .xp-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .xp-panel {
+      width: 100vw;
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      padding: var(--header-h, 100px) 10vw 72px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .xp-explore { background: #f7f6f3; }
+    .xp-expand  { background: #f0f4fb; }
+
+    /* ── Phase label — prominent at top ─────────────── */
+    .xp-phase {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin: 0 0 0.5rem;
+      flex-shrink: 0;
+    }
+    .xp-explore .xp-phase { color: #1e293b; }
+    .xp-expand  .xp-phase { color: #2563eb; }
+
+    /* ── Questions below phase label ────────────────── */
+    .xp-questions {
+      margin: 0 0 2rem;
+      flex-shrink: 0;
+    }
+    .xp-question {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(0.8rem, 1.4vw, 1rem);
+      font-style: italic;
+      color: #94a3b8;
+      margin: 0 0 0.1em;
+      line-height: 1.35;
+    }
+
+    /* ── Panel content area ─────────────────────────── */
+    .xp-panel-content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Content elements ───────────────────────────── */
+    .fw-title {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.05rem, 2vw, 1.4rem);
+      font-style: italic;
+      color: #1e293b;
+      margin: 0 0 0.1em;
+      line-height: 1.25;
+    }
+    .fw-subtitle {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin: 0 0 1.4em;
+    }
+    .fw-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.2em;
+    }
+    .fw-list li {
+      font-size: 0.85rem;
+      color: #475569;
+      padding: 0.18em 0 0.18em 1.2em;
+      position: relative;
+      line-height: 1.45;
+    }
+    .fw-list li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: #cbd5e1;
+    }
+    .fw-point {
+      margin: 0 0 1.1em;
+    }
+    .fw-point-label {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0 0 0.25em;
+    }
+    .fw-point-text {
+      font-size: 0.88rem;
+      color: #334155;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .fw-principles {
+      list-style: none;
+      padding: 0;
+      counter-reset: principle;
+      margin: 0 0 1.2em;
+    }
+    .fw-principles li {
+      counter-increment: principle;
+      font-size: 0.85rem;
+      color: #475569;
+      padding: 0.22em 0 0.22em 1.8em;
+      position: relative;
+      line-height: 1.45;
+    }
+    .fw-principles li::before {
+      content: counter(principle) '.';
+      position: absolute;
+      left: 0;
+      color: #94a3b8;
+      font-size: 0.8em;
+    }
+    .fw-note {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(0.88rem, 1.5vw, 1.05rem);
+      font-style: italic;
+      color: #64748b;
+      margin: 0.8em 0 0.4em;
+      line-height: 1.5;
+    }
+    .fw-closing {
+      font-size: 0.85rem;
+      color: #475569;
+      margin: 0.5em 0 1.4em;
+      line-height: 1.5;
+    }
+
+    /* Reduce offsets on small screens */
+    @media (max-width: 640px) {
+      .xp-panel { padding-left: 6vw; padding-right: 6vw; }
+    }
+
+    /* ── Bottom nav bar ─────────────────────────────── */
+    .xp-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 2rem 1.2rem;
+      z-index: 10;
+    }
+
+    .xp-counter {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      color: #94a3b8;
+    }
+
+    .xp-btn-next {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      padding: 0.4rem 0.5rem;
+      color: #334155;
+      transition: color 0.2s;
+    }
+    .xp-btn-next:hover { color: #1e293b; }
+
+    .xp-dots {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+    .xp-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .xp-dot.active          { background: #475569; transform: scale(1.45); }
+    .xp-dot.expand.active   { background: #2563eb; }
+  </style>
 </head>
+
 <body class="framework-page">
   <div id="site-header"></div>
-  <main class="framework-main">
-    <section class="framework-hero">
-      <div class="container">
-        <p class="framework-tag">Framework</p>
-        <h1 class="framework-title">EXPLORE → EXPAND</h1>
-        <p class="framework-intro">This framework describes how experiences evolve in real time. Not as phases in a process, but as shifts in collective cognition. It is designed for facilitation, collaboration, and systems where outcomes cannot be fully predefined.</p>
-      </div>
-    </section>
 
-    <section class="framework-grid">
-      <article class="stage-card">
-        <span class="stage-label">EXPLORE</span>
-        <h2 class="stage-name">EXPLORE is the phase of alignment.</h2>
-        <p class="stage-description">It is where the system becomes legible.</p>
+  <main class="xp-main" id="xpMain">
+    <div class="xp-track" id="xpTrack">
 
-        <ul class="stage-list">
-          <li>participants attune to each other</li>
-          <li>assumptions are surfaced, not resolved</li>
-          <li>context becomes shared rather than individual</li>
-          <li>tension is named without being solved</li>
-        </ul>
-
-        <div class="stage-keypoint">
-          <strong>Functional role</strong>
-          <p>EXPLORE reduces hidden variance in perception. It does not create agreement. It creates mutual visibility.</p>
+      <!-- ── 0 · EXPLORE · Alignment ──────────────── -->
+      <section class="xp-panel xp-explore">
+        <p class="xp-phase">Explore</p>
+        <div class="xp-questions" data-pool="explore"></div>
+        <div class="xp-panel-content">
+          <p class="fw-title">EXPLORE is the phase of alignment.</p>
+          <p class="fw-subtitle">It is where the system becomes legible.</p>
+          <ul class="fw-list">
+            <li>participants attune to each other</li>
+            <li>assumptions are surfaced, not resolved</li>
+            <li>context becomes shared rather than individual</li>
+            <li>tension is named without being solved</li>
+          </ul>
+          <div class="fw-point">
+            <p class="fw-point-label">Key principle</p>
+            <p class="fw-point-text">You cannot expand what is not yet shared.</p>
+          </div>
         </div>
+      </section>
 
-        <div class="stage-keypoint">
-          <strong>Failure mode</strong>
-          <p>When EXPLORE is rushed: expansion becomes noise, ideas are built on misaligned assumptions, energy increases but direction fragments.</p>
+      <!-- ── 1 · EXPAND · Generative deviation ────── -->
+      <section class="xp-panel xp-expand">
+        <p class="xp-phase">Expand</p>
+        <div class="xp-questions" data-pool="expand"></div>
+        <div class="xp-panel-content">
+          <p class="fw-title">EXPAND is the phase of generative deviation.</p>
+          <p class="fw-subtitle">It is where new material enters the system.</p>
+          <ul class="fw-list">
+            <li>new interpretations emerge</li>
+            <li>intuition is allowed to surface without justification</li>
+            <li>associations are widened</li>
+            <li>unexpected connections are welcomed</li>
+          </ul>
+          <div class="fw-point">
+            <p class="fw-point-label">Key principle</p>
+            <p class="fw-point-text">Expansion without alignment is dispersion.</p>
+          </div>
         </div>
+      </section>
 
-        <div class="stage-keypoint">
-          <strong>Key principle</strong>
-          <p>You cannot expand what is not yet shared.</p>
+      <!-- ── 2 · EXPLORE · Functional role ────────── -->
+      <section class="xp-panel xp-explore">
+        <p class="xp-phase">Explore</p>
+        <div class="xp-questions" data-pool="explore"></div>
+        <div class="xp-panel-content">
+          <div class="fw-point">
+            <p class="fw-point-label">Functional role</p>
+            <p class="fw-point-text">EXPLORE reduces hidden variance in perception. It does not create agreement. It creates mutual visibility.</p>
+          </div>
+          <div class="fw-point">
+            <p class="fw-point-label">Failure mode</p>
+            <p class="fw-point-text">When EXPLORE is rushed: expansion becomes noise, ideas are built on misaligned assumptions, energy increases but direction fragments.</p>
+          </div>
+          <div class="fw-point">
+            <p class="fw-point-label">In practice</p>
+            <p class="fw-point-text">The discomfort before clarity is not a problem. It is the work.</p>
+          </div>
         </div>
+      </section>
 
-        <div class="subprinciples">
-          <p class="subprinciples-label">Sub-principles</p>
-          <ol class="subprinciples-list">
+      <!-- ── 3 · EXPAND · Functional role ─────────── -->
+      <section class="xp-panel xp-expand">
+        <p class="xp-phase">Expand</p>
+        <div class="xp-questions" data-pool="expand"></div>
+        <div class="xp-panel-content">
+          <div class="fw-point">
+            <p class="fw-point-label">Functional role</p>
+            <p class="fw-point-text">EXPAND increases the possibility space. It introduces novelty, ambiguity, and directional divergence.</p>
+          </div>
+          <div class="fw-point">
+            <p class="fw-point-label">Failure mode</p>
+            <p class="fw-point-text">When EXPAND is premature: it becomes brainstorming without grounding, novelty replaces coherence, participants lose shared reference points.</p>
+          </div>
+          <div class="fw-point">
+            <p class="fw-point-label">In practice</p>
+            <p class="fw-point-text">The edge of coherence is where new form begins.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 4 · EXPLORE · Sub-principles ─────────── -->
+      <section class="xp-panel xp-explore">
+        <p class="xp-phase">Explore</p>
+        <div class="xp-questions" data-pool="explore"></div>
+        <div class="xp-panel-content">
+          <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
+          <ol class="fw-principles">
             <li>Name what is present — not what should be.</li>
             <li>Alignment is not agreement. It is shared visibility.</li>
             <li>A question held open is worth more than a premature answer.</li>
             <li>The discomfort before clarity is not a problem. It is the work.</li>
             <li>What is unspoken shapes the room more than what is said.</li>
           </ol>
+          <p class="fw-note">EXPLORE and EXPAND are not sequential steps. They are oscillations.</p>
         </div>
-      </article>
+      </section>
 
-      <article class="stage-card">
-        <span class="stage-label">EXPAND</span>
-        <h2 class="stage-name">EXPAND is the phase of generative deviation.</h2>
-        <p class="stage-description">It is where new material enters the system.</p>
-
-        <ul class="stage-list">
-          <li>new interpretations emerge</li>
-          <li>intuition is allowed to surface without justification</li>
-          <li>associations are widened</li>
-          <li>unexpected connections are welcomed</li>
-        </ul>
-
-        <div class="stage-keypoint">
-          <strong>Functional role</strong>
-          <p>EXPAND increases the possibility space. It introduces novelty, ambiguity, and directional divergence.</p>
-        </div>
-
-        <div class="stage-keypoint">
-          <strong>Failure mode</strong>
-          <p>When EXPAND is premature: it becomes brainstorming without grounding, novelty replaces coherence, participants lose shared reference points.</p>
-        </div>
-
-        <div class="stage-keypoint">
-          <strong>Key principle</strong>
-          <p>Expansion without alignment is dispersion.</p>
-        </div>
-
-        <div class="subprinciples">
-          <p class="subprinciples-label">Sub-principles</p>
-          <ol class="subprinciples-list">
+      <!-- ── 5 · EXPAND · Sub-principles + closing ── -->
+      <section class="xp-panel xp-expand">
+        <p class="xp-phase">Expand</p>
+        <div class="xp-questions" data-pool="expand"></div>
+        <div class="xp-panel-content">
+          <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
+          <ol class="fw-principles">
             <li>The unexpected connection is not a mistake. Follow it.</li>
             <li>Intuition arrives before justification. Let it.</li>
             <li>Novelty without grounding is noise. Grounding without novelty is stasis.</li>
             <li>The edge of coherence is where new form begins.</li>
             <li>Expansion is not chaos. It is a wider form of order.</li>
           </ol>
+          <p class="fw-closing">Good experiences do not resolve tension. They learn how to move through it without collapse.</p>
+          <a class="button button-primary" href="contact.html" style="display:inline-block;">
+            Start a conversation
+          </a>
         </div>
-      </article>
-    </section>
+      </section>
 
-    <section class="framework-footer">
-      <div class="container">
-        <p class="framework-note">EXPLORE and EXPAND are not sequential steps. They are oscillations.</p>
+    </div><!-- /xp-track -->
 
-        <div class="framework-flow">
-          <p>EXPLORE sharpens perception</p>
-          <p>EXPAND increases possibility</p>
-          <p>EXPLORE recalibrates meaning</p>
-          <p>EXPAND tests new reality edges</p>
-        </div>
-
-        <p class="framework-closing">Good experiences do not resolve tension. They learn how to move through it without collapse.</p>
-
-        <div class="framework-cta">
-          <a class="button button-primary" href="experiences.html">See the experiences</a>
-          <a class="button button-secondary" href="contact.html">Start a conversation</a>
-        </div>
-
-        <a class="framework-return" href="index.html">← Return to home</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>Resonant XP — Experience design for behaviour, interaction &amp; leadership</p>
-      <a href="mailto:lab@resonantxp.com">lab@resonantxp.com</a>
+    <!-- ── Bottom navigation ──────────────────────── -->
+    <div class="xp-bottom" id="xpBottom">
+      <span class="xp-counter" id="xpCounter">01 / 06</span>
+      <div class="xp-dots" id="xpDots"></div>
+      <button class="xp-btn-next" id="xpBtnNext" type="button">→</button>
     </div>
-  </footer>
+
+    <script>
+    (function () {
+      const track   = document.getElementById('xpTrack');
+      const btnNext = document.getElementById('xpBtnNext');
+      const dotsEl  = document.getElementById('xpDots');
+      const counter = document.getElementById('xpCounter');
+      const mainEl  = document.getElementById('xpMain');
+      const panels  = Array.from(track.querySelectorAll('.xp-panel'));
+      const N       = panels.length;
+      let current   = 0;
+
+      // ── Question pools ──────────────────────────────
+      const QUESTIONS = {
+        explore: [
+          'What is actually present in this room?',
+          'What is the pattern underneath this?',
+          'What are you noticing right now?',
+          'What has not yet been named?',
+          'What is the tension that keeps returning?',
+          'Where does the energy go when no one is watching?',
+          'What would you say if you were certain it would be heard?',
+          'What assumption is everyone sharing without knowing?',
+        ],
+        expand: [
+          'What becomes possible if you let this go further?',
+          'What wants to emerge from here?',
+          'What is one step further than seems safe?',
+          'What would surprise you to discover is true?',
+          'If you followed the unexpected connection, where would it lead?',
+          'What is the edge of your current frame?',
+          'What have you not yet allowed yourself to consider?',
+          'What if the constraint is also the opening?',
+        ],
+      };
+
+      function pickRandom(arr, n) {
+        return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+      }
+
+      // ── Populate question containers ────────────────
+      panels.forEach(panel => {
+        const pool = panel.classList.contains('xp-expand') ? 'expand' : 'explore';
+        const container = panel.querySelector('[data-pool]');
+        if (!container) return;
+        const count = Math.random() < 0.5 ? 2 : 3;
+        pickRandom(QUESTIONS[pool], count).forEach(q => {
+          const p = document.createElement('p');
+          p.className = 'xp-question';
+          p.textContent = q;
+          container.appendChild(p);
+        });
+      });
+
+      // ── Build dots ──────────────────────────────────
+      panels.forEach(p => {
+        const d = document.createElement('span');
+        d.className = 'xp-dot' + (p.classList.contains('xp-expand') ? ' expand' : '');
+        dotsEl.appendChild(d);
+      });
+      const dots = Array.from(dotsEl.children);
+
+      // ── Sync UI ─────────────────────────────────────
+      function sync() {
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        counter.textContent =
+          String(current + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+      }
+
+      // ── Go to panel ─────────────────────────────────
+      function goTo(idx, animated) {
+        current = ((idx % N) + N) % N;
+        track.style.transition = animated
+          ? 'transform 0.65s cubic-bezier(0.4, 0, 0.2, 1)'
+          : 'none';
+        track.style.transform = `translateX(calc(${-current} * 100vw))`;
+        if (!animated) track.offsetWidth;
+        sync();
+      }
+
+      // ── Advance (wraps) ─────────────────────────────
+      function advance() {
+        goTo(current + 1, true);
+      }
+
+      // ── Button ──────────────────────────────────────
+      btnNext.addEventListener('click', advance);
+
+      // ── Keyboard ────────────────────────────────────
+      function onKey(e) {
+        if (!document.getElementById('xpTrack')) {
+          document.removeEventListener('keydown', onKey);
+          return;
+        }
+        if (e.key === 'ArrowRight') advance();
+      }
+      document.addEventListener('keydown', onKey);
+
+      // ── Touch swipe ─────────────────────────────────
+      let tx0 = 0;
+      track.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
+      track.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - tx0;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0) advance();
+      }, { passive: true });
+
+      // ── Header height → CSS var ──────────────────────
+      const headerEl = document.getElementById('site-header');
+      if (headerEl) {
+        const applyH = () =>
+          document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+        applyH();
+        new ResizeObserver(applyH).observe(headerEl);
+      }
+
+      // ── Init ─────────────────────────────────────────
+      goTo(0, false);
+    })();
+    </script>
+
+  </main><!-- /xp-main -->
 
 </body>
 </html>
