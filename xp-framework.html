@@ -86,19 +86,78 @@
     }
     .xp-expand .fw-principles li::before { left: auto; right: 0; }
 
-    /* ── Phase label — prominent at top ─────────────── */
+    /* ── Phase label — XP styled like header ─────────── */
     .xp-phase {
-      font-family: 'Linden Hill', Georgia, serif;
       font-size: clamp(2.8rem, 6vw, 5rem);
-      font-weight: normal;
-      font-style: italic;
-      letter-spacing: 0.01em;
       line-height: 1;
       margin: 0 0 0.5rem;
       flex-shrink: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
     }
-    .xp-explore .xp-phase { color: #1e293b; }
-    .xp-expand  .xp-phase { color: #2563eb; }
+    .xp-expand .xp-phase { flex-direction: row-reverse; }
+
+    .phase-e {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      color: #94a3b8;
+      font-size: 0.6em;
+      padding-bottom: 0.08em;
+    }
+
+    .phase-xp {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-style: normal;
+      font-weight: normal;
+      color: #1e293b;
+      letter-spacing: -0.01em;
+    }
+
+    .phase-suffix {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #2563eb;
+      display: inline-block;
+      animation: phaseSuffixFloat 3.5s ease-in-out infinite;
+    }
+    .xp-expand .phase-suffix {
+      animation-name: phaseSuffixFloatR;
+    }
+
+    @keyframes phaseSuffixFloat {
+      0%,100% { transform: translate(0, 0) rotate(-0.3deg); }
+      30%     { transform: translate(1px, -3px) rotate(0.4deg); }
+      65%     { transform: translate(-1px, -2px) rotate(-0.5deg); }
+    }
+    @keyframes phaseSuffixFloatR {
+      0%,100% { transform: translate(0, 0) rotate(0.3deg); }
+      30%     { transform: translate(-1px, -3px) rotate(-0.4deg); }
+      65%     { transform: translate(1px, -2px) rotate(0.5deg); }
+    }
+
+    /* ── First-visit scroll hint arrow ───────────────── */
+    .xp-scroll-hint {
+      position: fixed;
+      bottom: 3.2rem;
+      right: 2.2rem;
+      z-index: 20;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .xp-scroll-hint svg { overflow: visible; }
+    .xp-scroll-hint-text {
+      font-family: 'Indie Flower', cursive;
+      font-size: 0.78rem;
+      color: #2563eb;
+      opacity: 0.65;
+      display: block;
+      text-align: right;
+      margin-top: 0.15rem;
+    }
+    .xp-scroll-hint.hidden { opacity: 0; }
 
     /* ── Questions below phase label ────────────────── */
     .xp-questions {
@@ -269,7 +328,7 @@
 
       <!-- ── 0 · EXPLORE · Alignment ──────────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPLORE is the phase of alignment.</p>
@@ -289,7 +348,7 @@
 
       <!-- ── 1 · EXPAND · Generative deviation ────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPAND is the phase of generative deviation.</p>
@@ -309,7 +368,7 @@
 
       <!-- ── 2 · EXPLORE · Functional role ────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -329,7 +388,7 @@
 
       <!-- ── 3 · EXPAND · Functional role ─────────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -349,7 +408,7 @@
 
       <!-- ── 4 · EXPLORE · Sub-principles ─────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -366,7 +425,7 @@
 
       <!-- ── 5 · EXPAND · Sub-principles + closing ── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -385,6 +444,15 @@
       </section>
 
     </div><!-- /xp-track -->
+
+    <!-- ── Scroll hint arrow (first visit) ──────── -->
+    <div class="xp-scroll-hint" id="xpScrollHint">
+      <svg width="90" height="40" viewBox="0 0 90 40" aria-hidden="true">
+        <path d="M4 20 C15 8, 35 6, 52 14 C62 18, 68 22, 72 28" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <path d="M66 24 L72 28 L70 20" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+      </svg>
+      <span class="xp-scroll-hint-text">click to continue</span>
+    </div>
 
     <!-- ── Bottom navigation ──────────────────────── -->
     <div class="xp-bottom" id="xpBottom">
@@ -479,8 +547,18 @@
         sync();
       }
 
+      // ── Hide scroll hint on first advance ───────────
+      const hintEl = document.getElementById('xpScrollHint');
+      let hintHidden = false;
+      function hideHint() {
+        if (hintHidden || !hintEl) return;
+        hintHidden = true;
+        hintEl.classList.add('hidden');
+      }
+
       // ── Advance — seamless infinite right wrap ───────
       function advance() {
+        hideHint();
         const next = current + 1;
         goTo(next, true);
         if (next === N) {

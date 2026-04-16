@@ -26,9 +26,10 @@
     }
     .fn-wave {
       fill: none;
-      stroke: rgba(255,255,255,0.12);
-      stroke-width: 2.2;
+      stroke: rgba(255,255,255,0.05);
+      stroke-width: 1.8;
       stroke-linecap: round;
+      filter: blur(1.2px);
     }
     .field-notes-main {
       position: relative;
@@ -94,12 +95,12 @@
     .note-card:hover .note-card-title { opacity: 1; transform: translateY(0); }
     .note-card-text {
       font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(1rem, 1.6vw, 1.2rem);
-      line-height: 1.45;
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 1.1;
       color: #ffffff;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.03em;
       display: -webkit-box;
-      -webkit-line-clamp: 4;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }

@@ -436,6 +436,7 @@ section p {
 .nav-links a.active {
   color: #0f172a;
   font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .nav-sep {
@@ -547,6 +548,15 @@ section p {
   font-size: 0.95rem;
 }
 
+
+/* ===== PAGE-SPECIFIC BODY BACKGROUNDS ===== */
+body.experiences-page {
+  background: #f7f6f3;
+}
+
+body.contact-page {
+  background: #ffffff;
+}
 
 /* ===== FIELD NOTES PAGE ===== */
 body.field-notes-page {
@@ -666,10 +676,14 @@ body.field-notes-page {
 
 .note-card-text {
   font-family: var(--font-logo);
-  font-size: clamp(2rem, 4.2vw, 3.3rem);
-  line-height: 1.15;
+  font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+  line-height: 1.1;
   color: #ffffff;
   letter-spacing: -0.03em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .note-card-context {

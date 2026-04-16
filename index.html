@@ -164,47 +164,46 @@
       </div>
     </section>
 
+    <script>
+    (function() {
+      const svg = document.getElementById('indexBgSvg');
+      if (!svg) return;
+      const W = 1440, H = 900, STEP = 6, N = 12;
+      const waveLines = [], waveConfigs = [];
+      for (let i = 0; i < N; i++) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('class', 'page-wave');
+        svg.appendChild(path);
+        waveLines.push(path);
+        waveConfigs.push({
+          baseY:      (H / (N - 1)) * i,
+          speed:      0.08 + Math.random() * 0.06,
+          phase:      Math.random() * Math.PI * 2,
+          amp:        12 + Math.random() * 18,
+          wavelength: 0.003 + Math.random() * 0.002,
+          direction:  Math.random() < 0.5 ? 1 : -1,
+        });
+      }
+      let t = 0;
+      function animateBg() {
+        if (!svg.isConnected) return;
+        t += 0.024;
+        waveLines.forEach((path, i) => {
+          const cfg = waveConfigs[i];
+          const pts = [];
+          for (let x = 0; x <= W; x += STEP) {
+            const y = cfg.baseY + Math.sin(x * cfg.wavelength * cfg.direction + t * cfg.speed + cfg.phase) * cfg.amp;
+            pts.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`);
+          }
+          path.setAttribute('d', pts.join(' '));
+        });
+        requestAnimationFrame(animateBg);
+      }
+      animateBg();
+    })();
+    </script>
+
   </main>
-
-
-  <script>
-  (function() {
-    const svg = document.getElementById('indexBgSvg');
-    if (!svg) return;
-    const W = 1440, H = 900, STEP = 6, N = 12;
-    const waveLines = [], waveConfigs = [];
-    for (let i = 0; i < N; i++) {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('class', 'page-wave');
-      svg.appendChild(path);
-      waveLines.push(path);
-      waveConfigs.push({
-        baseY:      (H / (N - 1)) * i,
-        speed:      0.08 + Math.random() * 0.06,
-        phase:      Math.random() * Math.PI * 2,
-        amp:        12 + Math.random() * 18,
-        wavelength: 0.003 + Math.random() * 0.002,
-        direction:  Math.random() < 0.5 ? 1 : -1,
-      });
-    }
-    let t = 0;
-    function animateBg() {
-      if (!svg.isConnected) return;
-      t += 0.024;
-      waveLines.forEach((path, i) => {
-        const cfg = waveConfigs[i];
-        const pts = [];
-        for (let x = 0; x <= W; x += STEP) {
-          const y = cfg.baseY + Math.sin(x * cfg.wavelength * cfg.direction + t * cfg.speed + cfg.phase) * cfg.amp;
-          pts.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`);
-        }
-        path.setAttribute('d', pts.join(' '));
-      });
-      requestAnimationFrame(animateBg);
-    }
-    animateBg();
-  })();
-  </script>
 
   <!-- FOOTER -->
   <footer class="site-footer">
