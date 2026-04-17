@@ -27,8 +27,6 @@
       min-height: 100vh;
       padding: var(--header-h, 80px) 1rem 8rem;
       transition: background-color 1.5s ease;
-      display: flex;
-      flex-direction: column;
     }
 
     .celtx-paper {
@@ -39,15 +37,11 @@
       max-width: 680px;
       margin: 0 auto;
       padding: 0 48px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
     }
 
     #scriptHistory {
-      flex: 1;
-      overflow-y: auto;
-      padding-bottom: 1rem;
+      overflow-y: visible;
+      padding-bottom: 0;
     }
 
     .celtx-act, .celtx-scene {
@@ -101,15 +95,17 @@
 
     .celtx-dial-user {
       color: #2563eb;
+      font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
     }
 
     .celtx-dial-user[data-editable] {
       cursor: pointer;
+      text-decoration: underline dotted rgba(37,99,235,0.4);
+      text-underline-offset: 3px;
     }
     .celtx-dial-user[data-editable]:hover {
-      text-decoration: underline;
-      text-decoration-style: dotted;
+      text-decoration-color: rgba(37,99,235,0.75);
     }
 
     /* ── Inky inline inputs ───────────────────────── */
@@ -173,6 +169,18 @@
       transition: color 0.15s;
     }
     .loc-option:hover { color: #1d4ed8; }
+
+    /* Committed country name — clickable to re-select */
+    .loc-editable {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      color: #2563eb;
+      cursor: pointer;
+      text-decoration: underline dotted rgba(37,99,235,0.45);
+      text-underline-offset: 3px;
+      display: inline;
+    }
+    .loc-editable:hover { text-decoration-color: rgba(37,99,235,0.75); }
 
     /* ── Options block (intent) ───────────────────── */
     .celtx-options { padding-left: 3em; }
@@ -265,7 +273,7 @@
         else if (hour < 9)               detail = `Early. A clock reads ${hhmm}. The day has not decided what it wants to be.`;
         else if (hour < 12)              detail = `Morning. A clock reads ${hhmm}. The coffee is still warm.`;
         else if (hour < 14)              detail = `Just after noon. A clock reads ${hhmm}. The sandwich is getting cold.`;
-        else if (hour < 17)             detail = `Afternoon. A clock reads ${hhmm}. The meeting that could have been an email has just ended.`;
+        else if (hour < 17)              detail = `Afternoon. A clock reads ${hhmm}. The meeting that could have been an email has just ended.`;
         else if (hour < 20)              detail = `Early evening. A clock reads ${hhmm}. The office is thinning out.`;
         else                             detail = `Evening. A clock reads ${hhmm}. Someone is still at their desk.`;
         const el = document.getElementById('celtxTimeSD');
@@ -307,13 +315,14 @@
         return wrap;
       }
 
-      function makeEditableLine(initialText, fieldName, prefix) {
+      // Committed editable line — dotted underline, click to re-edit
+      function makeEditableLine(initialText, fieldName, prefix, onChange) {
         const wrap = document.createElement('span');
         wrap.className = 'celtx-dial celtx-dial-user';
         wrap.setAttribute('data-editable', fieldName);
         wrap.textContent = prefix ? prefix + initialText : initialText;
         wrap.addEventListener('click', () => {
-          if (wrap.querySelector('input, textarea')) return;
+          if (wrap.querySelector('input')) return;
           const current = formData[fieldName] || initialText;
           const inp = document.createElement('input');
           inp.type = fieldName === 'email' ? 'email' : 'text';
@@ -325,15 +334,19 @@
           wrap.appendChild(inp);
           inp.focus();
           inp.select();
-          const commit = () => {
+          let done2 = false;
+          const doCommit = () => {
+            if (done2) return;
+            done2 = true;
             const v = inp.value.trim() || current;
             formData[fieldName] = v;
+            if (onChange) onChange(v);
             wrap.textContent = prefix ? prefix + v : v;
           };
-          inp.addEventListener('blur', commit);
+          inp.addEventListener('blur', doCommit);
           inp.addEventListener('keydown', e => {
             if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
-            if (e.key === 'Escape') { wrap.textContent = prefix ? prefix + current : current; }
+            if (e.key === 'Escape') { done2 = true; wrap.textContent = prefix ? prefix + current : current; }
           });
         });
         return wrap;
@@ -351,15 +364,16 @@
         setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 120);
       }
 
-      // ── Intro ─────────────────────────────────────────
+      // ── Intro: RESONA opener, then immediately YOU name input ─────────
       const r1 = makeResonaBlock('Something is different about you.');
       r1.style.opacity = '0';
       r1.style.transition = 'opacity 0.45s ease';
       histEl.appendChild(r1);
       setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
         r1.style.opacity = '1';
-      })), 500);
-      setTimeout(showNameStep, 1600);
+      })), 300);
+      // Bug 8: show name input quickly (800ms) so no gap below opener
+      setTimeout(showNameStep, 800);
 
       // ── STEP 0: Name ──────────────────────────────────
       function showNameStep() {
@@ -374,10 +388,10 @@
         const dialEl = document.createElement('span');
         dialEl.className = 'celtx-dial';
 
+        // Bug 1: no ellipsis placeholder — dotted border-bottom is the cue
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.className = 'celtx-ink';
-        inp.placeholder = '·  ·  ·  ·  ·  ·  ·';
         inp.setAttribute('autocomplete', 'off');
         inp.style.width = '12em';
 
@@ -403,14 +417,13 @@
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
-          // Save name block to history
+          // Bug 3: committed name uses makeEditableLine (clickable/editable)
           const done = document.createElement('div');
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
-          const dd = document.createElement('span');
-          dd.className = 'celtx-dial celtx-dial-user';
-          dd.textContent = userName || '—';
-          done.appendChild(dd);
+          done.appendChild(makeEditableLine(userName || '—', 'name', '', v2 => {
+            if (v2 && v2 !== '—') userName = v2;
+          }));
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
@@ -423,11 +436,9 @@
           if (idleTimer) clearTimeout(idleTimer);
           if (inp.value.trim()) idleTimer = setTimeout(commit, 3000);
         });
-
         inp.addEventListener('keydown', e => {
           if (e.key === 'Enter') { e.preventDefault(); commit(); }
         });
-
         inp.addEventListener('blur', () => {
           if (inp.value.trim() && !introResumed) commit();
         });
@@ -454,10 +465,10 @@
         prelude.textContent = 'Let me be a bit more specific about what I\'m looking for.';
         wrap.appendChild(prelude);
 
+        // Bug 1: no ellipsis placeholder
         const ta = document.createElement('textarea');
         ta.className = 'celtx-ink';
         ta.rows = 1;
-        ta.placeholder = '· · · · · · · · · · · · · · ·';
         wrap.appendChild(ta);
 
         fadeIn(wrap, 150);
@@ -466,10 +477,13 @@
         scrollToBottom();
 
         let idleTimer = null;
+        let committed = false; // Bug 5: guard against double-commit
 
         const commit = () => {
+          if (committed) return;
           const v = ta.value.trim();
           if (!v) return;
+          committed = true;
           if (idleTimer) clearTimeout(idleTimer);
           formData['situation'] = v;
 
@@ -493,17 +507,41 @@
           if (idleTimer) clearTimeout(idleTimer);
           if (ta.value.trim()) idleTimer = setTimeout(commit, 3000);
         });
-
         ta.addEventListener('keydown', e => {
           if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
         });
-
-        ta.addEventListener('blur', () => {
-          if (ta.value.trim()) commit();
-        });
+        ta.addEventListener('blur', () => { if (ta.value.trim()) commit(); });
       }
 
       // ── STEP 2: Location ──────────────────────────────
+      function buildCountryDial(dialEl, selectedLoc) {
+        while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
+        dialEl.appendChild(document.createTextNode('Good fortune you operate in '));
+        const locSpan = document.createElement('span');
+        locSpan.className = 'loc-editable';
+        locSpan.textContent = selectedLoc;
+        // Bug 3: clicking committed country re-shows options
+        locSpan.addEventListener('click', () => {
+          while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
+          dialEl.appendChild(document.createTextNode('Good fortune you operate in '));
+          ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((l, i) => {
+            const opt = document.createElement('span');
+            opt.className = 'loc-option';
+            opt.textContent = `[${l}]`; // Bug 6
+            opt.style.opacity = '0';
+            opt.style.animation = `rippleIn 0.3s ease ${i * 90}ms forwards`;
+            opt.addEventListener('click', () => {
+              formData['location'] = l;
+              buildCountryDial(dialEl, l);
+            });
+            dialEl.appendChild(opt);
+            if (i < 3) dialEl.appendChild(document.createTextNode('\u00a0'));
+          });
+        });
+        dialEl.appendChild(locSpan);
+        dialEl.appendChild(document.createTextNode('.'));
+      }
+
       function showLocationStep() {
         currEl.innerHTML = '';
         const wrap = document.createElement('div');
@@ -517,10 +555,11 @@
         dial.className = 'celtx-dial';
         dial.appendChild(document.createTextNode('Good fortune you operate in '));
 
+        // Bug 6: country options in [ ] brackets
         ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((loc, i) => {
           const opt = document.createElement('span');
           opt.className = 'loc-option';
-          opt.textContent = loc;
+          opt.textContent = `[${loc}]`;
           opt.style.opacity = '0';
           opt.style.animation = `rippleIn 0.3s ease ${i * 90}ms forwards`;
           opt.addEventListener('click', () => selectLocation(loc, dial, wrap));
@@ -530,7 +569,6 @@
 
         wrap.appendChild(nameEl);
         wrap.appendChild(dial);
-
         fadeIn(wrap, 150);
         currEl.appendChild(wrap);
         scrollToBottom();
@@ -538,8 +576,8 @@
 
       function selectLocation(loc, dialEl, wrapEl) {
         formData['location'] = loc;
-        while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
-        dialEl.textContent = `Good fortune you operate in ${loc}.`;
+        // Bug 3: committed country is editable via buildCountryDial
+        buildCountryDial(dialEl, loc);
         histEl.appendChild(wrapEl);
 
         const youBlock = document.createElement('div');
@@ -562,10 +600,87 @@
           scrollToBottom();
         }, 1000);
 
-        setTimeout(showIntentStep, 2400);
+        // Bug 7: email comes before intent
+        setTimeout(showEmailStep, 2400);
       }
 
-      // ── STEP 2b: Intent ───────────────────────────────
+      // ── STEP 3: Email (Bug 7: now before intent) ──────
+      function showEmailStep() {
+        currEl.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'celtx-block';
+
+        wrap.appendChild(makeYouCharEl());
+
+        const line1 = document.createElement('span');
+        line1.className = 'celtx-dial celtx-dial-user';
+        line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+        wrap.appendChild(line1);
+
+        const line2 = document.createElement('span');
+        line2.className = 'celtx-dial celtx-dial-user';
+        line2.appendChild(document.createTextNode("They'll reach me at "));
+
+        // Bug 1: no ellipsis placeholder
+        const emailInp = document.createElement('input');
+        emailInp.type = 'email';
+        emailInp.className = 'celtx-ink';
+        emailInp.style.width = '14em';
+        line2.appendChild(emailInp);
+        wrap.appendChild(line2);
+
+        const emailErr = document.createElement('span');
+        emailErr.className = 'celtx-dial';
+        emailErr.style.cssText = 'font-size:0.8em;color:#ef4444;display:none;';
+        emailErr.textContent = 'that does not look like an email address.';
+        wrap.appendChild(emailErr);
+
+        fadeIn(wrap, 150);
+        currEl.appendChild(wrap);
+        setTimeout(() => emailInp.focus(), 300);
+        scrollToBottom();
+
+        let idleTimer = null;
+        let submitted = false;
+
+        const commit = () => {
+          if (submitted) return;
+          const email = emailInp.value.trim();
+          const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+          if (!valid) { emailErr.style.display = 'block'; emailInp.focus(); return; }
+          emailErr.style.display = 'none';
+          if (idleTimer) clearTimeout(idleTimer);
+          submitted = true;
+          formData['email'] = email;
+
+          const done = document.createElement('div');
+          done.className = 'celtx-block';
+          done.appendChild(makeYouCharEl());
+          const dl1 = document.createElement('span');
+          dl1.className = 'celtx-dial celtx-dial-user';
+          dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+          done.appendChild(dl1);
+          done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
+          histEl.appendChild(done);
+
+          currEl.innerHTML = '';
+          // Bug 7: next is intent, not submit
+          showIntentStep();
+        };
+
+        emailInp.addEventListener('input', () => {
+          if (idleTimer) clearTimeout(idleTimer);
+          if (emailInp.value.trim()) idleTimer = setTimeout(commit, 3000);
+        });
+        emailInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        });
+        emailInp.addEventListener('blur', () => {
+          if (emailInp.value.trim() && !submitted) commit();
+        });
+      }
+
+      // ── STEP 4: Intent (Bug 7: now after email) ────────
       function showIntentStep() {
         currEl.innerHTML = '';
         const wrap = document.createElement('div');
@@ -582,10 +697,11 @@
         const opts = document.createElement('div');
         opts.className = 'celtx-options';
 
+        // Bug 6: options in [ ] brackets
         const curiousBtn = document.createElement('button');
         curiousBtn.className = 'celtx-option';
         curiousBtn.type = 'button';
-        curiousBtn.textContent = 'I am just curious.';
+        curiousBtn.textContent = '[I am just curious]';
         curiousBtn.style.animationDelay = '0ms';
         curiousBtn.addEventListener('click', () => {
           formData['intent'] = 'curious';
@@ -602,13 +718,13 @@
           histEl.appendChild(yb);
           currEl.innerHTML = '';
           scrollToBottom();
-          setTimeout(showEmailStep, 1000);
+          setTimeout(showSubmitStep, 800);
         });
 
         const explainBtn = document.createElement('button');
         explainBtn.className = 'celtx-option';
         explainBtn.type = 'button';
-        explainBtn.textContent = 'Let me explain:';
+        explainBtn.textContent = '[Let me explain]';
         explainBtn.style.animationDelay = '90ms';
         explainBtn.addEventListener('click', () => {
           opts.remove();
@@ -624,16 +740,19 @@
           prelude.textContent = 'Let me explain:';
           youWrap.appendChild(prelude);
 
+          // Bug 1: no ellipsis placeholder
           const ta = document.createElement('textarea');
           ta.className = 'celtx-ink';
           ta.rows = 1;
-          ta.placeholder = '· · · · · · · · · · · · ·';
           youWrap.appendChild(ta);
 
           let idleTimer = null;
+          let committed = false; // Bug 5: guard
           const commit = () => {
+            if (committed) return;
             const v = ta.value.trim();
             if (!v) return;
+            committed = true;
             if (idleTimer) clearTimeout(idleTimer);
             formData['intent'] = v;
             const done = document.createElement('div');
@@ -646,7 +765,7 @@
             done.appendChild(makeEditableLine(v, 'intent', ''));
             histEl.appendChild(done);
             currEl.innerHTML = '';
-            showEmailStep();
+            showSubmitStep();
           };
 
           ta.addEventListener('input', () => {
@@ -658,9 +777,7 @@
           ta.addEventListener('keydown', e => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
           });
-          ta.addEventListener('blur', () => {
-            if (ta.value.trim()) commit();
-          });
+          ta.addEventListener('blur', () => { if (ta.value.trim()) commit(); });
 
           fadeIn(youWrap, 0);
           currEl.appendChild(youWrap);
@@ -679,86 +796,7 @@
         scrollToBottom();
       }
 
-      // ── STEP 3: Email ──────────────────────────────────
-      function showEmailStep() {
-        currEl.innerHTML = '';
-        const wrap = document.createElement('div');
-        wrap.className = 'celtx-block';
-
-        wrap.appendChild(makeYouCharEl());
-
-        const line1 = document.createElement('span');
-        line1.className = 'celtx-dial celtx-dial-user';
-        line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
-        wrap.appendChild(line1);
-
-        const line2 = document.createElement('span');
-        line2.className = 'celtx-dial celtx-dial-user';
-        line2.appendChild(document.createTextNode("They'll reach me at "));
-
-        const emailInp = document.createElement('input');
-        emailInp.type = 'email';
-        emailInp.className = 'celtx-ink';
-        emailInp.placeholder = '· · · · · · ·';
-        emailInp.style.width = '14em';
-        line2.appendChild(emailInp);
-        wrap.appendChild(line2);
-
-        const emailErr = document.createElement('span');
-        emailErr.className = 'celtx-dial';
-        emailErr.style.cssText = 'font-size:0.8em;color:#ef4444;display:none;padding-left:3em;';
-        emailErr.textContent = 'that does not look like an email address.';
-        wrap.appendChild(emailErr);
-
-        fadeIn(wrap, 150);
-        currEl.appendChild(wrap);
-        setTimeout(() => emailInp.focus(), 300);
-        scrollToBottom();
-
-        let idleTimer = null;
-        let submitted = false;
-
-        const commit = () => {
-          if (submitted) return;
-          const email = emailInp.value.trim();
-          const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-          if (!valid) {
-            emailErr.style.display = 'block';
-            emailInp.focus();
-            return;
-          }
-          emailErr.style.display = 'none';
-          if (idleTimer) clearTimeout(idleTimer);
-          submitted = true;
-          formData['email'] = email;
-
-          const done = document.createElement('div');
-          done.className = 'celtx-block';
-          done.appendChild(makeYouCharEl());
-          const dl1 = document.createElement('span');
-          dl1.className = 'celtx-dial celtx-dial-user';
-          dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
-          done.appendChild(dl1);
-          done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
-          histEl.appendChild(done);
-
-          currEl.innerHTML = '';
-          showSubmitStep();
-        };
-
-        emailInp.addEventListener('input', () => {
-          if (idleTimer) clearTimeout(idleTimer);
-          if (emailInp.value.trim()) idleTimer = setTimeout(commit, 3000);
-        });
-        emailInp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); commit(); }
-        });
-        emailInp.addEventListener('blur', () => {
-          if (emailInp.value.trim() && !submitted) commit();
-        });
-      }
-
-      // ── STEP 4: Submit ────────────────────────────────
+      // ── STEP 5: Submit ────────────────────────────────
       function showSubmitStep() {
         currEl.innerHTML = '';
 
@@ -820,9 +858,9 @@
 
               const end = document.createElement('span');
               end.className = 'celtx-sd';
-              end.style.color     = '#ffffff';
-              end.style.marginTop = '3em';
-              end.style.opacity   = '0';
+              end.style.color      = '#ffffff';
+              end.style.marginTop  = '3em';
+              end.style.opacity    = '0';
               end.style.transition = 'opacity 0.9s ease';
               end.textContent = '(End of scene one.)';
               currEl.appendChild(end);
