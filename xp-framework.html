@@ -296,7 +296,8 @@
       color: #94a3b8;
     }
 
-    .xp-btn-next {
+    .xp-btn-next,
+    .xp-btn-back {
       background: none;
       border: none;
       cursor: pointer;
@@ -305,9 +306,12 @@
       letter-spacing: 0.12em;
       padding: 0.4rem 0.5rem;
       color: #334155;
-      transition: color 0.2s;
+      transition: color 0.2s, opacity 0.2s;
     }
-    .xp-btn-next:hover { color: #1e293b; }
+    .xp-btn-next:hover,
+    .xp-btn-back:hover { color: #1e293b; }
+    .xp-btn-back { opacity: 0; pointer-events: none; }
+    .xp-btn-back.visible { opacity: 1; pointer-events: auto; }
 
     .xp-dots {
       display: flex;
@@ -461,6 +465,7 @@
 
     <!-- ── Bottom navigation ──────────────────────── -->
     <div class="xp-bottom" id="xpBottom">
+      <button class="xp-btn-back" id="xpBtnBack" type="button" aria-label="Previous">←</button>
       <span class="xp-counter" id="xpCounter">01 / 06</span>
       <div class="xp-dots" id="xpDots"></div>
       <button class="xp-btn-next" id="xpBtnNext" type="button">→</button>
@@ -470,6 +475,7 @@
     (function () {
       const track   = document.getElementById('xpTrack');
       const btnNext = document.getElementById('xpBtnNext');
+      const btnBack = document.getElementById('xpBtnBack');
       const dotsEl  = document.getElementById('xpDots');
       const counter = document.getElementById('xpCounter');
       const mainEl  = document.getElementById('xpMain');
@@ -539,6 +545,8 @@
         dots.forEach((d, i) => d.classList.toggle('active', i === realIdx));
         counter.textContent =
           String(realIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+        // Show back button only when not on first panel
+        if (btnBack) btnBack.classList.toggle('visible', realIdx > 0);
       }
 
       // ── Go to slide ──────────────────────────────────
@@ -567,9 +575,14 @@
         const next = current + 1;
         goTo(next, true);
         if (next === N) {
-          // Arrived at clone of panel 0 — snap silently to real panel 0
           setTimeout(() => goTo(0, false), 680);
         }
+      }
+
+      // ── Retreat — go back one panel (no wrap) ────────
+      function retreat() {
+        if (current <= 0) return;
+        goTo(current - 1, true);
       }
 
       // ── Click anywhere on panel → advance ───────────
@@ -578,8 +591,9 @@
         advance();
       });
 
-      // ── Button ──────────────────────────────────────
+      // ── Buttons ─────────────────────────────────────
       btnNext.addEventListener('click', advance);
+      if (btnBack) btnBack.addEventListener('click', retreat);
 
       // ── Keyboard ────────────────────────────────────
       function onKey(e) {
@@ -588,6 +602,7 @@
           return;
         }
         if (e.key === 'ArrowRight') advance();
+        if (e.key === 'ArrowLeft')  retreat();
       }
       document.addEventListener('keydown', onKey);
 
@@ -598,6 +613,7 @@
         const dx = e.changedTouches[0].clientX - tx0;
         if (Math.abs(dx) < 40) return;
         if (dx < 0) advance();
+        if (dx > 0) retreat();
       }, { passive: true });
 
       // ── Header height → CSS var ──────────────────────

@@ -770,7 +770,9 @@ body.field-notes-page .brand-block {
 }
 
 body.field-notes-page .nav-links a[href="field-notes.html"],
-body.field-notes-page .nav-links a[href="xp-framework.html"] {
+body.field-notes-page .nav-links a[href="xp-framework.html"],
+body.field-notes-page .nav-links a[href="about.html"],
+body.field-notes-page .nav-links a[href="essays.html"] {
   color: rgba(255, 255, 255, 0.4);
 }
 
