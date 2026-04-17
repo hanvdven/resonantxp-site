@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resonant XP | EXPLORE → EXPAND Framework</title>
   <meta name="description" content="The EXPLORE → EXPAND Framework describes how experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
+  <meta property="og:title" content="EXPLORE → EXPAND Framework — Resonant XP" />
+  <meta property="og:description" content="How experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://resonantxp.com/xp-framework.html" />
+  <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
@@ -86,19 +91,78 @@
     }
     .xp-expand .fw-principles li::before { left: auto; right: 0; }
 
-    /* ── Phase label — prominent at top ─────────────── */
+    /* ── Phase label — XP styled like header ─────────── */
     .xp-phase {
-      font-family: 'Linden Hill', Georgia, serif;
       font-size: clamp(2.8rem, 6vw, 5rem);
-      font-weight: normal;
-      font-style: italic;
-      letter-spacing: 0.01em;
       line-height: 1;
       margin: 0 0 0.5rem;
       flex-shrink: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
     }
-    .xp-explore .xp-phase { color: #1e293b; }
-    .xp-expand  .xp-phase { color: #2563eb; }
+    .xp-expand .xp-phase { flex-direction: row-reverse; }
+
+    .phase-e {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      color: #94a3b8;
+      font-size: 0.6em;
+      padding-bottom: 0.08em;
+    }
+
+    .phase-xp {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-style: normal;
+      font-weight: normal;
+      color: #1e293b;
+      letter-spacing: -0.01em;
+    }
+
+    .phase-suffix {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #2563eb;
+      display: inline-block;
+      animation: phaseSuffixFloat 3.5s ease-in-out infinite;
+    }
+    .xp-expand .phase-suffix {
+      animation-name: phaseSuffixFloatR;
+    }
+
+    @keyframes phaseSuffixFloat {
+      0%,100% { transform: translate(0, 0) rotate(-0.3deg); }
+      30%     { transform: translate(1px, -3px) rotate(0.4deg); }
+      65%     { transform: translate(-1px, -2px) rotate(-0.5deg); }
+    }
+    @keyframes phaseSuffixFloatR {
+      0%,100% { transform: translate(0, 0) rotate(0.3deg); }
+      30%     { transform: translate(-1px, -3px) rotate(-0.4deg); }
+      65%     { transform: translate(1px, -2px) rotate(0.5deg); }
+    }
+
+    /* ── First-visit scroll hint arrow ───────────────── */
+    .xp-scroll-hint {
+      position: fixed;
+      bottom: 3.2rem;
+      right: 2.2rem;
+      z-index: 20;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    .xp-scroll-hint svg { overflow: visible; }
+    .xp-scroll-hint-text {
+      font-family: 'Indie Flower', cursive;
+      font-size: 0.78rem;
+      color: #2563eb;
+      opacity: 0.65;
+      display: block;
+      text-align: right;
+      margin-top: 0.15rem;
+    }
+    .xp-scroll-hint.hidden { opacity: 0; }
 
     /* ── Questions below phase label ────────────────── */
     .xp-questions {
@@ -232,7 +296,8 @@
       color: #94a3b8;
     }
 
-    .xp-btn-next {
+    .xp-btn-next,
+    .xp-btn-back {
       background: none;
       border: none;
       cursor: pointer;
@@ -241,9 +306,12 @@
       letter-spacing: 0.12em;
       padding: 0.4rem 0.5rem;
       color: #334155;
-      transition: color 0.2s;
+      transition: color 0.2s, opacity 0.2s;
     }
-    .xp-btn-next:hover { color: #1e293b; }
+    .xp-btn-next:hover,
+    .xp-btn-back:hover { color: #1e293b; }
+    .xp-btn-back { opacity: 0; pointer-events: none; }
+    .xp-btn-back.visible { opacity: 1; pointer-events: auto; }
 
     .xp-dots {
       display: flex;
@@ -269,7 +337,7 @@
 
       <!-- ── 0 · EXPLORE · Alignment ──────────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPLORE is the phase of alignment.</p>
@@ -289,7 +357,7 @@
 
       <!-- ── 1 · EXPAND · Generative deviation ────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPAND is the phase of generative deviation.</p>
@@ -309,7 +377,7 @@
 
       <!-- ── 2 · EXPLORE · Functional role ────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -329,7 +397,7 @@
 
       <!-- ── 3 · EXPAND · Functional role ─────────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -349,7 +417,7 @@
 
       <!-- ── 4 · EXPLORE · Sub-principles ─────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase">Explore</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -366,7 +434,7 @@
 
       <!-- ── 5 · EXPAND · Sub-principles + closing ── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase">Expand</p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -386,8 +454,18 @@
 
     </div><!-- /xp-track -->
 
+    <!-- ── Scroll hint arrow (first visit) ──────── -->
+    <div class="xp-scroll-hint" id="xpScrollHint">
+      <svg width="90" height="40" viewBox="0 0 90 40" aria-hidden="true">
+        <path d="M4 20 C15 8, 35 6, 52 14 C62 18, 68 22, 72 28" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        <path d="M66 24 L72 28 L70 20" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+      </svg>
+      <span class="xp-scroll-hint-text" id="xpHintText">click to continue</span>
+    </div>
+
     <!-- ── Bottom navigation ──────────────────────── -->
     <div class="xp-bottom" id="xpBottom">
+      <button class="xp-btn-back" id="xpBtnBack" type="button" aria-label="Previous">←</button>
       <span class="xp-counter" id="xpCounter">01 / 06</span>
       <div class="xp-dots" id="xpDots"></div>
       <button class="xp-btn-next" id="xpBtnNext" type="button">→</button>
@@ -397,6 +475,7 @@
     (function () {
       const track   = document.getElementById('xpTrack');
       const btnNext = document.getElementById('xpBtnNext');
+      const btnBack = document.getElementById('xpBtnBack');
       const dotsEl  = document.getElementById('xpDots');
       const counter = document.getElementById('xpCounter');
       const mainEl  = document.getElementById('xpMain');
@@ -466,6 +545,8 @@
         dots.forEach((d, i) => d.classList.toggle('active', i === realIdx));
         counter.textContent =
           String(realIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+        // Show back button only when not on first panel
+        if (btnBack) btnBack.classList.toggle('visible', realIdx > 0);
       }
 
       // ── Go to slide ──────────────────────────────────
@@ -479,14 +560,29 @@
         sync();
       }
 
+      // ── Hide scroll hint on first advance ───────────
+      const hintEl = document.getElementById('xpScrollHint');
+      let hintHidden = false;
+      function hideHint() {
+        if (hintHidden || !hintEl) return;
+        hintHidden = true;
+        hintEl.classList.add('hidden');
+      }
+
       // ── Advance — seamless infinite right wrap ───────
       function advance() {
+        hideHint();
         const next = current + 1;
         goTo(next, true);
         if (next === N) {
-          // Arrived at clone of panel 0 — snap silently to real panel 0
           setTimeout(() => goTo(0, false), 680);
         }
+      }
+
+      // ── Retreat — go back one panel (no wrap) ────────
+      function retreat() {
+        if (current <= 0) return;
+        goTo(current - 1, true);
       }
 
       // ── Click anywhere on panel → advance ───────────
@@ -495,8 +591,9 @@
         advance();
       });
 
-      // ── Button ──────────────────────────────────────
+      // ── Buttons ─────────────────────────────────────
       btnNext.addEventListener('click', advance);
+      if (btnBack) btnBack.addEventListener('click', retreat);
 
       // ── Keyboard ────────────────────────────────────
       function onKey(e) {
@@ -505,6 +602,7 @@
           return;
         }
         if (e.key === 'ArrowRight') advance();
+        if (e.key === 'ArrowLeft')  retreat();
       }
       document.addEventListener('keydown', onKey);
 
@@ -515,6 +613,7 @@
         const dx = e.changedTouches[0].clientX - tx0;
         if (Math.abs(dx) < 40) return;
         if (dx < 0) advance();
+        if (dx > 0) retreat();
       }, { passive: true });
 
       // ── Header height → CSS var ──────────────────────
@@ -524,6 +623,12 @@
           document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
         applyH();
         new ResizeObserver(applyH).observe(headerEl);
+      }
+
+      // ── Adapt hint text for touch devices ───────────
+      const hintTextEl = document.getElementById('xpHintText');
+      if (hintTextEl && window.matchMedia('(hover: none)').matches) {
+        hintTextEl.textContent = 'tap to continue';
       }
 
       // ── Init ─────────────────────────────────────────

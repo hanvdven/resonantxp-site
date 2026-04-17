@@ -436,6 +436,7 @@ section p {
 .nav-links a.active {
   color: #0f172a;
   font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .nav-sep {
@@ -446,12 +447,16 @@ section p {
 }
 
 .nav-links a[href="field-notes.html"],
-.nav-links a[href="xp-framework.html"] {
+.nav-links a[href="xp-framework.html"],
+.nav-links a[href="about.html"],
+.nav-links a[href="essays.html"] {
   color: rgba(51, 65, 85, 0.6);
 }
 
 .nav-links a[href="field-notes.html"]:hover,
-.nav-links a[href="xp-framework.html"]:hover {
+.nav-links a[href="xp-framework.html"]:hover,
+.nav-links a[href="about.html"]:hover,
+.nav-links a[href="essays.html"]:hover {
   color: #0f172a;
 }
 
@@ -547,6 +552,15 @@ section p {
   font-size: 0.95rem;
 }
 
+
+/* ===== PAGE-SPECIFIC BODY BACKGROUNDS ===== */
+body.experiences-page {
+  background: #f7f6f3;
+}
+
+body.contact-page {
+  background: #ffffff;
+}
 
 /* ===== FIELD NOTES PAGE ===== */
 body.field-notes-page {
@@ -666,10 +680,14 @@ body.field-notes-page {
 
 .note-card-text {
   font-family: var(--font-logo);
-  font-size: clamp(2rem, 4.2vw, 3.3rem);
-  line-height: 1.15;
+  font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+  line-height: 1.1;
   color: #ffffff;
   letter-spacing: -0.03em;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .note-card-context {
@@ -752,7 +770,9 @@ body.field-notes-page .brand-block {
 }
 
 body.field-notes-page .nav-links a[href="field-notes.html"],
-body.field-notes-page .nav-links a[href="xp-framework.html"] {
+body.field-notes-page .nav-links a[href="xp-framework.html"],
+body.field-notes-page .nav-links a[href="about.html"],
+body.field-notes-page .nav-links a[href="essays.html"] {
   color: rgba(255, 255, 255, 0.4);
 }
 
@@ -1229,6 +1249,23 @@ body.framework-page {
 
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 440px) {
+  .nav-links {
+    gap: 0.65rem;
+  }
+  .nav-links a {
+    font-size: 0.78rem;
+  }
+  .nav-links a.active {
+    font-size: 0.88rem;
+  }
+  /* Hide tertiary nav links on tiny screens */
+  .nav-links a[href="about.html"],
+  .nav-links a[href="essays.html"] {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .cta-card {
     flex-direction: column;
@@ -1252,6 +1289,15 @@ body.framework-page {
   .nav-links {
     width: 100%;
     justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .nav-links a {
+    font-size: 0.88rem;
+  }
+
+  .nav-links a.active {
+    font-size: 1rem;
   }
 
   .section {

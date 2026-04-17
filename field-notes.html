@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resonant XP | Field Notes</title>
   <meta name="description" content="Fragments from experience design, facilitation, and human systems in motion. Provocations from practice. What remains after clarity has already happened." />
+  <meta property="og:title" content="Field Notes — Resonant XP" />
+  <meta property="og:description" content="Fragments from experience design, facilitation, and human systems in motion." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://resonantxp.com/field-notes.html" />
+  <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
@@ -26,9 +31,10 @@
     }
     .fn-wave {
       fill: none;
-      stroke: rgba(255,255,255,0.12);
-      stroke-width: 2.2;
+      stroke: rgba(255,255,255,0.05);
+      stroke-width: 1.8;
       stroke-linecap: round;
+      filter: blur(1.2px);
     }
     .field-notes-main {
       position: relative;
@@ -41,13 +47,13 @@
       gap: 2.5rem;
       max-width: 720px;
       margin: 0 auto;
-      min-height: calc((190px + 2.5rem) * 5 - 2.5rem);
+      min-height: calc((230px + 2.5rem) * 5 - 2.5rem);
       padding: 2rem 1.5rem 0;
     }
     .note-card {
       cursor: pointer;
       outline: none;
-      height: 190px;
+      height: 230px;
       perspective: 1400px;
       overflow: hidden;
       border-radius: 28px;
@@ -76,6 +82,22 @@
       transition: background 0.3s ease;
     }
     .note-card:hover .note-card-front { background: rgba(28,28,28,1); }
+
+    /* Corner fold — hints the card can be flipped */
+    .note-card-front::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.07) 50%);
+      border-radius: 0 0 28px 0;
+      transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+      pointer-events: none;
+    }
+    .note-card:hover .note-card-front::after {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.13) 50%);
+    }
     .note-card-back {
       transform: rotateY(180deg);
       background: rgba(25,25,25,1);
@@ -94,12 +116,12 @@
     .note-card:hover .note-card-title { opacity: 1; transform: translateY(0); }
     .note-card-text {
       font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(1rem, 1.6vw, 1.2rem);
-      line-height: 1.45;
+      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      line-height: 1.1;
       color: #ffffff;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.03em;
       display: -webkit-box;
-      -webkit-line-clamp: 4;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }

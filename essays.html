@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resonant XP | Essays</title>
+  <meta name="description" content="Longer thinking on experience design, leadership, and what actually changes people. Fragments from practice, written slowly." />
+  <meta property="og:title" content="Essays — Resonant XP" />
+  <meta property="og:description" content="Longer thinking on experience design, leadership, and what actually changes people." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://resonantxp.com/essays.html" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <script src="header.js" defer></script>
+  <script src="nav.js" defer></script>
+  <style data-page-style>
+    /* ===================================================
+       ESSAYS — typographic list, expands in place
+       =================================================== */
+
+    .essays-page {
+      background: #f7f6f3;
+    }
+
+    .essays-wrap {
+      padding: var(--header-h, 80px) 1.5rem 8rem;
+    }
+
+    .essays-inner {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    .essays-eyebrow {
+      display: block;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0 0 1.2rem;
+    }
+
+    .essays-title {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: normal;
+      font-style: italic;
+      color: #1e293b;
+      margin: 0 0 0.5rem;
+      line-height: 1.1;
+    }
+
+    .essays-subtitle {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: #64748b;
+      margin: 0 0 3rem;
+    }
+
+    /* ── Divider ─────────────────────────────────────── */
+    .essays-rule {
+      border: none;
+      border-top: 1px solid #d1d5db;
+      margin: 0 0 2.5rem;
+    }
+
+    /* ── Essay item ──────────────────────────────────── */
+    .essay {
+      margin: 0 0 3rem;
+      cursor: pointer;
+    }
+
+    .essay-meta {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0 0 0.6rem;
+    }
+
+    .essay-heading {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-weight: normal;
+      font-style: italic;
+      color: #1e293b;
+      margin: 0 0 0.5rem;
+      line-height: 1.2;
+      transition: color 0.2s;
+    }
+
+    .essay:hover .essay-heading {
+      color: #2563eb;
+    }
+
+    .essay-excerpt {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #64748b;
+      margin: 0 0 0.8rem;
+    }
+
+    .essay-toggle {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: #2563eb;
+      border-bottom: 1px dotted rgba(37,99,235,0.4);
+      transition: color 0.15s;
+    }
+    .essay-toggle:hover { color: #1d4ed8; }
+
+    /* ── Essay body (expanded) ───────────────────────── */
+    .essay-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .essay-body.open {
+      max-height: 2000px;
+    }
+
+    .essay-body-inner {
+      padding: 1.5rem 0 0.5rem;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 1rem;
+      line-height: 1.85;
+      color: #334155;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 1rem;
+    }
+
+    .essay-body-inner p {
+      margin: 0 0 1.3em;
+    }
+
+    .essay-body-inner p:last-child {
+      margin-bottom: 0;
+    }
+
+    .essay-body-inner blockquote {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: #2563eb;
+      border-left: 2px solid #2563eb;
+      padding-left: 1.2rem;
+      margin: 1.5rem 0;
+    }
+
+    .essay-sep {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 0 0 3rem;
+    }
+
+    @media (max-width: 560px) {
+      .essays-inner { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+
+<body class="essays-page">
+  <div id="site-header"></div>
+
+  <main style="position: relative; z-index: 1;">
+    <div class="essays-wrap">
+      <div class="essays-inner">
+
+        <span class="essays-eyebrow">Essays</span>
+        <h1 class="essays-title">Thinking from practice.</h1>
+        <p class="essays-subtitle">Written slowly. Revised often. Not yet finished.</p>
+
+        <hr class="essays-rule" />
+
+        <!-- ── Essay 1 ──────────────────────────────── -->
+        <article class="essay" id="essay-1">
+          <p class="essay-meta">Experience design · 2025</p>
+          <h2 class="essay-heading">The designed situation</h2>
+          <p class="essay-excerpt">
+            People do not change when they understand something new. They change
+            when their behaviour becomes impossible to continue. The situation is
+            where that impossibility lives.
+          </p>
+          <button class="essay-toggle" type="button" aria-controls="essay-1-body" aria-expanded="false">
+            Read →
+          </button>
+          <div class="essay-body" id="essay-1-body" role="region">
+            <div class="essay-body-inner">
+              <p>
+                There is a persistent belief in organisational life that the right
+                content, delivered well, produces change. A workshop with good
+                material. A facilitator who explains clearly. Slides that are both
+                honest and elegant. I used to believe this too. I have a shelf of
+                evidence that it is not quite right.
+              </p>
+              <p>
+                What I have come to notice is this: people already know most of
+                what they need to know. A leadership team in difficulty is rarely
+                short of information about the difficulty. They know they are
+                avoiding something. They know the conversation has not happened.
+                They know the strategy exists only on paper. What they do not
+                have is a situation in which doing something different is more
+                available than doing the same thing.
+              </p>
+              <blockquote>
+                You cannot teach someone to lead under pressure.<br>
+                You can design a situation where leadership either emerges — or doesn't.
+              </blockquote>
+              <p>
+                The designed situation does not explain. It does not instruct.
+                It places people in contact with each other and with a set of
+                conditions they did not fully choose — and then waits. What
+                emerges is not performance. It is behaviour. And behaviour,
+                once visible, is workable in a way that understanding alone never is.
+              </p>
+              <p>
+                The designer's task is surprisingly narrow. Create the conditions.
+                Remove the exits. Be present without intervening unnecessarily.
+                Trust the room to do what rooms do when the situation is right.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <hr class="essay-sep" />
+
+        <!-- ── Essay 2 ──────────────────────────────── -->
+        <article class="essay" id="essay-2">
+          <p class="essay-meta">Leadership · 2025</p>
+          <h2 class="essay-heading">After the workshop</h2>
+          <p class="essay-excerpt">
+            Three days after the workshop, something has already been forgotten.
+            Three weeks after, the notebook is in a drawer. Three months after,
+            the organisation is more or less where it was. This is not a failure
+            of motivation. It is a failure of design.
+          </p>
+          <button class="essay-toggle" type="button" aria-controls="essay-2-body" aria-expanded="false">
+            Read →
+          </button>
+          <div class="essay-body" id="essay-2-body" role="region">
+            <div class="essay-body-inner">
+              <p>
+                The question I find most useful when someone asks me to design
+                a development programme is not: what do people need to learn?
+                It is: what would have to happen for anything to be different in
+                six months?
+              </p>
+              <p>
+                These are not the same question. The first points toward content.
+                The second points toward conditions — the actual conditions of the
+                actual organisation, with its actual power dynamics, its particular
+                history, its specific capacity for discomfort.
+              </p>
+              <p>
+                The body remembers what the mind forgets. What people carry from
+                an experience is almost never the content of a slide. It is the
+                feeling of a room at a specific moment. The silence before someone
+                said the thing no one had been saying. The moment when something
+                became impossible to ignore. These are the experiences that create
+                durable change — not because they were instructive, but because
+                they were real.
+              </p>
+              <blockquote>
+                Design for the moment that cannot be forgotten.<br>
+                Everything else is furniture.
+              </blockquote>
+              <p>
+                This means accepting that the designer does not control the outcome.
+                You can create conditions for a significant moment. You cannot
+                guarantee one. What you can do is make the significant moment more
+                likely, and make it safe enough to enter when it arrives.
+              </p>
+              <p>
+                That is, I think, what experience design is for. Not to produce
+                insight — insight is cheap. To produce the kind of contact with
+                reality that makes forgetting slightly harder.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <hr class="essay-sep" />
+
+        <!-- ── Essay 3 ──────────────────────────────── -->
+        <article class="essay" id="essay-3">
+          <p class="essay-meta">Group dynamics · 2024</p>
+          <h2 class="essay-heading">What the room already knows</h2>
+          <p class="essay-excerpt">
+            Most of what goes unspoken in a meeting is already known by everyone
+            in the room. The work is not to discover it. The work is to make it
+            safe enough to say.
+          </p>
+          <button class="essay-toggle" type="button" aria-controls="essay-3-body" aria-expanded="false">
+            Read →
+          </button>
+          <div class="essay-body" id="essay-3-body" role="region">
+            <div class="essay-body-inner">
+              <p>
+                I have been in enough rooms to know that groups are remarkably
+                good at knowing what they know and not saying it. The group
+                senses the tension. It senses the person who is performing
+                agreement. It senses the decision that has already been made
+                by two people before the meeting started. It knows all of this
+                and continues as if it does not.
+              </p>
+              <p>
+                This is not dishonesty, exactly. It is a form of collective
+                self-protection. The unspoken thing, once spoken, cannot be
+                unspoken. The room would have to reorganise around it.
+                That reorganisation is uncertain. So the group does what groups
+                often do — it manages the tension rather than resolving it,
+                indefinitely, until it can no longer.
+              </p>
+              <p>
+                The facilitator's most useful question is rarely a question.
+                It is a kind of witness: to name, neutrally and without drama,
+                what appears to be present. Not to interpret. Not to solve. To
+                make visible what the room was already seeing and not saying.
+              </p>
+              <blockquote>
+                When a group becomes silent, something has been recognised<br>
+                but not yet made speakable.
+              </blockquote>
+              <p>
+                The skill is in the timing. Name the thing too early, and the
+                room does not recognise it yet — it feels like an intrusion.
+                Name it too late, and the group has already moved on to managing
+                the discomfort, which is harder to interrupt.
+              </p>
+              <p>
+                What I have learned — slowly, from many rooms — is that the room
+                itself usually knows when. There is a quality of attention that
+                shifts just before something becomes nameable. The practised eye
+                can see it. The practised silence can hold it.
+              </p>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      // Header height
+      const headerEl = document.getElementById('site-header');
+      if (headerEl) {
+        const setH = () =>
+          document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+        setH();
+        new ResizeObserver(setH).observe(headerEl);
+      }
+
+      // Essay expand / collapse
+      document.querySelectorAll('.essay-toggle').forEach(btn => {
+        const bodyId = btn.getAttribute('aria-controls');
+        const bodyEl = document.getElementById(bodyId);
+        if (!bodyEl) return;
+
+        const heading = btn.closest('.essay').querySelector('.essay-heading');
+
+        btn.addEventListener('click', () => {
+          const isOpen = bodyEl.classList.toggle('open');
+          btn.textContent = isOpen ? 'Close ←' : 'Read →';
+          btn.setAttribute('aria-expanded', isOpen);
+          if (heading) heading.style.color = isOpen ? '#2563eb' : '';
+        });
+
+        // Click on heading also toggles
+        if (heading) {
+          heading.addEventListener('click', () => btn.click());
+        }
+      });
+    })();
+    </script>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>Resonant XP</p>
+      <a href="privacy.html" style="font-size:0.82rem;color:#94a3b8;">Privacy</a>
+    </div>
+  </footer>
+
+</body>
+</html>
