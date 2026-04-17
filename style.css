@@ -1249,6 +1249,23 @@ body.framework-page {
 
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 440px) {
+  .nav-links {
+    gap: 0.65rem;
+  }
+  .nav-links a {
+    font-size: 0.78rem;
+  }
+  .nav-links a.active {
+    font-size: 0.88rem;
+  }
+  /* Hide tertiary nav links on tiny screens */
+  .nav-links a[href="about.html"],
+  .nav-links a[href="essays.html"] {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .cta-card {
     flex-direction: column;
@@ -1272,6 +1289,15 @@ body.framework-page {
   .nav-links {
     width: 100%;
     justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .nav-links a {
+    font-size: 0.88rem;
+  }
+
+  .nav-links a.active {
+    font-size: 1rem;
   }
 
   .section {

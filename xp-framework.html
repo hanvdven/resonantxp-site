@@ -460,7 +460,7 @@
         <path d="M4 20 C15 8, 35 6, 52 14 C62 18, 68 22, 72 28" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         <path d="M66 24 L72 28 L70 20" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
       </svg>
-      <span class="xp-scroll-hint-text">click to continue</span>
+      <span class="xp-scroll-hint-text" id="xpHintText">click to continue</span>
     </div>
 
     <!-- ── Bottom navigation ──────────────────────── -->
@@ -623,6 +623,12 @@
           document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
         applyH();
         new ResizeObserver(applyH).observe(headerEl);
+      }
+
+      // ── Adapt hint text for touch devices ───────────
+      const hintTextEl = document.getElementById('xpHintText');
+      if (hintTextEl && window.matchMedia('(hover: none)').matches) {
+        hintTextEl.textContent = 'tap to continue';
       }
 
       // ── Init ─────────────────────────────────────────

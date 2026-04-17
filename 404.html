@@ -3,69 +3,201 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonant XP | Not found</title>
+  <title>Resonant XP | Scene Not Found</title>
+  <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Martel+Sans:wght@300;400;600;800&display=swap" />
-  <link rel="stylesheet" href="/style.css" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <script src="/header.js" defer></script>
-  <style>
-    .not-found {
-      height: calc(100vh - var(--header-h, 80px));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0 2rem;
-      margin-top: var(--header-h, 80px);
-    }
-    .not-found-num {
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-style: italic;
-      font-size: clamp(8rem, 28vw, 26rem);
-      color: #2563eb;
-      line-height: 0.85;
-      margin: 0;
-      display: block;
-      user-select: none;
-    }
-    .not-found-sub {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: clamp(0.75rem, 1.4vw, 0.95rem);
-      letter-spacing: 0.18em;
-      text-transform: lowercase;
-      color: #94a3b8;
-      margin: 1.8rem 0 0;
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <script src="header.js" defer></script>
+  <script src="nav.js" defer></script>
+  <style data-page-style>
+    /* ===================================================
+       404 — SCENE NOT FOUND
+       Celtx stage-play format · soft light
+       =================================================== */
+
+    body.notfound-page {
+      background: #f9f8f5;
     }
 
-    /* Track header height */
-    #site-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
+    .notfound-wrap {
+      min-height: 100vh;
+      padding: var(--header-h, 80px) 1.5rem 8rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .celtx-script {
+      width: min(580px, 100%);
+      font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+      font-size: clamp(0.88rem, 1.5vw, 1rem);
+      line-height: 1.7;
+      color: #1e293b;
+      padding: 3rem 0 0;
+    }
+
+    .celtx-act {
+      text-align: center;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0 0 2.5rem;
+    }
+
+    .celtx-scene-head {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #cbd5e1;
+      margin: 0 0 2rem;
+    }
+
+    .celtx-direction {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      color: #64748b;
+      margin: 0 0 1.6rem;
+      padding-left: 2.5rem;
+    }
+    .celtx-direction::before { content: '('; }
+    .celtx-direction::after  { content: ')'; }
+
+    .celtx-char {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #475569;
+      margin: 0 0 0.15rem;
+      padding-left: 30%;
+    }
+
+    .celtx-dial {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-size: 1.08rem;
+      color: #1e293b;
+      padding: 0 10% 0 20%;
+      margin: 0 0 1.6rem;
+      line-height: 1.6;
+    }
+
+    .celtx-404 {
+      font-family: 'Linden Hill', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 7.5rem);
+      color: #e2e8f0;
+      line-height: 1;
+      text-align: center;
+      margin: 0 0 1.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .celtx-beat {
+      text-align: center;
+      font-family: 'Indie Flower', cursive;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin: 0.4rem 0 1.8rem;
+    }
+
+    .celtx-return {
+      display: block;
+      padding-left: 20%;
+      margin-top: 2.8rem;
+    }
+    .celtx-return a {
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #2563eb;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(37,99,235,0.3);
+      padding-bottom: 0.15rem;
+      transition: border-color 0.2s;
+    }
+    .celtx-return a:hover { border-color: #2563eb; }
+
+    .celtx-curtain {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 3rem 0 1rem;
+    }
+
+    .celtx-end {
+      text-align: center;
+      font-family: 'Martel Sans', system-ui, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #cbd5e1;
     }
   </style>
 </head>
-<body>
+
+<body class="notfound-page">
   <div id="site-header"></div>
 
-  <main>
-    <div class="not-found">
-      <span class="not-found-num">404</span>
-      <p class="not-found-sub">you're not supposed to be here</p>
-    </div>
-  </main>
+  <main style="position: relative; z-index: 1;">
+    <div class="notfound-wrap">
+      <div class="celtx-script">
 
-  <script>
-    const headerEl = document.getElementById('site-header');
-    if (headerEl) {
+        <p class="celtx-act">Act IV · Scene 0</p>
+
+        <p class="celtx-scene-head">INT. AN EMPTY STAGE — TIME UNKNOWN</p>
+
+        <p class="celtx-direction">The stage is bare. No furniture. No light cues. A page that was never written.</p>
+
+        <p class="celtx-404">404</p>
+        <p class="celtx-beat">[ silence ]</p>
+
+        <p class="celtx-char">Resona</p>
+        <p class="celtx-dial">
+          This scene does not exist here.<br>
+          It may have been moved, renamed,<br>
+          or quietly retired.
+        </p>
+
+        <p class="celtx-direction">A long pause. Somewhere offstage, a chair scrapes.</p>
+
+        <p class="celtx-char">You</p>
+        <p class="celtx-dial">Where do I go from here?</p>
+
+        <p class="celtx-char">Resona</p>
+        <p class="celtx-dial">Back to the beginning.<br>The stage is still warm.</p>
+
+        <p class="celtx-return"><a href="index.html">← Return to the stage</a></p>
+
+        <hr class="celtx-curtain" />
+        <p class="celtx-end">End of scene</p>
+
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      const headerEl = document.getElementById('site-header');
+      if (!headerEl) return;
       const setH = () =>
         document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
       setH();
       new ResizeObserver(setH).observe(headerEl);
-    }
-  </script>
+    })();
+    </script>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>Resonant XP</p>
+      <a href="privacy.html" style="font-size:0.82rem;color:#94a3b8;">Privacy</a>
+    </div>
+  </footer>
+
 </body>
 </html>
