@@ -47,8 +47,12 @@
       gap: 2.5rem;
       max-width: 720px;
       margin: 0 auto;
-      min-height: calc((230px + 2.5rem) * 5 - 2.5rem);
       padding: 2rem 1.5rem 0;
+    }
+    /* Slots always occupy space even when empty — no page jumping */
+    .note-slot {
+      height: 230px;
+      border-radius: 28px;
     }
     .note-card {
       cursor: pointer;
@@ -116,7 +120,7 @@
     .note-card:hover .note-card-title { opacity: 1; transform: translateY(0); }
     .note-card-text {
       font-family: 'Californian FB','Palatino Linotype',Palatino,Georgia,serif;
-      font-size: clamp(2.2rem, 4.8vw, 3.8rem);
+      font-size: 2rem; /* JS fitter overrides this per card */
       line-height: 1.1;
       color: #ffffff;
       letter-spacing: -0.03em;
@@ -297,6 +301,48 @@
   }
 
   // =============================================
+  // FIT CARD TEXT — binary-search font size so
+  // full text fills (not overflows) the card face
+  // =============================================
+  function fitCardText(card) {
+    const textEl  = card.querySelector('.note-card-text');
+    const faceEl  = card.querySelector('.note-card-front');
+    const titleEl = card.querySelector('.note-card-title');
+    if (!textEl || !faceEl) return;
+
+    const faceH = faceEl.getBoundingClientRect().height;
+    if (!faceH) return; // not painted yet — skip
+
+    const cs   = window.getComputedStyle(faceEl);
+    const pt   = parseFloat(cs.paddingTop)    || 24;
+    const pb   = parseFloat(cs.paddingBottom) || 24;
+    const titH = titleEl ? titleEl.getBoundingClientRect().height + 8 : 20;
+    const maxH = faceH - pt - pb - titH - 4;
+
+    // Expand to measure without clamp
+    textEl.style.display           = 'block';
+    textEl.style.overflow          = 'visible';
+    textEl.style.webkitLineClamp   = 'none';
+
+    // Binary search: 14 px → 60 px
+    let lo = 14, hi = 61;
+    textEl.style.fontSize = hi + 'px';
+    if (textEl.scrollHeight > maxH) {
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        textEl.style.fontSize = mid + 'px';
+        if (textEl.scrollHeight <= maxH) lo = mid; else hi = mid;
+      }
+      textEl.style.fontSize = lo + 'px';
+    }
+
+    // Restore line-clamp
+    textEl.style.display         = '-webkit-box';
+    textEl.style.overflow        = 'hidden';
+    textEl.style.webkitLineClamp = '3';
+  }
+
+  // =============================================
   // BUILD CARD
   // =============================================
   function buildCard(note) {
@@ -346,6 +392,9 @@
     if (delay) el.style.animationDelay = delay + 'ms';
 
     slots[slotIdx] = { note, el };
+
+    // Fit text after the card is painted
+    requestAnimationFrame(() => requestAnimationFrame(() => fitCardText(el)));
 
     const act = () => handleClick(slotIdx);
     el.addEventListener('click', act);
