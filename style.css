@@ -296,8 +296,10 @@ section p {
 
 /* ===== HEADER / NAV ===== */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   backdrop-filter: blur(14px);
   background: transparent;

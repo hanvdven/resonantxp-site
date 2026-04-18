@@ -1,0 +1,43 @@
+# Deploy Resonant XP to GitHub Pages
+#
+# Runs on every push to main. No build step — pure static HTML/CSS/JS.
+# Enable GitHub Pages in repo Settings → Pages → Source: GitHub Actions.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # allow manual trigger from Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true   # skip queued deploy if a newer one starts
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'           # entire repo root is the site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

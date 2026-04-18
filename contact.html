@@ -381,14 +381,10 @@
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block';
 
+        // Input at celtx-char level — same position as character name label, no indent
         const charEl = document.createElement('span');
         charEl.className = 'celtx-char celtx-char-you-static';
-        charEl.textContent = 'YOU';
 
-        const dialEl = document.createElement('span');
-        dialEl.className = 'celtx-dial';
-
-        // Bug 1: no ellipsis placeholder — dotted border-bottom is the cue
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.className = 'celtx-ink';
@@ -399,10 +395,9 @@
         ghost.className = 'name-ghost';
         ghost.textContent = 'what is your name?';
 
-        dialEl.appendChild(inp);
-        dialEl.appendChild(ghost);
+        charEl.appendChild(inp);
+        charEl.appendChild(ghost);
         wrap.appendChild(charEl);
-        wrap.appendChild(dialEl);
 
         fadeIn(wrap, 0);
         currEl.appendChild(wrap);
@@ -417,13 +412,36 @@
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
-          // Bug 3: committed name uses makeEditableLine (clickable/editable)
+          // Committed name shown once at char level — editable on click, no duplicate dial line
           const done = document.createElement('div');
           done.className = 'celtx-block';
-          done.appendChild(makeYouCharEl());
-          done.appendChild(makeEditableLine(userName || '—', 'name', '', v2 => {
-            if (v2 && v2 !== '—') userName = v2;
-          }));
+          const nameLabel = document.createElement('span');
+          nameLabel.className = 'celtx-char celtx-char-you-static';
+          nameLabel.textContent = userName || '—';
+          nameLabel.style.cssText = 'cursor:pointer;text-decoration:underline dotted rgba(37,99,235,0.4);text-underline-offset:3px;';
+          nameLabel.addEventListener('click', () => {
+            if (nameLabel.querySelector('input')) return;
+            const prev = nameLabel.textContent;
+            nameLabel.textContent = '';
+            const inp2 = document.createElement('input');
+            inp2.type = 'text'; inp2.className = 'celtx-ink';
+            inp2.value = prev; inp2.style.width = '12em';
+            nameLabel.appendChild(inp2);
+            inp2.focus(); inp2.select();
+            let done2 = false;
+            const save = () => {
+              if (done2) return; done2 = true;
+              const v2 = inp2.value.trim() || prev;
+              userName = v2; formData['name'] = v2;
+              nameLabel.textContent = v2;
+            };
+            inp2.addEventListener('blur', save);
+            inp2.addEventListener('keydown', e => {
+              if (e.key === 'Enter') { e.preventDefault(); inp2.blur(); }
+              if (e.key === 'Escape') { done2 = true; nameLabel.textContent = prev; }
+            });
+          });
+          done.appendChild(nameLabel);
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
