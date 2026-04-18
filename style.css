@@ -64,6 +64,7 @@ body {
 }
 
 main {
+  padding-top: var(--header-h, 80px);
   opacity: 1;
   will-change: opacity;
   transition: opacity 280ms ease;
