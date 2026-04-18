@@ -324,8 +324,8 @@
     textEl.style.overflow          = 'visible';
     textEl.style.webkitLineClamp   = 'none';
 
-    // Binary search: 14 px → 60 px
-    let lo = 14, hi = 61;
+    // Binary search: 7 px → 60 px
+    let lo = 7, hi = 61;
     textEl.style.fontSize = hi + 'px';
     if (textEl.scrollHeight > maxH) {
       while (hi - lo > 1) {
