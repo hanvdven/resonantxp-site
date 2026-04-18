@@ -408,13 +408,14 @@
 
         function commit() {
           if (introResumed) return;
+          introResumed = true; // guard before any DOM ops that could re-trigger blur
           const v = inp.value.trim();
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
-          // Committed name shown once at char level — editable on click, no duplicate dial line
           const done = document.createElement('div');
           done.className = 'celtx-block';
+          // name at char level — editable on click
           const nameLabel = document.createElement('span');
           nameLabel.className = 'celtx-char celtx-char-you-static';
           nameLabel.textContent = userName || '—';
@@ -442,10 +443,14 @@
             });
           });
           done.appendChild(nameLabel);
+          // YOU dialogue line beneath the name
+          const feelLine = document.createElement('span');
+          feelLine.className = 'celtx-dial celtx-dial-user';
+          feelLine.textContent = 'yes. I have had a feeling for a while now.';
+          done.appendChild(feelLine);
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
-          introResumed = true;
           continueAfterName();
         }
 
@@ -463,7 +468,7 @@
       }
 
       function continueAfterName() {
-        const r2 = makeResonaBlock('As if you cannot just sit still? That small reflex — a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.');
+        const r2 = makeResonaBlock('As if you cannot just sit still? That small reflex — like a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.');
         fadeIn(r2, 300);
         histEl.appendChild(r2);
         scrollToBottom();
@@ -480,7 +485,7 @@
 
         const prelude = document.createElement('span');
         prelude.className = 'celtx-dial celtx-dial-user';
-        prelude.textContent = 'Let me be a bit more specific about what I\'m looking for.';
+        prelude.textContent = 'hmm. let me be a bit more specific.';
         wrap.appendChild(prelude);
 
         // Bug 1: no ellipsis placeholder
@@ -510,7 +515,7 @@
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
           dp.className = 'celtx-dial celtx-dial-user';
-          dp.textContent = 'Let me be a bit more specific about what I\'m looking for.';
+          dp.textContent = 'hmm. let me be a bit more specific.';
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
           histEl.appendChild(done);
@@ -534,14 +539,14 @@
       // ── STEP 2: Location ──────────────────────────────
       function buildCountryDial(dialEl, selectedLoc) {
         while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
-        dialEl.appendChild(document.createTextNode('Good fortune you operate in '));
+        dialEl.appendChild(document.createTextNode('I see. Good fortune you operate in '));
         const locSpan = document.createElement('span');
         locSpan.className = 'loc-editable';
         locSpan.textContent = selectedLoc;
         // Bug 3: clicking committed country re-shows options
         locSpan.addEventListener('click', () => {
           while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
-          dialEl.appendChild(document.createTextNode('Good fortune you operate in '));
+          dialEl.appendChild(document.createTextNode('I see. Good fortune you operate in '));
           ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((l, i) => {
             const opt = document.createElement('span');
             opt.className = 'loc-option';
@@ -571,7 +576,7 @@
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
-        dial.appendChild(document.createTextNode('Good fortune you operate in '));
+        dial.appendChild(document.createTextNode('I see. Good fortune you operate in '));
 
         // Bug 6: country options in [ ] brackets
         ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((loc, i) => {
@@ -622,7 +627,7 @@
         setTimeout(showEmailStep, 2400);
       }
 
-      // ── STEP 3: Email (Bug 7: now before intent) ──────
+      // ── STEP 3: Email ─────────────────────────────────
       function showEmailStep() {
         currEl.innerHTML = '';
         const wrap = document.createElement('div');
@@ -639,7 +644,6 @@
         line2.className = 'celtx-dial celtx-dial-user';
         line2.appendChild(document.createTextNode("They'll reach me at "));
 
-        // Bug 1: no ellipsis placeholder
         const emailInp = document.createElement('input');
         emailInp.type = 'email';
         emailInp.className = 'celtx-ink';
@@ -682,7 +686,6 @@
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
-          // Bug 7: next is intent, not submit
           showIntentStep();
         };
 
@@ -710,7 +713,7 @@
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
-        dial.textContent = 'What will happen next, you think?';
+        dial.textContent = 'What do you hope will happen next?';
 
         const opts = document.createElement('div');
         opts.className = 'celtx-options';
