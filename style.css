@@ -64,7 +64,6 @@ body {
 }
 
 main {
-  padding-top: var(--header-h, 80px);
   opacity: 1;
   will-change: opacity;
   transition: opacity 280ms ease;
@@ -297,10 +296,7 @@ section p {
 
 /* ===== HEADER / NAV ===== */
 .site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 20;
   backdrop-filter: blur(14px);
   background: transparent;
