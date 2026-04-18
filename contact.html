@@ -408,13 +408,14 @@
 
         function commit() {
           if (introResumed) return;
+          introResumed = true; // guard before any DOM ops that could re-trigger blur
           const v = inp.value.trim();
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
-          // Committed name shown once at char level — editable on click, no duplicate dial line
           const done = document.createElement('div');
           done.className = 'celtx-block';
+          // name at char level — editable on click
           const nameLabel = document.createElement('span');
           nameLabel.className = 'celtx-char celtx-char-you-static';
           nameLabel.textContent = userName || '—';
@@ -442,10 +443,14 @@
             });
           });
           done.appendChild(nameLabel);
+          // YOU dialogue line beneath the name
+          const feelLine = document.createElement('span');
+          feelLine.className = 'celtx-dial celtx-dial-user';
+          feelLine.textContent = 'I have had a feeling for a while now.';
+          done.appendChild(feelLine);
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
-          introResumed = true;
           continueAfterName();
         }
 
@@ -622,24 +627,26 @@
         setTimeout(showEmailStep, 2400);
       }
 
-      // ── STEP 3: Email (Bug 7: now before intent) ──────
+      // ── STEP 3: Email ─────────────────────────────────
       function showEmailStep() {
         currEl.innerHTML = '';
+
+        // RESONA asks for email explicitly before YOU responds
+        const rAsk = makeResonaBlock('I want to be able to reach you. What is your email address?');
+        fadeIn(rAsk, 0);
+        histEl.appendChild(rAsk);
+        scrollToBottom();
+
+        setTimeout(() => {
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block';
 
         wrap.appendChild(makeYouCharEl());
 
-        const line1 = document.createElement('span');
-        line1.className = 'celtx-dial celtx-dial-user';
-        line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
-        wrap.appendChild(line1);
-
         const line2 = document.createElement('span');
         line2.className = 'celtx-dial celtx-dial-user';
-        line2.appendChild(document.createTextNode("They'll reach me at "));
+        line2.appendChild(document.createTextNode('My email address is '));
 
-        // Bug 1: no ellipsis placeholder
         const emailInp = document.createElement('input');
         emailInp.type = 'email';
         emailInp.className = 'celtx-ink';
@@ -674,15 +681,10 @@
           const done = document.createElement('div');
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
-          const dl1 = document.createElement('span');
-          dl1.className = 'celtx-dial celtx-dial-user';
-          dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
-          done.appendChild(dl1);
-          done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
+          done.appendChild(makeEditableLine(email, 'email', 'My email address is '));
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
-          // Bug 7: next is intent, not submit
           showIntentStep();
         };
 
@@ -696,6 +698,7 @@
         emailInp.addEventListener('blur', () => {
           if (emailInp.value.trim() && !submitted) commit();
         });
+        }, 600);
       }
 
       // ── STEP 4: Intent (Bug 7: now after email) ────────
