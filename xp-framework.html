@@ -98,40 +98,37 @@
       margin: 0 0 0.5rem;
       flex-shrink: 0;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 0;
     }
     .xp-expand .xp-phase { flex-direction: row-reverse; }
 
-    .phase-e {
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-style: italic;
-      font-weight: 300;
-      color: #94a3b8;
-      font-size: 0.6em;
-      padding-bottom: 0.08em;
-    }
-
-    .phase-xp {
-      font-family: 'Linden Hill', Georgia, serif;
-      font-style: normal;
-      font-weight: normal;
-      color: #1e293b;
-      letter-spacing: -0.01em;
-    }
-
+    .phase-e,
     .phase-suffix {
-      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-family: var(--font-accent);
       font-style: italic;
       font-weight: 400;
-      color: #2563eb;
+      color: var(--blue1);
+      font-size: 0.5em;
+      text-transform: uppercase;
       display: inline-flex;
-      align-items: flex-end;
+      align-items: center;
+      letter-spacing: 0;
       will-change: transform;
     }
+    .phase-e span,
     .phase-suffix span {
       display: inline-block;
       will-change: transform;
+    }
+
+    .phase-xp {
+      font-family: var(--font-logo);
+      font-style: normal;
+      font-weight: 525;
+      color: var(--XPBlack);
+      letter-spacing: -0.01em;
+      line-height: 1;
     }
 
     /* ── First-visit scroll hint arrow ───────────────── */
@@ -630,10 +627,10 @@
     <script>
     // ===== PHASE LABEL FLOAT =====
     (function () {
-      const suffixEls = Array.from(document.querySelectorAll('.phase-suffix'));
+      const groupEls = Array.from(document.querySelectorAll('.phase-e, .phase-suffix'));
       const letterSpans = [];
 
-      suffixEls.forEach(function (el, si) {
+      groupEls.forEach(function (el, si) {
         const text = el.textContent;
         el.textContent = '';
         text.split('').forEach(function (ch, ci) {
@@ -676,7 +673,7 @@
         const gY = Math.sin(floatT * gf.speedY + gf.phaseY) * gf.ampY;
         const gX = Math.sin(floatT * gf.speedX + gf.phaseX) * gf.ampX;
 
-        suffixEls.forEach(function (el) {
+        groupEls.forEach(function (el) {
           el.style.transform = 'translateZ(0) translate(' + gX + 'px,' + gY + 'px)';
         });
 
