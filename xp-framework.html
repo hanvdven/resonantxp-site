@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +10,17 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://resonantxp.com/xp-framework.html" />
   <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="EXPLORE → EXPAND Framework — Resonant XP" />
+  <meta name="twitter:description" content="How experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
+  <meta property="og:site_name" content="Resonant XP" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:locale:alternate" content="nl_NL" />
+  <meta property="og:locale:alternate" content="de_DE" />
+  <link rel="canonical" href="https://resonantxp.com/xp-framework.html" />
+  <link rel="alternate" hreflang="en" href="https://resonantxp.com/xp-framework.html" />
+  <link rel="alternate" hreflang="nl" href="https://resonantxp.com/nl/xp-framework.html" />
+  <link rel="alternate" hreflang="de" href="https://resonantxp.com/de/xp-framework.html" />
+  <link rel="alternate" hreflang="x-default" href="https://resonantxp.com/xp-framework.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
@@ -450,8 +461,14 @@
       <button class="xp-btn-back" id="xpBtnBack" type="button" aria-label="Previous">←</button>
       <span class="xp-counter" id="xpCounter">01 / 06</span>
       <div class="xp-dots" id="xpDots"></div>
+      <div class="lang-switch" role="group" aria-label="Language" style="position:relative;z-index:20;">
+        <button class="lang-flag" type="button" data-lang="en" title="English">🇬🇧</button>
+        <button class="lang-flag" type="button" data-lang="nl" title="Nederlands">🇳🇱</button>
+        <button class="lang-flag" type="button" data-lang="de" title="Deutsch">🇩🇪</button>
+      </div>
       <button class="xp-btn-next" id="xpBtnNext" type="button">→</button>
     </div>
+    <script src="lang-switch.js" defer></script>
 
     <script>
     (function () {

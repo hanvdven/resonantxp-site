@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +10,17 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://resonantxp.com/field-notes.html" />
   <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Field Notes — Resonant XP" />
+  <meta name="twitter:description" content="Fragments from experience design, facilitation, and human systems in motion." />
+  <meta property="og:site_name" content="Resonant XP" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:locale:alternate" content="nl_NL" />
+  <meta property="og:locale:alternate" content="de_DE" />
+  <link rel="canonical" href="https://resonantxp.com/field-notes.html" />
+  <link rel="alternate" hreflang="en" href="https://resonantxp.com/field-notes.html" />
+  <link rel="alternate" hreflang="nl" href="https://resonantxp.com/nl/field-notes.html" />
+  <link rel="alternate" hreflang="de" href="https://resonantxp.com/de/field-notes.html" />
+  <link rel="alternate" hreflang="x-default" href="https://resonantxp.com/field-notes.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
@@ -268,7 +279,7 @@
     { type: 'text', title: "future",            front: "What are you optimising for that will matter less in ten years than it does today?",                      back: "Every strategy is a bet on what will stay constant. Name the assumptions underneath yours — before someone else names them for you." },
     { type: 'text', title: "perspective",       front: "How would a five-year-old explain what your organisation actually does?",                                 back: "Simplification is not dumbing down. It is the discipline of keeping only what is true. Children are ruthless editors of pretension." },
     { type: 'text', title: "perspective",       front: "How would you explain this meeting to someone who had never been to a meeting?",                          back: "The stranger's gaze is a design tool. What looks normal from inside often looks absurd from outside. That gap is where the work begins." },
-    { type: 'text', title: "adaptability",      front: "You cannot plan for uncertainty. You can practice adaptability.",                                         back: "Preparation is not prediction. It is building the capacity to move well when movement is required." },
+    { type: 'text', title: "adaptability",      front: "You cannot plan for uncertainty. You can practise adaptability.",                                         back: "Preparation is not prediction. It is building the capacity to move well when movement is required." },
     { type: 'text', title: "emergence",         front: "The users who were not supposed to be there built the product's future.",                               back: "Lego's adult fan community was not a strategic target. The company did not design for them and initially did not court them. Adult sets are now one of their fastest-growing lines. The behaviour that looks like an edge case is sometimes the signal." },
     { type: 'text', title: "decisions",         front: "Most of what gets called decision-making is decision-confirming.",                                        back: "Research on group cognition shows that by the time a choice reaches formal discussion, the outcome is often already settled — shaped by prior conversations, power dynamics, and unspoken assumptions. The meeting is the ritual. The decision happened earlier." },
     { type: 'text', title: "blank",             front: ".",                                                                                                      back: "Sometimes the most important thing in a session is the moment nobody knows what to say next. This was that moment." },
@@ -457,9 +468,15 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <p>Resonant XP</p>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button class="lang-flag" type="button" data-lang="en" title="English">🇬🇧</button>
+        <button class="lang-flag" type="button" data-lang="nl" title="Nederlands">🇳🇱</button>
+        <button class="lang-flag" type="button" data-lang="de" title="Deutsch">🇩🇪</button>
+      </div>
       <a href="privacy.html" style="font-size:0.82rem;color:rgba(248,250,252,0.2);">Privacy</a>
     </div>
   </footer>
+  <script src="lang-switch.js" defer></script>
 
 </body>
 </html>
