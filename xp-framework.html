@@ -74,22 +74,13 @@
     .xp-explore::after { background: linear-gradient(to right, transparent, #f0f4fb); }
     .xp-expand::after  { background: linear-gradient(to right, transparent, #f7f6f3); }
 
-    /* ── Expand panels: right-aligned ────────────────── */
+    /* ── Expand panels: content shifted right, text left-aligned ─ */
     .xp-expand .xp-phase,
     .xp-expand .xp-questions,
-    .xp-expand .xp-panel-content { text-align: right; }
-    .xp-expand .fw-list li {
-      padding-left: 0;
-      padding-right: 1.2em;
-      text-align: right;
+    .xp-expand .xp-panel-content {
+      max-width: 55%;
+      margin-left: auto;
     }
-    .xp-expand .fw-list li::before { left: auto; right: 0; }
-    .xp-expand .fw-principles li {
-      padding-left: 0;
-      padding-right: 1.8em;
-      text-align: right;
-    }
-    .xp-expand .fw-principles li::before { left: auto; right: 0; }
 
     /* ── Phase label — XP styled like header ─────────── */
     .xp-phase {
@@ -101,7 +92,7 @@
       align-items: center;
       gap: 0;
     }
-    .xp-expand .xp-phase { flex-direction: row-reverse; }
+    .xp-expand .xp-phase { justify-content: flex-end; }
 
     .phase-e,
     .phase-suffix {
@@ -257,13 +248,16 @@
       line-height: 1.5;
     }
 
-    /* Expand panels: push content clear of the right-edge fade (10%) */
-    .xp-expand { padding-right: 14vw; padding-left: 6vw; }
+    /* Expand panels: tighter right gap, keep some clearance from fade */
+    .xp-expand { padding-right: 11vw; padding-left: 6vw; }
 
     /* Reduce offsets on small screens */
     @media (max-width: 640px) {
       .xp-panel  { padding-left: 6vw; padding-right: 6vw; }
-      .xp-expand { padding-right: 12vw; padding-left: 4vw; }
+      .xp-expand { padding-right: 10vw; padding-left: 4vw; }
+      .xp-expand .xp-phase,
+      .xp-expand .xp-questions,
+      .xp-expand .xp-panel-content { max-width: 80%; }
     }
 
     /* ── Bottom nav bar ─────────────────────────────── */
