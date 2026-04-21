@@ -125,22 +125,13 @@
       font-style: italic;
       font-weight: 400;
       color: #2563eb;
+      display: inline-flex;
+      align-items: flex-end;
+      will-change: transform;
+    }
+    .phase-suffix span {
       display: inline-block;
-      animation: phaseSuffixFloat 3.5s ease-in-out infinite;
-    }
-    .xp-expand .phase-suffix {
-      animation-name: phaseSuffixFloatR;
-    }
-
-    @keyframes phaseSuffixFloat {
-      0%,100% { transform: translate(0, 0) rotate(-0.3deg); }
-      30%     { transform: translate(1px, -3px) rotate(0.4deg); }
-      65%     { transform: translate(-1px, -2px) rotate(-0.5deg); }
-    }
-    @keyframes phaseSuffixFloatR {
-      0%,100% { transform: translate(0, 0) rotate(0.3deg); }
-      30%     { transform: translate(-1px, -3px) rotate(-0.4deg); }
-      65%     { transform: translate(1px, -2px) rotate(0.5deg); }
+      will-change: transform;
     }
 
     /* ── First-visit scroll hint arrow ───────────────── */
@@ -337,7 +328,7 @@
 
       <!-- ── 0 · EXPLORE · Alignment ──────────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">loration</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPLORE is the phase of alignment.</p>
@@ -357,7 +348,7 @@
 
       <!-- ── 1 · EXPAND · Generative deviation ────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">ansion</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-title">EXPAND is the phase of generative deviation.</p>
@@ -377,7 +368,7 @@
 
       <!-- ── 2 · EXPLORE · Functional role ────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">loration</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -397,7 +388,7 @@
 
       <!-- ── 3 · EXPAND · Functional role ─────────── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">ansion</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
@@ -417,7 +408,7 @@
 
       <!-- ── 4 · EXPLORE · Sub-principles ─────────── -->
       <section class="xp-panel xp-explore">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">lore</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">loration</span></p>
         <div class="xp-questions" data-pool="explore"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -434,7 +425,7 @@
 
       <!-- ── 5 · EXPAND · Sub-principles + closing ── -->
       <section class="xp-panel xp-expand">
-        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
+        <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">ansion</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
@@ -633,6 +624,73 @@
 
       // ── Init ─────────────────────────────────────────
       goTo(0, false);
+    })();
+    </script>
+
+    <script>
+    // ===== PHASE LABEL FLOAT =====
+    (function () {
+      const suffixEls = Array.from(document.querySelectorAll('.phase-suffix'));
+      const letterSpans = [];
+
+      suffixEls.forEach(function (el, si) {
+        const text = el.textContent;
+        el.textContent = '';
+        text.split('').forEach(function (ch, ci) {
+          const span = document.createElement('span');
+          span.textContent = ch;
+          span.dataset.id = 'phs-' + si + '-' + ci;
+          el.appendChild(span);
+          letterSpans.push(span);
+        });
+      });
+
+      const gf = {
+        phaseY: Math.random() * Math.PI * 2,
+        speedY: 0.55 + Math.random() * 0.25,
+        ampY:   1.0 + Math.random(),
+        phaseX: Math.random() * Math.PI * 2,
+        speedX: 0.32 + Math.random() * 0.18,
+        ampX:   0.6 + Math.random() * 0.7,
+      };
+
+      const fs = new Map();
+      function getFS(id) {
+        if (!fs.has(id)) fs.set(id, {
+          phaseY: Math.random() * Math.PI * 2,
+          speedY: 1.1 + Math.random() * 0.8,
+          ampY:   (1.0 + Math.random()) * 0.4,
+          phaseX: Math.random() * Math.PI * 2,
+          speedX: 0.65 + Math.random() * 0.5,
+          ampX:   (0.6 + Math.random() * 0.7) * 0.4,
+        });
+        return fs.get(id);
+      }
+
+      let floatT = 0, floatLast = null;
+
+      function phaseFloatLoop(ts) {
+        if (floatLast !== null) floatT += (ts - floatLast) * 0.001;
+        floatLast = ts;
+
+        const gY = Math.sin(floatT * gf.speedY + gf.phaseY) * gf.ampY;
+        const gX = Math.sin(floatT * gf.speedX + gf.phaseX) * gf.ampX;
+
+        suffixEls.forEach(function (el) {
+          el.style.transform = 'translateZ(0) translate(' + gX + 'px,' + gY + 'px)';
+        });
+
+        letterSpans.forEach(function (span) {
+          const f = getFS(span.dataset.id);
+          const y = Math.sin(floatT * f.speedY + f.phaseY) * f.ampY;
+          const x = Math.sin(floatT * f.speedX + f.phaseX) * f.ampX;
+          span.style.transform = 'translateZ(0) translate(' + x + 'px,' + y + 'px)';
+        });
+
+        requestAnimationFrame(phaseFloatLoop);
+      }
+
+      requestAnimationFrame(phaseFloatLoop);
     })();
     </script>
 
