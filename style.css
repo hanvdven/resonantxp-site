@@ -271,10 +271,12 @@ section p {
 .hero-tagline {
   margin: 0 0 2.5rem;
   font-family: var(--font-body);
-  font-size: 0.72rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: rgba(71, 85, 105, 0.45);
+  font-size: clamp(1.1rem, 2vw, 1.55rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #1e293b;
+  line-height: 1.4;
   opacity: 0;
   transform: translateY(12px);
   animation: fadeUp 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
