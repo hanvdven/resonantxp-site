@@ -538,6 +538,39 @@ section p {
   font-size: 0.95rem;
 }
 
+/* ── Language switcher ──────────────────────────── */
+.lang-switch {
+  display: flex;
+  gap: 0.15rem;
+  align-items: center;
+}
+.lang-flag {
+  background: none;
+  border: none;
+  padding: 0.15rem 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  border-radius: 3px;
+  font-family: inherit;
+}
+.lang-flag:hover { opacity: 0.85; transform: translateY(-1px); }
+.lang-flag.active {
+  opacity: 1;
+  cursor: default;
+  background: rgba(148, 163, 184, 0.14);
+}
+.lang-flag.active:hover { transform: none; }
+
+body.field-notes-page .lang-flag { color: #f8fafc; opacity: 0.35; }
+body.field-notes-page .lang-flag:hover { opacity: 0.75; }
+body.field-notes-page .lang-flag.active {
+  opacity: 1;
+  background: rgba(248, 250, 252, 0.08);
+}
+
 
 /* ===== PAGE-SPECIFIC BODY BACKGROUNDS ===== */
 body.experiences-page {
