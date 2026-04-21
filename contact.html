@@ -294,19 +294,26 @@
         return userName ? userName.split(' ')[0].toUpperCase() : 'YOU';
       }
 
+      function updateAllNameLabels() {
+        document.querySelectorAll('[data-you-label]').forEach(el => {
+          el.textContent = userLabel();
+        });
+      }
+
       function makeYouCharEl() {
         const el = document.createElement('span');
         el.className = 'celtx-char celtx-char-you-static';
+        el.setAttribute('data-you-label', '');
         el.textContent = userLabel();
         return el;
       }
 
-      function makeResonaBlock(text) {
+      function makePersonaBlock(text) {
         const wrap = document.createElement('div');
         wrap.className = 'celtx-block';
         const name = document.createElement('span');
         name.className = 'celtx-char celtx-char-resona';
-        name.textContent = 'RESONA';
+        name.textContent = 'PERSONA';
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
         dial.textContent = text;
@@ -314,6 +321,8 @@
         wrap.appendChild(dial);
         return wrap;
       }
+
+      const makeResonaBlock = makePersonaBlock;
 
       // Committed editable line — dotted underline, click to re-edit
       function makeEditableLine(initialText, fieldName, prefix, onChange) {
@@ -364,108 +373,108 @@
         setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 120);
       }
 
-      // ── Intro: RESONA opener, then immediately YOU name input ─────────
-      const r1 = makeResonaBlock('Something is different about you.');
-      r1.style.opacity = '0';
-      r1.style.transition = 'opacity 0.45s ease';
-      histEl.appendChild(r1);
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
-        r1.style.opacity = '1';
-      })), 300);
-      // Bug 8: show name input quickly (800ms) so no gap below opener
-      setTimeout(showNameStep, 800);
+      // ── Intro: PERSONA opener with name inline ──────────────────
+      (function () {
+        const r1wrap = document.createElement('div');
+        r1wrap.className = 'celtx-block';
+        r1wrap.style.opacity = '0';
+        r1wrap.style.transition = 'opacity 0.45s ease';
 
-      // ── STEP 0: Name ──────────────────────────────────
-      function showNameStep() {
-        currEl.innerHTML = '';
-        const wrap = document.createElement('div');
-        wrap.className = 'celtx-block';
+        const r1char = document.createElement('span');
+        r1char.className = 'celtx-char celtx-char-resona';
+        r1char.textContent = 'PERSONA';
 
-        // Input at celtx-char level — same position as character name label, no indent
-        const charEl = document.createElement('span');
-        charEl.className = 'celtx-char celtx-char-you-static';
+        const r1dial = document.createElement('span');
+        r1dial.className = 'celtx-dial';
+        r1dial.appendChild(document.createTextNode('Something is different about you, '));
 
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.className = 'celtx-ink';
-        inp.setAttribute('autocomplete', 'off');
-        inp.style.width = '12em';
+        const nameInp = document.createElement('input');
+        nameInp.type = 'text';
+        nameInp.className = 'celtx-ink';
+        nameInp.setAttribute('autocomplete', 'off');
+        nameInp.style.width = '10em';
 
-        const ghost = document.createElement('span');
-        ghost.className = 'name-ghost';
-        ghost.textContent = 'what is your name?';
+        const nameGhost = document.createElement('span');
+        nameGhost.className = 'name-ghost';
+        nameGhost.textContent = '← your name';
 
-        charEl.appendChild(inp);
-        charEl.appendChild(ghost);
-        wrap.appendChild(charEl);
+        r1dial.appendChild(nameInp);
+        r1dial.appendChild(nameGhost);
+        r1wrap.appendChild(r1char);
+        r1wrap.appendChild(r1dial);
+        histEl.appendChild(r1wrap);
 
-        fadeIn(wrap, 0);
-        currEl.appendChild(wrap);
-        setTimeout(() => inp.focus(), 150);
-        scrollToBottom();
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          r1wrap.style.opacity = '1';
+          setTimeout(() => nameInp.focus(), 200);
+        })), 300);
 
         let idleTimer = null;
 
-        function commit() {
+        function commitName() {
           if (introResumed) return;
-          introResumed = true; // guard before any DOM ops that could re-trigger blur
-          const v = inp.value.trim();
+          introResumed = true;
+          const v = nameInp.value.trim();
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
-          const done = document.createElement('div');
-          done.className = 'celtx-block';
-          // name at char level — editable on click
-          const nameLabel = document.createElement('span');
-          nameLabel.className = 'celtx-char celtx-char-you-static';
-          nameLabel.textContent = userName || '—';
-          nameLabel.style.cssText = 'cursor:pointer;text-decoration:underline dotted rgba(37,99,235,0.4);text-underline-offset:3px;';
-          nameLabel.addEventListener('click', () => {
-            if (nameLabel.querySelector('input')) return;
-            const prev = nameLabel.textContent;
-            nameLabel.textContent = '';
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'celtx-ink';
+          nameSpan.setAttribute('data-editable', 'name');
+          nameSpan.style.cssText = 'cursor:pointer;text-decoration:underline dotted rgba(37,99,235,0.4);text-underline-offset:3px;';
+          nameSpan.textContent = userName || '—';
+          nameSpan.addEventListener('click', () => {
+            if (nameSpan.querySelector('input')) return;
+            const prev = nameSpan.textContent;
+            nameSpan.textContent = '';
             const inp2 = document.createElement('input');
             inp2.type = 'text'; inp2.className = 'celtx-ink';
-            inp2.value = prev; inp2.style.width = '12em';
-            nameLabel.appendChild(inp2);
+            inp2.value = prev; inp2.style.width = '10em';
+            nameSpan.appendChild(inp2);
             inp2.focus(); inp2.select();
             let done2 = false;
             const save = () => {
               if (done2) return; done2 = true;
               const v2 = inp2.value.trim() || prev;
               userName = v2; formData['name'] = v2;
-              nameLabel.textContent = v2;
+              nameSpan.textContent = v2;
+              updateAllNameLabels();
             };
             inp2.addEventListener('blur', save);
             inp2.addEventListener('keydown', e => {
               if (e.key === 'Enter') { e.preventDefault(); inp2.blur(); }
-              if (e.key === 'Escape') { done2 = true; nameLabel.textContent = prev; }
+              if (e.key === 'Escape') { done2 = true; nameSpan.textContent = prev; }
             });
           });
-          done.appendChild(nameLabel);
-          // YOU dialogue line beneath the name
-          const feelLine = document.createElement('span');
-          feelLine.className = 'celtx-dial celtx-dial-user';
-          feelLine.textContent = 'yes. I have had a feeling for a while now.';
-          done.appendChild(feelLine);
-          histEl.appendChild(done);
+          r1dial.removeChild(nameInp);
+          r1dial.removeChild(nameGhost);
+          r1dial.appendChild(nameSpan);
 
-          currEl.innerHTML = '';
+          const youBlock = document.createElement('div');
+          youBlock.className = 'celtx-block';
+          youBlock.appendChild(makeYouCharEl());
+          const feelLine = document.createElement('span');
+          feelLine.className = 'celtx-dial';
+          feelLine.textContent = 'yes. I have had a feeling for a while now.';
+          youBlock.appendChild(feelLine);
+          fadeIn(youBlock, 0);
+          histEl.appendChild(youBlock);
+          scrollToBottom();
           continueAfterName();
         }
 
-        inp.addEventListener('input', () => {
-          ghost.style.opacity = inp.value.length ? '0' : '1';
+        nameInp.addEventListener('input', () => {
+          nameGhost.style.opacity = nameInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
-          if (inp.value.trim()) idleTimer = setTimeout(commit, 3000);
+          if (nameInp.value.trim()) idleTimer = setTimeout(commitName, 3000);
         });
-        inp.addEventListener('keydown', e => {
-          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        nameInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); commitName(); }
         });
-        inp.addEventListener('blur', () => {
-          if (inp.value.trim() && !introResumed) commit();
+        nameInp.addEventListener('blur', () => {
+          if (nameInp.value.trim() && !introResumed) commitName();
         });
-      }
+      })();
 
       function continueAfterName() {
         const r2 = makeResonaBlock('As if you cannot just sit still? That small reflex — like a twitch in your leg. I have it sometimes. My body tells me it is time to move. And yet... I don\'t.');
@@ -484,7 +493,7 @@
         wrap.appendChild(makeYouCharEl());
 
         const prelude = document.createElement('span');
-        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.className = 'celtx-dial';
         prelude.textContent = 'hmm. let me be a bit more specific.';
         wrap.appendChild(prelude);
 
@@ -514,7 +523,7 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
-          dp.className = 'celtx-dial celtx-dial-user';
+          dp.className = 'celtx-dial';
           dp.textContent = 'hmm. let me be a bit more specific.';
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
@@ -572,7 +581,7 @@
 
         const nameEl = document.createElement('span');
         nameEl.className = 'celtx-char celtx-char-resona';
-        nameEl.textContent = 'RESONA';
+        nameEl.textContent = 'PERSONA';
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
@@ -607,7 +616,7 @@
         youBlock.className = 'celtx-block';
         youBlock.appendChild(makeYouCharEl());
         const yd = document.createElement('span');
-        yd.className = 'celtx-dial celtx-dial-user';
+        yd.className = 'celtx-dial';
         yd.textContent = 'I know right. I love it here.';
         youBlock.appendChild(yd);
         fadeIn(youBlock, 0);
@@ -636,12 +645,12 @@
         wrap.appendChild(makeYouCharEl());
 
         const line1 = document.createElement('span');
-        line1.className = 'celtx-dial celtx-dial-user';
+        line1.className = 'celtx-dial';
         line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
         wrap.appendChild(line1);
 
         const line2 = document.createElement('span');
-        line2.className = 'celtx-dial celtx-dial-user';
+        line2.className = 'celtx-dial';
         line2.appendChild(document.createTextNode("They'll reach me at "));
 
         const emailInp = document.createElement('input');
@@ -649,6 +658,11 @@
         emailInp.className = 'celtx-ink';
         emailInp.style.width = '14em';
         line2.appendChild(emailInp);
+
+        const emailGhost = document.createElement('span');
+        emailGhost.className = 'name-ghost';
+        emailGhost.textContent = '← your email address';
+        line2.appendChild(emailGhost);
         wrap.appendChild(line2);
 
         const emailErr = document.createElement('span');
@@ -679,7 +693,7 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dl1 = document.createElement('span');
-          dl1.className = 'celtx-dial celtx-dial-user';
+          dl1.className = 'celtx-dial';
           dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
           done.appendChild(dl1);
           done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
@@ -690,6 +704,7 @@
         };
 
         emailInp.addEventListener('input', () => {
+          emailGhost.style.opacity = emailInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
           if (emailInp.value.trim()) idleTimer = setTimeout(commit, 3000);
         });
@@ -709,7 +724,7 @@
 
         const nameEl = document.createElement('span');
         nameEl.className = 'celtx-char celtx-char-resona';
-        nameEl.textContent = 'RESONA';
+        nameEl.textContent = 'PERSONA';
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
@@ -732,7 +747,7 @@
           yb.className = 'celtx-block';
           yb.appendChild(makeYouCharEl());
           const yd = document.createElement('span');
-          yd.className = 'celtx-dial celtx-dial-user';
+          yd.className = 'celtx-dial';
           yd.textContent = 'I am just curious.';
           yb.appendChild(yd);
           fadeIn(yb, 0);
@@ -757,7 +772,7 @@
           youWrap.appendChild(makeYouCharEl());
 
           const prelude = document.createElement('span');
-          prelude.className = 'celtx-dial celtx-dial-user';
+          prelude.className = 'celtx-dial';
           prelude.textContent = 'Let me explain:';
           youWrap.appendChild(prelude);
 
@@ -780,7 +795,7 @@
             done.className = 'celtx-block';
             done.appendChild(makeYouCharEl());
             const dp = document.createElement('span');
-            dp.className = 'celtx-dial celtx-dial-user';
+            dp.className = 'celtx-dial';
             dp.textContent = 'Let me explain:';
             done.appendChild(dp);
             done.appendChild(makeEditableLine(v, 'intent', ''));

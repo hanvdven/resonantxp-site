@@ -289,11 +289,11 @@
   // =============================================
   // STATE
   // =============================================
-  const MAX_VISIBLE = 5;
+  const MAX_SLOTS = 5;
   let pool = shuffle(allNotes);
   let poolIdx = 0;
-  let slots = [null, null, null, null, null]; // null = empty slot
-  let flippedSlots = new Set();               // indices of flipped cards
+  const slots = Array(MAX_SLOTS).fill(null); // {note, el} or null
+  let activeB = null; // index of the one B card, or null
 
   function nextFromPool() {
     if (poolIdx >= pool.length) { pool = shuffle(allNotes); poolIdx = 0; }
@@ -364,39 +364,35 @@
   }
 
   // =============================================
-  // REMOVE A CARD (fade out, clear slot)
+  // REMOVE CARD (fade out, clear slot, optional callback)
   // =============================================
-  function removeCard(slotIdx) {
-    const entry = slots[slotIdx];
-    if (!entry) return;
-    slots[slotIdx] = null;
-    flippedSlots.delete(slotIdx);
+  function removeCard(idx, then) {
+    const entry = slots[idx];
+    if (!entry) { if (then) then(); return; }
+    slots[idx] = null;
     const el = entry.el;
-    el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    el.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
     el.style.opacity    = '0';
-    el.style.transform  = 'translateY(-10px) scale(0.95)';
+    el.style.transform  = 'scale(0.95)';
     setTimeout(() => {
-      const slotEl = document.getElementById(`slot-${slotIdx}`);
+      const slotEl = document.getElementById(`slot-${idx}`);
       if (slotEl) slotEl.innerHTML = '';
-    }, 320);
+      if (then) then();
+    }, 300);
   }
 
   // =============================================
   // SPAWN CARD INTO SLOT
   // =============================================
-  function spawnIntoSlot(slotIdx, note, delay) {
+  function spawnIntoSlot(idx, note) {
     const el = buildCard(note);
-    const slotEl = document.getElementById(`slot-${slotIdx}`);
+    const slotEl = document.getElementById(`slot-${idx}`);
+    if (!slotEl) return;
     slotEl.innerHTML = '';
     slotEl.appendChild(el);
-    if (delay) el.style.animationDelay = delay + 'ms';
-
-    slots[slotIdx] = { note, el };
-
-    // Fit text after the card is painted
+    slots[idx] = { note, el };
     requestAnimationFrame(() => requestAnimationFrame(() => fitCardText(el)));
-
-    const act = () => handleClick(slotIdx);
+    const act = () => handleClick(idx);
     el.addEventListener('click', act);
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
@@ -404,50 +400,54 @@
   }
 
   // =============================================
+  // RECYCLE B CARD: flip back to F, then replace
+  // =============================================
+  function recycleCard(idx) {
+    const entry = slots[idx];
+    if (!entry) return;
+    entry.el.classList.remove('flipped');
+    setTimeout(() => {
+      removeCard(idx, () => setTimeout(() => spawnIntoSlot(idx, nextFromPool()), 60));
+    }, 720); // wait for flip-back transition
+  }
+
+  // =============================================
   // CLICK HANDLER
   // =============================================
-  function handleClick(slotIdx) {
-    if (flippedSlots.size === 0) {
-      // Phase A: flip this card + remove 1–3 other random cards
-      const entry = slots[slotIdx];
-      if (!entry) return;
-      entry.el.classList.add('flipped');
-      flippedSlots.add(slotIdx);
+  function handleClick(idx) {
+    const entry = slots[idx];
+    if (!entry) return;
+    if (entry.el.classList.contains('flipped')) return; // ignore B cards
 
-      const others = shuffle(
-        Array.from({ length: MAX_VISIBLE }, (_, i) => i)
-          .filter(i => i !== slotIdx && slots[i])
-      );
-      const count = Math.min(others.length, 1 + Math.floor(Math.random() * 3));
-      others.slice(0, count).forEach(i => removeCard(i));
+    // 1. Recycle previous B card (if any)
+    const prev = activeB;
+    activeB = idx;
+    if (prev !== null && prev !== idx) recycleCard(prev);
 
-    } else {
-      // Phase B: remove all flipped cards, then refill to 5
-      [...flippedSlots].forEach(i => removeCard(i));
-      flippedSlots.clear();
-      setTimeout(refillSlots, 380);
-    }
-  }
+    // 2. Flip clicked card F → B
+    entry.el.classList.add('flipped');
 
-  // =============================================
-  // REFILL EMPTY SLOTS
-  // =============================================
-  function refillSlots() {
-    let delay = 0;
-    for (let i = 0; i < MAX_VISIBLE; i++) {
-      if (!slots[i]) {
-        spawnIntoSlot(i, nextFromPool(), delay);
-        delay += 110;
+    // 3. Replace 0–2 random other slots (exclude clicked & being-recycled)
+    const excluded = new Set([idx]);
+    if (prev !== null) excluded.add(prev);
+    const candidates = shuffle(
+      Array.from({ length: MAX_SLOTS }, (_, i) => i).filter(i => !excluded.has(i))
+    );
+    const count = Math.floor(Math.random() * 3); // 0, 1, or 2
+    candidates.slice(0, count).forEach((slotI, j) => {
+      const delay = j * 130;
+      if (slots[slotI]) {
+        removeCard(slotI, () => setTimeout(() => spawnIntoSlot(slotI, nextFromPool()), 60));
+      } else {
+        setTimeout(() => spawnIntoSlot(slotI, nextFromPool()), delay);
       }
-    }
+    });
   }
 
   // =============================================
-  // INIT
+  // INIT — start with only slot 0
   // =============================================
-  for (let i = 0; i < MAX_VISIBLE; i++) {
-    spawnIntoSlot(i, nextFromPool(), i * 120);
-  }
+  spawnIntoSlot(0, nextFromPool());
 
   })(); // end outer IIFE
   </script>
