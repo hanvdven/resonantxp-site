@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Martel+Sans:wght@600&amp;family=Averia+Serif+Libre:ital,wght@1,300&amp;display=swap');
+    </style>
+    <!-- Clip all wave content to the 300×300 frame -->
+    <clipPath id="frame">
+      <rect width="300" height="300"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Background ─────────────────────────────── -->
+  <rect width="300" height="300" fill="#f7f6f3"/>
+
+  <!-- ── Animated waves — clipped to frame ─────── -->
+  <!--
+    Each wave path spans x = -150 to x = 600 (5 full periods of 150px).
+    The animateTransform shifts each group by exactly one period (-150px),
+    so the wave tiles seamlessly. Different starting offsets + speeds
+    produce a natural, non-synchronised feel.
+  -->
+  <g clip-path="url(#frame)">
+
+    <!-- Wave A · above · y=98 · A=8 · 12 s -->
+    <g opacity="0.13">
+      <animateTransform attributeName="transform" type="translate"
+        from="0,0" to="-150,0" dur="12s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"
+        d="M -150,98
+           C -123,90 -102,90 -75,98
+           C  -48,106  -27,106   0,98
+           C   27,90   48,90   75,98
+           C  102,106  123,106 150,98
+           C  177,90  198,90  225,98
+           C  252,106  273,106 300,98
+           C  327,90  348,90  375,98
+           C  402,106  423,106 450,98
+           C  477,90  498,90  525,98
+           C  552,106  573,106 600,98"/>
+    </g>
+
+    <!-- Wave B · above · y=113 · A=10 · inverted · 9 s -->
+    <g opacity="0.09">
+      <animateTransform attributeName="transform" type="translate"
+        from="-38,0" to="-188,0" dur="9s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linecap="round"
+        d="M -150,113
+           C -123,123 -102,123 -75,113
+           C  -48,103  -27,103   0,113
+           C   27,123   48,123  75,113
+           C  102,103  123,103 150,113
+           C  177,123  198,123 225,113
+           C  252,103  273,103 300,113
+           C  327,123  348,123 375,113
+           C  402,103  423,103 450,113
+           C  477,123  498,123 525,113
+           C  552,103  573,103 600,113"/>
+    </g>
+
+    <!-- Wave C · centre · y=152 · A=5 · ghost · 18 s -->
+    <g opacity="0.05">
+      <animateTransform attributeName="transform" type="translate"
+        from="-75,0" to="-225,0" dur="18s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#2563eb" stroke-width="1.0" stroke-linecap="round"
+        d="M -150,152
+           C -123,147 -102,147 -75,152
+           C  -48,157  -27,157   0,152
+           C   27,147   48,147  75,152
+           C  102,157  123,157 150,152
+           C  177,147  198,147 225,152
+           C  252,157  273,157 300,152
+           C  327,147  348,147 375,152
+           C  402,157  423,157 450,152
+           C  477,147  498,147 525,152
+           C  552,157  573,157 600,152"/>
+    </g>
+
+    <!-- Wave D · below · y=195 · A=8 · 10 s -->
+    <g opacity="0.13">
+      <animateTransform attributeName="transform" type="translate"
+        from="-50,0" to="-200,0" dur="10s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round"
+        d="M -150,195
+           C -123,187 -102,187 -75,195
+           C  -48,203  -27,203   0,195
+           C   27,187   48,187  75,195
+           C  102,203  123,203 150,195
+           C  177,187  198,187 225,195
+           C  252,203  273,203 300,195
+           C  327,187  348,187 375,195
+           C  402,203  423,203 450,195
+           C  477,187  498,187 525,195
+           C  552,203  573,203 600,195"/>
+    </g>
+
+    <!-- Wave E · below · y=210 · A=10 · inverted · 8 s -->
+    <g opacity="0.09">
+      <animateTransform attributeName="transform" type="translate"
+        from="-20,0" to="-170,0" dur="8s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#2563eb" stroke-width="1.2" stroke-linecap="round"
+        d="M -150,210
+           C -123,220 -102,220 -75,210
+           C  -48,200  -27,200   0,210
+           C   27,220   48,220  75,210
+           C  102,200  123,200 150,210
+           C  177,220  198,220 225,210
+           C  252,200  273,200 300,210
+           C  327,220  348,220 375,210
+           C  402,200  423,200 450,210
+           C  477,220  498,220 525,210
+           C  552,200  573,200 600,210"/>
+    </g>
+
+  </g><!-- /waves -->
+
+  <!-- ── RESONANT label ────────────────────────── -->
+  <text x="150" y="63"
+    text-anchor="middle"
+    font-family="'Martel Sans', system-ui, sans-serif"
+    font-size="9.5" font-weight="600"
+    letter-spacing="6"
+    fill="#94a3b8">RESONANT</text>
+
+  <!-- Top rule -->
+  <line x1="40" y1="74" x2="260" y2="74" stroke="#d1d5db" stroke-width="0.5"/>
+
+  <!-- ── XP monogram ──────────────────────────── -->
+  <text x="150" y="185"
+    text-anchor="middle"
+    font-family="Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, serif"
+    font-size="90" font-style="italic"
+    fill="#1a1f2e">XP</text>
+
+  <!-- Bottom rule -->
+  <line x1="40" y1="230" x2="260" y2="230" stroke="#d1d5db" stroke-width="0.5"/>
+
+  <!-- ── Tagline ────────────────────────────────── -->
+  <text x="150" y="248"
+    text-anchor="middle"
+    font-family="'Averia Serif Libre', Georgia, serif"
+    font-size="8" font-style="italic"
+    letter-spacing="2"
+    fill="#94a3b8">experience design</text>
+
+</svg>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Martel+Sans:wght@600&amp;family=Averia+Serif+Libre:ital,wght@1,300&amp;display=swap');
+    </style>
+    <clipPath id="frame-d">
+      <rect width="300" height="300"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="300" height="300" fill="#1a1f2e"/>
+
+  <!-- Animated waves -->
+  <g clip-path="url(#frame-d)">
+
+    <!-- Wave A y=95 A=8 dur=12s -->
+    <g opacity="0.20">
+      <animateTransform attributeName="transform" type="translate"
+        from="0,0" to="-150,0" dur="12s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"
+        d="M-150,95 C-123,87 -102,87 -75,95 C-48,103 -27,103 0,95 C27,87 48,87 75,95 C102,103 123,103 150,95 C177,87 198,87 225,95 C252,103 273,103 300,95 C327,87 348,87 375,95 C402,103 423,103 450,95 C477,87 498,87 525,95 C552,103 573,103 600,95"/>
+    </g>
+
+    <!-- Wave B y=110 A=10 inv dur=9s -->
+    <g opacity="0.13">
+      <animateTransform attributeName="transform" type="translate"
+        from="-38,0" to="-188,0" dur="9s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#60a5fa" stroke-width="1.2" stroke-linecap="round"
+        d="M-150,110 C-123,120 -102,120 -75,110 C-48,100 -27,100 0,110 C27,120 48,120 75,110 C102,100 123,100 150,110 C177,120 198,120 225,110 C252,100 273,100 300,110 C327,120 348,120 375,110 C402,100 423,100 450,110 C477,120 498,120 525,110 C552,100 573,100 600,110"/>
+    </g>
+
+    <!-- Wave C y=150 A=5 ghost dur=18s -->
+    <g opacity="0.07">
+      <animateTransform attributeName="transform" type="translate"
+        from="-75,0" to="-225,0" dur="18s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#93c5fd" stroke-width="1.0" stroke-linecap="round"
+        d="M-150,150 C-123,145 -102,145 -75,150 C-48,155 -27,155 0,150 C27,145 48,145 75,150 C102,155 123,155 150,150 C177,145 198,145 225,150 C252,155 273,155 300,150 C327,145 348,145 375,150 C402,155 423,155 450,150 C477,145 498,145 525,150 C552,155 573,155 600,150"/>
+    </g>
+
+    <!-- Wave D y=192 A=8 dur=10s -->
+    <g opacity="0.20">
+      <animateTransform attributeName="transform" type="translate"
+        from="-50,0" to="-200,0" dur="10s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"
+        d="M-150,192 C-123,184 -102,184 -75,192 C-48,200 -27,200 0,192 C27,184 48,184 75,192 C102,200 123,200 150,192 C177,184 198,184 225,192 C252,200 273,200 300,192 C327,184 348,184 375,192 C402,200 423,200 450,192 C477,184 498,184 525,192 C552,200 573,200 600,192"/>
+    </g>
+
+    <!-- Wave E y=207 A=10 inv dur=8s -->
+    <g opacity="0.13">
+      <animateTransform attributeName="transform" type="translate"
+        from="-20,0" to="-170,0" dur="8s" repeatCount="indefinite"/>
+      <path fill="none" stroke="#60a5fa" stroke-width="1.2" stroke-linecap="round"
+        d="M-150,207 C-123,217 -102,217 -75,207 C-48,197 -27,197 0,207 C27,217 48,217 75,207 C102,197 123,197 150,207 C177,217 198,217 225,207 C252,197 273,197 300,207 C327,217 348,217 375,207 C402,197 423,197 450,207 C477,217 498,217 525,207 C552,197 573,197 600,207"/>
+    </g>
+
+  </g>
+
+  <!-- RESONANT label -->
+  <text x="150" y="62"
+    text-anchor="middle"
+    font-family="'Martel Sans', system-ui, sans-serif"
+    font-size="9.5" font-weight="600"
+    letter-spacing="6"
+    fill="#475569">RESONANT</text>
+
+  <!-- Top rule -->
+  <line x1="36" y1="73" x2="264" y2="73" stroke="#334155" stroke-width="0.5"/>
+
+  <!-- XP monogram -->
+  <text x="150" y="183"
+    text-anchor="middle"
+    font-family="Palatino, 'Palatino Linotype', 'Book Antiqua', Georgia, serif"
+    font-size="90" font-style="italic"
+    fill="#f1f5f9">XP</text>
+
+  <!-- Bottom rule -->
+  <line x1="36" y1="228" x2="264" y2="228" stroke="#334155" stroke-width="0.5"/>
+
+  <!-- Tagline -->
+  <text x="150" y="246"
+    text-anchor="middle"
+    font-family="'Averia Serif Libre', Georgia, serif"
+    font-size="8" font-style="italic"
+    letter-spacing="2"
+    fill="#475569">experience design</text>
+
+</svg>
