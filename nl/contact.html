@@ -36,13 +36,17 @@
     .celtx-char-you-static { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; color: #2563eb; text-transform: none; }
     .celtx-dial { display: block; padding-left: 3em; text-align: left; margin: 0; font-size: 12pt; }
     .celtx-dial-user { color: #2563eb; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; }
+    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; background: rgba(253, 224, 71, 0.28); border-radius: 1px; }
     .celtx-dial-user[data-editable] { cursor: pointer; text-decoration: underline dotted rgba(37,99,235,0.4); text-underline-offset: 3px; }
     .celtx-dial-user[data-editable]:hover { text-decoration-color: rgba(37,99,235,0.75); }
+    .celtx-name-committed { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; color: #2563eb; }
     .celtx-ink { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: 12pt; color: #2563eb; background: transparent; border: none; outline: none; padding: 0 0.1em; vertical-align: baseline; line-height: 1.5; }
     .celtx-ink::placeholder { color: #93c5fd; letter-spacing: 0.28em; }
-    input.celtx-ink { border-bottom: 1px dotted rgba(37,99,235,0.35); display: inline; }
+    input.celtx-ink { display: block; width: 100%; box-sizing: border-box; border-bottom: 1px dotted rgba(37,99,235,0.35); }
+    input.celtx-ink.celtx-ink-inline { display: inline; width: auto; }
     textarea.celtx-ink { display: block; width: 100%; resize: none; overflow-y: hidden; border-bottom: 1px dotted rgba(37,99,235,0.3); padding-left: 3em; margin-top: 0.3em; box-sizing: border-box; }
-    .name-ghost { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: 0.82em; color: #93c5fd; margin-left: 1.4em; pointer-events: none; transition: opacity 0.3s; vertical-align: baseline; }
+    .celtx-ink-wrap { padding-left: 3em; margin-top: 0.3em; }
+    .celtx-ink-hint { display: block; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: 0.82em; color: #93c5fd; transition: opacity 0.2s; margin-bottom: 0.1em; }
     @keyframes rippleIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
     .loc-option { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; color: #2563eb; cursor: pointer; border-bottom: 1px dotted rgba(37,99,235,0.45); margin: 0 0.35em; display: inline; transition: color 0.15s; }
     .loc-option:hover { color: #1d4ed8; }
@@ -53,7 +57,6 @@
     .celtx-option:hover { color: #1d4ed8; }
     .celtx-send-col { padding-left: 3em; margin-top: 1.5em; }
     #scriptHistory .celtx-block { opacity: 1; }
-    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; }
     .celtx-foot { margin-top: 5em; font-size: 9pt; font-style: italic; color: #bbb; text-align: center; transition: opacity 0.5s ease; }
     .celtx-foot a { color: #bbb; text-decoration: underline; }
     @media (max-width: 560px) { .celtx-paper { padding: 0 20px; } }
@@ -160,9 +163,8 @@
           const current = formData[fieldName] || initialText;
           const inp = document.createElement('input');
           inp.type = fieldName === 'email' ? 'email' : 'text';
-          inp.className = 'celtx-ink';
+          inp.className = 'celtx-ink celtx-ink-inline';
           inp.value = current;
-          inp.style.display = 'inline';
           inp.style.width = fieldName === 'email' ? '14em' : '20em';
           wrap.textContent = prefix || '';
           wrap.appendChild(inp);
@@ -198,6 +200,7 @@
         setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 120);
       }
 
+      // ── Intro: PERSONA opener with name input below ──
       (function () {
         const r1wrap = document.createElement('div');
         r1wrap.className = 'celtx-block';
@@ -210,22 +213,25 @@
 
         const r1dial = document.createElement('span');
         r1dial.className = 'celtx-dial';
-        r1dial.appendChild(document.createTextNode('Er is iets anders aan jou, '));
+        r1dial.appendChild(document.createTextNode('Er is iets anders aan jou,'));
+
+        const inkWrap = document.createElement('div');
+        inkWrap.className = 'celtx-ink-wrap';
+
+        const nameHint = document.createElement('span');
+        nameHint.className = 'celtx-ink-hint';
+        nameHint.textContent = 'jouw naam';
 
         const nameInp = document.createElement('input');
         nameInp.type = 'text';
         nameInp.className = 'celtx-ink';
-        nameInp.setAttribute('autocomplete', 'off');
-        nameInp.style.width = '10em';
+        nameInp.setAttribute('autocomplete', 'name');
 
-        const nameGhost = document.createElement('span');
-        nameGhost.className = 'name-ghost';
-        nameGhost.textContent = '← jouw naam';
-
-        r1dial.appendChild(nameInp);
-        r1dial.appendChild(nameGhost);
+        inkWrap.appendChild(nameHint);
+        inkWrap.appendChild(nameInp);
         r1wrap.appendChild(r1char);
         r1wrap.appendChild(r1dial);
+        r1wrap.appendChild(inkWrap);
         histEl.appendChild(r1wrap);
 
         setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -242,44 +248,21 @@
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
+          r1wrap.removeChild(inkWrap);
+          r1dial.appendChild(document.createTextNode(' '));
           const nameSpan = document.createElement('span');
-          nameSpan.className = 'celtx-ink';
-          nameSpan.setAttribute('data-editable', 'name');
-          nameSpan.style.cssText = 'cursor:pointer;text-decoration:underline dotted rgba(37,99,235,0.4);text-underline-offset:3px;';
+          nameSpan.className = 'celtx-name-committed';
           nameSpan.textContent = userName || '—';
-          nameSpan.addEventListener('click', () => {
-            if (nameSpan.querySelector('input')) return;
-            const prev = nameSpan.textContent;
-            nameSpan.textContent = '';
-            const inp2 = document.createElement('input');
-            inp2.type = 'text'; inp2.className = 'celtx-ink';
-            inp2.value = prev; inp2.style.width = '10em';
-            nameSpan.appendChild(inp2);
-            inp2.focus(); inp2.select();
-            let done2 = false;
-            const save = () => {
-              if (done2) return; done2 = true;
-              const v2 = inp2.value.trim() || prev;
-              userName = v2; formData['name'] = v2;
-              nameSpan.textContent = v2;
-              updateAllNameLabels();
-            };
-            inp2.addEventListener('blur', save);
-            inp2.addEventListener('keydown', e => {
-              if (e.key === 'Enter') { e.preventDefault(); inp2.blur(); }
-              if (e.key === 'Escape') { done2 = true; nameSpan.textContent = prev; }
-            });
-          });
-          r1dial.removeChild(nameInp);
-          r1dial.removeChild(nameGhost);
           r1dial.appendChild(nameSpan);
+
+          updateAllNameLabels();
 
           const youBlock = document.createElement('div');
           youBlock.className = 'celtx-block';
           youBlock.appendChild(makeYouCharEl());
           const feelLine = document.createElement('span');
-          feelLine.className = 'celtx-dial';
-          feelLine.textContent = 'ja. ik heb al een tijdje een gevoel.';
+          feelLine.className = 'celtx-dial celtx-dial-user';
+          feelLine.textContent = 'Ja. Ik heb al een tijdje een gevoel.';
           youBlock.appendChild(feelLine);
           fadeIn(youBlock, 0);
           histEl.appendChild(youBlock);
@@ -288,7 +271,7 @@
         }
 
         nameInp.addEventListener('input', () => {
-          nameGhost.style.opacity = nameInp.value.length ? '0' : '1';
+          nameHint.style.opacity = nameInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
           if (nameInp.value.trim()) idleTimer = setTimeout(commitName, 3000);
         });
@@ -316,13 +299,14 @@
         wrap.appendChild(makeYouCharEl());
 
         const prelude = document.createElement('span');
-        prelude.className = 'celtx-dial';
-        prelude.textContent = 'hmm. laat me iets specifieker zijn.';
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = 'Hmm. Laat me iets specifieker zijn.';
         wrap.appendChild(prelude);
 
         const ta = document.createElement('textarea');
         ta.className = 'celtx-ink';
         ta.rows = 1;
+        ta.placeholder = '...';
         wrap.appendChild(ta);
 
         fadeIn(wrap, 150);
@@ -345,8 +329,8 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
-          dp.className = 'celtx-dial';
-          dp.textContent = 'hmm. laat me iets specifieker zijn.';
+          dp.className = 'celtx-dial celtx-dial-user';
+          dp.textContent = 'Hmm. Laat me iets specifieker zijn.';
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
           histEl.appendChild(done);
@@ -367,12 +351,12 @@
         ta.addEventListener('blur', () => { if (ta.value.trim()) commit(); });
       }
 
-      function buildCountryDial(dialEl, selectedLoc) {
+      function buildCountryDial(dialEl, selectedLabel) {
         while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
         dialEl.appendChild(document.createTextNode('Ik zie. Gelukkig dat u actief bent in '));
         const locSpan = document.createElement('span');
         locSpan.className = 'loc-editable';
-        locSpan.textContent = selectedLoc;
+        locSpan.textContent = selectedLabel;
         locSpan.addEventListener('click', () => {
           while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
           dialEl.appendChild(document.createTextNode('Ik zie. Gelukkig dat u actief bent in '));
@@ -387,7 +371,7 @@
               buildCountryDial(dialEl, label);
             });
             dialEl.appendChild(opt);
-            if (i < 3) dialEl.appendChild(document.createTextNode(' '));
+            if (i < 3) dialEl.appendChild(document.createTextNode(' '));
           });
         });
         dialEl.appendChild(locSpan);
@@ -415,7 +399,7 @@
           opt.style.animation = `rippleIn 0.3s ease ${i * 90}ms forwards`;
           opt.addEventListener('click', () => selectLocation(val, label, dial, wrap));
           dial.appendChild(opt);
-          if (i < 3) dial.appendChild(document.createTextNode(' '));
+          if (i < 3) dial.appendChild(document.createTextNode(' '));
         });
 
         wrap.appendChild(nameEl);
@@ -434,8 +418,8 @@
         youBlock.className = 'celtx-block';
         youBlock.appendChild(makeYouCharEl());
         const yd = document.createElement('span');
-        yd.className = 'celtx-dial';
-        yd.textContent = 'inderdaad. ik ben hier graag.';
+        yd.className = 'celtx-dial celtx-dial-user';
+        yd.textContent = 'Inderdaad. Ik ben hier graag.';
         youBlock.appendChild(yd);
         fadeIn(youBlock, 0);
         histEl.appendChild(youBlock);
@@ -444,7 +428,7 @@
         scrollToBottom();
 
         setTimeout(() => {
-          const soBlock = makeResonaBlock('Dus... waar wacht je op.');
+          const soBlock = makeResonaBlock('Dus... waar wacht je op?');
           fadeIn(soBlock, 0);
           histEl.appendChild(soBlock);
           scrollToBottom();
@@ -461,31 +445,36 @@
         wrap.appendChild(makeYouCharEl());
 
         const line1 = document.createElement('span');
-        line1.className = 'celtx-dial';
-        line1.textContent = "ik weet het niet. ik heb een vreemd gevoel dat iemand contact opneemt en naar me luistert.";
+        line1.className = 'celtx-dial celtx-dial-user';
+        line1.textContent = "Ik weet het niet. Ik heb een vreemd gevoel dat iemand contact opneemt en naar me luistert.";
         wrap.appendChild(line1);
 
         const line2 = document.createElement('span');
-        line2.className = 'celtx-dial';
-        line2.appendChild(document.createTextNode("ze bereiken me op "));
+        line2.className = 'celtx-dial celtx-dial-user';
+        line2.textContent = "Ze bereiken me op";
+        wrap.appendChild(line2);
+
+        const emailWrap = document.createElement('div');
+        emailWrap.className = 'celtx-ink-wrap';
+
+        const emailHint = document.createElement('span');
+        emailHint.className = 'celtx-ink-hint';
+        emailHint.textContent = 'jouw e-mailadres';
 
         const emailInp = document.createElement('input');
         emailInp.type = 'email';
         emailInp.className = 'celtx-ink';
-        emailInp.style.width = '14em';
-        line2.appendChild(emailInp);
-
-        const emailGhost = document.createElement('span');
-        emailGhost.className = 'name-ghost';
-        emailGhost.textContent = '← jouw e-mailadres';
-        line2.appendChild(emailGhost);
-        wrap.appendChild(line2);
+        emailInp.setAttribute('autocomplete', 'email');
 
         const emailErr = document.createElement('span');
-        emailErr.className = 'celtx-dial';
-        emailErr.style.cssText = 'font-size:0.8em;color:#ef4444;display:none;';
-        emailErr.textContent = 'dat ziet er niet uit als een e-mailadres.';
-        wrap.appendChild(emailErr);
+        emailErr.className = 'celtx-ink-hint';
+        emailErr.style.cssText = 'color:#ef4444;display:none;opacity:1;';
+        emailErr.textContent = 'Dat ziet er niet uit als een e-mailadres.';
+
+        emailWrap.appendChild(emailHint);
+        emailWrap.appendChild(emailInp);
+        emailWrap.appendChild(emailErr);
+        wrap.appendChild(emailWrap);
 
         fadeIn(wrap, 150);
         currEl.appendChild(wrap);
@@ -509,10 +498,10 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dl1 = document.createElement('span');
-          dl1.className = 'celtx-dial';
-          dl1.textContent = "ik weet het niet. ik heb een vreemd gevoel dat iemand contact opneemt en naar me luistert.";
+          dl1.className = 'celtx-dial celtx-dial-user';
+          dl1.textContent = "Ik weet het niet. Ik heb een vreemd gevoel dat iemand contact opneemt en naar me luistert.";
           done.appendChild(dl1);
-          done.appendChild(makeEditableLine(email, 'email', "ze bereiken me op "));
+          done.appendChild(makeEditableLine(email, 'email', "Ze bereiken me op "));
           histEl.appendChild(done);
 
           currEl.innerHTML = '';
@@ -520,7 +509,7 @@
         };
 
         emailInp.addEventListener('input', () => {
-          emailGhost.style.opacity = emailInp.value.length ? '0' : '1';
+          emailHint.style.opacity = emailInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
           if (emailInp.value.trim()) idleTimer = setTimeout(commit, 3000);
         });
@@ -561,8 +550,8 @@
           yb.className = 'celtx-block';
           yb.appendChild(makeYouCharEl());
           const yd = document.createElement('span');
-          yd.className = 'celtx-dial';
-          yd.textContent = 'ik ben gewoon nieuwsgierig.';
+          yd.className = 'celtx-dial celtx-dial-user';
+          yd.textContent = 'Ik ben gewoon nieuwsgierig.';
           yb.appendChild(yd);
           fadeIn(yb, 0);
           histEl.appendChild(yb);
@@ -586,13 +575,14 @@
           youWrap.appendChild(makeYouCharEl());
 
           const prelude = document.createElement('span');
-          prelude.className = 'celtx-dial';
+          prelude.className = 'celtx-dial celtx-dial-user';
           prelude.textContent = 'Laat me uitleggen:';
           youWrap.appendChild(prelude);
 
           const ta = document.createElement('textarea');
           ta.className = 'celtx-ink';
           ta.rows = 1;
+          ta.placeholder = '...';
           youWrap.appendChild(ta);
 
           let idleTimer = null;
@@ -608,7 +598,7 @@
             done.className = 'celtx-block';
             done.appendChild(makeYouCharEl());
             const dp = document.createElement('span');
-            dp.className = 'celtx-dial';
+            dp.className = 'celtx-dial celtx-dial-user';
             dp.textContent = 'Laat me uitleggen:';
             done.appendChild(dp);
             done.appendChild(makeEditableLine(v, 'intent', ''));
