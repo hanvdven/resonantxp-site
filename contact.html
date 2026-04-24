@@ -50,10 +50,7 @@
       padding: 0 48px;
     }
 
-    #scriptHistory {
-      overflow-y: visible;
-      padding-bottom: 0;
-    }
+    #scriptHistory { overflow-y: visible; padding-bottom: 0; }
 
     .celtx-act, .celtx-scene {
       display: block;
@@ -104,12 +101,22 @@
       font-size: 12pt;
     }
 
+    /* User lines — blue italic in Averia */
     .celtx-dial-user {
       color: #2563eb;
       font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
     }
 
+    /* Committed user lines in history get a yellow marker */
+    #scriptHistory .celtx-dial-user {
+      color: #2563eb;
+      opacity: 1;
+      background: rgba(253, 224, 71, 0.28);
+      border-radius: 1px;
+    }
+
+    /* Editable committed lines — dotted underline, click to re-edit */
     .celtx-dial-user[data-editable] {
       cursor: pointer;
       text-decoration: underline dotted rgba(37,99,235,0.4);
@@ -117,6 +124,13 @@
     }
     .celtx-dial-user[data-editable]:hover {
       text-decoration-color: rgba(37,99,235,0.75);
+    }
+
+    /* Committed name blended into sentence — no click affordance */
+    .celtx-name-committed {
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
+      color: #2563eb;
     }
 
     /* ── Inky inline inputs ───────────────────────── */
@@ -136,10 +150,20 @@
       color: #93c5fd;
       letter-spacing: 0.28em;
     }
+
+    /* Block inputs — name and email primary fields */
     input.celtx-ink {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
       border-bottom: 1px dotted rgba(37,99,235,0.35);
-      display: inline;
     }
+    /* Inline inputs — used only in edit-in-place (makeEditableLine) */
+    input.celtx-ink.celtx-ink-inline {
+      display: inline;
+      width: auto;
+    }
+
     textarea.celtx-ink {
       display: block;
       width: 100%;
@@ -151,16 +175,20 @@
       box-sizing: border-box;
     }
 
-    /* Ghost hint beside name input */
-    .name-ghost {
+    /* ── Label above input ────────────────────────── */
+    .celtx-ink-wrap {
+      padding-left: 3em;
+      margin-top: 0.3em;
+    }
+
+    .celtx-ink-hint {
+      display: block;
       font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
       font-size: 0.82em;
       color: #93c5fd;
-      margin-left: 1.4em;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      vertical-align: baseline;
+      transition: opacity 0.2s;
+      margin-bottom: 0.1em;
     }
 
     /* ── Inline location options ──────────────────── */
@@ -181,7 +209,6 @@
     }
     .loc-option:hover { color: #1d4ed8; }
 
-    /* Committed country name — clickable to re-select */
     .loc-editable {
       font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
@@ -223,7 +250,6 @@
 
     /* ── History ──────────────────────────────────── */
     #scriptHistory .celtx-block { opacity: 1; }
-    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; }
 
     /* ── Foot note ───────────────────────────────── */
     .celtx-foot {
@@ -335,7 +361,7 @@
 
       const makeResonaBlock = makePersonaBlock;
 
-      // Committed editable line — dotted underline, click to re-edit
+      // Committed editable line — click to re-edit inline
       function makeEditableLine(initialText, fieldName, prefix, onChange) {
         const wrap = document.createElement('span');
         wrap.className = 'celtx-dial celtx-dial-user';
@@ -346,9 +372,8 @@
           const current = formData[fieldName] || initialText;
           const inp = document.createElement('input');
           inp.type = fieldName === 'email' ? 'email' : 'text';
-          inp.className = 'celtx-ink';
+          inp.className = 'celtx-ink celtx-ink-inline';
           inp.value = current;
-          inp.style.display = 'inline';
           inp.style.width = fieldName === 'email' ? '14em' : '20em';
           wrap.textContent = prefix || '';
           wrap.appendChild(inp);
@@ -384,7 +409,7 @@
         setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 120);
       }
 
-      // ── Intro: PERSONA opener with name inline ──────────────────
+      // ── Intro: PERSONA opener with name input below ──
       (function () {
         const r1wrap = document.createElement('div');
         r1wrap.className = 'celtx-block';
@@ -395,24 +420,29 @@
         r1char.className = 'celtx-char celtx-char-resona';
         r1char.textContent = 'PERSONA';
 
+        // Dialogue line ends with comma — name appears below
         const r1dial = document.createElement('span');
         r1dial.className = 'celtx-dial';
-        r1dial.appendChild(document.createTextNode('Something is different about you, '));
+        r1dial.appendChild(document.createTextNode('Something is different about you,'));
+
+        // Label above the input line
+        const inkWrap = document.createElement('div');
+        inkWrap.className = 'celtx-ink-wrap';
+
+        const nameHint = document.createElement('span');
+        nameHint.className = 'celtx-ink-hint';
+        nameHint.textContent = 'your name';
 
         const nameInp = document.createElement('input');
         nameInp.type = 'text';
         nameInp.className = 'celtx-ink';
-        nameInp.setAttribute('autocomplete', 'off');
-        nameInp.style.width = '10em';
+        nameInp.setAttribute('autocomplete', 'name');
 
-        const nameGhost = document.createElement('span');
-        nameGhost.className = 'name-ghost';
-        nameGhost.textContent = '← your name';
-
-        r1dial.appendChild(nameInp);
-        r1dial.appendChild(nameGhost);
+        inkWrap.appendChild(nameHint);
+        inkWrap.appendChild(nameInp);
         r1wrap.appendChild(r1char);
         r1wrap.appendChild(r1dial);
+        r1wrap.appendChild(inkWrap);
         histEl.appendChild(r1wrap);
 
         setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -429,44 +459,22 @@
           if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
           if (v) { userName = v; formData['name'] = v; }
 
+          // Remove the input block, append name seamlessly to the sentence
+          r1wrap.removeChild(inkWrap);
+          r1dial.appendChild(document.createTextNode(' '));
           const nameSpan = document.createElement('span');
-          nameSpan.className = 'celtx-ink';
-          nameSpan.setAttribute('data-editable', 'name');
-          nameSpan.style.cssText = 'cursor:pointer;text-decoration:underline dotted rgba(37,99,235,0.4);text-underline-offset:3px;';
+          nameSpan.className = 'celtx-name-committed';
           nameSpan.textContent = userName || '—';
-          nameSpan.addEventListener('click', () => {
-            if (nameSpan.querySelector('input')) return;
-            const prev = nameSpan.textContent;
-            nameSpan.textContent = '';
-            const inp2 = document.createElement('input');
-            inp2.type = 'text'; inp2.className = 'celtx-ink';
-            inp2.value = prev; inp2.style.width = '10em';
-            nameSpan.appendChild(inp2);
-            inp2.focus(); inp2.select();
-            let done2 = false;
-            const save = () => {
-              if (done2) return; done2 = true;
-              const v2 = inp2.value.trim() || prev;
-              userName = v2; formData['name'] = v2;
-              nameSpan.textContent = v2;
-              updateAllNameLabels();
-            };
-            inp2.addEventListener('blur', save);
-            inp2.addEventListener('keydown', e => {
-              if (e.key === 'Enter') { e.preventDefault(); inp2.blur(); }
-              if (e.key === 'Escape') { done2 = true; nameSpan.textContent = prev; }
-            });
-          });
-          r1dial.removeChild(nameInp);
-          r1dial.removeChild(nameGhost);
           r1dial.appendChild(nameSpan);
+
+          updateAllNameLabels();
 
           const youBlock = document.createElement('div');
           youBlock.className = 'celtx-block';
           youBlock.appendChild(makeYouCharEl());
           const feelLine = document.createElement('span');
-          feelLine.className = 'celtx-dial';
-          feelLine.textContent = 'yes. I have had a feeling for a while now.';
+          feelLine.className = 'celtx-dial celtx-dial-user';
+          feelLine.textContent = 'Yes. I have had a feeling for a while now.';
           youBlock.appendChild(feelLine);
           fadeIn(youBlock, 0);
           histEl.appendChild(youBlock);
@@ -475,7 +483,7 @@
         }
 
         nameInp.addEventListener('input', () => {
-          nameGhost.style.opacity = nameInp.value.length ? '0' : '1';
+          nameHint.style.opacity = nameInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
           if (nameInp.value.trim()) idleTimer = setTimeout(commitName, 3000);
         });
@@ -504,14 +512,14 @@
         wrap.appendChild(makeYouCharEl());
 
         const prelude = document.createElement('span');
-        prelude.className = 'celtx-dial';
-        prelude.textContent = 'hmm. let me be a bit more specific.';
+        prelude.className = 'celtx-dial celtx-dial-user';
+        prelude.textContent = 'Hmm. Let me be a bit more specific.';
         wrap.appendChild(prelude);
 
-        // Bug 1: no ellipsis placeholder
         const ta = document.createElement('textarea');
         ta.className = 'celtx-ink';
         ta.rows = 1;
+        ta.placeholder = '...';
         wrap.appendChild(ta);
 
         fadeIn(wrap, 150);
@@ -520,7 +528,7 @@
         scrollToBottom();
 
         let idleTimer = null;
-        let committed = false; // Bug 5: guard against double-commit
+        let committed = false;
 
         const commit = () => {
           if (committed) return;
@@ -534,8 +542,8 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
-          dp.className = 'celtx-dial';
-          dp.textContent = 'hmm. let me be a bit more specific.';
+          dp.className = 'celtx-dial celtx-dial-user';
+          dp.textContent = 'Hmm. Let me be a bit more specific.';
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
           histEl.appendChild(done);
@@ -563,14 +571,13 @@
         const locSpan = document.createElement('span');
         locSpan.className = 'loc-editable';
         locSpan.textContent = selectedLoc;
-        // Bug 3: clicking committed country re-shows options
         locSpan.addEventListener('click', () => {
           while (dialEl.firstChild) dialEl.removeChild(dialEl.firstChild);
           dialEl.appendChild(document.createTextNode('I see. Good fortune you operate in '));
           ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((l, i) => {
             const opt = document.createElement('span');
             opt.className = 'loc-option';
-            opt.textContent = `[${l}]`; // Bug 6
+            opt.textContent = `[${l}]`;
             opt.style.opacity = '0';
             opt.style.animation = `rippleIn 0.3s ease ${i * 90}ms forwards`;
             opt.addEventListener('click', () => {
@@ -578,7 +585,7 @@
               buildCountryDial(dialEl, l);
             });
             dialEl.appendChild(opt);
-            if (i < 3) dialEl.appendChild(document.createTextNode('\u00a0'));
+            if (i < 3) dialEl.appendChild(document.createTextNode(' '));
           });
         });
         dialEl.appendChild(locSpan);
@@ -598,7 +605,6 @@
         dial.className = 'celtx-dial';
         dial.appendChild(document.createTextNode('I see. Good fortune you operate in '));
 
-        // Bug 6: country options in [ ] brackets
         ['Belgium', 'Netherlands', 'Germany', 'Other'].forEach((loc, i) => {
           const opt = document.createElement('span');
           opt.className = 'loc-option';
@@ -607,7 +613,7 @@
           opt.style.animation = `rippleIn 0.3s ease ${i * 90}ms forwards`;
           opt.addEventListener('click', () => selectLocation(loc, dial, wrap));
           dial.appendChild(opt);
-          if (i < 3) dial.appendChild(document.createTextNode('\u00a0'));
+          if (i < 3) dial.appendChild(document.createTextNode(' '));
         });
 
         wrap.appendChild(nameEl);
@@ -619,7 +625,6 @@
 
       function selectLocation(loc, dialEl, wrapEl) {
         formData['location'] = loc;
-        // Bug 3: committed country is editable via buildCountryDial
         buildCountryDial(dialEl, loc);
         histEl.appendChild(wrapEl);
 
@@ -627,8 +632,8 @@
         youBlock.className = 'celtx-block';
         youBlock.appendChild(makeYouCharEl());
         const yd = document.createElement('span');
-        yd.className = 'celtx-dial';
-        yd.textContent = 'I know right. I love it here.';
+        yd.className = 'celtx-dial celtx-dial-user';
+        yd.textContent = 'I know, right. I love it here.';
         youBlock.appendChild(yd);
         fadeIn(youBlock, 0);
         histEl.appendChild(youBlock);
@@ -637,13 +642,12 @@
         scrollToBottom();
 
         setTimeout(() => {
-          const soBlock = makeResonaBlock('So... what are you waiting for.');
+          const soBlock = makeResonaBlock('So... what are you waiting for?');
           fadeIn(soBlock, 0);
           histEl.appendChild(soBlock);
           scrollToBottom();
         }, 1000);
 
-        // Bug 7: email comes before intent
         setTimeout(showEmailStep, 2400);
       }
 
@@ -656,31 +660,37 @@
         wrap.appendChild(makeYouCharEl());
 
         const line1 = document.createElement('span');
-        line1.className = 'celtx-dial';
+        line1.className = 'celtx-dial celtx-dial-user';
         line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
         wrap.appendChild(line1);
 
         const line2 = document.createElement('span');
-        line2.className = 'celtx-dial';
-        line2.appendChild(document.createTextNode("They'll reach me at "));
+        line2.className = 'celtx-dial celtx-dial-user';
+        line2.textContent = "They'll reach me at";
+        wrap.appendChild(line2);
+
+        // Label above the email input line
+        const emailWrap = document.createElement('div');
+        emailWrap.className = 'celtx-ink-wrap';
+
+        const emailHint = document.createElement('span');
+        emailHint.className = 'celtx-ink-hint';
+        emailHint.textContent = 'your email address';
 
         const emailInp = document.createElement('input');
         emailInp.type = 'email';
         emailInp.className = 'celtx-ink';
-        emailInp.style.width = '14em';
-        line2.appendChild(emailInp);
-
-        const emailGhost = document.createElement('span');
-        emailGhost.className = 'name-ghost';
-        emailGhost.textContent = '← your email address';
-        line2.appendChild(emailGhost);
-        wrap.appendChild(line2);
+        emailInp.setAttribute('autocomplete', 'email');
 
         const emailErr = document.createElement('span');
-        emailErr.className = 'celtx-dial';
-        emailErr.style.cssText = 'font-size:0.8em;color:#ef4444;display:none;';
-        emailErr.textContent = 'that does not look like an email address.';
-        wrap.appendChild(emailErr);
+        emailErr.className = 'celtx-ink-hint';
+        emailErr.style.cssText = 'color:#ef4444;display:none;opacity:1;';
+        emailErr.textContent = 'That does not look like an email address.';
+
+        emailWrap.appendChild(emailHint);
+        emailWrap.appendChild(emailInp);
+        emailWrap.appendChild(emailErr);
+        wrap.appendChild(emailWrap);
 
         fadeIn(wrap, 150);
         currEl.appendChild(wrap);
@@ -704,7 +714,7 @@
           done.className = 'celtx-block';
           done.appendChild(makeYouCharEl());
           const dl1 = document.createElement('span');
-          dl1.className = 'celtx-dial';
+          dl1.className = 'celtx-dial celtx-dial-user';
           dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
           done.appendChild(dl1);
           done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
@@ -715,7 +725,7 @@
         };
 
         emailInp.addEventListener('input', () => {
-          emailGhost.style.opacity = emailInp.value.length ? '0' : '1';
+          emailHint.style.opacity = emailInp.value.length ? '0' : '1';
           if (idleTimer) clearTimeout(idleTimer);
           if (emailInp.value.trim()) idleTimer = setTimeout(commit, 3000);
         });
@@ -727,7 +737,7 @@
         });
       }
 
-      // ── STEP 4: Intent (Bug 7: now after email) ────────
+      // ── STEP 4: Intent ────────────────────────────────
       function showIntentStep() {
         currEl.innerHTML = '';
         const wrap = document.createElement('div');
@@ -744,7 +754,6 @@
         const opts = document.createElement('div');
         opts.className = 'celtx-options';
 
-        // Bug 6: options in [ ] brackets
         const curiousBtn = document.createElement('button');
         curiousBtn.className = 'celtx-option';
         curiousBtn.type = 'button';
@@ -758,7 +767,7 @@
           yb.className = 'celtx-block';
           yb.appendChild(makeYouCharEl());
           const yd = document.createElement('span');
-          yd.className = 'celtx-dial';
+          yd.className = 'celtx-dial celtx-dial-user';
           yd.textContent = 'I am just curious.';
           yb.appendChild(yd);
           fadeIn(yb, 0);
@@ -783,18 +792,18 @@
           youWrap.appendChild(makeYouCharEl());
 
           const prelude = document.createElement('span');
-          prelude.className = 'celtx-dial';
+          prelude.className = 'celtx-dial celtx-dial-user';
           prelude.textContent = 'Let me explain:';
           youWrap.appendChild(prelude);
 
-          // Bug 1: no ellipsis placeholder
           const ta = document.createElement('textarea');
           ta.className = 'celtx-ink';
           ta.rows = 1;
+          ta.placeholder = '...';
           youWrap.appendChild(ta);
 
           let idleTimer = null;
-          let committed = false; // Bug 5: guard
+          let committed = false;
           const commit = () => {
             if (committed) return;
             const v = ta.value.trim();
@@ -806,7 +815,7 @@
             done.className = 'celtx-block';
             done.appendChild(makeYouCharEl());
             const dp = document.createElement('span');
-            dp.className = 'celtx-dial';
+            dp.className = 'celtx-dial celtx-dial-user';
             dp.textContent = 'Let me explain:';
             done.appendChild(dp);
             done.appendChild(makeEditableLine(v, 'intent', ''));

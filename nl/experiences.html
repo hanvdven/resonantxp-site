@@ -46,6 +46,16 @@
     .xp-bill-lang { font-size: 0.78rem; font-style: italic; color: #94a3b8; margin: 0 0 2.2rem; }
     .xp-bill-cta { display: inline-block; font-family: 'Martel Sans', system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; color: #2563eb; text-decoration: none; border: 1px solid #bfdbfe; padding: 0.55rem 1.4rem; transition: color 0.2s, border-color 0.2s; }
     .xp-bill-cta:hover { color: #1d4ed8; border-color: #2563eb; }
+
+    /* ── XP–X tailored block ─────────────────────────── */
+    .xp-tailored-rule { border: none; border-top: 1px dashed #bfdbfe; margin: 2.2rem 0; }
+    .xp-tailored { margin: 0 0 3rem; padding: 1.8rem 2rem 2rem; background: #eff6ff; border: 1.5px dashed #bfdbfe; text-align: center; }
+    .xp-tailored-label { font-family: 'Indie Flower', cursive; font-size: 0.88rem; color: #94a3b8; display: block; margin: 0 0 0.8rem; }
+    .xp-tailored-title { font-family: 'Linden Hill', Georgia, serif; font-size: clamp(1.4rem, 2.5vw, 1.9rem); font-weight: normal; font-style: italic; color: #1e293b; margin: 0 0 0.7rem; line-height: 1.2; }
+    .xp-tailored-sub { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: 0.97rem; color: #64748b; line-height: 1.65; margin: 0 0 1.4rem; }
+    .xp-tailored-link { font-family: 'Martel Sans', system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #2563eb; text-decoration: none; border-bottom: 1px solid rgba(37,99,235,0.35); padding-bottom: 0.1rem; transition: border-color 0.2s; }
+    .xp-tailored-link:hover { border-color: #2563eb; }
+
     @media (max-width: 560px) { .xp-bill-inner { font-size: 11pt; } }
   </style>
 </head>
@@ -61,19 +71,40 @@
           <span class="xp-bill-season">Seizoen 2025 · 2026</span>
           <p class="xp-bill-strapline">
             Ervaringen worden niet geleverd.<br>
-            Ze worden betreden.
+            Ze worden betreden.<br>
+            <span style="font-size:0.88em;opacity:0.7;">Alleen een situatie die je niet kunt repeteren laat zien hoe je werkelijk reageert.</span>
           </p>
         </header>
 
         <hr class="xp-bill-rule" />
 
+        <!-- ── XP–01 ──────────────────────────────────── -->
         <article class="xp-production">
           <span class="xp-prod-num">XP–01</span>
+          <h2 class="xp-prod-title">Intensief ervaringsprogramma</h2>
+          <p class="xp-prod-desc">
+            Een volledig meerdaags programma ontworpen voor één groep. Geen reeks
+            workshops — een aanhoudende boog van druk, reflectie en emergentie.
+            Elke dag bouwt voort op wat de vorige dag naar boven is gekomen.
+            Formaat, duur en volgorde worden ontworpen vanuit de briefing.
+          </p>
+          <em class="xp-prod-emerges">
+            Geen vaardigheden overgedragen —<br>
+            maar een groep die nu weet hoe ze werkelijk functioneert.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–02 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–02</span>
           <h2 class="xp-prod-title">Leiderschap onder druk</h2>
           <p class="xp-prod-desc">
-            Een gestructureerde omgeving waarin deelnemers moeten leiden zonder volledige
-            informatie, met wisselende omstandigheden en concurrerende perspectieven.
-            Onzekerheid is een ontwerpelement. Beslissingen worden in real time genomen.
+            Een gestructureerde omgeving waarin deelnemers moeten leiden zonder
+            volledige informatie, met wisselende omstandigheden en concurrerende
+            perspectieven. Onzekerheid is een ontwerpelement. Beslissingen worden
+            in real time genomen.
           </p>
           <em class="xp-prod-emerges">
             Wat naar voren komt is geen theorie over leiderschap —<br>
@@ -83,13 +114,14 @@
 
         <hr class="xp-bill-rule" />
 
+        <!-- ── XP–03 ──────────────────────────────────── -->
         <article class="xp-production">
-          <span class="xp-prod-num">XP–02</span>
+          <span class="xp-prod-num">XP–03</span>
           <h2 class="xp-prod-title">Collectieve intelligentie</h2>
           <p class="xp-prod-desc">
-            Een dynamisch groepssysteem waarbij geen enkele deelnemer de controle heeft,
-            maar er voortdurend beslissingen moeten worden genomen. Gedistribueerd door ontwerp.
-            Groepsbewustzijn onder druk.
+            Een dynamisch groepssysteem waarbij geen enkele deelnemer de controle
+            heeft, maar er voortdurend beslissingen moeten worden genomen.
+            Gedistribueerd door ontwerp. Groepsbewustzijn onder druk.
           </p>
           <em class="xp-prod-emerges">
             Intelligentie bevindt zich niet in individuen —<br>
@@ -99,12 +131,13 @@
 
         <hr class="xp-bill-rule" />
 
+        <!-- ── XP–04 ──────────────────────────────────── -->
         <article class="xp-production">
-          <span class="xp-prod-num">XP–03</span>
+          <span class="xp-prod-num">XP–04</span>
           <h2 class="xp-prod-title">Belichaamde communicatie</h2>
           <p class="xp-prod-desc">
-            Een interactieruimte in real time waarbij helderheid, timing en aanwezigheid
-            de verklaring vervangen als primaire communicatiemiddelen.
+            Een interactieruimte in real time waarbij helderheid, timing en
+            aanwezigheid de verklaring vervangen als primaire communicatiemiddelen.
             Non-verbaal bewustzijn. Directe feedbacklussen.
           </p>
           <em class="xp-prod-emerges">
@@ -112,6 +145,75 @@
             ze wordt uitgevoerd.
           </em>
         </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–05 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–05</span>
+          <h2 class="xp-prod-title">Organisatie in transitie</h2>
+          <p class="xp-prod-desc">
+            Voor organisaties midden in een ingrijpende verandering — herstructurering,
+            nieuw leiderschap, fusie of verlies van richting. Geen seminarie over
+            verandermanagement. Een reeks ontworpen situaties die de werkelijke toestand
+            van het systeem zichtbaar maken en voorwaarden scheppen voor iets nieuws.
+          </p>
+          <em class="xp-prod-emerges">
+            Verandering kan niet worden beheerd —<br>
+            maar de voorwaarden ervoor kunnen worden ontworpen.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–06 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–06</span>
+          <h2 class="xp-prod-title">1:1 leiderschapscoaching</h2>
+          <p class="xp-prod-desc">
+            Een maandelijkse samenwerking voor individuele leiders. Het werk is
+            niet primair conversationeel — het begint met ontworpen situaties,
+            echte observaties en eerlijke reflectie op wat er werkelijk is gebeurd.
+            Patroonherkenning. Eerlijke wrijving. In de loop van de tijd verschuift er iets.
+          </p>
+          <em class="xp-prod-emerges">
+            Je kunt je eigen patroon niet zien van binnenuit —<br>
+            daarom bestaat dit werk.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–07 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–07</span>
+          <h2 class="xp-prod-title">Keynote · Presentator · Moderator</h2>
+          <p class="xp-prod-desc">
+            Han spreekt op congressen, bedrijfsevenementen en leiderschapsbijeenkomsten.
+            Hij modereert ook panels, toppen en strategische gesprekken.
+            Zijn achtergrond in theater en improvisatie bepaalt beide: een lezing
+            is getimed en ontworpen om aan te komen; een panel wordt begeleid als
+            actieve luisteraar die de zaal leest en naar boven haalt wat ze werkelijk zegt.
+            In het Nederlands, Engels of Duits.
+          </p>
+          <em class="xp-prod-emerges">
+            Een zaal weet wanneer iemand aanwezig is —<br>
+            en wanneer niet.
+          </em>
+        </article>
+
+        <hr class="xp-tailored-rule" />
+
+        <!-- ── XP–X ───────────────────────────────────── -->
+        <div class="xp-tailored">
+          <span class="xp-tailored-label">XP–X</span>
+          <h2 class="xp-tailored-title">Op maat gemaakte ervaring</h2>
+          <p class="xp-tailored-sub">
+            Niets dat precies past bij het bovenstaande programma?<br>
+            Dat is doorgaans waar het interessante werk begint.
+          </p>
+          <a class="xp-tailored-link" href="contact.html">Laten we praten</a>
+        </div>
 
         <hr class="xp-bill-rule" />
 

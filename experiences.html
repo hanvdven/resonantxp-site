@@ -29,154 +29,73 @@
   <script src="header.js" defer></script>
   <script src="nav.js" defer></script>
   <style data-page-style>
-    /* ===================================================
-       EXPERIENCES — THEATRE PLAYBILL
-       Light background · Courier + serif mix · programme
-       =================================================== */
-
-    /* ── Page wrapper ────────────────────────────────── */
-    .xp-bill {
-      background: #f7f6f3;
-      min-height: 100vh;
-      padding: 0 1rem 7rem;
-    }
-
-    .xp-bill-inner {
-      max-width: 600px;
-      margin: 0 auto;
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 1rem;
-    }
-
-    /* ── Programme header ────────────────────────────── */
-    .xp-bill-head {
-      text-align: center;
-      margin-bottom: 3.5rem;
-    }
-
-    .xp-bill-company {
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-style: italic;
-      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
-      color: #2563eb;
-      margin: 0 0 0.5rem;
-      display: block;
-    }
-
-    .xp-bill-season {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.62rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: #334155;
-      display: block;
-      margin: 0 0 1.8rem;
-    }
-
-    .xp-bill-strapline {
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-size: 1rem;
-      font-style: italic;
-      color: #475569;
-      line-height: 1.7;
-      margin: 0;
-    }
-
-    /* ── Divider ─────────────────────────────────────── */
-    .xp-bill-rule {
-      border: none;
-      border-top: 1px solid #d1d5db;
-      margin: 2.2rem 0;
-    }
-
-    /* ── Production block ────────────────────────────── */
-    .xp-production {
-      margin: 0 0 4rem;
-    }
-    /* Slight horizontal stagger for playfulness */
+    .xp-bill { background: #f7f6f3; min-height: 100vh; padding: 0 1rem 7rem; }
+    .xp-bill-inner { max-width: 600px; margin: 0 auto; font-family: 'Martel Sans', system-ui, sans-serif; font-size: 1rem; }
+    .xp-bill-head { text-align: center; margin-bottom: 3.5rem; }
+    .xp-bill-company { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: clamp(1.5rem, 3.5vw, 2.2rem); color: #2563eb; margin: 0 0 0.5rem; display: block; }
+    .xp-bill-season { font-family: 'Martel Sans', system-ui, sans-serif; font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: #334155; display: block; margin: 0 0 1.8rem; }
+    .xp-bill-strapline { font-family: 'Averia Serif Libre', Georgia, serif; font-size: 1rem; font-style: italic; color: #475569; line-height: 1.7; margin: 0; }
+    .xp-bill-rule { border: none; border-top: 1px solid #d1d5db; margin: 2.2rem 0; }
+    .xp-production { margin: 0 0 4rem; }
     .xp-production:nth-of-type(odd)  { margin-left: 0; margin-right: 2.5rem; }
     .xp-production:nth-of-type(even) { margin-left: 2.5rem; margin-right: 0; }
+    .xp-prod-num { font-family: 'Martel Sans', system-ui, sans-serif; font-size: 0.68rem; letter-spacing: 0.32em; text-transform: uppercase; color: #2563eb; display: block; margin: 0 0 0.5rem; }
+    .xp-prod-title { font-family: 'Linden Hill', Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: normal; font-style: italic; color: #1e293b; margin: 0 0 1rem; line-height: 1.15; }
+    .xp-prod-desc { font-family: 'Martel Sans', system-ui, sans-serif; font-size: 1.0rem; font-weight: 300; color: #64748b; line-height: 1.75; margin: 0 0 1rem; }
+    .xp-prod-emerges { display: block; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; font-size: 1.05rem; color: #334155; padding-left: 1.4rem; border-left: 2px solid #2563eb; line-height: 1.6; }
+    .xp-bill-foot { margin-top: 0.5rem; text-align: center; }
+    .xp-bill-location { font-size: 0.8rem; color: #334155; line-height: 1.9; margin: 0 0 0.2rem; }
+    .xp-bill-lang { font-size: 0.78rem; font-style: italic; color: #94a3b8; margin: 0 0 2.2rem; }
+    .xp-bill-cta { display: inline-block; font-family: 'Martel Sans', system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; color: #2563eb; text-decoration: none; border: 1px solid #bfdbfe; padding: 0.55rem 1.4rem; transition: color 0.2s, border-color 0.2s; }
+    .xp-bill-cta:hover { color: #1d4ed8; border-color: #2563eb; }
 
-    .xp-prod-num {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: #2563eb;
-      display: block;
-      margin: 0 0 0.5rem;
+    /* ── XP–X tailored block ─────────────────────────── */
+    .xp-tailored-rule { border: none; border-top: 1px dashed #bfdbfe; margin: 2.2rem 0; }
+    .xp-tailored {
+      margin: 0 0 3rem;
+      padding: 1.8rem 2rem 2rem;
+      background: #eff6ff;
+      border: 1.5px dashed #bfdbfe;
+      text-align: center;
     }
-
-    .xp-prod-title {
+    .xp-tailored-label {
+      font-family: 'Indie Flower', cursive;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      display: block;
+      margin: 0 0 0.8rem;
+    }
+    .xp-tailored-title {
       font-family: 'Linden Hill', Georgia, serif;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
       font-weight: normal;
       font-style: italic;
       color: #1e293b;
-      margin: 0 0 1rem;
-      line-height: 1.15;
+      margin: 0 0 0.7rem;
+      line-height: 1.2;
     }
-
-    .xp-prod-desc {
-      font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 1.0rem;
-      font-weight: 300;
-      color: #64748b;
-      line-height: 1.75;
-      margin: 0 0 1rem;
-    }
-
-    .xp-prod-emerges {
-      display: block;
+    .xp-tailored-sub {
       font-family: 'Averia Serif Libre', Georgia, serif;
       font-style: italic;
-      font-size: 1.05rem;
-      color: #334155;
-      padding-left: 1.4rem;
-      border-left: 2px solid #2563eb;
-      line-height: 1.6;
+      font-size: 0.97rem;
+      color: #64748b;
+      line-height: 1.65;
+      margin: 0 0 1.4rem;
     }
-
-    /* ── Programme footer ────────────────────────────── */
-    .xp-bill-foot {
-      margin-top: 0.5rem;
-      text-align: center;
-    }
-
-    .xp-bill-location {
-      font-size: 0.8rem;
-      color: #334155;
-      line-height: 1.9;
-      margin: 0 0 0.2rem;
-    }
-
-    .xp-bill-lang {
-      font-size: 0.78rem;
-      font-style: italic;
-      color: #94a3b8;
-      margin: 0 0 2.2rem;
-    }
-
-    .xp-bill-cta {
-      display: inline-block;
+    .xp-tailored-link {
       font-family: 'Martel Sans', system-ui, sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.2em;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       color: #2563eb;
       text-decoration: none;
-      border: 1px solid #bfdbfe;
-      padding: 0.55rem 1.4rem;
-      transition: color 0.2s, border-color 0.2s;
+      border-bottom: 1px solid rgba(37,99,235,0.35);
+      padding-bottom: 0.1rem;
+      transition: border-color 0.2s;
     }
-    .xp-bill-cta:hover {
-      color: #1d4ed8;
-      border-color: #2563eb;
-    }
+    .xp-tailored-link:hover { border-color: #2563eb; }
 
-    @media (max-width: 560px) {
-      .xp-bill-inner { font-size: 11pt; }
-    }
+    @media (max-width: 560px) { .xp-bill-inner { font-size: 11pt; } }
   </style>
 </head>
 
@@ -193,7 +112,8 @@
           <span class="xp-bill-season">Season 2025 · 2026</span>
           <p class="xp-bill-strapline">
             Experiences are not delivered.<br>
-            They are entered.
+            They are entered.<br>
+            <span style="font-size:0.88em;opacity:0.7;">Only a situation you cannot rehearse shows you how you actually respond.</span>
           </p>
         </header>
 
@@ -202,6 +122,24 @@
         <!-- ── XP–01 ──────────────────────────────────── -->
         <article class="xp-production">
           <span class="xp-prod-num">XP–01</span>
+          <h2 class="xp-prod-title">Intensive Experience Programme</h2>
+          <p class="xp-prod-desc">
+            A full multi-day programme designed for a single group. Not a sequence
+            of workshops — a sustained arc of pressure, reflection, and emergence.
+            Each day builds on what surfaced the day before. Format, duration, and
+            sequence are designed from the brief.
+          </p>
+          <em class="xp-prod-emerges">
+            Not skills transferred —<br>
+            but a group that now knows how it actually works.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–02 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–02</span>
           <h2 class="xp-prod-title">Leadership Under Pressure</h2>
           <p class="xp-prod-desc">
             A structured environment where participants must lead without full
@@ -216,9 +154,9 @@
 
         <hr class="xp-bill-rule" />
 
-        <!-- ── XP–02 ──────────────────────────────────── -->
+        <!-- ── XP–03 ──────────────────────────────────── -->
         <article class="xp-production">
-          <span class="xp-prod-num">XP–02</span>
+          <span class="xp-prod-num">XP–03</span>
           <h2 class="xp-prod-title">Collective Intelligence</h2>
           <p class="xp-prod-desc">
             A dynamic group system where no single participant has control,
@@ -233,9 +171,9 @@
 
         <hr class="xp-bill-rule" />
 
-        <!-- ── XP–03 ──────────────────────────────────── -->
+        <!-- ── XP–04 ──────────────────────────────────── -->
         <article class="xp-production">
-          <span class="xp-prod-num">XP–03</span>
+          <span class="xp-prod-num">XP–04</span>
           <h2 class="xp-prod-title">Embodied Communication</h2>
           <p class="xp-prod-desc">
             A real-time interaction space where clarity, timing, and presence
@@ -247,6 +185,75 @@
             it is enacted.
           </em>
         </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–05 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–05</span>
+          <h2 class="xp-prod-title">Organisation in Transition</h2>
+          <p class="xp-prod-desc">
+            For organisations in the middle of significant change — restructuring,
+            new leadership, merger, or loss of direction. Not a seminar on change
+            management. A series of designed situations that make the actual state
+            of the system visible, and create conditions for something new to emerge.
+          </p>
+          <em class="xp-prod-emerges">
+            Change cannot be managed —<br>
+            but conditions for it can be designed.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–06 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–06</span>
+          <h2 class="xp-prod-title">1:1 Leadership Coaching</h2>
+          <p class="xp-prod-desc">
+            A monthly engagement for individual leaders. The work is not primarily
+            conversational — it begins with designed situations, real observations,
+            and honest reflection on what actually happened. Pattern recognition.
+            Honest friction. Over time, something shifts.
+          </p>
+          <em class="xp-prod-emerges">
+            You cannot see your own pattern from inside it —<br>
+            that is why this work exists.
+          </em>
+        </article>
+
+        <hr class="xp-bill-rule" />
+
+        <!-- ── XP–07 ──────────────────────────────────── -->
+        <article class="xp-production">
+          <span class="xp-prod-num">XP–07</span>
+          <h2 class="xp-prod-title">Keynote · Presenter · Moderator</h2>
+          <p class="xp-prod-desc">
+            Han speaks at conferences, company events, and leadership gatherings.
+            He also moderates panels, summits, and strategic conversations.
+            His background in theatre and improvisation shapes both: a talk is
+            timed and designed to land; a panel is guided as an active listener
+            who reads the room and draws out what it is actually saying.
+            In Dutch, English, or German.
+          </p>
+          <em class="xp-prod-emerges">
+            A room knows when someone is present —<br>
+            and when they are not.
+          </em>
+        </article>
+
+        <hr class="xp-tailored-rule" />
+
+        <!-- ── XP–X ───────────────────────────────────── -->
+        <div class="xp-tailored">
+          <span class="xp-tailored-label">XP–X</span>
+          <h2 class="xp-tailored-title">Tailored Experience</h2>
+          <p class="xp-tailored-sub">
+            Nothing quite fits the programme above?<br>
+            That is usually where the interesting work begins.
+          </p>
+          <a class="xp-tailored-link" href="contact.html">Let's talk</a>
+        </div>
 
         <hr class="xp-bill-rule" />
 
