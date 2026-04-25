@@ -305,6 +305,7 @@
   let poolIdx = 0;
   const slots = Array(MAX_SLOTS).fill(null); // {note, el} or null
   let activeB = null; // index of the one B card, or null
+  let visibleSlots = 1; // high-water mark of revealed slots
 
   function nextFromPool() {
     if (poolIdx >= pool.length) { pool = shuffle(allNotes); poolIdx = 0; }
@@ -428,31 +429,30 @@
   function handleClick(idx) {
     const entry = slots[idx];
     if (!entry) return;
-    if (entry.el.classList.contains('flipped')) return; // ignore B cards
 
-    // 1. Recycle previous B card (if any)
+    const isFlipped = entry.el.classList.contains('flipped');
+
+    if (isFlipped) {
+      // Clicking a flipped (B-side) card flips it back to front
+      entry.el.classList.remove('flipped');
+      if (activeB === idx) activeB = null;
+      return;
+    }
+
+    // F card: recycle previous B card, flip this one, reveal new cards
     const prev = activeB;
     activeB = idx;
     if (prev !== null && prev !== idx) recycleCard(prev);
 
-    // 2. Flip clicked card F → B
     entry.el.classList.add('flipped');
 
-    // 3. Replace 0–2 random other slots (exclude clicked & being-recycled)
-    const excluded = new Set([idx]);
-    if (prev !== null) excluded.add(prev);
-    const candidates = shuffle(
-      Array.from({ length: MAX_SLOTS }, (_, i) => i).filter(i => !excluded.has(i))
-    );
-    const count = Math.floor(Math.random() * 3); // 0, 1, or 2
-    candidates.slice(0, count).forEach((slotI, j) => {
-      const delay = j * 130;
-      if (slots[slotI]) {
-        removeCard(slotI, () => setTimeout(() => spawnIntoSlot(slotI, nextFromPool()), 60));
-      } else {
-        setTimeout(() => spawnIntoSlot(slotI, nextFromPool()), delay);
-      }
-    });
+    // Reveal up to 2 new cards in previously-hidden slots
+    const newCount = Math.min(2, MAX_SLOTS - visibleSlots);
+    for (let n = 0; n < newCount; n++) {
+      const s = visibleSlots + n;
+      setTimeout(() => spawnIntoSlot(s, nextFromPool()), n * 150);
+    }
+    visibleSlots = Math.min(MAX_SLOTS, visibleSlots + newCount);
   }
 
   // =============================================

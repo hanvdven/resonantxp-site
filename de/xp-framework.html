@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resonant XP | RESONATE → EXPAND Framework</title>
-  <meta name="description" content="The RESONATE → EXPAND Framework describes how experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
-  <meta property="og:title" content="RESONATE → EXPAND Framework — Resonant XP" />
-  <meta property="og:description" content="How experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
+  <title>Resonant XP | RESONATE → EXPAND Rahmenwerk</title>
+  <meta name="description" content="Das RESONATE → EXPAND Rahmenwerk beschreibt, wie Erlebnisse sich in Echtzeit entfalten — als Oszillationen in kollektiver Kognition, nicht als Schritte in einem Prozess." />
+  <meta property="og:title" content="RESONATE → EXPAND Rahmenwerk — Resonant XP" />
+  <meta property="og:description" content="Wie Erlebnisse sich in Echtzeit entfalten — als Oszillationen in kollektiver Kognition, nicht als Schritte in einem Prozess." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://resonantxp.com/xp-framework.html" />
+  <meta property="og:url" content="https://resonantxp.com/de/xp-framework.html" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="RESONATE → EXPAND Framework — Resonant XP" />
-  <meta name="twitter:description" content="How experiences evolve in real time — as oscillations in collective cognition, not steps in a process." />
+  <meta name="twitter:title" content="RESONATE → EXPAND Rahmenwerk — Resonant XP" />
+  <meta name="twitter:description" content="Wie Erlebnisse sich in Echtzeit entfalten — als Oszillationen in kollektiver Kognition, nicht als Schritte in einem Prozess." />
   <meta property="og:site_name" content="Resonant XP" />
-  <meta property="og:locale" content="en_GB" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:locale:alternate" content="en_GB" />
   <meta property="og:locale:alternate" content="nl_NL" />
-  <meta property="og:locale:alternate" content="de_DE" />
-  <link rel="canonical" href="https://resonantxp.com/xp-framework.html" />
+  <link rel="canonical" href="https://resonantxp.com/de/xp-framework.html" />
   <link rel="alternate" hreflang="en" href="https://resonantxp.com/xp-framework.html" />
   <link rel="alternate" hreflang="nl" href="https://resonantxp.com/nl/xp-framework.html" />
   <link rel="alternate" hreflang="de" href="https://resonantxp.com/de/xp-framework.html" />
@@ -24,17 +24,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <script src="header.js" defer></script>
-  <script src="nav.js" defer></script>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <script src="../header.js" defer></script>
+  <script src="../nav.js" defer></script>
   <style data-page-style>
     /* ===================================================
        XP-FRAMEWORK — HORIZONTAL PANEL SYSTEM
-       6 panels · Explore/Expand oscillating · wraps
+       6 panels · Resonate/Expand oscillating · wraps
        =================================================== */
 
-    /* Mobile: collapse header only when screen is truly narrow */
     @media (max-width: 480px) {
       body.framework-page .nav-links { display: none; }
       body.framework-page .brand-name { display: none; }
@@ -43,7 +42,6 @@
       body.framework-page .logo-frame  { width: 36px; height: auto; }
     }
 
-    /* ── Layout ─────────────────────────────────────── */
     .xp-main {
       position: fixed;
       inset: 0;
@@ -72,7 +70,6 @@
     .xp-explore { background: #f7f6f3; }
     .xp-expand  { background: #f0f4fb; }
 
-    /* ── Right-edge fade to next panel colour ────────── */
     .xp-panel { position: relative; }
     .xp-panel::after {
       content: '';
@@ -85,7 +82,6 @@
     .xp-explore::after { background: linear-gradient(to right, transparent, #f0f4fb); }
     .xp-expand::after  { background: linear-gradient(to right, transparent, #f7f6f3); }
 
-    /* ── Expand panels: content shifted right, text left-aligned ─ */
     .xp-expand .xp-phase,
     .xp-expand .xp-questions,
     .xp-expand .xp-panel-content {
@@ -93,7 +89,6 @@
       margin-left: auto;
     }
 
-    /* ── Phase label — XP styled like header ─────────── */
     .xp-phase {
       font-size: clamp(2.8rem, 6vw, 5rem);
       line-height: 1;
@@ -133,7 +128,6 @@
       line-height: 1;
     }
 
-    /* ── First-visit scroll hint arrow ───────────────── */
     .xp-scroll-hint {
       position: fixed;
       bottom: 3.2rem;
@@ -154,7 +148,6 @@
     }
     .xp-scroll-hint.hidden { opacity: 0; }
 
-    /* ── Questions below phase label ────────────────── */
     .xp-questions {
       margin: 0 0 2rem;
       flex-shrink: 0;
@@ -168,13 +161,11 @@
       line-height: 1.35;
     }
 
-    /* ── Panel content area ─────────────────────────── */
     .xp-panel-content {
       flex: 1;
       overflow: hidden;
     }
 
-    /* ── Content elements ───────────────────────────── */
     .fw-title {
       font-family: Georgia, 'Times New Roman', serif;
       font-size: clamp(1.05rem, 2vw, 1.4rem);
@@ -259,10 +250,8 @@
       line-height: 1.5;
     }
 
-    /* Expand panels: tighter right gap, keep some clearance from fade */
     .xp-expand { padding-right: 11vw; padding-left: 6vw; }
 
-    /* Reduce offsets on small screens */
     @media (max-width: 640px) {
       .xp-panel  { padding-left: 6vw; padding-right: 6vw; }
       .xp-expand { padding-right: 10vw; padding-left: 4vw; }
@@ -271,7 +260,6 @@
       .xp-expand .xp-panel-content { max-width: 80%; }
     }
 
-    /* ── Bottom nav bar ─────────────────────────────── */
     .xp-bottom {
       position: absolute;
       bottom: 0; left: 0; right: 0;
@@ -380,7 +368,7 @@
   <main class="xp-main" id="xpMain">
     <div class="xp-track" id="xpTrack">
 
-      <!-- ── 0 · RESONATE · Alignment ────────────── -->
+      <!-- ── 0 · RESONATE · Abstimmung ─────────────── -->
       <section class="xp-panel xp-explore">
         <div class="xp-wave-bg" aria-hidden="true">
           <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -394,51 +382,51 @@
         <p class="xp-phase"><span class="phase-resonate">RESONATE</span></p>
         <div class="xp-questions" data-pool="resonate"></div>
         <div class="xp-panel-content">
-          <p class="fw-title">RESONATE is the phase of alignment.</p>
-          <p class="fw-subtitle">It is where the system becomes legible.</p>
+          <p class="fw-title">RESONATE ist die Phase der Abstimmung.</p>
+          <p class="fw-subtitle">Es ist der Moment, in dem das System lesbar wird.</p>
           <ul class="fw-list">
-            <li>participants attune to each other</li>
-            <li>assumptions are surfaced, not resolved</li>
-            <li>context becomes shared rather than individual</li>
-            <li>tension is named without being solved</li>
+            <li>Teilnehmer stimmen sich aufeinander ab</li>
+            <li>Annahmen werden sichtbar, aber nicht aufgelöst</li>
+            <li>Kontext wird geteilt statt individuell gehalten</li>
+            <li>Spannung wird benannt, ohne aufgelöst zu werden</li>
           </ul>
           <div class="fw-point">
-            <p class="fw-point-label">Why it matters</p>
-            <p class="fw-point-text">Groups that skip this phase build fast on invisible disagreement.</p>
+            <p class="fw-point-label">Warum es zählt</p>
+            <p class="fw-point-text">Gruppen, die diese Phase überspringen, bauen schnell auf unsichtbaren Meinungsverschiedenheiten auf.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">Key principle</p>
-            <p class="fw-point-text">You cannot expand what has not yet resonated.</p>
+            <p class="fw-point-label">Kernprinzip</p>
+            <p class="fw-point-text">Man kann nicht ausweiten, was noch nicht resoniert hat.</p>
           </div>
         </div>
       </section>
 
-      <!-- ── 1 · EXPAND · Generative deviation ────── -->
+      <!-- ── 1 · EXPAND · Generative Abweichung ──────── -->
       <section class="xp-panel xp-expand">
         <div class="xp-watermark" aria-hidden="true">XP</div>
         <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
-          <p class="fw-title">EXPAND is the phase of generative deviation.</p>
-          <p class="fw-subtitle">It is where new material enters the system.</p>
+          <p class="fw-title">EXPAND ist die Phase der generativen Abweichung.</p>
+          <p class="fw-subtitle">Es ist der Moment, in dem neues Material das System betritt.</p>
           <ul class="fw-list">
-            <li>new interpretations emerge</li>
-            <li>intuition is allowed to surface without justification</li>
-            <li>associations are widened</li>
-            <li>unexpected connections are welcomed</li>
+            <li>neue Interpretationen entstehen</li>
+            <li>Intuition darf aufkommen ohne Rechtfertigung</li>
+            <li>Assoziationen werden erweitert</li>
+            <li>unerwartete Verbindungen werden willkommen geheißen</li>
           </ul>
           <div class="fw-point">
-            <p class="fw-point-label">Why it matters</p>
-            <p class="fw-point-text">New ideas do not emerge in rooms where people are still managing their image.</p>
+            <p class="fw-point-label">Warum es zählt</p>
+            <p class="fw-point-text">Neue Ideen entstehen nicht in Räumen, in denen Menschen noch mit der Verwaltung ihres Images beschäftigt sind.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">Key principle</p>
-            <p class="fw-point-text">Expansion without alignment is dispersion.</p>
+            <p class="fw-point-label">Kernprinzip</p>
+            <p class="fw-point-text">Ausweitung ohne Abstimmung ist Zerstreuung.</p>
           </div>
         </div>
       </section>
 
-      <!-- ── 2 · RESONATE · Functional role ──────── -->
+      <!-- ── 2 · RESONATE · Funktionale Rolle ──────────── -->
       <section class="xp-panel xp-explore">
         <div class="xp-wave-bg" aria-hidden="true">
           <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -453,42 +441,42 @@
         <div class="xp-questions" data-pool="resonate"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
-            <p class="fw-point-label">Functional role</p>
-            <p class="fw-point-text">RESONATE reduces hidden variance in perception. It does not create agreement. It creates mutual visibility.</p>
+            <p class="fw-point-label">Funktionale Rolle</p>
+            <p class="fw-point-text">RESONATE reduziert verborgene Varianzen in der Wahrnehmung. Es schafft keine Übereinstimmung. Es schafft gegenseitige Sichtbarkeit.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">Failure mode</p>
-            <p class="fw-point-text">When RESONATE is rushed: expansion becomes noise, ideas are built on misaligned assumptions, energy increases but direction fragments.</p>
+            <p class="fw-point-label">Fehlerform</p>
+            <p class="fw-point-text">Wenn RESONATE übersprungen wird: Ausweitung wird zu Rauschen, Ideen werden auf nicht abgestimmten Annahmen aufgebaut, Energie nimmt zu, aber Richtung fragmentiert.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">In practice</p>
-            <p class="fw-point-text">The discomfort before clarity is not a problem. It is the work.</p>
+            <p class="fw-point-label">In der Praxis</p>
+            <p class="fw-point-text">Das Unbehagen vor der Klarheit ist kein Problem. Es ist die Arbeit.</p>
           </div>
         </div>
       </section>
 
-      <!-- ── 3 · EXPAND · Functional role ─────────── -->
+      <!-- ── 3 · EXPAND · Funktionale Rolle ─────────────── -->
       <section class="xp-panel xp-expand">
         <div class="xp-watermark" aria-hidden="true">XP</div>
         <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
           <div class="fw-point">
-            <p class="fw-point-label">Functional role</p>
-            <p class="fw-point-text">EXPAND increases the possibility space. It introduces novelty, ambiguity, and directional divergence.</p>
+            <p class="fw-point-label">Funktionale Rolle</p>
+            <p class="fw-point-text">EXPAND vergrößert den Möglichkeitsraum. Es führt Neuheit, Ambiguität und direktionale Divergenz ein.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">Failure mode</p>
-            <p class="fw-point-text">When EXPAND is premature: it becomes brainstorming without grounding, novelty replaces coherence, participants lose shared reference points.</p>
+            <p class="fw-point-label">Fehlerform</p>
+            <p class="fw-point-text">Wenn EXPAND verfrüht ist: Es wird zu Brainstorming ohne Boden, Neuheit ersetzt Kohärenz, Teilnehmer verlieren gemeinsame Referenzpunkte.</p>
           </div>
           <div class="fw-point">
-            <p class="fw-point-label">In practice</p>
-            <p class="fw-point-text">The edge of coherence is where new form begins.</p>
+            <p class="fw-point-label">In der Praxis</p>
+            <p class="fw-point-text">Die Grenze der Kohärenz ist der Ort, an dem neue Form beginnt.</p>
           </div>
         </div>
       </section>
 
-      <!-- ── 4 · RESONATE · Sub-principles ────────── -->
+      <!-- ── 4 · RESONATE · Subprinzipien ──────────────── -->
       <section class="xp-panel xp-explore">
         <div class="xp-wave-bg" aria-hidden="true">
           <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -502,60 +490,60 @@
         <p class="xp-phase"><span class="phase-resonate">RESONATE</span></p>
         <div class="xp-questions" data-pool="resonate"></div>
         <div class="xp-panel-content">
-          <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
+          <p class="fw-point-label" style="margin-bottom:0.8em;">Subprinzipien</p>
           <ol class="fw-principles">
-            <li>Name what is present — not what should be.</li>
-            <li>Alignment is not agreement. It is shared visibility.</li>
-            <li>A question held open is worth more than a premature answer.</li>
-            <li>The discomfort before clarity is not a problem. It is the work.</li>
-            <li>What is unspoken shapes the room more than what is said.</li>
+            <li>Benenne, was anwesend ist — nicht, was sein sollte.</li>
+            <li>Abstimmung ist keine Übereinstimmung. Es ist geteilte Sichtbarkeit.</li>
+            <li>Eine offengehaltene Frage ist mehr wert als eine verfrühte Antwort.</li>
+            <li>Das Unbehagen vor der Klarheit ist kein Problem. Es ist die Arbeit.</li>
+            <li>Was unausgesprochen bleibt, formt den Raum mehr als das, was gesagt wird.</li>
           </ol>
-          <p class="fw-note">RESONATE and EXPAND are not sequential steps. They are oscillations.</p>
+          <p class="fw-note">RESONATE und EXPAND sind keine aufeinanderfolgenden Schritte. Es sind Oszillationen.</p>
         </div>
       </section>
 
-      <!-- ── 5 · EXPAND · Sub-principles + closing ── -->
+      <!-- ── 5 · EXPAND · Subprinzipien + Abschluss ──── -->
       <section class="xp-panel xp-expand">
         <div class="xp-watermark" aria-hidden="true">XP</div>
         <p class="xp-phase"><span class="phase-e">e</span><span class="phase-xp">XP</span><span class="phase-suffix">and</span></p>
         <div class="xp-questions" data-pool="expand"></div>
         <div class="xp-panel-content">
-          <p class="fw-point-label" style="margin-bottom:0.8em;">Sub-principles</p>
+          <p class="fw-point-label" style="margin-bottom:0.8em;">Subprinzipien</p>
           <ol class="fw-principles">
-            <li>The unexpected connection is not a mistake. Follow it.</li>
-            <li>Intuition arrives before justification. Let it.</li>
-            <li>Novelty without grounding is noise. Grounding without novelty is stasis.</li>
-            <li>The edge of coherence is where new form begins.</li>
-            <li>Expansion is not chaos. It is a wider form of order.</li>
+            <li>Die unerwartete Verbindung ist kein Irrtum. Folge ihr.</li>
+            <li>Intuition kommt vor der Rechtfertigung. Lass es zu.</li>
+            <li>Neuheit ohne Boden ist Rauschen. Boden ohne Neuheit ist Stillstand.</li>
+            <li>Die Grenze der Kohärenz ist der Ort, an dem neue Form beginnt.</li>
+            <li>Ausweitung ist kein Chaos. Es ist eine breitere Form von Ordnung.</li>
           </ol>
-          <p class="fw-closing">Good experiences do not resolve tension. They learn how to move through it without collapse.</p>
+          <p class="fw-closing">Gute Erlebnisse lösen Spannung nicht auf. Sie lehren, sich hindurchzubewegen ohne einzubrechen.</p>
         </div>
       </section>
 
     </div><!-- /xp-track -->
 
-    <!-- ── Scroll hint arrow (first visit) ──────── -->
+    <!-- ── Scroll hint arrow ──────────────────────── -->
     <div class="xp-scroll-hint" id="xpScrollHint">
       <svg width="90" height="40" viewBox="0 0 90 40" aria-hidden="true">
         <path d="M4 20 C15 8, 35 6, 52 14 C62 18, 68 22, 72 28" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         <path d="M66 24 L72 28 L70 20" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
       </svg>
-      <span class="xp-scroll-hint-text" id="xpHintText">click to continue</span>
+      <span class="xp-scroll-hint-text" id="xpHintText">klicken um weiterzugehen</span>
     </div>
 
     <!-- ── Bottom navigation ──────────────────────── -->
     <div class="xp-bottom" id="xpBottom">
-      <button class="xp-btn-back" id="xpBtnBack" type="button" aria-label="Previous">←</button>
+      <button class="xp-btn-back" id="xpBtnBack" type="button" aria-label="Zurück">←</button>
       <span class="xp-counter" id="xpCounter">01 / 06</span>
       <div class="xp-dots" id="xpDots"></div>
-      <div class="lang-switch" role="group" aria-label="Language" style="position:relative;z-index:20;">
+      <div class="lang-switch" role="group" aria-label="Sprache" style="position:relative;z-index:20;">
         <button class="lang-flag" type="button" data-lang="en" title="English">🇬🇧</button>
         <button class="lang-flag" type="button" data-lang="nl" title="Nederlands">🇳🇱</button>
         <button class="lang-flag" type="button" data-lang="de" title="Deutsch">🇩🇪</button>
       </div>
       <button class="xp-btn-next" id="xpBtnNext" type="button">→</button>
     </div>
-    <script src="lang-switch.js" defer></script>
+    <script src="../lang-switch.js" defer></script>
 
     <script>
     (function () {
@@ -566,36 +554,34 @@
       const counter = document.getElementById('xpCounter');
       const mainEl  = document.getElementById('xpMain');
       const panels  = Array.from(track.querySelectorAll('.xp-panel'));
-      const N       = panels.length; // 6 real panels
+      const N       = panels.length;
 
-      // ── Clone panel 0 at end for seamless wrap ──────
       const clone0 = panels[0].cloneNode(true);
       clone0.setAttribute('aria-hidden', 'true');
       track.appendChild(clone0);
-      const TOTAL = N + 1; // 7 slides (6 + clone)
+      const TOTAL = N + 1;
       let current = 0;
 
-      // ── Question pools ──────────────────────────────
       const QUESTIONS = {
         resonate: [
-          'What is actually present in this room?',
-          'What is the pattern underneath this?',
-          'What are you noticing right now?',
-          'What has not yet been named?',
-          'What is the tension that keeps returning?',
-          'Where does the energy go when no one is watching?',
-          'What would you say if you were certain it would be heard?',
-          'What assumption is everyone sharing without knowing?',
+          'Was ist in diesem Raum wirklich anwesend?',
+          'Welches Muster liegt darunter?',
+          'Was nimmst du in diesem Moment wahr?',
+          'Was wurde noch nicht benannt?',
+          'Was ist die Spannung, die immer wiederkehrt?',
+          'Wohin geht die Energie, wenn niemand zuschaut?',
+          'Was würdest du sagen, wenn du sicher wärst, dass es gehört wird?',
+          'Welche Annahme teilen alle, ohne es zu wissen?',
         ],
         expand: [
-          'What becomes possible if you let this go further?',
-          'What wants to emerge from here?',
-          'What is one step further than seems safe?',
-          'What would surprise you to discover is true?',
-          'If you followed the unexpected connection, where would it lead?',
-          'What is the edge of your current frame?',
-          'What have you not yet allowed yourself to consider?',
-          'What if the constraint is also the opening?',
+          'Was wird möglich, wenn du das weiterlaufen lässt?',
+          'Was will hier herauskommen?',
+          'Was ist ein Schritt weiter als sicher erscheint?',
+          'Was würde dich überraschen, wenn es wahr wäre?',
+          'Wenn du der unerwarteten Verbindung folgtest, wohin würde sie führen?',
+          'Was ist die Grenze deines aktuellen Rahmens?',
+          'Was hast du dir noch nicht erlaubt zu bedenken?',
+          'Was, wenn die Begrenzung auch die Öffnung ist?',
         ],
       };
 
@@ -603,7 +589,6 @@
         return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
       }
 
-      // ── Populate question containers (all panels incl. clone) ──
       [...panels, clone0].forEach(panel => {
         const container = panel.querySelector('[data-pool]');
         if (!container || container.children.length) return;
@@ -617,7 +602,6 @@
         });
       });
 
-      // ── Build dots (N real panels only) ────────────
       panels.forEach(p => {
         const d = document.createElement('span');
         d.className = 'xp-dot' + (p.classList.contains('xp-expand') ? ' expand' : '');
@@ -625,17 +609,14 @@
       });
       const dots = Array.from(dotsEl.children);
 
-      // ── Sync UI ─────────────────────────────────────
       function sync() {
         const realIdx = current % N;
         dots.forEach((d, i) => d.classList.toggle('active', i === realIdx));
         counter.textContent =
           String(realIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
-        // Show back button only when not on first panel
         if (btnBack) btnBack.classList.toggle('visible', realIdx > 0);
       }
 
-      // ── Go to slide ──────────────────────────────────
       function goTo(idx, animated) {
         current = idx;
         track.style.transition = animated
@@ -646,7 +627,6 @@
         sync();
       }
 
-      // ── Hide scroll hint on first advance ───────────
       const hintEl = document.getElementById('xpScrollHint');
       let hintHidden = false;
       function hideHint() {
@@ -655,7 +635,6 @@
         hintEl.classList.add('hidden');
       }
 
-      // ── Advance — seamless infinite right wrap ───────
       function advance() {
         hideHint();
         const next = current + 1;
@@ -665,23 +644,19 @@
         }
       }
 
-      // ── Retreat — go back one panel (no wrap) ────────
       function retreat() {
         if (current <= 0) return;
         goTo(current - 1, true);
       }
 
-      // ── Click anywhere on panel → advance ───────────
       mainEl.addEventListener('click', e => {
         if (e.target.closest('button, a, input, textarea')) return;
         advance();
       });
 
-      // ── Buttons ─────────────────────────────────────
       btnNext.addEventListener('click', advance);
       if (btnBack) btnBack.addEventListener('click', retreat);
 
-      // ── Keyboard ────────────────────────────────────
       function onKey(e) {
         if (!document.getElementById('xpTrack')) {
           document.removeEventListener('keydown', onKey);
@@ -692,7 +667,6 @@
       }
       document.addEventListener('keydown', onKey);
 
-      // ── Touch swipe ─────────────────────────────────
       let tx0 = 0;
       track.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
       track.addEventListener('touchend', e => {
@@ -702,7 +676,6 @@
         if (dx > 0) retreat();
       }, { passive: true });
 
-      // ── Header height → CSS var ──────────────────────
       const headerEl = document.getElementById('site-header');
       if (headerEl) {
         const applyH = () =>
@@ -711,19 +684,16 @@
         new ResizeObserver(applyH).observe(headerEl);
       }
 
-      // ── Adapt hint text for touch devices ───────────
       const hintTextEl = document.getElementById('xpHintText');
       if (hintTextEl && window.matchMedia('(hover: none)').matches) {
-        hintTextEl.textContent = 'tap to continue';
+        hintTextEl.textContent = 'tippen um weiterzugehen';
       }
 
-      // ── Init ─────────────────────────────────────────
       goTo(0, false);
     })();
     </script>
 
     <script>
-    // ===== PHASE LABEL FLOAT =====
     (function () {
       const groupEls = Array.from(document.querySelectorAll('.phase-e, .phase-suffix, .phase-resonate'));
       const letterSpans = [];
