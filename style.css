@@ -557,6 +557,7 @@ section p {
   font-family: inherit;
 }
 .lang-flag:hover { opacity: 0.85; transform: translateY(-1px); }
+.lang-flag .fi { width: 1.4em; height: 1.05em; border-radius: 2px; vertical-align: middle; }
 .lang-flag.active {
   opacity: 1;
   cursor: default;
