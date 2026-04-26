@@ -284,29 +284,35 @@
   <!-- Marker roughness filter -->
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
-      <filter id="marker-roughness" x="-8%" y="-60%" width="116%" height="220%" color-interpolation-filters="sRGB">
-        <!-- Expand text alpha into a solid highlight block covering padding -->
-        <feMorphology in="SourceAlpha" operator="dilate" radius="6 8" result="block"/>
-        <!-- Vivid yellow fill clipped to that block -->
+      <filter id="marker-roughness" x="-12%" y="-60%" width="124%" height="220%" color-interpolation-filters="sRGB">
+        <!-- 1. Dilate text pixels into highlight block; wider X bridges word/letter gaps -->
+        <feMorphology in="SourceAlpha" operator="dilate" radius="10 8" result="block"/>
+        <!-- 2. Vivid yellow fill -->
         <feFlood flood-color="#ffee00" result="yellow"/>
         <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
-        <!-- Streaky horizontal opacity bands (lighter/darker like real marker ink) -->
-        <feTurbulence type="fractalNoise" baseFrequency="0.005 0.18" numOctaves="2" seed="11" result="streakNoise"/>
+        <!-- 3. Wider, subtler streaky bands — low Y freq = broad horizontal bands -->
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.07" numOctaves="2" seed="11" result="streakNoise"/>
         <feColorMatrix in="streakNoise" type="saturate" values="0" result="mono"/>
         <feComponentTransfer in="mono" result="lightMono">
-          <feFuncR type="linear" slope="0.28" intercept="0.72"/>
-          <feFuncG type="linear" slope="0.28" intercept="0.72"/>
-          <feFuncB type="linear" slope="0.28" intercept="0.72"/>
+          <feFuncR type="linear" slope="0.12" intercept="0.88"/>
+          <feFuncG type="linear" slope="0.12" intercept="0.88"/>
+          <feFuncB type="linear" slope="0.12" intercept="0.88"/>
         </feComponentTransfer>
         <feBlend in="solidFill" in2="lightMono" mode="multiply" result="streaky"/>
         <feComposite in="streaky" in2="block" operator="in" result="streakClipped"/>
-        <!-- Set overall opacity -->
-        <feColorMatrix in="streakClipped" type="matrix"
+        <!-- 4. Head/tail darkening: horizontal-only Gaussian fade used as multiply mask -->
+        <feGaussianBlur in="block" stdDeviation="12 0" result="hGrad"/>
+        <feColorMatrix in="hGrad" type="matrix"
+          values="0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0 1" result="edgeMask"/>
+        <feBlend in="streakClipped" in2="edgeMask" mode="multiply" result="withEdges"/>
+        <feComposite in="withEdges" in2="block" operator="in" result="edgeClipped"/>
+        <!-- 5. Overall opacity -->
+        <feColorMatrix in="edgeClipped" type="matrix"
           values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.65 0" result="semiTrans"/>
-        <!-- Rough jagged edges — applied only to the highlight, not the text -->
+        <!-- 6. Rough jagged edges on highlight only -->
         <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
         <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
-        <!-- Original undistorted text composited on top -->
+        <!-- 7. Undistorted text on top -->
         <feMerge>
           <feMergeNode in="roughHighlight"/>
           <feMergeNode in="SourceGraphic"/>
