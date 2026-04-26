@@ -35,9 +35,10 @@
     .celtx-char-resona { color: #000; }
     .celtx-char-you-static { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; color: #2563eb; text-transform: none; }
     .celtx-dial { display: block; padding-left: 3em; text-align: left; margin: 0; font-size: 12pt; }
-    .celtx-dial-user { color: #2563eb; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; }
-    #scriptHistory .celtx-dial-user { color: #2563eb; opacity: 1; }
-    mark.celtx-marker { background: none; background-color: rgba(255, 253, 0, 0.52); color: inherit; font: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0.07em 0.3em 0.1em 0.2em; border-radius: 0; filter: url(#marker-roughness); }
+    .celtx-dial-user {}
+    #scriptHistory .celtx-dial-user { opacity: 1; }
+    mark.celtx-marker { background: none; background-color: rgba(255, 253, 0, 0.55); color: inherit; font: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0.07em 0.3em 0.1em 0.2em; border-radius: 0; filter: url(#marker-roughness); }
+    mark.celtx-marker-ink { color: #2563eb; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; }
     .celtx-dial-user[data-editable] { cursor: pointer; text-decoration: underline dotted rgba(37,99,235,0.4); text-underline-offset: 3px; }
     .celtx-dial-user[data-editable]:hover { text-decoration-color: rgba(37,99,235,0.75); }
     .celtx-name-committed { font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; color: #2563eb; }
@@ -70,9 +71,9 @@
   <!-- Marker roughness filter -->
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
-      <filter id="marker-roughness" x="-8%" y="-30%" width="116%" height="160%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.018" numOctaves="3" seed="5" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+      <filter id="marker-roughness" x="-6%" y="-55%" width="112%" height="210%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.025 0.075" numOctaves="3" seed="4" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
     </defs>
   </svg>
@@ -164,9 +165,9 @@
 
       const makeResonaBlock = makePersonaBlock;
 
-      function makeMarked(text) {
+      function makeMarked(text, ink) {
         const m = document.createElement('mark');
-        m.className = 'celtx-marker';
+        m.className = ink ? 'celtx-marker celtx-marker-ink' : 'celtx-marker';
         m.textContent = text;
         return m;
       }
@@ -178,8 +179,9 @@
 
         function setDisplay(value) {
           wrap.innerHTML = '';
-          if (prefix) wrap.appendChild(document.createTextNode(prefix));
-          wrap.appendChild(makeMarked(value));
+          if (prefix) wrap.appendChild(makeMarked(prefix.trimEnd(), false));
+          if (prefix) wrap.appendChild(document.createTextNode(' '));
+          wrap.appendChild(makeMarked(value, true));
         }
         setDisplay(initialText);
 
@@ -326,7 +328,7 @@
 
         const prelude = document.createElement('span');
         prelude.className = 'celtx-dial celtx-dial-user';
-        prelude.textContent = 'Hmm. Lass mich etwas konkreter sein.';
+        prelude.appendChild(makeMarked('Hmm. Lass mich etwas konkreter sein.'));
         wrap.appendChild(prelude);
 
         const ta = document.createElement('textarea');
@@ -474,12 +476,12 @@
 
         const line1 = document.createElement('span');
         line1.className = 'celtx-dial celtx-dial-user';
-        line1.textContent = "Ich weiß nicht. Ich habe ein seltsames Gefühl, dass jemand sich meldet und mir zuhört.";
+        line1.appendChild(makeMarked("Ich weiß nicht. Ich habe ein seltsames Gefühl, dass jemand sich meldet und mir zuhört."));
         wrap.appendChild(line1);
 
         const line2 = document.createElement('span');
         line2.className = 'celtx-dial celtx-dial-user';
-        line2.textContent = "Man erreicht mich unter";
+        line2.appendChild(makeMarked("Man erreicht mich unter"));
         wrap.appendChild(line2);
 
         const emailWrap = document.createElement('div');
@@ -604,7 +606,7 @@
 
           const prelude = document.createElement('span');
           prelude.className = 'celtx-dial celtx-dial-user';
-          prelude.textContent = 'Lass mich erklären:';
+          prelude.appendChild(makeMarked('Lass mich erklären:'));
           youWrap.appendChild(prelude);
 
           const ta = document.createElement('textarea');
