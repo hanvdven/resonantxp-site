@@ -285,9 +285,9 @@
   <!-- Marker roughness filter -->
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
-      <filter id="marker-roughness" x="-8%" y="-30%" width="116%" height="160%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035 0.018" numOctaves="3" seed="5" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+      <filter id="marker-roughness" x="-6%" y="-55%" width="112%" height="210%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.025 0.075" numOctaves="3" seed="4" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
     </defs>
   </svg>
@@ -510,7 +510,7 @@
           youBlock.appendChild(makeYouCharEl());
           const feelLine = document.createElement('span');
           feelLine.className = 'celtx-dial celtx-dial-user';
-          feelLine.appendChild(makeMarked('Yes. I have had a feeling for a while now.'));
+          feelLine.textContent = 'Yes. I have had a feeling for a while now.';
           youBlock.appendChild(feelLine);
           fadeIn(youBlock, 0);
           histEl.appendChild(youBlock);
@@ -579,7 +579,7 @@
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
           dp.className = 'celtx-dial celtx-dial-user';
-          dp.appendChild(makeMarked('Hmm. Let me be a bit more specific.'));
+          dp.textContent = 'Hmm. Let me be a bit more specific.';
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
           histEl.appendChild(done);
@@ -669,7 +669,7 @@
         youBlock.appendChild(makeYouCharEl());
         const yd = document.createElement('span');
         yd.className = 'celtx-dial celtx-dial-user';
-        yd.appendChild(makeMarked('I know, right. I love it here.'));
+        yd.textContent = 'I know, right. I love it here.';
         youBlock.appendChild(yd);
         fadeIn(youBlock, 0);
         histEl.appendChild(youBlock);
@@ -751,7 +751,7 @@
           done.appendChild(makeYouCharEl());
           const dl1 = document.createElement('span');
           dl1.className = 'celtx-dial celtx-dial-user';
-          dl1.appendChild(makeMarked("I don't know. I have a strange feeling someone will reach out and listen to me."));
+          dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
           done.appendChild(dl1);
           done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
           histEl.appendChild(done);
@@ -804,7 +804,7 @@
           yb.appendChild(makeYouCharEl());
           const yd = document.createElement('span');
           yd.className = 'celtx-dial celtx-dial-user';
-          yd.appendChild(makeMarked('I am just curious.'));
+          yd.textContent = 'I am just curious.';
           yb.appendChild(yd);
           fadeIn(yb, 0);
           histEl.appendChild(yb);
@@ -852,7 +852,7 @@
             done.appendChild(makeYouCharEl());
             const dp = document.createElement('span');
             dp.className = 'celtx-dial celtx-dial-user';
-            dp.appendChild(makeMarked('Let me explain:'));
+            dp.textContent = 'Let me explain:';
             done.appendChild(dp);
             done.appendChild(makeEditableLine(v, 'intent', ''));
             histEl.appendChild(done);
