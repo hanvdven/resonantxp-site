@@ -110,7 +110,6 @@
     /* Fluorescent marker — scripted text: black Courier */
     mark.celtx-marker {
       background: none;
-      background-color: rgba(255, 253, 0, 0.55);
       color: inherit;
       font: inherit;
       -webkit-box-decoration-break: clone;
@@ -285,9 +284,33 @@
   <!-- Marker roughness filter -->
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
-      <filter id="marker-roughness" x="-6%" y="-55%" width="112%" height="210%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.025 0.075" numOctaves="3" seed="4" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+      <filter id="marker-roughness" x="-8%" y="-60%" width="116%" height="220%" color-interpolation-filters="sRGB">
+        <!-- Expand text alpha into a solid highlight block covering padding -->
+        <feMorphology in="SourceAlpha" operator="dilate" radius="6 8" result="block"/>
+        <!-- Vivid yellow fill clipped to that block -->
+        <feFlood flood-color="#ffee00" result="yellow"/>
+        <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
+        <!-- Streaky horizontal opacity bands (lighter/darker like real marker ink) -->
+        <feTurbulence type="fractalNoise" baseFrequency="0.005 0.18" numOctaves="2" seed="11" result="streakNoise"/>
+        <feColorMatrix in="streakNoise" type="saturate" values="0" result="mono"/>
+        <feComponentTransfer in="mono" result="lightMono">
+          <feFuncR type="linear" slope="0.28" intercept="0.72"/>
+          <feFuncG type="linear" slope="0.28" intercept="0.72"/>
+          <feFuncB type="linear" slope="0.28" intercept="0.72"/>
+        </feComponentTransfer>
+        <feBlend in="solidFill" in2="lightMono" mode="multiply" result="streaky"/>
+        <feComposite in="streaky" in2="block" operator="in" result="streakClipped"/>
+        <!-- Set overall opacity -->
+        <feColorMatrix in="streakClipped" type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.65 0" result="semiTrans"/>
+        <!-- Rough jagged edges — applied only to the highlight, not the text -->
+        <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
+        <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
+        <!-- Original undistorted text composited on top -->
+        <feMerge>
+          <feMergeNode in="roughHighlight"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
     </defs>
   </svg>
