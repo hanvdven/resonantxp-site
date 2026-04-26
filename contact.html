@@ -101,23 +101,16 @@
       font-size: 12pt;
     }
 
-    /* User lines — blue italic in Averia */
-    .celtx-dial-user {
-      color: #2563eb;
-      font-family: 'Averia Serif Libre', Georgia, serif;
-      font-style: italic;
-    }
+    /* User lines — container only; colour/font live on the mark elements */
+    .celtx-dial-user {}
 
     /* Committed user lines in history */
-    #scriptHistory .celtx-dial-user {
-      color: #2563eb;
-      opacity: 1;
-    }
+    #scriptHistory .celtx-dial-user { opacity: 1; }
 
-    /* Fluorescent marker — per-line, hand-drawn feel via SVG filter */
+    /* Fluorescent marker — scripted text: black Courier */
     mark.celtx-marker {
       background: none;
-      background-color: rgba(255, 253, 0, 0.52);
+      background-color: rgba(255, 253, 0, 0.55);
       color: inherit;
       font: inherit;
       -webkit-box-decoration-break: clone;
@@ -125,6 +118,13 @@
       padding: 0.07em 0.3em 0.1em 0.2em;
       border-radius: 0;
       filter: url(#marker-roughness);
+    }
+
+    /* Ink marker — typed input: blue Averia italic */
+    mark.celtx-marker-ink {
+      color: #2563eb;
+      font-family: 'Averia Serif Libre', Georgia, serif;
+      font-style: italic;
     }
 
     /* Editable committed lines — dotted underline, click to re-edit */
@@ -382,9 +382,9 @@
 
       const makeResonaBlock = makePersonaBlock;
 
-      function makeMarked(text) {
+      function makeMarked(text, ink) {
         const m = document.createElement('mark');
-        m.className = 'celtx-marker';
+        m.className = ink ? 'celtx-marker celtx-marker-ink' : 'celtx-marker';
         m.textContent = text;
         return m;
       }
@@ -397,8 +397,9 @@
 
         function setDisplay(value) {
           wrap.innerHTML = '';
-          if (prefix) wrap.appendChild(document.createTextNode(prefix));
-          wrap.appendChild(makeMarked(value));
+          if (prefix) wrap.appendChild(makeMarked(prefix.trimEnd(), false));
+          if (prefix) wrap.appendChild(document.createTextNode(' '));
+          wrap.appendChild(makeMarked(value, true));
         }
         setDisplay(initialText);
 
@@ -510,7 +511,7 @@
           youBlock.appendChild(makeYouCharEl());
           const feelLine = document.createElement('span');
           feelLine.className = 'celtx-dial celtx-dial-user';
-          feelLine.textContent = 'Yes. I have had a feeling for a while now.';
+          feelLine.appendChild(makeMarked('Yes. I have had a feeling for a while now.'));
           youBlock.appendChild(feelLine);
           fadeIn(youBlock, 0);
           histEl.appendChild(youBlock);
@@ -549,7 +550,7 @@
 
         const prelude = document.createElement('span');
         prelude.className = 'celtx-dial celtx-dial-user';
-        prelude.textContent = 'Hmm. Let me be a bit more specific.';
+        prelude.appendChild(makeMarked('Hmm. Let me be a bit more specific.'));
         wrap.appendChild(prelude);
 
         const ta = document.createElement('textarea');
@@ -579,7 +580,7 @@
           done.appendChild(makeYouCharEl());
           const dp = document.createElement('span');
           dp.className = 'celtx-dial celtx-dial-user';
-          dp.textContent = 'Hmm. Let me be a bit more specific.';
+          dp.appendChild(makeMarked('Hmm. Let me be a bit more specific.'));
           done.appendChild(dp);
           done.appendChild(makeEditableLine(v, 'situation', ''));
           histEl.appendChild(done);
@@ -669,7 +670,7 @@
         youBlock.appendChild(makeYouCharEl());
         const yd = document.createElement('span');
         yd.className = 'celtx-dial celtx-dial-user';
-        yd.textContent = 'I know, right. I love it here.';
+        yd.appendChild(makeMarked('I know, right. I love it here.'));
         youBlock.appendChild(yd);
         fadeIn(youBlock, 0);
         histEl.appendChild(youBlock);
@@ -697,12 +698,12 @@
 
         const line1 = document.createElement('span');
         line1.className = 'celtx-dial celtx-dial-user';
-        line1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+        line1.appendChild(makeMarked("I don't know. I have a strange feeling someone will reach out and listen to me."));
         wrap.appendChild(line1);
 
         const line2 = document.createElement('span');
         line2.className = 'celtx-dial celtx-dial-user';
-        line2.textContent = "They'll reach me at";
+        line2.appendChild(makeMarked("They'll reach me at"));
         wrap.appendChild(line2);
 
         // Label above the email input line
@@ -751,7 +752,7 @@
           done.appendChild(makeYouCharEl());
           const dl1 = document.createElement('span');
           dl1.className = 'celtx-dial celtx-dial-user';
-          dl1.textContent = "I don't know. I have a strange feeling someone will reach out and listen to me.";
+          dl1.appendChild(makeMarked("I don't know. I have a strange feeling someone will reach out and listen to me."));
           done.appendChild(dl1);
           done.appendChild(makeEditableLine(email, 'email', "They'll reach me at "));
           histEl.appendChild(done);
@@ -804,7 +805,7 @@
           yb.appendChild(makeYouCharEl());
           const yd = document.createElement('span');
           yd.className = 'celtx-dial celtx-dial-user';
-          yd.textContent = 'I am just curious.';
+          yd.appendChild(makeMarked('I am just curious.'));
           yb.appendChild(yd);
           fadeIn(yb, 0);
           histEl.appendChild(yb);
@@ -829,7 +830,7 @@
 
           const prelude = document.createElement('span');
           prelude.className = 'celtx-dial celtx-dial-user';
-          prelude.textContent = 'Let me explain:';
+          prelude.appendChild(makeMarked('Let me explain:'));
           youWrap.appendChild(prelude);
 
           const ta = document.createElement('textarea');
@@ -852,7 +853,7 @@
             done.appendChild(makeYouCharEl());
             const dp = document.createElement('span');
             dp.className = 'celtx-dial celtx-dial-user';
-            dp.textContent = 'Let me explain:';
+            dp.appendChild(makeMarked('Let me explain:'));
             done.appendChild(dp);
             done.appendChild(makeEditableLine(v, 'intent', ''));
             histEl.appendChild(done);
