@@ -71,20 +71,25 @@
   <!-- Marker roughness filter -->
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
-      <filter id="marker-roughness" x="-8%" y="-60%" width="116%" height="220%" color-interpolation-filters="sRGB">
-        <feMorphology in="SourceAlpha" operator="dilate" radius="6 8" result="block"/>
+      <filter id="marker-roughness" x="-12%" y="-60%" width="124%" height="220%" color-interpolation-filters="sRGB">
+        <feMorphology in="SourceAlpha" operator="dilate" radius="10 8" result="block"/>
         <feFlood flood-color="#ffee00" result="yellow"/>
         <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
-        <feTurbulence type="fractalNoise" baseFrequency="0.005 0.18" numOctaves="2" seed="11" result="streakNoise"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.07" numOctaves="2" seed="11" result="streakNoise"/>
         <feColorMatrix in="streakNoise" type="saturate" values="0" result="mono"/>
         <feComponentTransfer in="mono" result="lightMono">
-          <feFuncR type="linear" slope="0.28" intercept="0.72"/>
-          <feFuncG type="linear" slope="0.28" intercept="0.72"/>
-          <feFuncB type="linear" slope="0.28" intercept="0.72"/>
+          <feFuncR type="linear" slope="0.12" intercept="0.88"/>
+          <feFuncG type="linear" slope="0.12" intercept="0.88"/>
+          <feFuncB type="linear" slope="0.12" intercept="0.88"/>
         </feComponentTransfer>
         <feBlend in="solidFill" in2="lightMono" mode="multiply" result="streaky"/>
         <feComposite in="streaky" in2="block" operator="in" result="streakClipped"/>
-        <feColorMatrix in="streakClipped" type="matrix"
+        <feGaussianBlur in="block" stdDeviation="12 0" result="hGrad"/>
+        <feColorMatrix in="hGrad" type="matrix"
+          values="0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0 1" result="edgeMask"/>
+        <feBlend in="streakClipped" in2="edgeMask" mode="multiply" result="withEdges"/>
+        <feComposite in="withEdges" in2="block" operator="in" result="edgeClipped"/>
+        <feColorMatrix in="edgeClipped" type="matrix"
           values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.65 0" result="semiTrans"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
         <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
