@@ -73,7 +73,7 @@
     <defs>
       <filter id="marker-roughness" x="-12%" y="-60%" width="124%" height="220%" color-interpolation-filters="sRGB">
         <feMorphology in="SourceAlpha" operator="dilate" radius="10 14" result="block"/>
-        <feFlood flood-color="#ffff00" result="yellow"/>
+        <feFlood flood-color="#ffff66" result="yellow"/>
         <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.004 0.07" numOctaves="2" seed="11" result="streakNoise"/>
         <feColorMatrix in="streakNoise" type="saturate" values="0" result="mono"/>
@@ -90,7 +90,7 @@
         <feBlend in="streakClipped" in2="edgeMask" mode="multiply" result="withEdges"/>
         <feComposite in="withEdges" in2="block" operator="in" result="edgeClipped"/>
         <feColorMatrix in="edgeClipped" type="matrix"
-          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.82 0" result="semiTrans"/>
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.75 0" result="semiTrans"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
         <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="5" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
         <feMerge>

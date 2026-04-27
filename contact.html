@@ -289,7 +289,7 @@
         <!-- 1. Dilate text pixels into highlight block; larger Y bridges dots/spaces to even height -->
         <feMorphology in="SourceAlpha" operator="dilate" radius="10 14" result="block"/>
         <!-- 2. Pure vivid yellow fill -->
-        <feFlood flood-color="#ffff00" result="yellow"/>
+        <feFlood flood-color="#ffff66" result="yellow"/>
         <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
         <!-- 3. Streaky texture bands -->
         <feTurbulence type="fractalNoise" baseFrequency="0.004 0.07" numOctaves="2" seed="11" result="streakNoise"/>
@@ -309,7 +309,7 @@
         <feComposite in="withEdges" in2="block" operator="in" result="edgeClipped"/>
         <!-- 5. Semi-transparent so overlaps/edges deepen (mix-blend-mode:multiply on CSS side) -->
         <feColorMatrix in="edgeClipped" type="matrix"
-          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.82 0" result="semiTrans"/>
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.75 0" result="semiTrans"/>
         <!-- 6. Rough jagged edges — reduced scale to avoid scattered artifact fragments -->
         <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
         <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="5" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
