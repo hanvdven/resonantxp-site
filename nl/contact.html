@@ -37,7 +37,7 @@
     .celtx-dial { display: block; padding-left: 3em; text-align: left; margin: 0; font-size: 12pt; }
     .celtx-dial-user {}
     #scriptHistory .celtx-dial-user { opacity: 1; }
-    mark.celtx-marker { background: none; color: inherit; font: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0.07em 0.3em 0.1em 0.2em; border-radius: 0; filter: url(#marker-roughness); }
+    mark.celtx-marker { background: none; color: inherit; font: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0.07em 0.3em 0.1em 0.2em; border-radius: 0; filter: url(#marker-roughness); mix-blend-mode: multiply; }
     mark.celtx-marker-ink { color: #2563eb; font-family: 'Averia Serif Libre', Georgia, serif; font-style: italic; }
     .celtx-dial-user[data-editable] { cursor: pointer; text-decoration: underline dotted rgba(37,99,235,0.4); text-underline-offset: 3px; }
     .celtx-dial-user[data-editable]:hover { text-decoration-color: rgba(37,99,235,0.75); }
@@ -72,8 +72,8 @@
   <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <defs>
       <filter id="marker-roughness" x="-12%" y="-60%" width="124%" height="220%" color-interpolation-filters="sRGB">
-        <feMorphology in="SourceAlpha" operator="dilate" radius="10 8" result="block"/>
-        <feFlood flood-color="#ffee00" result="yellow"/>
+        <feMorphology in="SourceAlpha" operator="dilate" radius="10 14" result="block"/>
+        <feFlood flood-color="#ffff00" result="yellow"/>
         <feComposite in="yellow" in2="block" operator="in" result="solidFill"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.004 0.07" numOctaves="2" seed="11" result="streakNoise"/>
         <feColorMatrix in="streakNoise" type="saturate" values="0" result="mono"/>
@@ -84,15 +84,15 @@
         </feComponentTransfer>
         <feBlend in="solidFill" in2="lightMono" mode="multiply" result="streaky"/>
         <feComposite in="streaky" in2="block" operator="in" result="streakClipped"/>
-        <feGaussianBlur in="block" stdDeviation="12 0" result="hGrad"/>
+        <feGaussianBlur in="block" stdDeviation="6 0" result="hGrad"/>
         <feColorMatrix in="hGrad" type="matrix"
-          values="0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0.5 0.5  0 0 0 0 1" result="edgeMask"/>
+          values="0 0 0 0.08 0.92  0 0 0 0.08 0.92  0 0 0 0.08 0.92  0 0 0 0 1" result="edgeMask"/>
         <feBlend in="streakClipped" in2="edgeMask" mode="multiply" result="withEdges"/>
         <feComposite in="withEdges" in2="block" operator="in" result="edgeClipped"/>
         <feColorMatrix in="edgeClipped" type="matrix"
-          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.65 0" result="semiTrans"/>
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.82 0" result="semiTrans"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.022 0.08" numOctaves="3" seed="4" result="edgeNoise"/>
-        <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="9" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
+        <feDisplacementMap in="semiTrans" in2="edgeNoise" scale="5" xChannelSelector="R" yChannelSelector="G" result="roughHighlight"/>
         <feMerge>
           <feMergeNode in="roughHighlight"/>
           <feMergeNode in="SourceGraphic"/>
