@@ -129,6 +129,11 @@
       let userName     = null;
       const formData   = {};
       let introResumed = false;
+      let nameEditEl   = null;
+
+      function triggerNameEdit() {
+        if (nameEditEl && document.body.contains(nameEditEl)) nameEditEl.click();
+      }
 
       (function () {
         const now  = new Date();
@@ -169,6 +174,9 @@
         el.className = 'celtx-char celtx-char-you-static';
         el.setAttribute('data-you-label', '');
         el.textContent = userLabel();
+        el.style.cursor = 'pointer';
+        el.title = 'Klicken zum Namen ändern';
+        el.addEventListener('click', triggerNameEdit);
         return el;
       }
 
@@ -177,7 +185,7 @@
         wrap.className = 'celtx-block';
         const name = document.createElement('span');
         name.className = 'celtx-char celtx-char-resona';
-        name.textContent = 'PERSONA';
+        name.textContent = 'PERSONA XP';
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
         dial.textContent = text;
@@ -260,7 +268,7 @@
 
         const r1char = document.createElement('span');
         r1char.className = 'celtx-char celtx-char-resona';
-        r1char.textContent = 'PERSONA';
+        r1char.textContent = 'PERSONA XP';
 
         const r1dial = document.createElement('span');
         r1dial.className = 'celtx-dial';
@@ -303,7 +311,37 @@
           r1dial.appendChild(document.createTextNode(' '));
           const nameSpan = document.createElement('span');
           nameSpan.className = 'celtx-name-committed';
+          nameSpan.style.cursor = 'pointer';
+          nameSpan.title = 'Klicken zum Namen ändern';
           nameSpan.textContent = userName || '—';
+          nameSpan.addEventListener('click', function () {
+            if (!document.body.contains(nameSpan)) return;
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'celtx-ink celtx-ink-inline';
+            inp.value = userName || '';
+            inp.style.width = '12em';
+            nameSpan.replaceWith(inp);
+            inp.focus();
+            inp.select();
+            let saved = false;
+            const doSave = () => {
+              if (saved) return;
+              saved = true;
+              const v = inp.value.trim() || userName;
+              userName = v;
+              formData['name'] = v;
+              nameSpan.textContent = v;
+              inp.replaceWith(nameSpan);
+              updateAllNameLabels();
+            };
+            inp.addEventListener('blur', doSave);
+            inp.addEventListener('keydown', e => {
+              if (e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
+              if (e.key === 'Escape') { saved = true; inp.replaceWith(nameSpan); }
+            });
+          });
+          nameEditEl = nameSpan;
           r1dial.appendChild(nameSpan);
 
           updateAllNameLabels();
@@ -437,7 +475,7 @@
 
         const nameEl = document.createElement('span');
         nameEl.className = 'celtx-char celtx-char-resona';
-        nameEl.textContent = 'PERSONA';
+        nameEl.textContent = 'PERSONA XP';
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
@@ -581,7 +619,7 @@
 
         const nameEl = document.createElement('span');
         nameEl.className = 'celtx-char celtx-char-resona';
-        nameEl.textContent = 'PERSONA';
+        nameEl.textContent = 'PERSONA XP';
 
         const dial = document.createElement('span');
         dial.className = 'celtx-dial';
