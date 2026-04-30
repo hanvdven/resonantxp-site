@@ -132,10 +132,12 @@ function splitMorphWord(w) {
 }
  
 function positionSides() {
-  const core = getEl('#xp-core');
+  const core  = getEl('#xp-core');
+  const block = getEl('.xp-block');
+  const totalW = block ? Math.round(block.getBoundingClientRect().width) : TOTAL_W;
   const xpW  = core ? core.getBoundingClientRect().width : 90;
   const preAv = XP_LEFT;
-  const sufAv = TOTAL_W - XP_LEFT - xpW;
+  const sufAv = totalW - XP_LEFT - xpW;
   const preEl = getEl('#xp-prefix');
   const sufEl = getEl('#xp-suffix');
   if (!preEl || !sufEl) return { preAv, sufAv };
@@ -417,6 +419,13 @@ function setupHeader() {
       morphIdx++;
     }, 6000);
   }));
+
+  // re-layout slots on resize / orientation change
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => rebuildMorphSlots(morphWordIdx), 150);
+  });
 }
  
 function insertHeader() {
