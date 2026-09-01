@@ -180,10 +180,14 @@
     .day-body { min-width: 0; }
 
     .hour-bar-wrap { margin: 0 0 1rem; }
-    .hour-bar-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-size: 0.74rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .hour-bar-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-size: 0.74rem; color: var(--muted); margin-bottom: 0.5rem; }
     .hour-bar-legend span { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
     .hour-bar-legend .sw { width: 0.6rem; height: 0.6rem; border-radius: 2px; display: inline-block; }
-    .hour-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); }
+    .hour-bar-container { position: relative; margin-bottom: 1.8rem; }
+    .hour-bar { display: flex; height: 12px; border-radius: 6px; overflow: visible; background: transparent; position: relative; }
+    .hour-bar-segment { display: flex; align-items: center; justify-content: center; position: relative; min-width: 20px; }
+    .hour-bar-segment-label { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.7rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .hour-bar-segment-cat { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.62rem; color: var(--muted); margin-bottom: 0.45rem; max-width: 90%; overflow: hidden; text-overflow: ellipsis; }
     .hour-bar-total { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
 
     .day-stats { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin: 0 0 1rem; font-size: 0.82rem; color: var(--muted); border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); padding: 0.6rem 0; }
@@ -279,6 +283,7 @@
               <span>🏛️ Bauhaus-Museum Weimar: ~1,5u</span>
               <span>🏠 Haus am Horn: ~30 min</span>
               <span>🥾 Park an der Ilm: ~45 min</span>
+              <span>🏨 Slapen: Weimar</span>
             </div>
             <p class="day-activities">Vertrek richting Weimar. Bauhaus-Museum Weimar, Haus am Horn — het enige gebouw dat in 1923 daadwerkelijk uit de Bauhaus-tentoonstelling is gerealiseerd — en 's avonds een korte wandeling door Park an der Ilm.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
@@ -311,6 +316,7 @@
               <span>🏛️ Meisterhäuser: ~1u</span>
               <span>🏛️ Bauhaus Museum Dessau: ~1u</span>
               <span>🚲 Törten: ~1u (fietsen, 4 km)</span>
+              <span>🏕️ Slapen: Dessau-camping</span>
             </div>
             <p class="day-activities">Het Bauhausgebäude van Gropius, de Meisterhäuser (woningen van Kandinsky, Klee en collega's), het Bauhaus Museum Dessau, en de Törten-wijk met de Laubenganghäuser.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
@@ -339,7 +345,7 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Frauenkirche, Dresden"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~1u45 (145 km)</span><span>🏛️ Museum naar keuze: ~2u</span><span>🚶 Avondwandeling Altstadt: ~1u</span></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u45 (145 km)</span><span>🏛️ Museum naar keuze: ~2u</span><span>🚶 Avondwandeling Altstadt: ~1u</span><span>🏨 Slapen: Dresden</span></div>
             <p class="day-activities">Onderweg naar Dresden. Kies één museum (Grünes Gewölbe of de Zwinger) en sluit af met een avondwandeling door de Altstadt, langs de Frauenkirche en de Brühlsche Terrasse.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>Dresden heette ooit "Elbflorenz". Van 1697 tot 1763 (met een korte onderbreking) regeerden de Saksische keurvorsten óók als koning van Polen — een personele unie die op menig Europa Universalis-scherm terugkomt.</p>
@@ -365,8 +371,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Bastei (rock formation)"><span class="day-icon-big">🥾</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~30 min (Dresden–Rathen)</span><span>🥾 Wandeltijd: ~3–4u / ~9 km</span></div>
-            <p class="day-activities">Wandeling langs de Bastei — de iconische zandsteenbrug hoog boven de Elbe — met een lus via de Schwedenlöcher terug naar beneden.</p>
+            <div class="day-stats"><span>🚗 Reistijd: ~30 min (Dresden–Rathen)</span><span>🥾 Wandeltijd: ~6–7u / ~16 km</span><span>🏕️ Slapen: Rathen-camping</span></div>
+            <p class="day-activities">Wandeling langs de Bastei — de iconische zandsteenbrug hoog boven de Elbe — met een lus via de Schwedenlöcher terug naar beneden. Dit wordt een volle wandeldag.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>"Saksisch Zwitserland" kreeg zijn naam van 18e-eeuwse Zwitserse kunstenaars die het landschap deden denken aan hun thuisland. De rotsen zijn zandsteen: 25 miljoen jaar geleden zeebodem, later opgetild en uitgesleten.</p>
               <p>De huidige Bastei-brug (1851, steen) verving een houten brug uit 1824. Erachter ligt Neurathen, de grootste middeleeuwse rotsburcht van Duitsland (13e eeuw) — precies het soort ruige versterking die in Kingdom Come: Deliverance thuis zou horen, al speelt dat spel verderop in Bohemen.</p>
@@ -391,8 +397,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Schrammsteine"><span class="day-icon-big">🥾</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🥾 Wandeltijd: ~4–5u / ~11 km</span></div>
-            <p class="day-activities">Schrammsteine en Affensteine — pittiger en stiller dan de Bastei, met stalen trappen en ladders en weidse uitzichten.</p>
+            <div class="day-stats"><span>🥾 Wandeltijd: ~6–7u / ~15 km</span><span>🏕️ Slapen: Bad Schandau-camping</span></div>
+            <p class="day-activities">Schrammsteine en Affensteine — pittiger en stiller dan de Bastei, met stalen trappen en ladders en weidse uitzichten. Volle wandeldag.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Dit nationaal park (sinds 1990) heeft het dichtste netwerk aan klimroutes van Duitsland. Hier ontstond eind 19e eeuw een van de bakermatten van het vrijklimmen: de strenge "Sächsische Kletterregeln" beïnvloeden de klimethiek wereldwijd nog steeds.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Stevige schoenen zijn hier geen luxe — sommige passages hebben klimijzers en smalle richels. Start bij Bad Schandau of Ostrau.</p></div>
             <button class="map-link" data-day="5">📍 Bekijk op kaart</button>
@@ -414,8 +420,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Görlitz"><span class="day-icon-big">🚗</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Rathen–Görlitz: ~1u30 (110 km)</span><span>🚶 Görlitz binnenstad: ~1u</span><span>🚗 Görlitz–Kraków: ~5u (460 km)</span></div>
-            <p class="day-activities">Rustige ochtend, dan via Görlitz — de meest oostelijke stad van Duitsland, uitzonderlijk goed bewaard — verder de grens over richting Kraków.</p>
+            <div class="day-stats"><span>🚗 Rathen–Görlitz: ~1u30 (110 km)</span><span>🚶 Görlitz binnenstad: ~1u</span><span>🚗 Görlitz–Kraków: ~5,5u (460 km + grens)</span><span>🏨 Slapen: Kraków</span></div>
+            <p class="day-activities">Rustige ochtend, dan via Görlitz — de meest oostelijke stad van Duitsland, uitzonderlijk goed bewaard — verder de grens over richting Kraków. Aankomst avond.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Görlitz liep bij de grensverschuiving van 1945 letterlijk doormidden: de Neiße werd de nieuwe Duits-Poolse grens en de oostelijke stadshelft werd het Poolse Zgorzelec. Görlitz zelf overleefde de oorlog nagenoeg ongeschonden, vandaar ook een geliefd filmdecor: "The Grand Budapest Hotel" en delen van "Inglourious Basterds" zijn hier opgenomen.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Binnen Schengen geen grenscontrole, maar tank net na de grens in Polen — brandstof is daar doorgaans goedkoper.</p></div>
             <button class="map-link" data-day="6">📍 Bekijk op kaart</button>
@@ -439,8 +445,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Main Square, Kraków"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🏛️ Rynek Główny + Lakenhallen + Mariakerk: ~2u</span></div>
-            <p class="day-activities">Aankomst en eerste kennismaking met de oude stad: de Rynek Główny, de Lakenhallen en de Mariakerk.</p>
+            <div class="day-stats"><span>🏛️ Rynek Główny + Lakenhallen + Mariakerk: ~2u</span><span>🎨 Hedendaagse kunst: Kunsthalle Kraków of PSTA</span><span>🏨 Slapen: Kraków</span></div>
+            <p class="day-activities">Aankomst en eerste kennismaking met de oude stad: de Rynek Główny, de Lakenhallen en de Mariakerk. Namiddag tijd voor een bezoek aan <strong>Kunsthalle Kraków</strong> (hedendaagse kunst) of <strong>PSTA</strong> (contemporary art space). Avond kuuroord of wandelen langs de Vistula.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>De Rynek Główny (aangelegd 1257) is het grootste middeleeuwse marktplein van Europa. Elk uur klinkt vanaf de Mariakerktoren de hejnał mariacki — een trompetsignaal dat abrupt afbreekt, ter herdenking van een wachter die volgens de legende in 1241 door een Mongoolse pijl werd geraakt.</p>
               <p>Binnen staat het Wit Stwosz-altaarstuk (1489) — het grootste gotische houtsnijaltaar ter wereld. Kraków was tot 1596 de hoofdstad van Polen; daarna verhuisde het hof naar Warschau, maar kroningen bleven hier nog lang plaatsvinden.</p>
@@ -465,8 +471,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Wawel Castle"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🏛️ Wawel kasteel + kathedraal: ~2,5u</span><span>🚶 Kazimierz: ~1,5u</span><span>🏛️ Podgórze / Schindler's Fabriek: ~2u</span></div>
-            <p class="day-activities">Wawel, Kazimierz (de historische Joodse wijk) en Podgórze (voormalig getto, met Schindler's Fabriek vlakbij en het Ghetto Heroes-plein). Vanavond eventueel een vegan fine-dining avond — Kraków's vegan-scene groeit snel; check HappyCow voor een actuele aanrader en boek vooraf.</p>
+            <div class="day-stats"><span>🏛️ Wawel kasteel + kathedraal: ~2,5u</span><span>🚶 Kazimierz: ~1,5u</span><span>🏛️ Podgórze / Schindler's Fabriek: ~2u</span><span>🌱 Vegan: Restaurant (HappyCow)</span><span>🏨 Slapen: Kraków</span></div>
+            <p class="day-activities">Wawel, Kazimierz (de historische Joodse wijk) en Podgórze (voormalig getto, met Schindler's Fabriek vlakbij en het Ghetto Heroes-plein). 's Avonds een vegan fine-dining avond — check HappyCow voor restaurant's en boek minstens 2 dagen vooraf.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>Wawel is de rustplaats van vrijwel alle Poolse koningen, inclusief de Jagiellonen-dynastie die via een personele unie met Litouwen op zijn hoogtepunt een van de grootste rijken van Europa bestuurde — weer een Europa Universalis-vergelijking. Kazimierz, gesticht in 1335, herbergde eeuwenlang een van de belangrijkste Joodse gemeenschappen van Europa: vlak voor de oorlog woonden er ruim 60.000 Joden in Kraków.</p>
               <p>Podgórze werd in 1941 het getto; Oskar Schindlers fabriek lag er vlakbij. "Schindler's List" is grotendeels op deze locaties opgenomen.</p>
@@ -491,8 +497,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Auschwitz concentration camp"><span class="day-icon-big">🕯️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~1u30 (65 km, enkele reis)</span><span>🏛️ Auschwitz I (gids): ~2u</span><span>🏛️ Birkenau: ~1,5–2u</span></div>
-            <p class="day-activities">Een volledige dag voor Auschwitz I en Birkenau samen, inclusief de pendelbus ertussen.</p>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u30 (65 km, enkele reis)</span><span>🏛️ Auschwitz I (gids): ~2u</span><span>🏛️ Birkenau: ~2–2,5u</span><span>🏨 Slapen: Kraków</span></div>
+            <p class="day-activities">Een volledige dag voor Auschwitz I en Birkenau samen, inclusief de pendelbus ertussen. Terugkeer in Kraków voor de nacht.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Auschwitz I was oorspronkelijk een Poolse legerkazerne; de nazi's openden het kamp in 1940, aanvankelijk voor Poolse politieke gevangenen. Birkenau (vanaf 1942) werd het grootste vernietigingskamp van het Derde Rijk. Tussen 1940-1945 zijn hier naar schatting 1,1 miljoen mensen vermoord, het overgrote deel Joden uit heel Europa.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Boek verplicht vooraf online via auschwitz.org. Neem weinig bagage mee en plan die avond bewust iets rustigs.</p></div>
             <button class="map-link" data-day="9">📍 Bekijk op kaart</button>
@@ -516,7 +522,7 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--amber) 24%, var(--paper))" data-wiki="Kutná Hora"><span class="day-icon-big">🏰</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~5u (480 km)</span><span>🏛️ Sint-Barbarakathedraal (indien tijd): ~1u</span></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~5,5u (480 km + grens)</span><span>🏛️ Sint-Barbarakathedraal (optioneel avond/ochtend): ~1u</span><span>🏨 Slapen: Kutná Hora</span></div>
             <p class="day-activities">Een lange rit terug naar Tsjechië, dit keer via het zuiden — rechtstreeks naar Kutná Hora, ooit bijna net zo rijk als Praag. Kom er de tijd voor, dan lukt vanavond nog een bezoek aan de Sint-Barbarakathedraal; anders morgenvroeg.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Kutná Hora dankte zijn rijkdom aan een van de grootste zilvermijnen van Europa. In het Italiaanse Hof (Vlašský dvůr) werd vanaf 1300 onder koning Wenceslaus II de Praagse groschen geslagen — eeuwenlang een van de belangrijkste munten van Centraal-Europa. Muntslag als machtsbron: weer een Europa Universalis-koppeling.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Puur een overbrugdag qua rijden — verwacht niet te veel meer dan aankomen en een eerste indruk.</p></div>
@@ -539,8 +545,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Tábor"><span class="day-icon-big">🎮</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🏛️ Sedlec-ossuarium: ~45 min</span><span>🚗 Reistijd: ~1u (Kutná Hora–Sázava, 60 km)</span><span>🥾 Sázava-rivierpad: ~2,5–3u / ~8–9 km</span><span>🚗 Reistijd: ~1u15 verder (Sázava–Tábor, 75 km)</span></div>
-            <p class="day-activities">Eerst het ossuarium van Sedlec, dan via Rataje nad Sázavou en het Sázava-klooster — met een wandeling langs de rivier — verder naar Tábor, het Hussietenstadje met een ondergronds tunnelnetwerk.</p>
+            <div class="day-stats"><span>🏛️ Sedlec-ossuarium: ~45 min</span><span>🚗 Reistijd: ~1u15 (Kutná Hora–Sázava, 60 km)</span><span>🥾 Sázava-rivierpad: ~6–7u / ~18 km</span><span>🚗 Reistijd: ~1u30 verder (Sázava–Tábor, 75 km)</span><span>🏕️ Slapen: Tábor-camping</span></div>
+            <p class="day-activities">Eerst het ossuarium van Sedlec, dan via Rataje nad Sázavou en het Sázava-klooster — met een lange wandeling langs de rivier — verder naar Tábor, het Hussietenstadje met een ondergronds tunnelnetwerk.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>Het ossuarium in Sedlec bevat de botten van naar schatting 40.000 tot 70.000 mensen, verzameld na de pest (1318) en de Hussietenoorlogen. Pas in de 19e eeuw rangschikte houtsnijder František Rint ze kunstig tot kroonluchters — inclusief een kroonluchter die letterlijk elk bot van het menselijk lichaam bevat.</p>
               <p>Kingdom Come: Deliverance speelt zich af in 1403, kort nadat koning Wenceslaus IV door zijn eigen halfbroer Sigismund gevangen werd genomen. Rataje nad Sázavou en het Sázava-klooster (gesticht 1032) zijn vrijwel 1-op-1 in de game te herkennen — het klooster was ooit het laatste bolwerk van de Oudkerkslavische liturgie in het Westen. Tábor werd in 1420 gesticht door radicale Hussieten (de Taboriten), met een vergaand egalitair ideaal van gedeeld bezit — soms "proto-communistisch" genoemd. Het ondergrondse tunnelnetwerk diende als schuilplaats en opslag.</p>
@@ -567,7 +573,7 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Prague"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~1u30 (Tábor–Praag, 90 km)</span><span>🚶 Eerste kennismaking Oudestadsplein: ~1u (avond)</span></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u45 (Tábor–Praag, 90 km)</span><span>🚶 Eerste kennismaking Oudestadsplein: ~1u (avond)</span><span>🏨 Slapen: Praag — nacht 1</span></div>
             <p class="day-activities">Een korte, relaxte rit naar Praag — vroeg genoeg voor een rustige avond. Precies dit weekend (19–20 sep) blijven jullie hier: 2 volle dagen, met het weekend erin.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Praag heet niet toevallig "de gouden stad" — vanaf de Karelsbrug tel je tientallen torens. Onder keizer Karel IV (1346-1378) was Praag zelfs even hoofdstad van het Heilige Roomse Rijk; toen kreeg de stad de eerste universiteit van Centraal-Europa (1348) en de Karelsbrug zelf.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Rustige aankomst, dineer in de Oude Stad en bewaar de drukke bezienswaardigheden voor morgen en overmorgen.</p></div>
@@ -590,8 +596,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Prague Castle"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🏛️ Praagse Burcht + Sint-Vituskathedraal: ~2,5u</span><span>🚶 Malá Strana: ~1u</span><span>🥾 Petřín: ~1,5u</span></div>
-            <p class="day-activities">De Praagse Burcht, Malá Strana en de Petřín-heuvel. Reserveer vanavond een tafel voor vegan fine dining bij <strong>Lehká Hlava</strong> (Boršov, Praag) — sfeervol, plantaardig, maar boek minstens 2 weken vooraf, ze zitten snel vol.</p>
+            <div class="day-stats"><span>🏛️ Praagse Burcht + Sint-Vituskathedraal: ~2,5u</span><span>🚶 Malá Strana: ~1u</span><span>🥾 Petřín: ~2u</span><span>🎨 Hedendaagse kunst: Rudolfinium/Kunsthalle</span><span>🏨 Slapen: Praag — nacht 2</span></div>
+            <p class="day-activities">De Praagse Burcht, Malá Strana en de Petřín-heuvel. Ochtend tijd voor hedendaagse kunst: <strong>Rudolfinium</strong> (hedendaagse expositie) of een van de vele kleine galerijen in de Oude Stad. 's Avonds een vegan fine-dining avond bij <strong>Lehká Hlava</strong> (Boršov, Praag) — sfeervol, plantaardig, maar boek minstens 2 weken vooraf.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>De Praagse Burcht is volgens het Guinness Book of Records het grootste aaneengesloten kasteelcomplex ter wereld. De Sint-Vituskathedraal deed er bijna 600 jaar over om af te bouwen (1344-1929) — binnenin zit een glas-in-loodraam van Alfons Mucha. Petřín-heuvel heeft een uitkijktoren uit 1891, een kwart-schaal kopie van de Eiffeltoren.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Koop het "Circuit B"-ticket voor de Burcht en ga bij opening naartoe — na 10 uur stromen de touringcars binnen.</p></div>
             <button class="map-link" data-day="13">📍 Bekijk op kaart</button>
@@ -613,8 +619,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Old Town Square, Prague"><span class="day-icon-big">🎨</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🏛️ Oudestadsplein + astronomisch uurwerk: ~1u</span><span>🏛️ Josefov: ~2,5u</span><span>🥾 Vyšehrad: ~1,5u (avond)</span></div>
-            <p class="day-activities">Het astronomisch uurwerk, Josefov en 's avonds Vyšehrad. Dit is de volste dag van Praag; Divoká Šárka is bewust geschrapt om haalbaar te blijven.</p>
+            <div class="day-stats"><span>🏛️ Oudestadsplein + astronomisch uurwerk: ~1u</span><span>🏛️ Josefov: ~2,5u</span><span>🥾 Vyšehrad: ~2u (avond)</span><span>🏨 Slapen: Praag — nacht 3</span></div>
+            <p class="day-activities">Het astronomisch uurwerk, Josefov en 's avonds Vyšehrad. Dit is de volste dag van Praag; Divoká Šárka is bewust geschrapt om haalbaar te blijven. Dit is de laatste nacht in Praag.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>Het astronomisch uurwerk (1410) is het oudst nog werkende ter wereld. Josefov was tot 1850 een apart, ommuurd Joods getto; de Oud-Nieuwe Synagoge (rond 1270) is de oudste nog actieve synagoge van Europa. Legende zegt dat rabbijn Löw hier de Golem schiep — een verhaal dat later Frankenstein beïnvloedde.</p>
               <p>Vyšehrad is volgens de stichtingslegende zelfs ouder dan de Burcht. Op de Slavín-begraafplaats liggen Dvořák, Smetana en Mucha. Smetana's cyclus "Má vlast" opent met een symfonisch gedicht getiteld "Vyšehrad" — geïnspireerd op precies deze heuvel.</p>
@@ -641,8 +647,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Milešovka"><span class="day-icon-big">🌋</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~1u (Praag–České středohoří, 80 km)</span><span>🥾 Milešovka: ~2,5u / ~7 km</span><span>🚗 Reistijd: ~30 min verder naar Teplice</span></div>
-            <p class="day-activities">Onderweg naar Teplice een wandeling naar de top van de Milešovka (837 m), de hoogste en meest kenmerkende vulkaanberg van het České středohoří. 's Avonds aankomst in Teplice.</p>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u15 (Praag–České středohoří, 80 km)</span><span>🥾 Milešovka: ~6–7u / ~18 km</span><span>🚗 Reistijd: ~45 min naar Teplice</span><span>🏕️ Slapen: Teplice</span></div>
+            <p class="day-activities">Onderweg naar Teplice een lange wandeling naar de top van de Milešovka (837 m), de hoogste en meest kenmerkende vulkaanberg van het České středohoří. 's Avonds aankomst in Teplice. Tip: natuurcamping nabij Teplice is ideaal, of een spa-hotel als je wilt relaxen.</p>
             <div class="day-trivia"><strong>Wist je dat</strong>
               <p>Milešovka staat bekend als "de Vesuvius van Bohemen" vanwege zijn scherpe, kegelvormige silhouet — een geërodeerde vulkaanprop, net als Trosky verderop een restant van vulkanisch gesteente dat harder was dan zijn omgeving. Op de top staat sinds 1904 een van de oudste nog werkende weerstations van Europa, berucht om de zwaarste windstoten ooit in Tsjechië gemeten — de berg steekt kaal en geïsoleerd boven het omliggende landschap uit.</p>
               <p>Teplice is een van de oudste kuuroorden van Europa, met een geschiedenis die teruggaat tot de 12e eeuw. Goethe en Beethoven ontmoetten elkaar hier zelfs, in juli 1812 — een beroemde (en wellicht wat aangedikte) anekdote wil dat Beethoven weigerde te buigen voor de passerende keizerlijke familie, tot Goethes zichtbare ergernis.</p>
@@ -667,8 +673,8 @@
           <div class="day-media" style="background:linear-gradient(135deg, color-mix(in srgb, var(--charcoal) 30%, var(--paper)), color-mix(in srgb, var(--green) 24%, var(--paper)))" data-wiki="Terezín"><span class="day-icon-big">🕯️</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~35 min (Teplice–Terezín, 35 km)</span><span>🏛️ Terezín: ~2,5–3u</span><span>🚗 Reistijd: ~1u30 verder (100 km)</span></div>
-            <p class="day-activities">Een indringend bezoek aan Terezín (Theresienstadt), gevolgd door de rit naar Hřensko/Jetřichovice in Boheems Zwitserland — waar de sfeer omslaat naar natuur en rust. Neem bij aankomst nog een korte, ontspannen wandeling rond de camping.</p>
+            <div class="day-stats"><span>🚗 Reistijd: ~40 min (Teplice–Terezín, 35 km)</span><span>🏛️ Terezín: ~2,5–3u</span><span>🚗 Reistijd: ~1u45 verder (100 km + bochtige weg)</span><span>🏕️ Slapen: Hřensko/Jetřichovice-camping</span></div>
+            <p class="day-activities">Een indringend bezoek aan Terezín (Theresienstadt), gevolgd door de rit naar Hřensko/Jetřichovice in Boheems Zwitserland — waar de sfeer omslaat naar natuur en rust. Natuurcamping in de buurt van Jetřichovice is ideaal: <strong>Camping Tisá</strong> of <strong>Kamp U Lesa</strong> hebben goede reviews. Neem bij aankomst nog een korte, ontspannen wandeling.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Terezín werd in de jaren 1780 door keizer Jozef II als vestingstad gebouwd, vernoemd naar zijn moeder Maria Theresia. De nazi's gebruikten het vanaf 1941 als getto en als propaganda-instrument: in 1944 lieten ze een nepdocumentaire maken om het Rode Kruis te misleiden. Van de naar schatting 150.000 mensen die via Terezín werden gedeporteerd, overleefden er minder dan 20.000 de oorlog; velen werden doorgestuurd naar Auschwitz.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Reken minstens 2 tot 3 uur voor Terezín. De weg naar Boheems Zwitserland is deels smal en bochtig — vertrek op tijd.</p></div>
             <button class="map-link" data-day="16">📍 Bekijk op kaart</button>
@@ -692,8 +698,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Tisá Walls"><span class="day-icon-big">🌲</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🥾 Tiské stěny-labyrint: ~2u / ~5 km</span><span>🚗 Reistijd: ~30 min naar Jetřichovice</span><span>🥾 Jetřichovice-omgeving: ~2u / ~6 km</span></div>
-            <p class="day-activities">De grote, rustige wandeldag: eerst het rotslabyrint van Tisá (Tiské stěny), dan een korte rit naar Jetřichovice voor een tweede wandeling door bos en zandsteenkloven.</p>
+            <div class="day-stats"><span>🥾 Tiské stěny-labyrint: ~4u / ~12 km</span><span>🚗 Reistijd: ~40 min naar Jetřichovice</span><span>🥾 Jetřichovice-omgeving: ~3u / ~9 km</span><span>🏕️ Slapen: Jetřichovice-camping</span></div>
+            <p class="day-activities">De grote wandeldag: eerst het rotslabyrint van Tisá (Tiské stěny), dan een korte rit naar Jetřichovice voor een tweede wandeling door bos en zandsteenkloven. Dit wordt een volle, rustige natuurdag.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Tisá is een wirwar van smalle doorgangen tussen zandstenen torens — net als bij Schrammsteine onderdeel van dezelfde eeuwenoude klimtraditie, maar dan aan de Tsjechische kant van de grens. Jetřichovice was ooit een glasblazersdorp: de dichte bossen leverden eeuwenlang het brandhout voor de Boheemse glasindustrie, waar deze streek wereldberoemd om werd.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Verdeel de dag rustig over de twee gebieden — beide zijn op zichzelf al de moeite waard, dus haast is nergens voor nodig.</p></div>
             <button class="map-link" data-day="17">📍 Bekijk op kaart</button>
@@ -715,8 +721,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Pravčická brána"><span class="day-icon-big">🌲</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🥾 Mezní Louka – Pravčická brána – Sokolí hnízdo: ~3,5–4u / ~10 km</span></div>
-            <p class="day-activities">Vanaf Mezní Louka naar de Pravčická brána en het uitzichtpunt Sokolí hnízdo. 's Avonds vertrek richting Leipzig.</p>
+            <div class="day-stats"><span>🥾 Mezní Louka – Pravčická brána – Sokolí hnízdo: ~6–7u / ~18 km</span><span>🚗 Reistijd: ~2u30 naar Leipzig</span><span>🏨 Slapen: Leipzig</span></div>
+            <p class="day-activities">Ochtend & middag: lange wandeling vanaf Mezní Louka naar de Pravčická brána en het uitzichtpunt Sokolí hnízdo. 's Avonds vertrek richting Leipzig.</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Pravčická brána (16 m hoog, 26,5 m breed) is de grootste natuurlijke zandstenen rotsboog van Europa. Sinds 1982 mag er niet meer overheen worden gelopen, maar het theehuis Sokolí hnízdo ("Valkennest") ernaast biedt hetzelfde uitzicht. Deze regio inspireerde eind 18e/19e eeuw de Duitse Romantiek, met Caspar David Friedrich als bekendste voorbeeld.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Mezní Louka. Sokolí hnízdo vraagt een klein bedrag entree, maar is het waard.</p></div>
             <button class="map-link" data-day="18">📍 Bekijk op kaart</button>
@@ -740,8 +746,8 @@
           <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Leipzig"><span class="day-icon-big">🚗</span><span class="wiki-credit">via Wikipedia</span></div>
           <div class="day-body">
             <div class="hour-bar-wrap" data-hours></div>
-            <div class="day-stats"><span>🚗 Reistijd: ~2u (Hřensko–Leipzig, 180 km)</span><span>🏛️ Optioneel Leipzig: ~1–1,5u</span><span>🚗 Reistijd: ~6–7u verder naar Friesland (600 km)</span></div>
-            <p class="day-activities">Een korte ochtend in Leipzig als daar zin en tijd voor is, daarna de lange terugrit. Met de Leipzig-stop erbij is dit de langste rijdag van de reis (~8-9u).</p>
+            <div class="day-stats"><span>🚗 Reistijd: ~2u30 (Hřensko–Leipzig, 180 km)</span><span>🏛️ Optioneel Leipzig: ~1–1,5u</span><span>🚗 Reistijd: ~6–7u verder naar Friesland (600 km)</span><span>🏠 Thuis in Friesland</span></div>
+            <p class="day-activities">Vroeg vertrek uit Leipzig-camping. Korte ochtendstop in Leipzig als daar zin en tijd voor is, daarna de lange terugrit. Met de Leipzig-stop erbij is dit de langste rijdag van de reis (~8,5–9u).</p>
             <div class="day-trivia"><strong>Wist je dat</strong><p>Johann Sebastian Bach werkte 27 jaar (1723-1750) als cantor van de Thomaskirche in Leipzig, waar hij nu ook begraven ligt. Bij het Völkerschlachtdenkmal herdenkt de stad de Volkerenslag van 1813 — met naar schatting 600.000 soldaten de grootste veldslag van Europa vóór de Eerste Wereldoorlog, waar Pruisen, Rusland, Oostenrijk en Zweden Napoleon definitief tot terugtrekken dwongen.</p></div>
             <div class="day-tip"><strong>Tip</strong><p>Vertrek vroeg. Bij tegenvallers eerst Leipzig laten vallen, niet de laatste etappe naar huis.</p></div>
             <button class="map-link" data-day="19">📍 Bekijk op kaart</button>
@@ -785,26 +791,31 @@
     });
 
     // ===== UREN-BALKJES =====
+    function timeFormat(hours) {
+      const h = Math.floor(hours);
+      const m = Math.round((hours - h) * 60);
+      return m === 0 ? `${h}u` : `${h}u${m.toString().padStart(2, '0')}`;
+    }
     const dayHours = {
-      1:  { rijden: 4.5, natuur: 0.75, cultuur: 2,   ontspanning: 1,   ongepland: 1.75 },
-      2:  { rijden: 1.25,natuur: 1,    cultuur: 3.5, ontspanning: 1,   ongepland: 1.25 },
-      3:  { rijden: 1.75,natuur: 0,    cultuur: 3,   ontspanning: 1.5, ongepland: 2 },
-      4:  { rijden: 0.5, natuur: 3.5,  cultuur: 0,   ontspanning: 2,   ongepland: 1 },
-      5:  { rijden: 0,   natuur: 4.5,  cultuur: 0,   ontspanning: 2,   ongepland: 1 },
-      6:  { rijden: 6.5, natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 1 },
-      7:  { rijden: 0,   natuur: 0,    cultuur: 2,   ontspanning: 2,   ongepland: 2 },
-      8:  { rijden: 0,   natuur: 0,    cultuur: 6,   ontspanning: 1.5, ongepland: 1 },
-      9:  { rijden: 1.5, natuur: 0,    cultuur: 3.5, ontspanning: 0.5, ongepland: 1 },
-      10: { rijden: 5,   natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 1.5 },
-      11: { rijden: 2.25,natuur: 3,    cultuur: 0.75,ontspanning: 1,   ongepland: 1 },
-      12: { rijden: 1.5, natuur: 0,    cultuur: 0,   ontspanning: 1.5, ongepland: 1 },
-      13: { rijden: 0,   natuur: 1.5,  cultuur: 2.5, ontspanning: 2,   ongepland: 1 },
-      14: { rijden: 0,   natuur: 1.5,  cultuur: 3.5, ontspanning: 1,   ongepland: 1 },
-      15: { rijden: 1.5, natuur: 2.5,  cultuur: 0,   ontspanning: 1.5, ongepland: 1 },
-      16: { rijden: 2.75,natuur: 0,    cultuur: 3,   ontspanning: 0.5, ongepland: 1 },
-      17: { rijden: 0.5, natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 1 },
-      18: { rijden: 0,   natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 1 },
-      19: { rijden: 8,   natuur: 0,    cultuur: 1,   ontspanning: 0,   ongepland: 1 },
+      1:  { rijden: 4.5, natuur: 0.75, cultuur: 2,   ontspanning: 1,   ongepland: 5.75 },
+      2:  { rijden: 1.25,natuur: 1,    cultuur: 3.5, ontspanning: 1,   ongepland: 7.25 },
+      3:  { rijden: 1.75,natuur: 0,    cultuur: 3,   ontspanning: 1.5, ongepland: 6.75 },
+      4:  { rijden: 0.5, natuur: 3.5,  cultuur: 0,   ontspanning: 2,   ongepland: 8 },
+      5:  { rijden: 0,   natuur: 4.5,  cultuur: 0,   ontspanning: 2,   ongepland: 7.5 },
+      6:  { rijden: 6.5, natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 5.5 },
+      7:  { rijden: 0,   natuur: 0,    cultuur: 2,   ontspanning: 2,   ongepland: 10 },
+      8:  { rijden: 0,   natuur: 0,    cultuur: 6,   ontspanning: 1.5, ongepland: 6.5 },
+      9:  { rijden: 1.5, natuur: 0,    cultuur: 3.5, ontspanning: 0.5, ongepland: 8.5 },
+      10: { rijden: 5,   natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 7 },
+      11: { rijden: 2.25,natuur: 3,    cultuur: 0.75,ontspanning: 1,   ongepland: 7 },
+      12: { rijden: 1.5, natuur: 0,    cultuur: 0,   ontspanning: 1.5, ongepland: 10 },
+      13: { rijden: 0,   natuur: 1.5,  cultuur: 2.5, ontspanning: 2,   ongepland: 8 },
+      14: { rijden: 0,   natuur: 1.5,  cultuur: 3.5, ontspanning: 1,   ongepland: 8 },
+      15: { rijden: 1.5, natuur: 2.5,  cultuur: 0,   ontspanning: 1.5, ongepland: 8.5 },
+      16: { rijden: 2.75,natuur: 0,    cultuur: 3,   ontspanning: 0.5, ongepland: 7.75 },
+      17: { rijden: 0.5, natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 7.5 },
+      18: { rijden: 0,   natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 8 },
+      19: { rijden: 8,   natuur: 0,    cultuur: 1,   ontspanning: 0,   ongepland: 5 },
     };
     const catMeta = {
       rijden:      { label: 'Rijden',      color: 'var(--bar-travel)' },
@@ -820,11 +831,20 @@
         const slot = dayEl.querySelector('[data-hours]');
         if (!h || !slot) return;
         const total = Object.values(h).reduce((a, b) => a + b, 0);
-        const legend = Object.entries(h).filter(([, v]) => v > 0)
-          .map(([k, v]) => `<span><span class="sw" style="background:${catMeta[k].color}"></span>${catMeta[k].label} ${v}u</span>`).join('');
-        const bar = Object.entries(h).filter(([, v]) => v > 0)
-          .map(([k, v]) => `<span style="flex-grow:${v};background:${catMeta[k].color}" title="${catMeta[k].label}: ${v}u"></span>`).join('');
-        slot.innerHTML = `<div class="hour-bar-legend">${legend}</div><div class="hour-bar">${bar}</div><div class="hour-bar-total">${total}u totaal ingeschat</div>`;
+        const entries = Object.entries(h).filter(([, v]) => v > 0);
+        const legend = entries
+          .map(([k, v]) => `<span><span class="sw" style="background:${catMeta[k].color}"></span>${catMeta[k].label} ${timeFormat(v)}</span>`).join('');
+        const barHTML = entries
+          .map(([k, v]) => {
+            const pct = (v / total) * 100;
+            const label = timeFormat(v);
+            const cat = catMeta[k].label;
+            return `<span class="hour-bar-segment" style="flex-grow:${v};background:${catMeta[k].color}">
+              <span class="hour-bar-segment-cat">${cat}</span>
+              <span class="hour-bar-segment-label">${label}</span>
+            </span>`;
+          }).join('');
+        slot.innerHTML = `<div class="hour-bar-legend">${legend}</div><div class="hour-bar-container"><div class="hour-bar">${barHTML}</div></div><div class="hour-bar-total">14 uur totaal</div>`;
       });
     }
     renderHourBars();
