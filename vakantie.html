@@ -5,44 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Vakantie 2026 — Bauhaus, Bergen &amp; Bohemen</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <!--
-    Over de foto's: er zijn (nog) geen echte foto's ingeladen. Elke dagkaart
-    heeft in plaats daarvan een kleurvlak + icoon, gekoppeld aan het karakter
-    van de dag. Wil je een eigen foto tonen? Voeg in de betreffende
-    .day-media div een <img src="img/vakantie/<bestandsnaam>.jpg" alt="…">
-    toe — het kleurvlak blijft dan als achtergrond zichtbaar totdat de foto
-    geladen is, en verdwijnt niet als de foto ontbreekt of niet laadt.
+    Route-logica (na feedback): Kutná Hora + Tábor liggen nu VOOR Praag (ze
+    liggen geografisch tussen Kraków en Praag in), Teplice NA Praag (op weg
+    naar de Duitse grens, samen met Terezín). Český ráj/Trosky is daardoor
+    geografisch uit de route gevallen (het lag NO van Praag, niet op de nieuwe
+    lijn) en vervangen door een wandeling op de Milešovka bij de rit naar
+    Teplice. De zo vrijgekomen dag ging naar een 2de volle wandeldag in
+    Boheems Zwitserland.
+
+    Foto's: elke .day-media start als kleurvlak + icoon; hydrateWikiImages()
+    (onderaan) haalt live, in de browser van de bezoeker, het bijpassende
+    Wikipedia-plaatje op. Lukt dat niet, dan blijft het kleurvlak gewoon staan.
+
+    Uren-balkjes: dayHours (onderaan) geeft per dag een schatting in 5
+    categorieën; renderHourBars() zet dat om in de gestapelde balkjes.
+    Schattingen, geen kloktijden — bedoeld om te zien welke dagen vol zitten.
   -->
   <style>
     :root {
-      --bg: #f5f0e6;
-      --paper: #fffdf7;
-      --ink: #262420;
-      --muted: #7a7266;
-      --line: rgba(38, 36, 32, 0.12);
-      --green: #3a5a40;
-      --green-soft: #e7ede4;
-      --rust: #b5562f;
-      --rust-soft: #f5e3d8;
-      --slate: #33475b;
-      --slate-soft: #e2e8ee;
-      --charcoal: #2b2b2e;
-      --charcoal-soft: #e6e4e2;
-      --teal: #2b6f74;
-      --teal-soft: #e0edee;
-      --amber: #a97921;
-      --amber-soft: #f3e6cc;
+      --bg: #17140f;
+      --paper: #221e18;
+      --paper-raised: #2a251d;
+      --ink: #f2ece0;
+      --muted: #a89d8a;
+      --line: rgba(242, 236, 224, 0.13);
+
+      --green: #7fae83;
+      --rust: #e0895a;
+      --slate: #8fb2d6;
+      --charcoal: #cfc9bd;
+      --teal: #6bc2c4;
+      --amber: #e0b25a;
+      --plum: #cf9fd6;
+
+      --bar-travel: #948d80;
+      --bar-nature: #5f8f68;
+      --bar-culture: #e2a679;
+      --bar-relax: #8ec5e8;
+      --bar-unplanned: #3d5a9e;
+
       --radius: 20px;
       --font-head: 'Fraunces', Georgia, serif;
       --font-body: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    * { box-sizing: border-box; }
+    :root[data-theme="light"] {
+      --bg: #f5f0e6;
+      --paper: #fffdf7;
+      --paper-raised: #fbf6ea;
+      --ink: #262420;
+      --muted: #7a7266;
+      --line: rgba(38, 36, 32, 0.12);
 
+      --green: #3a5a40;
+      --rust: #b5562f;
+      --slate: #33475b;
+      --charcoal: #2b2b2e;
+      --teal: #2b6f74;
+      --amber: #a97921;
+      --plum: #5b3a5e;
+    }
+
+    * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
 
     body {
@@ -51,308 +81,142 @@
       color: var(--ink);
       font-family: var(--font-body);
       line-height: 1.65;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
     img { max-width: 100%; display: block; }
-
     a { color: inherit; }
 
-    .wrap {
-      width: min(1080px, calc(100% - 2.5rem));
-      margin: 0 auto;
+    .wrap { width: min(1080px, calc(100% - 2.5rem)); margin: 0 auto; }
+
+    .theme-toggle {
+      position: fixed; top: 1rem; right: 1rem; z-index: 50;
+      appearance: none; border: 1px solid var(--line); background: var(--paper);
+      color: var(--ink); border-radius: 999px; padding: 0.5rem 0.9rem;
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; cursor: pointer;
     }
 
     /* ===== HERO ===== */
-    .hero {
-      padding: 5rem 0 3rem;
-      text-align: center;
-    }
-
-    .hero-eyebrow {
-      font-size: 0.78rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0 0 1.25rem;
-    }
-
-    .hero h1 {
-      font-family: var(--font-head);
-      font-weight: 500;
-      font-size: clamp(2.2rem, 5vw, 3.6rem);
-      line-height: 1.1;
-      margin: 0 0 1rem;
-      color: var(--ink);
-    }
-
-    .hero-sub {
-      max-width: 46rem;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 1.05rem;
-    }
-
-    .hero-dates {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-top: 1.75rem;
-      padding: 0.6rem 1.4rem;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      font-size: 0.9rem;
-      color: var(--ink);
-    }
-
+    .hero { padding: 5rem 0 2.5rem; text-align: center; }
+    .hero-eyebrow { font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin: 0 0 1.25rem; }
+    .hero h1 { font-family: var(--font-head); font-weight: 500; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.1; margin: 0 0 1rem; color: var(--ink); }
+    .hero-sub { max-width: 46rem; margin: 0 auto; color: var(--muted); font-size: 1.05rem; }
+    .hero-dates { display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1.75rem; padding: 0.6rem 1.4rem; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; font-size: 0.9rem; color: var(--ink); }
     .hero-dates strong { font-weight: 600; }
 
-    /* ===== LEGEND ===== */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.6rem 1.4rem;
-      margin: 2rem 0 0;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
+    .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.4rem; margin: 2rem 0 0; font-size: 0.85rem; color: var(--muted); }
     .legend-item { display: flex; align-items: center; gap: 0.45rem; }
+    .legend-dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: inline-block; }
 
-    .legend-dot {
-      width: 0.7rem;
-      height: 0.7rem;
-      border-radius: 50%;
-      display: inline-block;
-    }
+    .feasibility { max-width: 760px; margin: 2.5rem auto 0; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.75rem 2rem; text-align: left; }
+    .feasibility h2 { font-family: var(--font-head); font-weight: 500; font-size: 1.3rem; margin: 0 0 0.75rem; }
+    .feasibility p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
+    .feasibility p:last-child { margin-bottom: 0; }
+    .feasibility strong { color: var(--ink); }
 
     /* ===== MAP ===== */
-    .map-section { padding: 1.5rem 0 4rem; }
+    .map-section { padding: 2.5rem 0 4rem; }
+    .map-shell { border-radius: 28px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 20px 50px -30px rgba(0,0,0,0.5); }
+    #route-map { height: 480px; width: 100%; background: var(--paper-raised); }
+    .map-hint { text-align: center; font-size: 0.85rem; color: var(--muted); margin-top: 0.9rem; font-style: italic; }
 
-    .map-shell {
-      border-radius: 28px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      box-shadow: 0 20px 50px -30px rgba(38, 36, 32, 0.35);
-    }
-
-    #route-map {
-      height: 480px;
-      width: 100%;
-      background: var(--slate-soft);
-    }
-
-    .map-hint {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 0.9rem;
-      font-style: italic;
-    }
-
-    .day-badge {
-      background: var(--slate);
-      color: #fff;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font: 700 12px var(--font-body);
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-    }
-
+    .day-badge { background: var(--slate); color: #10131a; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font: 700 12px var(--font-body); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
     .day-badge.camping { background: var(--green); }
     .day-badge.stad { background: var(--slate); }
     .day-badge.mix { background: var(--amber); }
     .day-badge.reis { background: var(--muted); }
-
-    .flag-badge {
-      background: var(--rust);
-      color: #fff;
-      border-radius: 8px;
-      padding: 3px 8px;
-      font: 700 11px var(--font-body);
-      white-space: nowrap;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-    }
-
-    .leaflet-popup-content { font-family: var(--font-body); font-size: 0.9rem; }
-    .leaflet-popup-content a { color: var(--rust); font-weight: 600; text-decoration: none; }
+    .flag-badge { background: var(--rust); color: #10131a; border-radius: 8px; padding: 3px 8px; font: 700 11px var(--font-body); white-space: nowrap; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+    .leaflet-popup-content { font-family: var(--font-body); font-size: 0.9rem; color: #1f2937; }
+    .leaflet-popup-content a { color: #b5562f; font-weight: 600; text-decoration: none; }
     .leaflet-popup-content a:hover { text-decoration: underline; }
 
     /* ===== TIMELINE ===== */
     .timeline { padding: 1rem 0 6rem; }
+    .timeline-head { text-align: center; margin-bottom: 2.5rem; }
+    .timeline-title { font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 500; margin: 0 0 0.6rem; }
+    .timeline-sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+    .toggle-all { appearance: none; border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 0.45rem 1.1rem; font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
 
-    .timeline-title {
-      font-family: var(--font-head);
-      font-size: clamp(1.6rem, 3vw, 2.1rem);
-      font-weight: 500;
-      text-align: center;
-      margin: 0 0 3rem;
-    }
+    .group-header { display: flex; align-items: center; gap: 0.9rem; margin: 3rem 0 1.25rem; }
+    .group-header:first-of-type { margin-top: 0; }
+    .group-header .g-icon { font-size: 1.4rem; }
+    .group-header h3 { font-family: var(--font-head); font-weight: 500; font-size: 1.5rem; margin: 0; white-space: nowrap; }
+    .group-header .g-line { height: 1px; background: var(--line); flex: 1; }
+    .group-header .g-range { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
 
-    .day {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 2rem;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1.75rem;
-      scroll-margin-top: 2rem;
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-    }
+    .day { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 1.25rem; scroll-margin-top: 2rem; transition: box-shadow 0.3s ease, transform 0.3s ease; overflow: hidden; }
+    .day.highlight { box-shadow: 0 0 0 3px var(--rust); transform: translateY(-2px); }
 
-    .day.highlight {
-      box-shadow: 0 0 0 3px var(--rust);
-      transform: translateY(-2px);
-    }
+    .day-head { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; cursor: pointer; user-select: none; background: none; border: none; width: 100%; text-align: left; font-family: inherit; color: inherit; }
+    .day-head-main { min-width: 0; }
+    .day-meta { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+    .day-number { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    .day-date { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+    .day-route { font-family: var(--font-head); font-weight: 500; font-size: 1.35rem; margin: 0 0 0.6rem; line-height: 1.25; }
+    .day-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.76rem; font-weight: 600; background: color-mix(in srgb, var(--slate) 20%, var(--paper)); color: var(--slate); }
+    .chip.c-nature { background: color-mix(in srgb, var(--green) 22%, var(--paper)); color: var(--green); }
+    .chip.c-culture { background: color-mix(in srgb, var(--rust) 20%, var(--paper)); color: var(--rust); }
+    .chip.c-relax { background: color-mix(in srgb, var(--teal) 22%, var(--paper)); color: var(--teal); }
+    .chip.c-history { background: color-mix(in srgb, var(--charcoal) 30%, var(--paper)); color: var(--charcoal); }
+    .chip.c-amber { background: color-mix(in srgb, var(--amber) 22%, var(--paper)); color: var(--amber); }
+    .chip.c-hike-long { background: color-mix(in srgb, var(--green) 30%, var(--paper)); color: var(--green); font-weight: 700; }
+    .chip.c-hike-short { background: color-mix(in srgb, var(--teal) 30%, var(--paper)); color: var(--teal); font-weight: 700; }
 
-    .day-media {
-      position: relative;
-      border-radius: 14px;
-      overflow: hidden;
-      min-height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .day-toggle-icon { font-size: 1.1rem; color: var(--muted); transition: transform 0.25s ease; flex-shrink: 0; }
+    .day.expanded .day-toggle-icon { transform: rotate(180deg); }
 
-    .day-media .day-icon-big { font-size: 3rem; opacity: 0.9; }
+    .day-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .day.expanded .day-collapsible { max-height: 4000px; }
+    .day-collapsible-inner { padding: 0 1.5rem 1.5rem; display: grid; grid-template-columns: 200px 1fr; gap: 1.75rem; }
 
-    .day-media img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .day-media { position: relative; border-radius: 14px; overflow: hidden; min-height: 150px; display: flex; align-items: center; justify-content: center; }
+    .day-media .day-icon-big { font-size: 2.8rem; opacity: 0.9; }
+    .day-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .day-media.has-photo .day-icon-big { display: none; }
+    .wiki-credit { position: absolute; bottom: 6px; right: 8px; font-size: 0.6rem; color: rgba(255,255,255,0.9); background: rgba(0,0,0,0.4); padding: 1px 7px; border-radius: 6px; display: none; font-family: var(--font-body); }
+    .day-media.has-photo .wiki-credit { display: block; }
 
     .day-body { min-width: 0; }
 
-    .day-meta {
-      display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
+    .hour-bar-wrap { margin: 0 0 1rem; }
+    .hour-bar-legend { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; font-size: 0.74rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .hour-bar-legend span { display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+    .hour-bar-legend .sw { width: 0.6rem; height: 0.6rem; border-radius: 2px; display: inline-block; }
+    .hour-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); }
+    .hour-bar-total { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
 
-    .day-number {
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    .day-stats { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin: 0 0 1rem; font-size: 0.82rem; color: var(--muted); border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); padding: 0.6rem 0; }
+    .day-stats span { white-space: nowrap; }
 
-    .day-date {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--ink);
-    }
+    .day-activities { margin: 0 0 1rem; color: var(--ink); opacity: 0.88; }
 
-    .day-route {
-      font-family: var(--font-head);
-      font-weight: 500;
-      font-size: 1.5rem;
-      margin: 0 0 0.75rem;
-      line-height: 1.25;
-    }
+    .day-trivia { background: color-mix(in srgb, var(--plum) 14%, var(--paper)); border-left: 3px solid var(--plum); border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.88rem; margin-bottom: 0.9rem; }
+    .day-trivia strong { display: block; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.35rem; color: var(--plum); }
+    .day-trivia p { margin: 0 0 0.5rem; color: var(--ink); opacity: 0.92; }
+    .day-trivia p:last-child { margin-bottom: 0; }
 
-    .day-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.9rem;
-    }
+    .day-tip { background: color-mix(in srgb, var(--rust) 14%, var(--paper)); border-left: 3px solid var(--rust); border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.9rem; margin-bottom: 1rem; }
+    .day-tip strong { display: block; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.3rem; color: var(--rust); }
+    .day-tip p { margin: 0; color: var(--ink); opacity: 0.92; }
 
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.3rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: var(--slate-soft);
-      color: var(--slate);
-    }
+    .map-link { appearance: none; background: none; border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.9rem; font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; color: var(--ink); cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+    .map-link:hover { background: color-mix(in srgb, var(--slate) 18%, var(--paper)); border-color: var(--slate); }
 
-    .day-activities {
-      margin: 0 0 1rem;
-      color: #4a463f;
-    }
-
-    .day-tip {
-      background: var(--rust-soft);
-      border-left: 3px solid var(--rust);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      font-size: 0.9rem;
-      color: #5a3220;
-      margin-bottom: 1rem;
-    }
-
-    .day-tip strong {
-      display: block;
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 0.3rem;
-      color: var(--rust);
-    }
-
-    .day-tip p { margin: 0; }
-
-    .map-link {
-      appearance: none;
-      background: none;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 0.4rem 0.9rem;
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--ink);
-      cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .map-link:hover { background: var(--slate-soft); border-color: var(--slate); }
-
-    /* ===== FOOTER ===== */
-    .site-end {
-      text-align: center;
-      padding: 3rem 0 5rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--line);
-    }
-
-    .back-top {
-      display: inline-block;
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: var(--rust);
-      font-weight: 600;
-    }
+    .site-end { text-align: center; padding: 3rem 0 5rem; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); }
+    .back-top { display: inline-block; margin-top: 1rem; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; color: var(--rust); font-weight: 600; }
 
     @media (max-width: 720px) {
-      .day { grid-template-columns: 1fr; }
+      .day-collapsible-inner { grid-template-columns: 1fr; }
       .day-media { min-height: 120px; }
       #route-map { height: 360px; }
+      .theme-toggle { top: 0.6rem; right: 0.6rem; padding: 0.4rem 0.7rem; font-size: 0.72rem; }
     }
   </style>
 </head>
 <body id="top">
+
+  <button class="theme-toggle" id="themeToggle" type="button">☀️ Licht</button>
 
   <main class="wrap">
 
@@ -361,333 +225,528 @@
       <h1>Van Bauhaus tot Boheems Zwitserland</h1>
       <p class="hero-sub">
         Bunnik → Weimar → Dessau → Dresden → Saksisch Zwitserland → Kraków →
-        Teplice → Praag → Kutná Hora → Tábor → Terezín → Boheems Zwitserland
-        → Leipzig → Friesland.
+        Kutná Hora → Tábor → Praag → Teplice → Terezín → Boheems Zwitserland →
+        Leipzig → Friesland.
       </p>
-      <div class="hero-dates">
-        📅 <strong>ma 7 sep — vr 25 sep</strong> · Duitsland · Polen · Tsjechië
-      </div>
+      <div class="hero-dates">📅 <strong>ma 7 sep — vr 25 sep</strong> · Duitsland · Polen · Tsjechië</div>
 
       <div class="legend">
         <span class="legend-item"><span class="legend-dot" style="background:var(--slate)"></span> Stad (hotel)</span>
         <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> Camping</span>
         <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span> Gemengd / onderweg</span>
         <span class="legend-item"><span class="legend-dot" style="background:var(--muted)"></span> Reisdag</span>
+        <span class="legend-item">🥾 6× lange wandeling · 5× korte wandeling</span>
+      </div>
+
+      <div class="feasibility">
+        <h2>Is dit haalbaar?</h2>
+        <p><strong>Ja — en met de laatste omgooi (Kutná Hora/Tábor vóór Praag, Teplice erna) rijdt de route ook logischer:</strong> geen zigzag meer, mooi aflopend van Polen naar de Duitse grens. In totaal rijden jullie ruim <strong>3.100 km</strong>, met twee echte rijdagen (Görlitz→Kraków en de laatste dag naar Friesland, ~8–9u met Leipzig erbij).</p>
+        <p>Door Praag op 2 volle dagen te houden (i.p.v. 3) en de wandeling bij Teplice in de reisdag te vlechten, is er een hele dag overgebleven voor <strong>Boheems Zwitserland — nu met 2 volle wandeldagen</strong> in plaats van 1. Dat is precies de ademruimte aan het eind van de reis die gevraagd was.</p>
+        <p>Strakste dag blijft <strong>woensdag na Tábor</strong> (Terezín + rit naar Boheems Zwitserland) — vertrek daar op tijd. De laatste dag (Leipzig → Friesland) is de langste rijdag van de trip; laat Leipzig als eerste vallen als het uitloopt.</p>
       </div>
     </section>
 
     <section class="map-section">
-      <div class="map-shell">
-        <div id="route-map"></div>
-      </div>
+      <div class="map-shell"><div id="route-map"></div></div>
       <p class="map-hint">Klik op een genummerde stop voor details, of gebruik "📍 Bekijk op kaart" bij een dag hieronder.</p>
     </section>
 
     <section class="timeline">
-      <h2 class="timeline-title">Dag voor dag</h2>
+      <div class="timeline-head">
+        <h2 class="timeline-title">Dag voor dag</h2>
+        <p class="timeline-sub">Uren zijn schattingen, geen kloktijden — bedoeld om te zien welke dagen vol zitten. Klik een dag open voor details.</p>
+        <button class="toggle-all" id="toggleAll" type="button">Alles uitklappen</button>
+      </div>
+
+      <div class="group-header"><span class="g-icon">🎨</span><h3>Bauhaus</h3><span class="g-line"></span><span class="g-range">7–8 sep</span></div>
 
       <!-- DAG 1 -->
-      <article class="day" id="dag-1">
-        <div class="day-media" style="background:var(--rust-soft)"><span class="day-icon-big">🎨</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 1 / 19</span><span class="day-date">Ma 7 sep</span></div>
-          <h2 class="day-route">Bunnik → Weimar</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--rust-soft);color:var(--rust)">🎨 Cultuur</span>
+      <article class="day" id="dag-1" data-day="1">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 1 / 19</span><span class="day-date">Ma 7 sep</span></div>
+            <h2 class="day-route">Bunnik → Weimar</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad</span><span class="chip c-culture">🎨 Cultuur</span><span class="chip c-hike-short">🥾 Korte wandeling</span></div>
           </div>
-          <p class="day-activities">Vertrek richting Weimar. Bauhaus-Museum Weimar, Haus am Horn — het enige gebouw dat in 1923 daadwerkelijk uit de Bauhaus-tentoonstelling is gerealiseerd — en een wandeling door de compacte, goed te belopen binnenstad.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Parkhaus am Goetheplatz; Haus am Horn ligt vlak bij het Park an der Ilm en heeft beperkte openingstijden — check dat vooraf. Neem een combi-ticket als dat wordt aangeboden.</p></div>
-          <button class="map-link" data-day="1">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Weimar"><span class="day-icon-big">🎨</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats">
+              <span>🚗 Reistijd: ~4,5u (460 km)</span>
+              <span>🏛️ Bauhaus-Museum Weimar: ~1,5u</span>
+              <span>🏠 Haus am Horn: ~30 min</span>
+              <span>🥾 Park an der Ilm: ~45 min</span>
+            </div>
+            <p class="day-activities">Vertrek richting Weimar. Bauhaus-Museum Weimar, Haus am Horn — het enige gebouw dat in 1923 daadwerkelijk uit de Bauhaus-tentoonstelling is gerealiseerd — en 's avonds een korte wandeling door Park an der Ilm.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Weimar was rond 1800 hét intellectuele centrum van Duitsland — Goethe en Schiller woonden en werkten hier. In 1919 leende de stad haar naam aan de Weimarrepubliek: de grondwetgevende vergadering kwam bijeen in het Deutsches Nationaltheater, een paar honderd meter van waar je loopt, omdat Berlijn destijds te onrustig was.</p>
+              <p>Haus am Horn is functionalistisch en kubistisch — radicaal voor 1923 — en staat sinds 1996 op de UNESCO-werelderfgoedlijst. Zeven kilometer buiten de stad ligt Buchenwald: een confronterend contrast met Weimars culturele reputatie, en iets om te weten ook al staat het niet op het programma.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Parkhaus am Goetheplatz; Haus am Horn heeft beperkte openingstijden — check dat vooraf.</p></div>
+            <button class="map-link" data-day="1">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 2 -->
-      <article class="day" id="dag-2">
-        <div class="day-media" style="background:var(--rust-soft)"><span class="day-icon-big">🎨</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 2 / 19</span><span class="day-date">Di 8 sep</span></div>
-          <h2 class="day-route">Dessau</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--rust-soft);color:var(--rust)">🎨 Cultuur</span>
+      <article class="day" id="dag-2" data-day="2">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 2 / 19</span><span class="day-date">Di 8 sep</span></div>
+            <h2 class="day-route">Dessau</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-culture">🎨 Cultuur</span></div>
           </div>
-          <p class="day-activities">Het Bauhausgebäude van Gropius, de Meisterhäuser (woningen van Kandinsky, Klee en collega's), het Bauhaus Museum Dessau in het centrum, en de Törten-wijk met de Laubenganghäuser.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Törten ligt zo'n 4 km verderop — huur een fiets bij het Bauhausgebäude in plaats van te lopen. Een dagticket dat meerdere Bauhaus-locaties combineert is voordeliger dan losse kaartjes.</p></div>
-          <button class="map-link" data-day="2">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Bauhaus"><span class="day-icon-big">🎨</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats">
+              <span>🚗 Reistijd: ~1u15 (100 km)</span>
+              <span>🏛️ Bauhausgebäude: ~1,5u</span>
+              <span>🏛️ Meisterhäuser: ~1u</span>
+              <span>🏛️ Bauhaus Museum Dessau: ~1u</span>
+              <span>🚲 Törten: ~1u (fietsen, 4 km)</span>
+            </div>
+            <p class="day-activities">Het Bauhausgebäude van Gropius, de Meisterhäuser (woningen van Kandinsky, Klee en collega's), het Bauhaus Museum Dessau, en de Törten-wijk met de Laubenganghäuser.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Gropius verhuisde het Bauhaus in 1925 van Weimar naar Dessau nadat de nieuwe, rechtse Thüringer regering de subsidie schrapte. Het glazen gordijngevel-gebouw was zijn statement: licht, functie, geen ornament. In Törten bouwde hij sociale woningbouw voor arbeiders, een idee dat wereldwijd is nagevolgd.</p>
+              <p>In 1932 sloot de Nazi-gedomineerde gemeenteraad het Bauhaus in Dessau. Gropius en Mies van der Rohe emigreerden naar de VS (Harvard, Chicago) en vormden er de latere "International Style"; Kandinsky vertrok naar Parijs, Klee terug naar Zwitserland.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Törten ligt zo'n 4 km verderop — huur een fiets bij het Bauhausgebäude. Een gecombineerd dagticket is voordeliger dan losse kaartjes.</p></div>
+            <button class="map-link" data-day="2">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🏔️</span><h3>Dresden &amp; Saksisch Zwitserland</h3><span class="g-line"></span><span class="g-range">9–12 sep</span></div>
+
       <!-- DAG 3 -->
-      <article class="day" id="dag-3">
-        <div class="day-media" style="background:var(--slate-soft)"><span class="day-icon-big">🏛️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 3 / 19</span><span class="day-date">Wo 9 sep</span></div>
-          <h2 class="day-route">Dessau → Dresden</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--rust-soft);color:var(--rust)">🏛️ Cultuur</span>
+      <article class="day" id="dag-3" data-day="3">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 3 / 19</span><span class="day-date">Wo 9 sep</span></div>
+            <h2 class="day-route">Dessau → Dresden</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad</span><span class="chip c-culture">🏛️ Cultuur</span></div>
           </div>
-          <p class="day-activities">Onderweg naar Dresden. Kies één museum (bijvoorbeeld het Grüne Gewölbe of de Zwinger) en sluit af met een avondwandeling door de Altstadt, langs de Frauenkirche en de Brühlsche Terrasse.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Tickets voor het Grüne Gewölbe zijn met tijdslot en raken vaak vooraf uitverkocht — boek online voordat je vertrekt. Parkeer in een garage bij de Altmarkt-Galerie, de Altstadt zelf is grotendeels autoluw.</p></div>
-          <button class="map-link" data-day="3">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Frauenkirche, Dresden"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u45 (145 km)</span><span>🏛️ Museum naar keuze: ~2u</span><span>🚶 Avondwandeling Altstadt: ~1u</span></div>
+            <p class="day-activities">Onderweg naar Dresden. Kies één museum (Grünes Gewölbe of de Zwinger) en sluit af met een avondwandeling door de Altstadt, langs de Frauenkirche en de Brühlsche Terrasse.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Dresden heette ooit "Elbflorenz". Van 1697 tot 1763 (met een korte onderbreking) regeerden de Saksische keurvorsten óók als koning van Polen — een personele unie die op menig Europa Universalis-scherm terugkomt.</p>
+              <p>In de nacht van 13-14 februari 1945 werd de binnenstad vrijwel volledig verwoest; de Frauenkirche stortte in en lag 50 jaar als bewuste oorlogsruïne, tot ze tussen 1994-2005 met de originele, zwartgeblakerde stenen werd herbouwd. Muzieknerd-feit: Wagner was hier 1843-1849 Hofkapellmeister en liet in de Semperoper "Rienzi" en "De vliegende Hollander" in première gaan, voor hij na de mislukte Meiopstand van 1849 moest vluchten.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Tickets voor het Grüne Gewölbe zijn met tijdslot — boek online. Parkeer bij de Altmarkt-Galerie; de Altstadt zelf is grotendeels autoluw.</p></div>
+            <button class="map-link" data-day="3">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 4 -->
-      <article class="day" id="dag-4">
-        <div class="day-media" style="background:var(--green-soft)"><span class="day-icon-big">🥾</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 4 / 19</span><span class="day-date">Do 10 sep</span></div>
-          <h2 class="day-route">Saksisch Zwitserland</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">🌲 Wandelen</span>
+      <article class="day" id="dag-4" data-day="4">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 4 / 19</span><span class="day-date">Do 10 sep</span></div>
+            <h2 class="day-route">Saksisch Zwitserland — Bastei</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-nature">🌲 Wandelen</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">Wandeling langs de Bastei — de iconische zandsteenbrug hoog boven de Elbe — met een lus via de Schwedenlöcher terug naar beneden.</p>
-          <div class="day-tip"><strong>Tip</strong><p>De Bastei is 's middags overspoeld met dagjesmensen en touringcars. Start voor 9 uur, of ga pas laat in de middag; parkeer bij Lohmen of neem het veer bij Rathen over de Elbe.</p></div>
-          <button class="map-link" data-day="4">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Bastei (rock formation)"><span class="day-icon-big">🥾</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~30 min (Dresden–Rathen)</span><span>🥾 Wandeltijd: ~3–4u / ~9 km</span></div>
+            <p class="day-activities">Wandeling langs de Bastei — de iconische zandsteenbrug hoog boven de Elbe — met een lus via de Schwedenlöcher terug naar beneden.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>"Saksisch Zwitserland" kreeg zijn naam van 18e-eeuwse Zwitserse kunstenaars die het landschap deden denken aan hun thuisland. De rotsen zijn zandsteen: 25 miljoen jaar geleden zeebodem, later opgetild en uitgesleten.</p>
+              <p>De huidige Bastei-brug (1851, steen) verving een houten brug uit 1824. Erachter ligt Neurathen, de grootste middeleeuwse rotsburcht van Duitsland (13e eeuw) — precies het soort ruige versterking die in Kingdom Come: Deliverance thuis zou horen, al speelt dat spel verderop in Bohemen.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>De Bastei is 's middags overspoeld. Start voor 9 uur, of ga pas laat in de middag; parkeer bij Lohmen of neem het veer bij Rathen.</p></div>
+            <button class="map-link" data-day="4">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 5 -->
-      <article class="day" id="dag-5">
-        <div class="day-media" style="background:var(--green-soft)"><span class="day-icon-big">🥾</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 5 / 19</span><span class="day-date">Vr 11 sep</span></div>
-          <h2 class="day-route">Saksisch Zwitserland</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">🌲 Wandelen</span>
+      <article class="day" id="dag-5" data-day="5">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 5 / 19</span><span class="day-date">Vr 11 sep</span></div>
+            <h2 class="day-route">Saksisch Zwitserland — Schrammsteine</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-nature">🌲 Wandelen</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">Schrammsteine en Affensteine — pittiger en stiller dan de Bastei, met stalen trappen en ladders tegen de rotswand en weidse uitzichten over het nationaal park.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Stevige schoenen zijn hier geen luxe — sommige passages hebben klimijzers en smalle richels. Start bij Bad Schandau of Ostrau; reken op een halve tot hele dag afhankelijk van de route.</p></div>
-          <button class="map-link" data-day="5">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Schrammsteine"><span class="day-icon-big">🥾</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🥾 Wandeltijd: ~4–5u / ~11 km</span></div>
+            <p class="day-activities">Schrammsteine en Affensteine — pittiger en stiller dan de Bastei, met stalen trappen en ladders en weidse uitzichten.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Dit nationaal park (sinds 1990) heeft het dichtste netwerk aan klimroutes van Duitsland. Hier ontstond eind 19e eeuw een van de bakermatten van het vrijklimmen: de strenge "Sächsische Kletterregeln" beïnvloeden de klimethiek wereldwijd nog steeds.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Stevige schoenen zijn hier geen luxe — sommige passages hebben klimijzers en smalle richels. Start bij Bad Schandau of Ostrau.</p></div>
+            <button class="map-link" data-day="5">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 6 -->
-      <article class="day" id="dag-6">
-        <div class="day-media" style="background:var(--charcoal-soft)"><span class="day-icon-big">🚗</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 6 / 19</span><span class="day-date">Za 12 sep</span></div>
-          <h2 class="day-route">Saksisch Zwitserland → Polen</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--amber-soft);color:var(--amber)">⛺/🛏️ Gemengd</span>
-            <span class="chip">🚗 Reizen</span>
+      <article class="day" id="dag-6" data-day="6">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 6 / 19</span><span class="day-date">Za 12 sep</span></div>
+            <h2 class="day-route">Saksisch Zwitserland → Polen</h2>
+            <div class="day-chips"><span class="chip c-amber">⛺/🛏️ Gemengd</span><span class="chip">🚗 Reizen</span><span class="chip c-hike-short">🥾 Korte wandeling</span></div>
           </div>
-          <p class="day-activities">Rustige ochtend, dan de grens over richting Kraków — via Görlitz, de meest oostelijke stad van Duitsland, met een goed bewaarde middeleeuwse binnenstad als leuke lunchstop.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Binnen Schengen is er geen grenscontrole, maar tank net na de grens in Polen — brandstof is daar doorgaans goedkoper dan in Duitsland.</p></div>
-          <button class="map-link" data-day="6">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Görlitz"><span class="day-icon-big">🚗</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Rathen–Görlitz: ~1u30 (110 km)</span><span>🚶 Görlitz binnenstad: ~1u</span><span>🚗 Görlitz–Kraków: ~5u (460 km)</span></div>
+            <p class="day-activities">Rustige ochtend, dan via Görlitz — de meest oostelijke stad van Duitsland, uitzonderlijk goed bewaard — verder de grens over richting Kraków.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Görlitz liep bij de grensverschuiving van 1945 letterlijk doormidden: de Neiße werd de nieuwe Duits-Poolse grens en de oostelijke stadshelft werd het Poolse Zgorzelec. Görlitz zelf overleefde de oorlog nagenoeg ongeschonden, vandaar ook een geliefd filmdecor: "The Grand Budapest Hotel" en delen van "Inglourious Basterds" zijn hier opgenomen.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Binnen Schengen geen grenscontrole, maar tank net na de grens in Polen — brandstof is daar doorgaans goedkoper.</p></div>
+            <button class="map-link" data-day="6">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🇵🇱</span><h3>Polen</h3><span class="g-line"></span><span class="g-range">13–15 sep</span></div>
+
       <!-- DAG 7 -->
-      <article class="day" id="dag-7">
-        <div class="day-media" style="background:var(--slate-soft)"><span class="day-icon-big">🏛️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 7 / 19</span><span class="day-date">Zo 13 sep</span></div>
-          <h2 class="day-route">Kraków</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--slate-soft);color:var(--slate)">🏛️ Stad</span>
+      <article class="day" id="dag-7" data-day="7">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 7 / 19</span><span class="day-date">Zo 13 sep</span></div>
+            <h2 class="day-route">Kraków</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad</span><span class="chip">🏛️ Stad</span></div>
           </div>
-          <p class="day-activities">Aankomst en eerste kennismaking met de oude stad: de Rynek Główny (het grootste middeleeuwse marktplein van Europa), de Lakenhallen en de Mariakerk.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Elk uur klinkt vanaf de toren van de Mariakerk de hejnał — een trompetsignaal dat abrupt afbreekt, ter herinnering aan een middeleeuwse legende. Mooi moment om net op het plein te zijn.</p></div>
-          <button class="map-link" data-day="7">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Main Square, Kraków"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🏛️ Rynek Główny + Lakenhallen + Mariakerk: ~2u</span></div>
+            <p class="day-activities">Aankomst en eerste kennismaking met de oude stad: de Rynek Główny, de Lakenhallen en de Mariakerk.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>De Rynek Główny (aangelegd 1257) is het grootste middeleeuwse marktplein van Europa. Elk uur klinkt vanaf de Mariakerktoren de hejnał mariacki — een trompetsignaal dat abrupt afbreekt, ter herdenking van een wachter die volgens de legende in 1241 door een Mongoolse pijl werd geraakt.</p>
+              <p>Binnen staat het Wit Stwosz-altaarstuk (1489) — het grootste gotische houtsnijaltaar ter wereld. Kraków was tot 1596 de hoofdstad van Polen; daarna verhuisde het hof naar Warschau, maar kroningen bleven hier nog lang plaatsvinden.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>De hejnał is een mooi moment om net op het plein te zijn. De oude stad is grotendeels autoluw.</p></div>
+            <button class="map-link" data-day="7">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 8 -->
-      <article class="day" id="dag-8">
-        <div class="day-media" style="background:var(--rust-soft)"><span class="day-icon-big">🏛️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 8 / 19</span><span class="day-date">Ma 14 sep</span></div>
-          <h2 class="day-route">Kraków</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--rust-soft);color:var(--rust)">🏛️ Cultuur</span>
+      <article class="day" id="dag-8" data-day="8">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 8 / 19</span><span class="day-date">Ma 14 sep</span></div>
+            <h2 class="day-route">Kraków</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad</span><span class="chip c-culture">🏛️ Cultuur</span></div>
           </div>
-          <p class="day-activities">Wawel (kasteel en kathedraal), Kazimierz (de historische Joodse wijk) en Podgórze (voormalig getto, met Schindler's Fabriek en het Ghetto Heroes-plein) — plus musea naar keuze.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Voor de staatsvertrekken van Wawel geldt een dagelijks maximum aan bezoekers — boek een tijdslot online, zeker in september. Kazimierz is 's avonds het leukst voor eten en een biertje.</p></div>
-          <button class="map-link" data-day="8">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Wawel Castle"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🏛️ Wawel kasteel + kathedraal: ~2,5u</span><span>🚶 Kazimierz: ~1,5u</span><span>🏛️ Podgórze / Schindler's Fabriek: ~2u</span></div>
+            <p class="day-activities">Wawel, Kazimierz (de historische Joodse wijk) en Podgórze (voormalig getto, met Schindler's Fabriek vlakbij en het Ghetto Heroes-plein). Vanavond eventueel een vegan fine-dining avond — Kraków's vegan-scene groeit snel; check HappyCow voor een actuele aanrader en boek vooraf.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Wawel is de rustplaats van vrijwel alle Poolse koningen, inclusief de Jagiellonen-dynastie die via een personele unie met Litouwen op zijn hoogtepunt een van de grootste rijken van Europa bestuurde — weer een Europa Universalis-vergelijking. Kazimierz, gesticht in 1335, herbergde eeuwenlang een van de belangrijkste Joodse gemeenschappen van Europa: vlak voor de oorlog woonden er ruim 60.000 Joden in Kraków.</p>
+              <p>Podgórze werd in 1941 het getto; Oskar Schindlers fabriek lag er vlakbij. "Schindler's List" is grotendeels op deze locaties opgenomen.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Voor Wawel geldt een dagelijks bezoekersmaximum — boek een tijdslot online. Kazimierz is 's avonds het leukst.</p></div>
+            <button class="map-link" data-day="8">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 9 -->
-      <article class="day" id="dag-9">
-        <div class="day-media" style="background:var(--charcoal-soft)"><span class="day-icon-big">🕯️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 9 / 19</span><span class="day-date">Di 15 sep</span></div>
-          <h2 class="day-route">Auschwitz-Birkenau</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Kraków</span>
-            <span class="chip" style="background:var(--charcoal-soft);color:var(--charcoal)">🕯️ Geschiedenis</span>
+      <article class="day" id="dag-9" data-day="9">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 9 / 19</span><span class="day-date">Di 15 sep</span></div>
+            <h2 class="day-route">Auschwitz-Birkenau</h2>
+            <div class="day-chips"><span class="chip">🛏️ Kraków</span><span class="chip c-history">🕯️ Geschiedenis</span></div>
           </div>
-          <p class="day-activities">Een volledige dag voor Auschwitz I en Birkenau (Auschwitz II) samen — reken op zo'n 3,5 tot 4 uur voor beide terreinen inclusief de pendelbus ertussen.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Boek verplicht vooraf online via auschwitz.org — tijdsloten zitten in het hoogseizoen snel vol en in de zomer is een gids doorgaans verplicht voor Auschwitz I. Rijtijd vanuit Kraków is ongeveer anderhalf uur. Neem weinig bagage mee (grote tassen zijn niet toegestaan) en plan die avond bewust iets rustigs.</p></div>
-          <button class="map-link" data-day="9">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Auschwitz concentration camp"><span class="day-icon-big">🕯️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u30 (65 km, enkele reis)</span><span>🏛️ Auschwitz I (gids): ~2u</span><span>🏛️ Birkenau: ~1,5–2u</span></div>
+            <p class="day-activities">Een volledige dag voor Auschwitz I en Birkenau samen, inclusief de pendelbus ertussen.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Auschwitz I was oorspronkelijk een Poolse legerkazerne; de nazi's openden het kamp in 1940, aanvankelijk voor Poolse politieke gevangenen. Birkenau (vanaf 1942) werd het grootste vernietigingskamp van het Derde Rijk. Tussen 1940-1945 zijn hier naar schatting 1,1 miljoen mensen vermoord, het overgrote deel Joden uit heel Europa.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Boek verplicht vooraf online via auschwitz.org. Neem weinig bagage mee en plan die avond bewust iets rustigs.</p></div>
+            <button class="map-link" data-day="9">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🏰</span><h3>Oost-Bohemen — Kutná Hora &amp; Tábor</h3><span class="g-line"></span><span class="g-range">16–17 sep</span></div>
+
       <!-- DAG 10 -->
-      <article class="day" id="dag-10">
-        <div class="day-media" style="background:var(--teal-soft)"><span class="day-icon-big">♨️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 10 / 19</span><span class="day-date">Wo 16 sep</span></div>
-          <h2 class="day-route">Kraków → Teplice</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--amber-soft);color:var(--amber)">🛏️/⛺ Gemengd</span>
-            <span class="chip" style="background:var(--teal-soft);color:var(--teal)">♨️ Ontspanning</span>
+      <article class="day" id="dag-10" data-day="10">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 10 / 19</span><span class="day-date">Wo 16 sep</span></div>
+            <h2 class="day-route">Kraków → Kutná Hora</h2>
+            <div class="day-chips"><span class="chip c-amber">🛏️/⛺ Gemengd</span><span class="chip">🚗 Reizen</span><span class="chip c-amber">🏰 Middeleeuwen</span></div>
           </div>
-          <p class="day-activities">Een lange rit (zo'n 5 uur) naar Teplice, bekend om zijn thermale bronnen — 's avonds ontspannen in het kuurbad na twee zware dagen.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Boek een tijdslot in de thermen vooraf als je hotel dit niet standaard aanbiedt; plan onderweg een langere lunchstop om de rit op te breken.</p></div>
-          <button class="map-link" data-day="10">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--amber) 24%, var(--paper))" data-wiki="Kutná Hora"><span class="day-icon-big">🏰</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~5u (480 km)</span><span>🏛️ Sint-Barbarakathedraal (indien tijd): ~1u</span></div>
+            <p class="day-activities">Een lange rit terug naar Tsjechië, dit keer via het zuiden — rechtstreeks naar Kutná Hora, ooit bijna net zo rijk als Praag. Kom er de tijd voor, dan lukt vanavond nog een bezoek aan de Sint-Barbarakathedraal; anders morgenvroeg.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Kutná Hora dankte zijn rijkdom aan een van de grootste zilvermijnen van Europa. In het Italiaanse Hof (Vlašský dvůr) werd vanaf 1300 onder koning Wenceslaus II de Praagse groschen geslagen — eeuwenlang een van de belangrijkste munten van Centraal-Europa. Muntslag als machtsbron: weer een Europa Universalis-koppeling.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Puur een overbrugdag qua rijden — verwacht niet te veel meer dan aankomen en een eerste indruk.</p></div>
+            <button class="map-link" data-day="10">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 11 -->
-      <article class="day" id="dag-11">
-        <div class="day-media" style="background:var(--green-soft)"><span class="day-icon-big">🏰</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 11 / 19</span><span class="day-date">Do 17 sep</span></div>
-          <h2 class="day-route">Teplice → Český ráj / Trosky → Praag</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Praag</span>
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">🌲🏰 Natuur + KCD</span>
+      <article class="day" id="dag-11" data-day="11">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 11 / 19</span><span class="day-date">Do 17 sep</span></div>
+            <h2 class="day-route">Kutná Hora → Tábor (via Sázava)</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-amber">🎮🏰 KCD + geschiedenis</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">Onderweg een wandeling in het Bohemens Paradijs (Český ráj) naar kasteelruïne Trosky, met zijn twee kenmerkende basaltpieken — bekend terrein voor wie Kingdom Come: Deliverance II heeft gespeeld. 's Avonds aankomst in Praag.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Ktová of Ploskovice voor een lus van 1–2 uur naar Trosky; de klim naar de top is kort maar steil. Reken op aankomst in Praag rond 19–20 uur.</p></div>
-          <button class="map-link" data-day="11">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Tábor"><span class="day-icon-big">🎮</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🏛️ Sedlec-ossuarium: ~45 min</span><span>🚗 Reistijd: ~1u (Kutná Hora–Sázava, 60 km)</span><span>🥾 Sázava-rivierpad: ~2,5–3u / ~8–9 km</span><span>🚗 Reistijd: ~1u15 verder (Sázava–Tábor, 75 km)</span></div>
+            <p class="day-activities">Eerst het ossuarium van Sedlec, dan via Rataje nad Sázavou en het Sázava-klooster — met een wandeling langs de rivier — verder naar Tábor, het Hussietenstadje met een ondergronds tunnelnetwerk.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Het ossuarium in Sedlec bevat de botten van naar schatting 40.000 tot 70.000 mensen, verzameld na de pest (1318) en de Hussietenoorlogen. Pas in de 19e eeuw rangschikte houtsnijder František Rint ze kunstig tot kroonluchters — inclusief een kroonluchter die letterlijk elk bot van het menselijk lichaam bevat.</p>
+              <p>Kingdom Come: Deliverance speelt zich af in 1403, kort nadat koning Wenceslaus IV door zijn eigen halfbroer Sigismund gevangen werd genomen. Rataje nad Sázavou en het Sázava-klooster (gesticht 1032) zijn vrijwel 1-op-1 in de game te herkennen — het klooster was ooit het laatste bolwerk van de Oudkerkslavische liturgie in het Westen. Tábor werd in 1420 gesticht door radicale Hussieten (de Taboriten), met een vergaand egalitair ideaal van gedeeld bezit — soms "proto-communistisch" genoemd. Het ondergrondse tunnelnetwerk diende als schuilplaats en opslag.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Tijdsloten voor het ossuarium raken snel vol — boek online vooraf. Boek in Tábor zo mogelijk een vast tijdstip voor de ondergrondse gangen.</p></div>
+            <button class="map-link" data-day="11">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🏛️</span><h3>Praag</h3><span class="g-line"></span><span class="g-range">18–20 sep</span></div>
+
       <!-- DAG 12 -->
-      <article class="day" id="dag-12">
-        <div class="day-media" style="background:var(--slate-soft)"><span class="day-icon-big">🏛️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 12 / 19</span><span class="day-date">Vr 18 sep</span></div>
-          <h2 class="day-route">Praag</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--slate-soft);color:var(--slate)">🏛️ Stad + wandelen</span>
+      <article class="day" id="dag-12" data-day="12">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 12 / 19</span><span class="day-date">Vr 18 sep</span></div>
+            <h2 class="day-route">Tábor → Praag</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad — nacht 1/3</span><span class="chip">🏛️ Stad</span></div>
           </div>
-          <p class="day-activities">De Praagse Burcht (met de Sint-Vituskathedraal), Malá Strana (Kleinzijde, met de Nerudova-straat) en de Petřín-heuvel — te voet of met de kabelbaan omhoog, met uitzicht en een miniatuur-Eiffeltoren.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Koop het "Circuit B"-ticket voor de belangrijkste onderdelen van de Burcht en ga bij opening naartoe — na 10 uur stromen de touringcars binnen. De wisseling van de wacht is elk uur, om 12 uur uitgebreider.</p></div>
-          <button class="map-link" data-day="12">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Prague"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u30 (Tábor–Praag, 90 km)</span><span>🚶 Eerste kennismaking Oudestadsplein: ~1u (avond)</span></div>
+            <p class="day-activities">Een korte, relaxte rit naar Praag — vroeg genoeg voor een rustige avond. Precies dit weekend (19–20 sep) blijven jullie hier: 2 volle dagen, met het weekend erin.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Praag heet niet toevallig "de gouden stad" — vanaf de Karelsbrug tel je tientallen torens. Onder keizer Karel IV (1346-1378) was Praag zelfs even hoofdstad van het Heilige Roomse Rijk; toen kreeg de stad de eerste universiteit van Centraal-Europa (1348) en de Karelsbrug zelf.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Rustige aankomst, dineer in de Oude Stad en bewaar de drukke bezienswaardigheden voor morgen en overmorgen.</p></div>
+            <button class="map-link" data-day="12">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 13 -->
-      <article class="day" id="dag-13">
-        <div class="day-media" style="background:var(--rust-soft)"><span class="day-icon-big">🎨</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 13 / 19</span><span class="day-date">Za 19 sep</span></div>
-          <h2 class="day-route">Praag</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--rust-soft);color:var(--rust)">🎨 Cultuur</span>
+      <article class="day" id="dag-13" data-day="13">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 13 / 19</span><span class="day-date">Za 19 sep</span></div>
+            <h2 class="day-route">Praag — Burcht &amp; Petřín</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad — nacht 2/3</span><span class="chip">🏛️ Stad + wandelen</span><span class="chip c-hike-short">🥾 Korte wandeling</span></div>
           </div>
-          <p class="day-activities">De oude stad rond het Oudestadsplein met het astronomisch uurwerk, Josefov (de Joodse wijk, met de Oud-Nieuwe Synagoge en de oude Joodse begraafplaats), en Art Nouveau-architectuur zoals het Gemeentehuis.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Koop een combi-ticket voor het Joods Museum. Het uurwerk trekt elk heel uur een dichte mensenmassa — sta je liever wat vrijer, kom dan net vóór het hele uur en positioneer je aan de zijkant.</p></div>
-          <button class="map-link" data-day="13">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--slate) 24%, var(--paper))" data-wiki="Prague Castle"><span class="day-icon-big">🏛️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🏛️ Praagse Burcht + Sint-Vituskathedraal: ~2,5u</span><span>🚶 Malá Strana: ~1u</span><span>🥾 Petřín: ~1,5u</span></div>
+            <p class="day-activities">De Praagse Burcht, Malá Strana en de Petřín-heuvel. Reserveer vanavond een tafel voor vegan fine dining bij <strong>Lehká Hlava</strong> (Boršov, Praag) — sfeervol, plantaardig, maar boek minstens 2 weken vooraf, ze zitten snel vol.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>De Praagse Burcht is volgens het Guinness Book of Records het grootste aaneengesloten kasteelcomplex ter wereld. De Sint-Vituskathedraal deed er bijna 600 jaar over om af te bouwen (1344-1929) — binnenin zit een glas-in-loodraam van Alfons Mucha. Petřín-heuvel heeft een uitkijktoren uit 1891, een kwart-schaal kopie van de Eiffeltoren.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Koop het "Circuit B"-ticket voor de Burcht en ga bij opening naartoe — na 10 uur stromen de touringcars binnen.</p></div>
+            <button class="map-link" data-day="13">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 14 -->
-      <article class="day" id="dag-14">
-        <div class="day-media" style="background:var(--green-soft)"><span class="day-icon-big">🌲</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 14 / 19</span><span class="day-date">Zo 20 sep</span></div>
-          <h2 class="day-route">Praag</h2>
-          <div class="day-chips">
-            <span class="chip">🛏️ Stad</span>
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">🌲 Stad + natuur</span>
+      <article class="day" id="dag-14" data-day="14">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 14 / 19</span><span class="day-date">Zo 20 sep</span></div>
+            <h2 class="day-route">Praag — Oude Stad, Josefov &amp; Vyšehrad</h2>
+            <div class="day-chips"><span class="chip">🛏️ Stad — nacht 3/3</span><span class="chip c-culture">🎨 Cultuur</span><span class="chip c-hike-short">🥾 Korte wandeling</span></div>
           </div>
-          <p class="day-activities">Divoká Šárka — een verrassend wild dal met wandelpaden en een openluchtzwembad, ver van de toeristische drukte — gevolgd door Vyšehrad: de oude vestingheuvel met de Slavín-begraafplaats (Dvořák, Mucha) en uitzicht over de rivier. De middag verder vrij in te vullen.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Beide plekken zijn prima met tram of metro te bereiken. Vyšehrad is een van de rustigste grote bezienswaardigheden van Praag — een fijne tegenhanger van de drukte in de oude stad.</p></div>
-          <button class="map-link" data-day="14">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--rust) 22%, var(--paper))" data-wiki="Old Town Square, Prague"><span class="day-icon-big">🎨</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🏛️ Oudestadsplein + astronomisch uurwerk: ~1u</span><span>🏛️ Josefov: ~2,5u</span><span>🥾 Vyšehrad: ~1,5u (avond)</span></div>
+            <p class="day-activities">Het astronomisch uurwerk, Josefov en 's avonds Vyšehrad. Dit is de volste dag van Praag; Divoká Šárka is bewust geschrapt om haalbaar te blijven.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Het astronomisch uurwerk (1410) is het oudst nog werkende ter wereld. Josefov was tot 1850 een apart, ommuurd Joods getto; de Oud-Nieuwe Synagoge (rond 1270) is de oudste nog actieve synagoge van Europa. Legende zegt dat rabbijn Löw hier de Golem schiep — een verhaal dat later Frankenstein beïnvloedde.</p>
+              <p>Vyšehrad is volgens de stichtingslegende zelfs ouder dan de Burcht. Op de Slavín-begraafplaats liggen Dvořák, Smetana en Mucha. Smetana's cyclus "Má vlast" opent met een symfonisch gedicht getiteld "Vyšehrad" — geïnspireerd op precies deze heuvel.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Het uurwerk trekt elk heel uur een dichte mensenmassa — kom net vóór het hele uur en ga aan de zijkant staan.</p></div>
+            <button class="map-link" data-day="14">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">♨️</span><h3>Naar het noorden — Teplice &amp; Terezín</h3><span class="g-line"></span><span class="g-range">21–22 sep</span></div>
+
       <!-- DAG 15 -->
-      <article class="day" id="dag-15">
-        <div class="day-media" style="background:var(--amber-soft)"><span class="day-icon-big">🏰</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 15 / 19</span><span class="day-date">Ma 21 sep</span></div>
-          <h2 class="day-route">Praag → Kutná Hora</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--amber-soft);color:var(--amber)">🛏️/⛺ Gemengd</span>
-            <span class="chip" style="background:var(--amber-soft);color:var(--amber)">🏰 Middeleeuwen</span>
+      <article class="day" id="dag-15" data-day="15">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 15 / 19</span><span class="day-date">Ma 21 sep</span></div>
+            <h2 class="day-route">Praag → Teplice (via Milešovka)</h2>
+            <div class="day-chips"><span class="chip c-amber">🛏️/⛺ Gemengd</span><span class="chip c-nature">🌲 Wandelen</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">De Sint-Barbarakathedraal, het knekelhuis (ossuarium) van Sedlec, en de geschiedenis van deze voormalige zilverstad die in de middeleeuwen bijna net zo rijk was als Praag zelf.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Tijdsloten voor het ossuarium in Sedlec raken vaak dezelfde dag al vol — boek online vooraf. Kutná Hora ligt op ongeveer een uur van Praag; ruim voldoende tijd inplannen om beide plekken rustig te doen.</p></div>
-          <button class="map-link" data-day="15">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Milešovka"><span class="day-icon-big">🌋</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~1u (Praag–České středohoří, 80 km)</span><span>🥾 Milešovka: ~2,5u / ~7 km</span><span>🚗 Reistijd: ~30 min verder naar Teplice</span></div>
+            <p class="day-activities">Onderweg naar Teplice een wandeling naar de top van de Milešovka (837 m), de hoogste en meest kenmerkende vulkaanberg van het České středohoří. 's Avonds aankomst in Teplice.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong>
+              <p>Milešovka staat bekend als "de Vesuvius van Bohemen" vanwege zijn scherpe, kegelvormige silhouet — een geërodeerde vulkaanprop, net als Trosky verderop een restant van vulkanisch gesteente dat harder was dan zijn omgeving. Op de top staat sinds 1904 een van de oudste nog werkende weerstations van Europa, berucht om de zwaarste windstoten ooit in Tsjechië gemeten — de berg steekt kaal en geïsoleerd boven het omliggende landschap uit.</p>
+              <p>Teplice is een van de oudste kuuroorden van Europa, met een geschiedenis die teruggaat tot de 12e eeuw. Goethe en Beethoven ontmoetten elkaar hier zelfs, in juli 1812 — een beroemde (en wellicht wat aangedikte) anekdote wil dat Beethoven weigerde te buigen voor de passerende keizerlijke familie, tot Goethes zichtbare ergernis.</p>
+            </div>
+            <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Milešov of Velemín voor de kortste route naar de top. Is er 's avonds nog energie, dan is een avond in het Teplice-kuurbad een fijne afsluiter.</p></div>
+            <button class="map-link" data-day="15">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 16 -->
-      <article class="day" id="dag-16">
-        <div class="day-media" style="background:var(--amber-soft)"><span class="day-icon-big">🎮</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 16 / 19</span><span class="day-date">Di 22 sep</span></div>
-          <h2 class="day-route">KCD-land → Tábor</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--amber-soft);color:var(--amber)">🎮🏰 KCD + geschiedenis</span>
+      <article class="day" id="dag-16" data-day="16">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 16 / 19</span><span class="day-date">Di 22 sep</span></div>
+            <h2 class="day-route">Teplice → Terezín → Boheems Zwitserland</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-history">🕯️ → 🌲</span></div>
           </div>
-          <p class="day-activities">Rataje nad Sázavou, Sázava (met het klooster) en eventueel Malešov — het landschap dat model stond voor Kingdom Come: Deliverance. Daarna verder naar Tábor, het historische Hussietenstadje met een middeleeuws plein en een netwerk van ondergrondse gangen.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Leuk om onderweg herkenbare plekken uit de game te spotten. In Tábor is een rondleiding door de ondergrondse gangen (Táborské podzemí) de moeite waard — boek indien mogelijk een vast tijdstip.</p></div>
-          <button class="map-link" data-day="16">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:linear-gradient(135deg, color-mix(in srgb, var(--charcoal) 30%, var(--paper)), color-mix(in srgb, var(--green) 24%, var(--paper)))" data-wiki="Terezín"><span class="day-icon-big">🕯️</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~35 min (Teplice–Terezín, 35 km)</span><span>🏛️ Terezín: ~2,5–3u</span><span>🚗 Reistijd: ~1u30 verder (100 km)</span></div>
+            <p class="day-activities">Een indringend bezoek aan Terezín (Theresienstadt), gevolgd door de rit naar Hřensko/Jetřichovice in Boheems Zwitserland — waar de sfeer omslaat naar natuur en rust. Neem bij aankomst nog een korte, ontspannen wandeling rond de camping.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Terezín werd in de jaren 1780 door keizer Jozef II als vestingstad gebouwd, vernoemd naar zijn moeder Maria Theresia. De nazi's gebruikten het vanaf 1941 als getto en als propaganda-instrument: in 1944 lieten ze een nepdocumentaire maken om het Rode Kruis te misleiden. Van de naar schatting 150.000 mensen die via Terezín werden gedeporteerd, overleefden er minder dan 20.000 de oorlog; velen werden doorgestuurd naar Auschwitz.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Reken minstens 2 tot 3 uur voor Terezín. De weg naar Boheems Zwitserland is deels smal en bochtig — vertrek op tijd.</p></div>
+            <button class="map-link" data-day="16">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🌲</span><h3>Boheems Zwitserland</h3><span class="g-line"></span><span class="g-range">23–24 sep</span></div>
+
       <!-- DAG 17 -->
-      <article class="day" id="dag-17" style="background:linear-gradient(120deg, var(--paper) 55%, var(--green-soft))">
-        <div class="day-media" style="background:linear-gradient(135deg, var(--charcoal-soft), var(--green-soft))"><span class="day-icon-big">🕯️</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 17 / 19</span><span class="day-date">Wo 23 sep</span></div>
-          <h2 class="day-route">Tábor → Terezín → Boheems Zwitserland</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--charcoal-soft);color:var(--charcoal)">🕯️ → 🌲</span>
+      <article class="day" id="dag-17" data-day="17">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 17 / 19</span><span class="day-date">Wo 23 sep</span></div>
+            <h2 class="day-route">Boheems Zwitserland — Tisá &amp; Jetřichovice</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-nature">🌲 Wandelen</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">Een zwaar, indringend bezoek aan Terezín (Theresienstadt) — het voormalige getto en de Kleine Vesting van de Gestapo — gevolgd door de doorrit naar Hřensko/Jetřichovice in Boheems Zwitserland, waar de sfeer volledig omslaat naar natuur en rust.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Reken minstens 2 tot 3 uur voor Terezín. De weg naar Boheems Zwitserland is deels smal en bochtig — vertrek op tijd zodat je bij daglicht kunt opzetten op de camping.</p></div>
-          <button class="map-link" data-day="17">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Tisá Walls"><span class="day-icon-big">🌲</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🥾 Tiské stěny-labyrint: ~2u / ~5 km</span><span>🚗 Reistijd: ~30 min naar Jetřichovice</span><span>🥾 Jetřichovice-omgeving: ~2u / ~6 km</span></div>
+            <p class="day-activities">De grote, rustige wandeldag: eerst het rotslabyrint van Tisá (Tiské stěny), dan een korte rit naar Jetřichovice voor een tweede wandeling door bos en zandsteenkloven.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Tisá is een wirwar van smalle doorgangen tussen zandstenen torens — net als bij Schrammsteine onderdeel van dezelfde eeuwenoude klimtraditie, maar dan aan de Tsjechische kant van de grens. Jetřichovice was ooit een glasblazersdorp: de dichte bossen leverden eeuwenlang het brandhout voor de Boheemse glasindustrie, waar deze streek wereldberoemd om werd.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Verdeel de dag rustig over de twee gebieden — beide zijn op zichzelf al de moeite waard, dus haast is nergens voor nodig.</p></div>
+            <button class="map-link" data-day="17">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
       <!-- DAG 18 -->
-      <article class="day" id="dag-18">
-        <div class="day-media" style="background:var(--green-soft)"><span class="day-icon-big">🌲</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 18 / 19</span><span class="day-date">Do 24 sep</span></div>
-          <h2 class="day-route">Boheems Zwitserland</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">⛺ Camping</span>
-            <span class="chip" style="background:var(--green-soft);color:var(--green)">🌲 Wandelen</span>
+      <article class="day" id="dag-18" data-day="18">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 18 / 19</span><span class="day-date">Do 24 sep</span></div>
+            <h2 class="day-route">Boheems Zwitserland — Pravčická brána</h2>
+            <div class="day-chips"><span class="chip c-nature">⛺ Camping</span><span class="chip c-nature">🌲 Wandelen</span><span class="chip c-hike-long">🥾 Lange wandeling</span></div>
           </div>
-          <p class="day-activities">Een volle wandeldag: Tisá (een labyrint van zandstenen rotstorens), Jetřichovice en de Pravčická brána — de grootste natuurlijke zandstenen rotsboog van Europa. 's Avonds vertrek richting Leipzig.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Combineer twee van de drie afhankelijk van conditie — het is samen een flinke dag. Parkeer bij Mezní Louka als startpunt voor de Pravčická brána; de boog zelf mag niet worden belopen, maar het uitzichtplatform (Sokolí hnízdo) ernaast is een klein bedrag entree waard.</p></div>
-          <button class="map-link" data-day="18">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--green) 24%, var(--paper))" data-wiki="Pravčická brána"><span class="day-icon-big">🌲</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🥾 Mezní Louka – Pravčická brána – Sokolí hnízdo: ~3,5–4u / ~10 km</span></div>
+            <p class="day-activities">Vanaf Mezní Louka naar de Pravčická brána en het uitzichtpunt Sokolí hnízdo. 's Avonds vertrek richting Leipzig.</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Pravčická brána (16 m hoog, 26,5 m breed) is de grootste natuurlijke zandstenen rotsboog van Europa. Sinds 1982 mag er niet meer overheen worden gelopen, maar het theehuis Sokolí hnízdo ("Valkennest") ernaast biedt hetzelfde uitzicht. Deze regio inspireerde eind 18e/19e eeuw de Duitse Romantiek, met Caspar David Friedrich als bekendste voorbeeld.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Parkeer bij Mezní Louka. Sokolí hnízdo vraagt een klein bedrag entree, maar is het waard.</p></div>
+            <button class="map-link" data-day="18">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
+      <div class="group-header"><span class="g-icon">🏠</span><h3>Naar huis</h3><span class="g-line"></span><span class="g-range">25 sep</span></div>
+
       <!-- DAG 19 -->
-      <article class="day" id="dag-19">
-        <div class="day-media" style="background:var(--charcoal-soft)"><span class="day-icon-big">🚗</span></div>
-        <div class="day-body">
-          <div class="day-meta"><span class="day-number">Dag 19 / 19</span><span class="day-date">Vr 25 sep</span></div>
-          <h2 class="day-route">Leipzig → Friesland</h2>
-          <div class="day-chips">
-            <span class="chip" style="background:var(--charcoal-soft);color:var(--charcoal)">— Onderweg</span>
-            <span class="chip">🚗 Reizen</span>
+      <article class="day" id="dag-19" data-day="19">
+        <button class="day-head" type="button">
+          <div class="day-head-main">
+            <div class="day-meta"><span class="day-number">Dag 19 / 19</span><span class="day-date">Vr 25 sep</span></div>
+            <h2 class="day-route">Leipzig → Friesland</h2>
+            <div class="day-chips"><span class="chip c-history">— Onderweg</span><span class="chip">🚗 Reizen</span></div>
           </div>
-          <p class="day-activities">Een korte ochtend in Leipzig als daar zin in is — bijvoorbeeld het Völkerschlachtdenkmal of koffie in de Altstadt — daarna de lange terugrit naar Friesland.</p>
-          <div class="day-tip"><strong>Tip</strong><p>Het is sowieso een lange dag (6–7 uur rijden); weeg af of de Leipzig-stop het waard is of dat rechtdoor rijden prettiger is. Check vooraf op wegwerkzaamheden op de A2/A7.</p></div>
-          <button class="map-link" data-day="19">📍 Bekijk op kaart</button>
-        </div>
+          <span class="day-toggle-icon">⌄</span>
+        </button>
+        <div class="day-collapsible"><div class="day-collapsible-inner">
+          <div class="day-media" style="background:color-mix(in srgb, var(--charcoal) 30%, var(--paper))" data-wiki="Leipzig"><span class="day-icon-big">🚗</span><span class="wiki-credit">via Wikipedia</span></div>
+          <div class="day-body">
+            <div class="hour-bar-wrap" data-hours></div>
+            <div class="day-stats"><span>🚗 Reistijd: ~2u (Hřensko–Leipzig, 180 km)</span><span>🏛️ Optioneel Leipzig: ~1–1,5u</span><span>🚗 Reistijd: ~6–7u verder naar Friesland (600 km)</span></div>
+            <p class="day-activities">Een korte ochtend in Leipzig als daar zin en tijd voor is, daarna de lange terugrit. Met de Leipzig-stop erbij is dit de langste rijdag van de reis (~8-9u).</p>
+            <div class="day-trivia"><strong>Wist je dat</strong><p>Johann Sebastian Bach werkte 27 jaar (1723-1750) als cantor van de Thomaskirche in Leipzig, waar hij nu ook begraven ligt. Bij het Völkerschlachtdenkmal herdenkt de stad de Volkerenslag van 1813 — met naar schatting 600.000 soldaten de grootste veldslag van Europa vóór de Eerste Wereldoorlog, waar Pruisen, Rusland, Oostenrijk en Zweden Napoleon definitief tot terugtrekken dwongen.</p></div>
+            <div class="day-tip"><strong>Tip</strong><p>Vertrek vroeg. Bij tegenvallers eerst Leipzig laten vallen, niet de laatste etappe naar huis.</p></div>
+            <button class="map-link" data-day="19">📍 Bekijk op kaart</button>
+          </div>
+        </div></div>
       </article>
 
     </section>
@@ -701,9 +760,76 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script>
-    // Eén marker per dag, gekoppeld aan de dagkaarten hieronder via id="dag-N".
-    // Herhaalde locaties (bv. drie dagen Kraków) krijgen een kleine spiraal-
-    // offset zodat alle markers apart klikbaar blijven.
+    // ===== THEMA (dark standaard) =====
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const saved = localStorage.getItem('vakantie-theme');
+      if (saved === 'light') { root.setAttribute('data-theme', 'light'); btn.textContent = '🌙 Donker'; }
+      btn.addEventListener('click', () => {
+        const isLight = root.getAttribute('data-theme') === 'light';
+        if (isLight) { root.removeAttribute('data-theme'); btn.textContent = '☀️ Licht'; localStorage.setItem('vakantie-theme', 'dark'); }
+        else { root.setAttribute('data-theme', 'light'); btn.textContent = '🌙 Donker'; localStorage.setItem('vakantie-theme', 'light'); }
+      });
+    })();
+
+    // ===== INKLAPBARE DAGEN =====
+    document.querySelectorAll('.day-head').forEach(head => {
+      head.addEventListener('click', () => head.closest('.day').classList.toggle('expanded'));
+    });
+    document.getElementById('toggleAll').addEventListener('click', function () {
+      const days = document.querySelectorAll('.day');
+      const anyCollapsed = Array.from(days).some(d => !d.classList.contains('expanded'));
+      days.forEach(d => d.classList.toggle('expanded', anyCollapsed));
+      this.textContent = anyCollapsed ? 'Alles inklappen' : 'Alles uitklappen';
+    });
+
+    // ===== UREN-BALKJES =====
+    const dayHours = {
+      1:  { rijden: 4.5, natuur: 0.75, cultuur: 2,   ontspanning: 1,   ongepland: 1.75 },
+      2:  { rijden: 1.25,natuur: 1,    cultuur: 3.5, ontspanning: 1,   ongepland: 1.25 },
+      3:  { rijden: 1.75,natuur: 0,    cultuur: 3,   ontspanning: 1.5, ongepland: 2 },
+      4:  { rijden: 0.5, natuur: 3.5,  cultuur: 0,   ontspanning: 2,   ongepland: 1 },
+      5:  { rijden: 0,   natuur: 4.5,  cultuur: 0,   ontspanning: 2,   ongepland: 1 },
+      6:  { rijden: 6.5, natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 1 },
+      7:  { rijden: 0,   natuur: 0,    cultuur: 2,   ontspanning: 2,   ongepland: 2 },
+      8:  { rijden: 0,   natuur: 0,    cultuur: 6,   ontspanning: 1.5, ongepland: 1 },
+      9:  { rijden: 1.5, natuur: 0,    cultuur: 3.5, ontspanning: 0.5, ongepland: 1 },
+      10: { rijden: 5,   natuur: 0,    cultuur: 1,   ontspanning: 1,   ongepland: 1.5 },
+      11: { rijden: 2.25,natuur: 3,    cultuur: 0.75,ontspanning: 1,   ongepland: 1 },
+      12: { rijden: 1.5, natuur: 0,    cultuur: 0,   ontspanning: 1.5, ongepland: 1 },
+      13: { rijden: 0,   natuur: 1.5,  cultuur: 2.5, ontspanning: 2,   ongepland: 1 },
+      14: { rijden: 0,   natuur: 1.5,  cultuur: 3.5, ontspanning: 1,   ongepland: 1 },
+      15: { rijden: 1.5, natuur: 2.5,  cultuur: 0,   ontspanning: 1.5, ongepland: 1 },
+      16: { rijden: 2.75,natuur: 0,    cultuur: 3,   ontspanning: 0.5, ongepland: 1 },
+      17: { rijden: 0.5, natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 1 },
+      18: { rijden: 0,   natuur: 4,    cultuur: 0,   ontspanning: 2,   ongepland: 1 },
+      19: { rijden: 8,   natuur: 0,    cultuur: 1,   ontspanning: 0,   ongepland: 1 },
+    };
+    const catMeta = {
+      rijden:      { label: 'Rijden',      color: 'var(--bar-travel)' },
+      natuur:      { label: 'Natuur',      color: 'var(--bar-nature)' },
+      cultuur:     { label: 'Cultuur',     color: 'var(--bar-culture)' },
+      ontspanning: { label: 'Ontspanning', color: 'var(--bar-relax)' },
+      ongepland:   { label: 'Ongepland',   color: 'var(--bar-unplanned)' },
+    };
+    function renderHourBars() {
+      document.querySelectorAll('.day[data-day]').forEach(dayEl => {
+        const n = Number(dayEl.dataset.day);
+        const h = dayHours[n];
+        const slot = dayEl.querySelector('[data-hours]');
+        if (!h || !slot) return;
+        const total = Object.values(h).reduce((a, b) => a + b, 0);
+        const legend = Object.entries(h).filter(([, v]) => v > 0)
+          .map(([k, v]) => `<span><span class="sw" style="background:${catMeta[k].color}"></span>${catMeta[k].label} ${v}u</span>`).join('');
+        const bar = Object.entries(h).filter(([, v]) => v > 0)
+          .map(([k, v]) => `<span style="flex-grow:${v};background:${catMeta[k].color}" title="${catMeta[k].label}: ${v}u"></span>`).join('');
+        slot.innerHTML = `<div class="hour-bar-legend">${legend}</div><div class="hour-bar">${bar}</div><div class="hour-bar-total">${total}u totaal ingeschat</div>`;
+      });
+    }
+    renderHourBars();
+
+    // ===== KAART =====
     const stops = [
       { day: 1,  name: 'Weimar',                lat: 50.9795, lng: 11.3235, type: 'stad' },
       { day: 2,  name: 'Dessau',                 lat: 51.8395, lng: 12.2385, type: 'camping' },
@@ -714,22 +840,20 @@
       { day: 7,  name: 'Kraków',                 lat: 50.0647, lng: 19.9450, type: 'stad' },
       { day: 8,  name: 'Kraków',                 lat: 50.0647, lng: 19.9450, type: 'stad' },
       { day: 9,  name: 'Auschwitz-Birkenau',      lat: 50.0359, lng: 19.1783, type: 'stad' },
-      { day: 10, name: 'Teplice',                lat: 50.6404, lng: 13.8245, type: 'mix' },
-      { day: 11, name: 'Praag (via Trosky)',      lat: 50.0755, lng: 14.4378, type: 'stad' },
-      { day: 12, name: 'Praag',                  lat: 50.0755, lng: 14.4378, type: 'stad' },
+      { day: 10, name: 'Kutná Hora',             lat: 49.9479, lng: 15.2681, type: 'mix' },
+      { day: 11, name: 'Sázava → Tábor',          lat: 49.4144, lng: 14.6578, type: 'camping' },
+      { day: 12, name: 'Praag (aankomst)',        lat: 50.0755, lng: 14.4378, type: 'stad' },
       { day: 13, name: 'Praag',                  lat: 50.0755, lng: 14.4378, type: 'stad' },
       { day: 14, name: 'Praag',                  lat: 50.0755, lng: 14.4378, type: 'stad' },
-      { day: 15, name: 'Kutná Hora',             lat: 49.9479, lng: 15.2681, type: 'mix' },
-      { day: 16, name: 'Tábor',                  lat: 49.4144, lng: 14.6578, type: 'camping' },
-      { day: 17, name: 'Terezín → Boh. Zwitserland', lat: 50.8712, lng: 14.2465, type: 'camping' },
-      { day: 18, name: 'Boheems Zwitserland',     lat: 50.8712, lng: 14.2465, type: 'camping' },
+      { day: 15, name: 'Milešovka → Teplice',     lat: 50.6404, lng: 13.8245, type: 'mix' },
+      { day: 16, name: 'Terezín → Boh. Zwitserland', lat: 50.8712, lng: 14.2465, type: 'camping' },
+      { day: 17, name: 'Tisá / Jetřichovice',     lat: 50.8712, lng: 14.2465, type: 'camping' },
+      { day: 18, name: 'Pravčická brána',         lat: 50.8712, lng: 14.2465, type: 'camping' },
       { day: 19, name: 'Leipzig',                lat: 51.3397, lng: 12.3731, type: 'reis' },
     ];
-
     const start = { name: 'Bunnik (start)', lat: 52.0574, lng: 5.1902 };
     const end   = { name: 'Friesland (thuis)', lat: 53.2012, lng: 5.7999 };
 
-    // Spiraal-offset voor opeenvolgende dagen op (bijna) dezelfde plek
     const seen = new Map();
     function jitter(lat, lng) {
       const key = lat.toFixed(2) + ',' + lng.toFixed(2);
@@ -747,46 +871,31 @@
       maxZoom: 18,
     }).addTo(map);
 
-    function typeClass(t) {
-      return t === 'camping' ? 'camping' : t === 'stad' ? 'stad' : t === 'mix' ? 'mix' : 'reis';
-    }
+    function typeClass(t) { return t === 'camping' ? 'camping' : t === 'stad' ? 'stad' : t === 'mix' ? 'mix' : 'reis'; }
 
     const latlngs = [[start.lat, start.lng]];
     const markers = [];
 
-    L.marker([start.lat, start.lng], {
-      icon: L.divIcon({ className: '', html: '<span class="flag-badge">🏁 Start</span>', iconSize: [70, 24], iconAnchor: [35, 12] }),
-    }).addTo(map).bindPopup(start.name);
+    L.marker([start.lat, start.lng], { icon: L.divIcon({ className: '', html: '<span class="flag-badge">🏁 Start</span>', iconSize: [70, 24], iconAnchor: [35, 12] }) }).addTo(map).bindPopup(start.name);
 
     stops.forEach(s => {
       const [lat, lng] = jitter(s.lat, s.lng);
       latlngs.push([lat, lng]);
       const marker = L.marker([lat, lng], {
-        icon: L.divIcon({
-          className: '',
-          html: `<span class="day-badge ${typeClass(s.type)}">${s.day}</span>`,
-          iconSize: [26, 26],
-          iconAnchor: [13, 13],
-        }),
-      }).addTo(map).bindPopup(
-        `<strong>Dag ${s.day} — ${s.name}</strong><br><a href="#dag-${s.day}">Bekijk dagplanning ↓</a>`
-      );
+        icon: L.divIcon({ className: '', html: `<span class="day-badge ${typeClass(s.type)}">${s.day}</span>`, iconSize: [26, 26], iconAnchor: [13, 13] }),
+      }).addTo(map).bindPopup(`<strong>Dag ${s.day} — ${s.name}</strong><br><a href="#dag-${s.day}">Bekijk dagplanning ↓</a>`);
       markers[s.day] = marker;
     });
 
     latlngs.push([end.lat, end.lng]);
-    L.marker([end.lat, end.lng], {
-      icon: L.divIcon({ className: '', html: '<span class="flag-badge">🏠 Thuis</span>', iconSize: [70, 24], iconAnchor: [35, 12] }),
-    }).addTo(map).bindPopup(end.name);
+    L.marker([end.lat, end.lng], { icon: L.divIcon({ className: '', html: '<span class="flag-badge">🏠 Thuis</span>', iconSize: [70, 24], iconAnchor: [35, 12] }) }).addTo(map).bindPopup(end.name);
 
-    L.polyline(latlngs, { color: '#b5562f', weight: 2.5, opacity: 0.7, dashArray: '6 8' }).addTo(map);
+    L.polyline(latlngs, { color: '#e0895a', weight: 2.5, opacity: 0.8, dashArray: '6 8' }).addTo(map);
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
 
-    const bounds = L.latLngBounds(latlngs);
-    map.fitBounds(bounds, { padding: [30, 30] });
-
-    // Koppeling dagkaart -> kaart
     document.querySelectorAll('.map-link').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const day = Number(btn.dataset.day);
         const marker = markers[day];
         if (!marker) return;
@@ -796,17 +905,39 @@
       });
     });
 
-    // Highlight dagkaart wanneer je via een popup-link naar beneden springt
     window.addEventListener('hashchange', highlightFromHash);
     function highlightFromHash() {
       document.querySelectorAll('.day.highlight').forEach(el => el.classList.remove('highlight'));
       const el = document.querySelector(location.hash);
       if (el && el.classList.contains('day')) {
+        el.classList.add('expanded');
         el.classList.add('highlight');
         setTimeout(() => el.classList.remove('highlight'), 2200);
       }
     }
     highlightFromHash();
+
+    // ===== LIVE FOTO'S VIA WIKIPEDIA =====
+    function hydrateWikiImages() {
+      document.querySelectorAll('.day-media[data-wiki]').forEach(el => {
+        if (el.querySelector('img')) return;
+        const title = el.dataset.wiki;
+        const url = 'https://en.wikipedia.org/w/api.php?origin=*&action=query&prop=pageimages'
+          + '&titles=' + encodeURIComponent(title) + '&format=json&pithumbsize=900&redirects=1';
+        fetch(url).then(r => r.ok ? r.json() : Promise.reject())
+          .then(data => {
+            const pages = data && data.query && data.query.pages;
+            const page = pages && Object.values(pages)[0];
+            const src = page && page.thumbnail && page.thumbnail.source;
+            if (!src) return;
+            const img = new Image();
+            img.onload = () => { img.alt = title; img.loading = 'lazy'; el.insertBefore(img, el.firstChild); el.classList.add('has-photo'); };
+            img.onerror = () => {};
+            img.src = src;
+          }).catch(() => {});
+      });
+    }
+    hydrateWikiImages();
   </script>
 
 </body>
