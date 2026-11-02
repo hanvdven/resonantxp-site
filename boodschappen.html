@@ -51,9 +51,6 @@
     .progress i { display: block; height: 100%; background: var(--done); transition: width .25s; }
     /* recepten-strip op een lijstje */
     /* toevoegen */
-    .add { display: grid; grid-template-columns: 1fr 112px; gap: 8px; margin: 14px 0; }
-    .add select { grid-column: 1 / 2; }
-    .add .btn { grid-column: 2 / 3; }
     input, select, textarea { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
     /* categorieën + items */
     .item { display: flex; align-items: center; gap: 12px; padding: 4px 8px 4px 4px; border-bottom: 1px solid var(--line); background: var(--card); }
@@ -74,7 +71,7 @@
     .ing .nbtn { grid-column: 3 / 5; min-height: 36px; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     input[type=checkbox] { width: 20px; min-height: 20px; padding: 0; accent-color: var(--done); }
     /* "In huis": gedimd, maar nog steeds leesbaar en aanklikbaar */
-    .item.stock .txt > div:first-child, .item.stock .txt > button, .item.stock .qty { opacity: .42; }
+    .item.stock .nm2, .item.stock .qty { opacity: .42; }
     .item.stock .check span { border-color: #d6d2c8; }
     .tag.stk { background: #efede7; color: var(--muted); cursor: pointer; }
     .badge { color: var(--done); font-weight: 600; }
@@ -110,8 +107,8 @@
     /* Bord: categorieën | recepten. Eén kant open (breed, ingrediënten afvinkbaar), de andere dicht
        (smalle verticale blokken met gedraaide tekst). SVG-lijntjes in de tussenruimte van 44px. */
     .ov { position: relative; display: grid; column-gap: 44px; margin-top: 18px; align-items: start; }
-    .ov.cat { grid-template-columns: minmax(0, 1fr) 52px; }
-    .ov.rec { grid-template-columns: 52px minmax(0, 1fr); }
+    .ov.cat { grid-template-columns: minmax(0, 1fr) 58px; }
+    .ov.rec { grid-template-columns: 58px minmax(0, 1fr); }
     .ovl { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
     .ovL, .ovR { position: relative; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
     .ocat, .orec { overflow: hidden; }
@@ -144,7 +141,6 @@
     .stepper button { width: 34px; min-height: 34px; } .stepper span { min-width: 64px; }
     .aap { min-height: 0; padding: 6px 12px; margin-bottom: 8px; font-size: .88rem; }
     .progress { margin: 4px 0 2px; height: 6px; }
-    .add { margin: 8px 0; gap: 6px; }
     .alg { padding: 0 12px 6px; margin: 0 0 8px; }
     .alg summary { min-height: 36px; font-size: .9rem; }
     .achips { gap: 5px; margin: 2px 0 6px; }
@@ -164,6 +160,33 @@
     .rctl .stepper button, .rctl .btn.icon { width: 30px; min-height: 30px; }
     .rctl .stepper span { min-width: 52px; font-size: .82rem; }
     .toolbar { margin-top: 16px; }
+    /* Accordeon (Han 2026-11-02): één blok per kant open, + in elke kop, allergenen achter het ingrediënt. */
+    .oblk > .ohead { cursor: pointer; user-select: none; gap: 4px; transform-origin: 16px 50%; }
+    .ohead .cnt { color: var(--muted); font-size: .76rem; white-space: nowrap; }
+    .ohead .chev { width: 14px; text-align: center; color: var(--muted); font-size: .8rem; flex: none; }
+    .plus { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--accent); font-size: 1.1rem; line-height: 1; padding: 0; }
+    .obody { overflow: hidden; }
+    .obody[hidden] { display: none; }
+    .ocat { border-left: 4px solid var(--cc, var(--line)); }
+    .rub { display: flex; align-items: center; justify-content: space-between; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 6px 2px -4px; }
+    .rub:first-child { margin-top: 0; }
+    .vrub { display: flex; justify-content: center; color: var(--muted); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+    /* Lange namen lopen over meerdere smalle kolommen i.p.v. één lange verticale regel (scheelt ~75% hoogte). */
+    .vt { white-space: normal; max-height: 124px; flex-direction: column; gap: 3px; overflow-wrap: break-word; }
+    .vblock .vt > span:first-child { font-size: .76rem; line-height: 1.15; }
+    .vrub .vt { white-space: nowrap; max-height: none; }
+    .vblock { min-height: 64px; padding: 10px 2px; }
+    .vplus { min-height: 40px; align-items: center; font-size: 1.1rem; }
+    .inl { display: flex; gap: 6px; padding: 6px 8px 8px; border-top: 1px solid var(--line); }
+    .inl input { min-height: 34px; }
+    .inl .btn { min-height: 34px; padding: 0 14px; }
+    .item .txt { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; }
+    .nm2 { border: 0; background: none; padding: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+    .item.done .txt { text-decoration: none; }
+    .item.done .nm2 { text-decoration: line-through; color: var(--muted); }
+    .item .tag { margin: 0; }
+    .tag.warn { font-weight: 700; letter-spacing: .02em; }
+    .algbottom { margin-top: 20px; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
@@ -218,7 +241,52 @@
       [/snacks?\b|chips|popcorn/, '🍿'], [/koffie/, '☕'], [/thee/, '🍵'], [/zout|suiker|saus|ketchup|mayo|mosterd/, '🧂']];
     const CAT_EMOJI = { 'Groente & fruit': '🥬', 'Aardappelen, pasta & rijst': '🍝', 'Brood & ontbijt': '🍞', 'Houdbaar': '🥫',
       'Zuivelvervangers': '🥛', 'Kruiden & sauzen': '🧂', 'Beleg': '🥪', 'Dranken': '🥤', 'Lekkers & snacks': '🍬' };
-    const emojiFor = (name, cat) => { const n = name.toLowerCase(); const hit = EMOJI.find(([re]) => re.test(n)); return hit ? hit[1] : (CAT_EMOJI[cat] || '🛒'); };
+    const emojiFor = (name, cat) => { const info = ingInfo(name); if (info?.emoji) return info.emoji; const n = name.toLowerCase(); const hit = EMOJI.find(([re]) => re.test(n)); return hit ? hit[1] : (CAT_EMOJI[cat] || '🛒'); };
+    /* ---------- ingrediëntenlijst (boodschappen-ingredienten.json in de repo) ----------
+       Han bewerkt dat bestand op GitHub. De pagina haalt het bij het starten op en bewaart een kopie
+       voor offline gebruik. Het levert per ingrediënt emoji, categorie en allergenen; zonder bestand valt
+       alles terug op de emoji-regels hierboven en "onbekend" voor allergenen. */
+    const DBKEY = 'boodschappen.ingredienten';
+    const NL_ALG = { gluten: 'gluten', schaaldieren: 'crustaceans', eieren: 'eggs', vis: 'fish', pinda: 'peanuts', soja: 'soy', melk: 'milk',
+      noten: 'nuts', selderij: 'celery', mosterd: 'mustard', sesam: 'sesame', sulfiet: 'sulphites', lupine: 'lupin', weekdieren: 'molluscs' };
+    const norm = s => String(s || '').toLowerCase().replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim(); // "aardappel (kruimig)" → "aardappel"
+    let DB = new Map(), DB_KEYS = [];
+    const infoCache = new Map();
+    function setDB(json) {
+      DB = new Map();
+      for (const x of json.ingredienten || []) {
+        const info = { emoji: x.emoji, cat: x.categorie, allergens: (x.allergenen || []).map(a => NL_ALG[a]).filter(Boolean), traces: (x.sporen || []).map(a => NL_ALG[a]).filter(Boolean) };
+        for (const n of [x.naam, ...(x.ook || [])]) DB.set(norm(n), info);
+      }
+      DB_KEYS = [...DB.keys()].sort((a, b) => b.length - a.length); // langste eerst: "glutenvrije pasta" vóór "pasta"
+      infoCache.clear();
+    }
+    const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Exacte naam of alias; anders het langste lijst-woord dat als heel woord in de naam staat ("gemengde sla" → sla).
+    function ingInfo(name) {
+      const n = norm(name); if (!n) return null;
+      if (infoCache.has(n)) return infoCache.get(n);
+      let hit = DB.get(n);
+      if (!hit) { const k = DB_KEYS.find(k => new RegExp(`(^|[\\s-])${escRe(k)}($|[\\s-])`).test(n)); hit = k ? DB.get(k) : null; }
+      infoCache.set(n, hit || null);
+      return hit || null;
+    }
+    // Snel invoeren per regel: "300 g pompoen", "2 avocado", "pompoen 1 kg" of alleen "pompoen".
+    const UNIT_ALIAS = { gram: 'g', gr: 'g', kilo: 'kg', liter: 'l', stuks: 'stuk', st: 'stuk', tenen: 'teen', bossen: 'bos', bosje: 'bos', blikken: 'blik', blikje: 'blik',
+      pakken: 'pak', pakje: 'pak', flessen: 'fles', potjes: 'potje', eetlepel: 'el', eetlepels: 'el', theelepel: 'tl', theelepels: 'tl' };
+    function parseLine(txt) {
+      const s = txt.trim().replace(/\s+/g, ' '); if (!s) return null;
+      const NUM = '(\\d+(?:[.,]\\d+)?)';
+      let m = s.match(new RegExp(`^${NUM}\\s*([a-zA-Z]+)?\\s+(.+)$`)), qty, unit, name;
+      if (m) [, qty, unit, name] = m;
+      else if ((m = s.match(new RegExp(`^(.+?)\\s+${NUM}\\s*([a-zA-Z]+)?$`)))) [, name, qty, unit] = m;
+      else return { name: s, qty: 0, unit: '', qtyText: '' };
+      let u = (unit || '').toLowerCase(); u = UNIT_ALIAS[u] || u;
+      if (u && !UNITS.includes(u)) { name = unit + ' ' + name; u = ''; } // "2 rode uien": 'rode' is geen eenheid
+      if (!u) u = 'stuk';
+      const q = parseFloat(qty.replace(',', '.'));
+      return { name: name.trim(), qty: q, unit: u, qtyText: fmtQty(q, u) };
+    }
     const DEFAULT_CATS = ['Groente & fruit', 'Aardappelen, pasta & rijst', 'Brood & ontbijt', 'Houdbaar',
       'Zuivelvervangers', 'Kruiden & sauzen', 'Beleg', 'Dranken', 'Lekkers & snacks', 'Overig'];
 
@@ -228,6 +296,11 @@
 
     /* ---------- seed: de eerste keer dat de pagina opent ---------- */
     const ing = (name, qty, unit, cat) => ({ name, qty, unit, cat, ...(GPU[name] ? { gpu: GPU[name] } : {}), ...(STOCK.has(name) ? { stock: true } : {}) });
+    // Weekboodschappen: vaste setjes (kind 'week') die niet per persoon schalen. Ook gebruikt door de v3-migratie.
+    const seedSets = () => [
+      { id: uid(), kind: 'week', name: 'Ontbijt', persons: 4, ingredients: [ing('havermout', 600, 'g', 'Brood & ontbijt'), ing('haverdrink', 2, 'l', 'Zuivelvervangers'), ing('fruit', 12, 'stuk', 'Groente & fruit')] },
+      { id: uid(), kind: 'week', name: 'Lunch', persons: 4, ingredients: [ing('brood', 2, 'stuk', 'Brood & ontbijt'), ing('beleg', 0, '', 'Beleg'), ing('sap', 2, 'pak', 'Dranken')] },
+    ];
     function seed() {
       const recipes = [
         { id: uid(), name: 'Pompoensoep', persons: 4, ingredients: [
@@ -251,17 +324,15 @@
           ing('pasta', 400, 'g', 'Aardappelen, pasta & rijst'), ing('tomatenpassata', 1, 'pak', 'Houdbaar'),
           ing('ui', 1, 'stuk', 'Groente & fruit'), ing('knoflook', 2, 'teen', 'Groente & fruit'),
           ing('basilicum', 1, 'bos', 'Groente & fruit'), ing('olijfolie', 2, 'el', 'Kruiden & sauzen')] },
+        ...seedSets(),
       ];
       const item = (name, qty, cat) => ({ id: uid(), name, qty, cat, done: false });
       return {
-        v: 2, nutCache: {}, categories: [...DEFAULT_CATS], recipes,
+        v: 3, nutCache: {}, categories: [...DEFAULT_CATS], recipes,
         lists: [{
           id: uid(), name: 'Boodschappen 2–3 dagen', persons: 4, done: {}, buy: {}, view: 'cat', hideDone: false,
           recipes: recipes.map(r => ({ rid: r.id, persons: 4 })),
-          items: [item('beleg', '', 'Beleg'), item('Fanta', '2 fles', 'Dranken'), item('sap', '2 pak', 'Dranken'),
-            item('fruit', '12 stuks', 'Groente & fruit'), item('lekkers', '', 'Lekkers & snacks'),
-            item('snacks', '', 'Lekkers & snacks'), item('havermout (ontbijt)', '600 g', 'Brood & ontbijt'),
-            item('haverdrink (ontbijt)', '2 l', 'Zuivelvervangers')],
+          items: [item('Fanta', '2 fles', 'Dranken'), item('lekkers', '', 'Lekkers & snacks'), item('snacks', '', 'Lekkers & snacks')],
         }],
       };
     }
@@ -282,6 +353,12 @@
         }
         S.v = 2; save();
       }
+      // v2 → v3: setjes bestaan nog niet. Voorbeelden toevoegen aan de receptenbak (niet op een lijstje),
+      // zodat ze onder "+" bij Weekboodschappen klaarstaan. Losse items blijven staan, nu onder "Overige".
+      if (!(S.v >= 3)) {
+        if (!S.recipes.some(r => r.kind === 'week')) S.recipes.push(...seedSets());
+        S.v = 3; save();
+      }
     }
     function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* vol/geblokkeerd: app blijft werken, alleen niet bewaard */ } }
 
@@ -297,17 +374,21 @@
     const recipeById = id => S.recipes.find(r => r.id === id);
     const listById = id => S.lists.find(l => l.id === id);
 
-    // Allergenen van een groep ingrediënten. 'unknown' = minstens één zonder (nieuwe) OFF-koppeling: leeg is
-    // dan NIET "veilig" maar "niet gecontroleerd". Oudere koppelingen zonder allergenen-veld tellen ook als onbekend.
+    // Allergenen van een groep ingrediënten: ingrediëntenlijst ∪ gekoppeld product (Han: "optellen, voorzichtigste
+    // wint"). 'unknown' = minstens één ingrediënt staat niet in de lijst én heeft geen product: dan is leeg NIET veilig.
     function allergyOf(gs) {
       const hit = new Set(), trace = new Set(); let unknown = false;
       for (const g of gs) {
-        const o = g && g.off;
-        if (!o || !Array.isArray(o.allergens)) { unknown = true; continue; }
-        o.allergens.forEach(a => hit.add(a)); (o.traces || []).forEach(a => trace.add(a));
+        const info = ingInfo(g.name), o = g.off, offOk = !!o && Array.isArray(o.allergens);
+        if (!info && !offOk) { unknown = true; continue; }
+        if (info) { info.allergens.forEach(a => hit.add(a)); info.traces.forEach(a => trace.add(a)); }
+        if (offOk) { o.allergens.forEach(a => hit.add(a)); (o.traces || []).forEach(a => trace.add(a)); }
       }
       return { hit: [...hit], trace: [...trace].filter(a => !hit.has(a)), unknown };
     }
+    const kindOf = r => r.kind === 'week' ? 'week' : 'recept';
+    // Schaalfactor van een recept op een lijstje; setjes schalen niet.
+    const factorOf = (r, lr) => kindOf(r) === 'week' ? 1 : lr.persons / r.persons;
     const keyOf = g => g.name.trim().toLowerCase() + '|' + g.unit;
     // Eén regel per (naam, eenheid): "ui" uit drie recepten wordt "3 stuk". Dat is de hele
     // meerwaarde van afleiden i.p.v. kopiëren. stock = álle bijdragende recepten zeggen "in huis" en
@@ -316,7 +397,7 @@
       const map = new Map();
       for (const lr of l.recipes) {
         const r = recipeById(lr.rid); if (!r) continue;
-        const f = lr.persons / r.persons;
+        const f = factorOf(r, lr);
         for (const g of r.ingredients) {
           const name = g.name.trim(); if (!name) continue;
           const key = keyOf(g);
@@ -329,13 +410,13 @@
         }
       }
       const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit), stock: r.canStock && !(l.buy || {})[r.key], allergy: allergyOf(r.gs) }));
-      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done, stock: !!it.stock, emoji: it.emoji || emojiFor(it.name, it.cat), allergy: allergyOf([null]) });
+      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done, stock: !!it.stock, emoji: it.emoji || emojiFor(it.name, it.cat), allergy: allergyOf([{ name: it.name }]) });
       return rows;
     }
     // Wat er van één recept op dit lijstje staat, met de hoeveelheid van DAT recept; done/stock komen
     // uit de gedeelde regel zodat afvinken in beide weergaven hetzelfde is.
-    function recipePartsFor(r, persons, rowMap) {
-      const f = persons / r.persons, out = new Map();
+    function recipePartsFor(r, lr, rowMap) {
+      const f = factorOf(r, lr), out = new Map();
       for (const g of r.ingredients) {
         if (!g.name.trim()) continue;
         const key = keyOf(g), p = out.get(key) || { key, qty: 0, unit: g.unit };
@@ -398,6 +479,7 @@
     // Onthoud de categorie van eerder gebruikte namen, zodat "melk" de tweede keer vanzelf goed staat.
     function guessCat(name) {
       const n = name.trim().toLowerCase(); if (!n) return null;
+      const info = ingInfo(n); if (info?.cat) return info.cat;
       for (const l of S.lists) for (const it of l.items) if (it.name.toLowerCase() === n) return it.cat;
       for (const r of S.recipes) for (const g of r.ingredients) if (g.name.toLowerCase() === n) return g.cat;
       return null;
@@ -426,33 +508,33 @@
     function algTags(r) {
       const av = S.avoid || []; if (!av.length) return '';
       const h = r.allergy.hit.filter(a => av.includes(a)), t = r.allergy.trace.filter(a => av.includes(a));
-      return h.map(a => `<span class="tag warn">⚠ ${ALG_NAME[a]}</span>`).join('') + t.map(a => `<span class="tag trace">sporen ${ALG_NAME[a].toLowerCase()}</span>`).join('')
-        + (r.allergy.unknown ? '<span class="tag unk">? niet gecontroleerd</span>' : '');
+      return h.map(a => `<span class="tag warn">LET OP: ${ALG_NAME[a].toUpperCase()}</span>`).join('') + t.map(a => `<span class="tag trace">sporen ${ALG_NAME[a].toLowerCase()}</span>`).join('')
+        + (r.allergy.unknown ? '<span class="tag unk" title="Onbekend ingrediënt: allergenen niet gecontroleerd. Voeg het toe aan boodschappen-ingredienten.json.">?</span>' : '');
     }
-    // Het paneel bovenaan: filter + (alleen als er iets aangevinkt is) een samenvatting over de hele lijst.
+    // Het filterblok (onderaan de lijst): kiezen + per allergeen welke ingrediënten het bevatten.
     function algPanel(rows) {
       const av = S.avoid || [];
+      const per = av.map(a => [a, rows.filter(r => r.allergy.hit.includes(a))]).filter(([, rs]) => rs.length);
       const hitRows = rows.filter(r => r.allergy.hit.some(a => av.includes(a)));
       const traceRows = rows.filter(r => !hitRows.includes(r) && r.allergy.trace.some(a => av.includes(a)));
       const unk = rows.filter(r => r.allergy.unknown);
-      const status = av.length ? `${hitRows.length ? `<div class="warnline">⚠ Bevat: ${hitRows.map(r => esc(r.name)).join(', ')}</div>` : '<div class="muted">Geen treffers bij de gecontroleerde ingrediënten.</div>'}
+      const status = av.length ? `${per.map(([a, rs]) => `<div class="warnline">⚠ LET OP: ${ALG_NAME[a].toUpperCase()} — ${rs.map(r => esc(r.name)).join(', ')}</div>`).join('') || '<div class="muted">Niets gevonden bij de bekende ingrediënten.</div>'}
         ${traceRows.length ? `<div class="muted">Sporen mogelijk: ${traceRows.map(r => esc(r.name)).join(', ')}</div>` : ''}
-        ${unk.length ? `<div class="muted">? ${unk.length} van ${rows.length} niet gecontroleerd (geen product gekoppeld): ${unk.slice(0, 12).map(r => esc(r.name)).join(', ')}${unk.length > 12 ? '…' : ''}</div>` : ''}` : '';
+        ${unk.length ? `<div class="muted">? ${unk.length} onbekend (niet in de ingrediëntenlijst): ${unk.slice(0, 12).map(r => esc(r.name)).join(', ')}${unk.length > 12 ? '…' : ''}</div>` : ''}` : '';
       const sum = av.length ? `: ${av.map(a => ALG_NAME[a].toLowerCase()).join(', ')}${hitRows.length ? ` · <b style="color:#b42318">⚠ ${hitRows.length}</b>` : ''}${unk.length ? ` · ? ${unk.length}` : ''}` : '';
       return `<details class="card alg"${S.ui?.algOpen ? ' open' : ''}><summary>Allergenen vermijden${sum}</summary>
         <div class="achips">${ALLERGENS.map(([id, nl]) => `<label class="achip${av.includes(id) ? ' on' : ''}"><input type="checkbox" data-avoid="${id}"${av.includes(id) ? ' checked' : ''} /> ${nl}</label>`).join('')}</div>
         ${status}
-        <div class="muted">Uit Open Food Facts, over het gekoppelde <i>product</i>. Ontbrekend ≠ afwezig: check bij een echte allergie altijd het etiket.</div></details>`;
+        <div class="muted">Algemene inschatting uit de ingrediëntenlijst, aangevuld met gekoppelde producten. Jouw merk kan afwijken: check bij een echte allergie altijd het etiket.</div></details>`;
     }
-    function itemHtml(r, showTags) {
+    // Eén regel: vinkje · emoji naam [in huis] [LET OP: …] · hoeveelheid. Tags staan achter de naam (Han: scheelt hoogte).
+    function itemHtml(r) {
       const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
         : (r.canStock ? `<button class="tag stk" data-act="restock" data-key="${esc(r.key)}">toch kopen</button>` : '');
+      const name = `<span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}`;
       return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
-        <div class="txt grow">
-          ${r.recipe ? `<div data-act="selIng" data-key="${esc(r.key)}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
-          <div>${stk}${algTags(r)}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
-        </div>
+        <div class="txt grow">${r.recipe ? `<span class="nm2" data-act="selIng" data-key="${esc(r.key)}">${name}</span>` : `<button class="nm2" data-act="editItem" data-id="${r.id}">${name}</button>`}${stk}${algTags(r)}</div>
         <span class="qty">${esc(r.qtyText)}</span>
       </div>`;
     }
@@ -461,65 +543,103 @@
     function algChip(r) {
       const av = S.avoid || []; if (!av.length) return '';
       const a = allergyOf(r.ingredients.filter(g => g.name.trim())), h = a.hit.filter(x => av.includes(x));
-      return (h.length ? ` · <b style="color:#b42318">⚠ ${h.map(x => ALG_NAME[x].toLowerCase()).join(', ')}</b>` : '') + (a.unknown ? ' · ? niet gecontroleerd' : '');
+      return (h.length ? ` · <b style="color:#b42318">⚠ LET OP: ${h.map(x => ALG_NAME[x].toUpperCase()).join(', ')}</b>` : '') + (a.unknown ? ' · ? onbekend' : '');
     }
-    const REC_COLORS = ['#7b5ea7', '#2f7f9e', '#c2603a', '#4f8a4c', '#b0487a', '#8a7a2e'];
-    const recColor = (l, rid) => REC_COLORS[Math.max(0, l.recipes.findIndex(x => x.rid === rid)) % REC_COLORS.length];
+    // Kleuren: rechts per blok (recept/setje), links per categorie. Lijnen krijgen de kleur van het blok aan de
+    // DICHTE kant, dus per recept als de categorieën open staan en per categorie als de recepten open staan.
+    const REC_COLORS = ['#7b5ea7', '#2f7f9e', '#c2603a', '#4f8a4c', '#b0487a', '#8a7a2e', '#3a7ca5', '#a0522d'];
+    const CAT_COLORS = ['#4f8a4c', '#b8862b', '#c2603a', '#2f7f9e', '#7b8aa0', '#8a6d3b', '#b0487a', '#3a7ca5', '#9b59b6', '#7f8c8d'];
+    const OV_COLOR = '#8a8f98';
+    const catColor = c => CAT_COLORS[Math.max(0, S.categories.indexOf(c)) % CAT_COLORS.length];
+    const RUBS = [['recept', 'Recepten'], ['week', 'Weekboodschappen'], ['ov', 'Overige']];
+    // De blokken rechts, vaste volgorde: recepten, setjes, Overige (= de losse items van dit lijstje).
+    function rightBlocks(l, rows, rowMap) {
+      const out = [];
+      for (const [k] of RUBS.slice(0, 2)) for (const lr of l.recipes) {
+        const r = recipeById(lr.rid); if (!r || kindOf(r) !== k) continue;
+        out.push({ key: 'rec:' + r.id, id: r.id, kind: k, name: r.name, r, lr, parts: recipePartsFor(r, lr, rowMap) });
+      }
+      out.forEach((b, i) => b.color = REC_COLORS[i % REC_COLORS.length]);
+      out.push({ key: 'rec:_ov', id: '_ov', kind: 'ov', name: 'Overige', parts: rows.filter(x => !x.recipe), color: OV_COLOR });
+      return out;
+    }
+    const ptext = parts => parts.length ? progressText(progressOf(parts)) : 'leeg';
+    // kort, voor de smalle blokken: "2/5" of "✓"
+    const pshort = parts => { if (!parts.length) return 'leeg'; const p = progressOf(parts); return !p.t || p.d === p.t ? '✓' : `${p.d}/${p.t}`; };
+    const addForm = t => S.ui?.adding === t ? `<form class="inl" data-t="${esc(t)}" autocomplete="off"><input name="line" placeholder="bv. 300 g pompoen" aria-label="Toevoegen" enterkeyhint="done" /><button class="btn small primary" aria-label="Toevoegen">+</button></form>` : '';
 
-    // Het bord. l.view = 'rec' → recepten open; anders categorieën open.
+    // Het bord: categorieën | recepten. Eén kant open (l.view 'rec' → rechts), daarbinnen één blok open
+    // (S.ui.open.cat / .rec). Elk blok draagt data-b ('cat:<naam>' / 'rec:<id>') en data-color voor de lijntjes.
     function boardHtml(l, rows, rowMap) {
-      const rec = l.view === 'rec', sel = S.ui?.sel;
+      const rec = l.view === 'rec', u = S.ui || {}, sel = u.sel, open = u.open || {};
       const cnt = p => p.t ? `${p.d}/${p.t}` : 'in huis';
+      const vblock = (key, color, name, sub, label) => `<button class="card vblock ${key.startsWith('cat:') ? 'ocat' : 'orec'}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" data-act="side" style="--cc:${color};--rc:${color}" aria-label="${esc(label)}"><span class="vt"><span>${name}</span><span class="muted">${sub}</span></span></button>`;
+      const blk = (key, color, cls, head, body, isOpen) => `<div class="card oblk ${cls}${isOpen ? ' open' : ''}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" style="--cc:${color};--rc:${color}">
+          <div class="ohead" data-act="acc" role="button" aria-expanded="${isOpen}">${head}<span class="chev" aria-hidden="true">${isOpen ? '▾' : '▸'}</span></div>
+          <div class="obody"${isOpen ? '' : ' hidden'}>${body}</div></div>`;
+      const plus = (t, label) => `<button class="plus" data-act="plus" data-t="${esc(t)}" aria-label="${esc(label)}">+</button>`;
       const left = grouped(rows, rec ? false : l.hideDone).map(([c, arr]) => {
-        const p = progressOf(arr), em = CAT_EMOJI[c] || '🛒';
-        return rec
-          ? `<button class="card ocat vblock${sel === 'c:' + c ? ' sel' : ''}" data-cat="${esc(c)}" data-act="side" data-v="cat" aria-label="Categorieën openen bij ${esc(c)}"><span class="vt"><span>${em} ${esc(c)}</span><span class="muted">${cnt(p)}</span></span></button>`
-          : `<div class="card ocat" data-cat="${esc(c)}"><div class="ohead"><span>${em} ${esc(c)}</span><span>${cnt(p)}</span></div>${arr.map(r => itemHtml(r, false)).join('')}</div>`;
+        const p = progressOf(arr), em = CAT_EMOJI[c] || '🛒', col = catColor(c), key = 'cat:' + c;
+        if (rec) return vblock(key, col, `${em} ${esc(c)}`, cnt(p), 'Categorieën openen bij ' + c);
+        return blk(key, col, 'ocat', `<span>${em} ${esc(c)}</span><span class="cnt">${cnt(p)}</span>${plus('c:' + c, 'Toevoegen aan ' + c)}`,
+          arr.map(itemHtml).join('') + addForm('c:' + c), open.cat === c);
       }).join('');
-      const right = l.recipes.map(lr => {
-        const r = recipeById(lr.rid); if (!r) return '';
-        const parts = recipePartsFor(r, lr.persons, rowMap), p = progressOf(parts), c = recColor(l, r.id), done = p.t === p.d ? ' badge' : '';
-        if (!rec) return `<button class="card orec vblock${sel === 'r:' + r.id ? ' sel' : ''}" data-rid="${r.id}" data-act="side" data-v="rec" style="--rc:${c}" aria-label="Recepten openen bij ${esc(r.name)}"><span class="vt"><span>${esc(r.name)}</span><span class="muted${done}">${progressText(p)}</span></span></button>`;
-        const n = nutri(r), kcal = n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '';
-        const shown = parts.filter(x => !(l.hideDone && x.done)).sort(byName);
-        return `<div class="card orec${sel === 'r:' + r.id ? ' sel' : ''}" data-rid="${r.id}" style="--rc:${c}">
-          <div class="ohead"><span><a href="#/recept/${r.id}">${esc(r.name)}</a><span class="muted osub"><span class="${done}">${progressText(p)}</span>${kcal}${algChip(r)}</span></span></div>
-          <div class="row rctl">${stepper('rpers', r.id, lr.persons, 'pers.')}<span class="grow"></span><button class="btn icon" data-act="rdel" data-id="${r.id}" aria-label="Recept van lijstje halen">×</button></div>
-          ${shown.map(x => itemHtml(x, false)).join('')}</div>`;
+      const blocks = rightBlocks(l, rows, rowMap);
+      const right = RUBS.map(([k, title]) => {
+        const bs = blocks.filter(b => b.kind === k), what = k === 'week' ? 'Setje' : 'Recept';
+        if (!rec) return `<div class="vrub"><span class="vt">${title}</span></div>`
+          + bs.map(b => vblock(b.key, b.color, esc(b.name), pshort(b.parts), b.name + ' openen')).join('')
+          + (k === 'ov' ? '' : `<button class="vblock vadd vplus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`);
+        return `<div class="rub"><span>${title}</span>${k === 'ov' ? '' : `<button class="plus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`}</div>`
+          + bs.map(b => {
+            const p = progressOf(b.parts), t = b.kind === 'ov' ? 'o' : 'r:' + b.id;
+            const shown = b.parts.filter(x => !(l.hideDone && x.done)).sort(byName);
+            let sub = '', ctl = '';
+            if (b.kind === 'recept') {
+              const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '') + algChip(b.r);
+              ctl = `${stepper('rpers', b.id, b.lr.persons, 'pers.')}<span class="grow"></span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
+            } else if (b.kind === 'week') ctl = `<span class="muted grow">vast setje</span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
+            const name = b.kind === 'ov' ? 'Overige' : `<a href="#/recept/${b.id}">${esc(b.name)}</a>`;
+            return blk(b.key, b.color, 'orec', `<span>${name}<span class="muted osub"><span class="${b.parts.length && p.t === p.d ? 'badge' : ''}">${ptext(b.parts)}</span>${sub}</span></span>${plus(t, 'Toevoegen aan ' + b.name)}`,
+              (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(itemHtml).join('') + addForm(t), open.rec === b.id);
+          }).join('');
       }).join('');
-      const add = rec ? '<button class="btn" data-act="addRecipe">+ Recept toevoegen</button>'
-        : '<button class="vblock vadd" data-act="addRecipe" aria-label="Recept toevoegen"><span class="vt"><span>+ toevoegen</span></span></button>';
-      return `<div class="ov ${rec ? 'rec' : 'cat'}" id="ov"><svg class="ovl" id="ovl" aria-hidden="true"></svg><div class="ovL">${left}</div><div class="ovR">${right}${add}</div></div>`;
+      return `<div class="ov ${rec ? 'rec' : 'cat'}" id="ov"><svg class="ovl" id="ovl" aria-hidden="true"></svg><div class="ovL">${left}</div><div class="ovR">${right}</div></div>`;
     }
 
-    // Tekent de lijntjes NA de render, op gemeten posities: dan kloppen ze na omklappen, lange namen die
-    // afbreken of draaien van het scherm. Van elk ingrediënt aan de open kant naar het blok aan de dichte kant.
+    // Lijntjes, getekend NA de render op gemeten posities. Open blok: één lijn per ingrediënt; dicht blok: één lijn
+    // per doel vanaf de kop. Doel = recept/setje/Overige (categorieën open) of categorie (recepten open).
     function drawLines() {
       const ov = $('#ov'), svg = $('#ovl'), l = curList(); if (!ov || !svg || !l) return;
       const box = ov.getBoundingClientRect();
       svg.setAttribute('width', box.width); svg.setAttribute('height', box.height);
-      const rec = l.view === 'rec', sel = S.ui?.sel, byKey = new Map(rowsFor(l).map(r => [r.key, r]));
+      const rec = l.view === 'rec', sel = S.ui?.sel, rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const catOf = r => S.categories.includes(r.cat) ? r.cat : 'Overig'; // zelfde terugval als grouped()
+      const targetsOf = r => rec ? ['cat:' + catOf(r)] : r.recipe ? r.src.map(x => 'rec:' + x.id) : ['rec:_ov'];
+      const blockRows = new Map([...grouped(rows, false).map(([c, a]) => ['cat:' + c, a]), ...rightBlocks(l, rows, rowMap).map(b => [b.key, b.parts])]);
+      const els = new Map([...ov.querySelectorAll('[data-b]')].map(e => [e.dataset.b, e]));
       const rect = el => { const b = el.getBoundingClientRect(); return { l: b.left - box.left, r: b.right - box.left, t: b.top - box.top, b: b.bottom - box.top }; };
-      const catBlocks = new Map([...ov.querySelectorAll('.ocat')].map(e => [e.dataset.cat, e]));
       const out = [];
-      for (const it of ov.querySelectorAll(rec ? '.orec .item[data-key]' : '.ocat .item[data-key]')) {
-        const r = byKey.get(it.dataset.key); if (!r || !r.recipe) continue; // losse items hebben geen recept
-        const a = rect(it), y1 = a.t + Math.min((a.b - a.t) / 2, 22);
-        const targets = rec ? [{ el: catBlocks.get(catOf(r)), rid: it.closest('.orec').dataset.rid }]
-          : r.src.map(x => ({ el: ov.querySelector(`.orec[data-rid="${x.id}"]`), rid: x.id }));
-        for (const t of targets) {
-          if (!t.el) continue;
-          const b = rect(t.el);
-          // landen op dezelfde hoogte als het ingrediënt (binnen het smalle blok) → zo vlak mogelijke lijnen
-          const y2 = Math.max(b.t + 12, Math.min(b.b - 12, y1));
-          const [x1, x2, k] = rec ? [a.l, b.r, -38] : [a.r, b.l, 38]; // k: controlepunten blijven binnen de 44px
-          out.push({ d: `M${x1},${y1} C${x1 + k},${y1} ${x2 - k},${y2} ${x2},${y2}`, c: recColor(l, t.rid),
-            active: !!sel && (sel === 'k:' + r.key || sel === 'r:' + t.rid || sel === 'c:' + catOf(r)), done: r.done, stock: r.stock });
+      for (const blk of ov.querySelectorAll((rec ? '.ovR' : '.ovL') + ' .oblk')) {
+        const body = blk.querySelector('.obody');
+        const anchors = !body.hidden ? [...body.querySelectorAll('.item[data-key]')].map(el => ({ el, rs: [rowMap.get(el.dataset.key)] }))
+          : [{ el: blk.querySelector('.ohead'), rs: blockRows.get(blk.dataset.b) || [] }];
+        for (const a of anchors) {
+          const tg = new Map();
+          for (const r of a.rs) if (r) for (const k of targetsOf(r)) { if (!tg.has(k)) tg.set(k, []); tg.get(k).push(r); }
+          if (!tg.size) continue;
+          const ra = rect(a.el), y1 = ra.t + Math.min((ra.b - ra.t) / 2, 18);
+          for (const [k, rr] of tg) {
+            const te = els.get(k); if (!te) continue;
+            const rb = rect(te), y2 = Math.max(rb.t + 12, Math.min(rb.b - 12, y1)); // zo vlak mogelijk landen
+            const [x1, x2, c] = rec ? [ra.l, rb.r, -38] : [ra.r, rb.l, 38]; // controlepunten binnen de 44px goot
+            out.push({ d: `M${x1},${y1} C${x1 + c},${y1} ${x2 - c},${y2} ${x2},${y2}`, c: te.dataset.color,
+              active: !!sel && (sel === 'b:' + blk.dataset.b || sel === 'b:' + k || rr.some(r => sel === 'k:' + r.key)), done: rr.every(r => r.done), stock: rr.every(r => r.stock) });
+          }
         }
       }
       svg.innerHTML = out.sort((a, b) => a.active - b.active).map(o => {
-        const op = sel ? (o.active ? .95 : .07) : (o.done ? .15 : .42);
+        const op = sel ? (o.active ? .95 : .1) : (o.done ? .15 : .45);
         return `<path d="${o.d}" fill="none" stroke="${o.c}" stroke-width="${o.active ? 1.8 : 1}" stroke-opacity="${op}" stroke-linecap="round"${o.stock ? ' stroke-dasharray="3 3"' : ''}/>`;
       }).join('');
     }
@@ -528,31 +648,26 @@
       const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
       return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
-        ${algPanel(rows)}
         <div class="row">${stepper('lpers', l.id, l.persons, 'personen')}<span class="muted grow">schaalt alle recepten mee</span></div>
         <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${pr.d} van ${pr.t} binnen</div>
-        <form class="add" id="addForm" autocomplete="off">
-          <input name="name" placeholder="Wat moet je halen?" aria-label="Naam" required />
-          <input name="qty" placeholder="Aantal" aria-label="Aantal" />
-          <select name="cat" aria-label="Categorie" data-prev="${esc(S.categories[0])}">${catOptions(S.ui?.lastCat || S.categories[0])}</select>
-          <button class="btn primary">Toevoegen</button>
-        </form>
         ${boardHtml(l, rows, rowMap)}
         <div class="toolbar">
           <button class="btn small" data-act="hideDone">${l.hideDone ? 'Toon afgevinkt' : 'Verberg afgevinkt'}</button>
           <button class="btn small" data-act="uncheckAll">Alles uitvinken</button>
           <button class="btn small" data-act="share">Deel / kopieer</button>
           <button class="btn small danger" data-act="delList">Lijstje verwijderen</button>
-        </div>`;
+        </div>
+        <div class="algbottom">${algPanel(rows)}</div>`;
     }
 
     function viewRecipes() {
-      const cards = S.recipes.map(r => `<a href="#/recept/${r.id}" class="card listcard"><b>${esc(r.name)}</b><div class="muted">${r.persons} personen · ${r.ingredients.length} ingrediënten</div></a>`).join('')
-        || '<div class="empty">Nog geen recepten.</div>';
-      return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${cards}<button class="btn primary" data-act="newRecipe">+ Nieuw recept</button>`;
+      const card = r => `<a href="#/recept/${r.id}" class="card listcard"><b>${esc(r.name)}</b><div class="muted">${kindOf(r) === 'week' ? 'vast setje' : r.persons + ' personen'} · ${r.ingredients.length} ingrediënten</div></a>`;
+      const sec = (k, t) => `<div class="rub" style="margin:14px 2px 8px">${t}</div>` + (S.recipes.filter(r => kindOf(r) === k).map(card).join('') || '<div class="muted">Nog niets.</div>');
+      return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${sec('recept', 'Recepten')}${sec('week', 'Weekboodschappen')}
+        <div class="toolbar"><button class="btn primary" data-act="newRecipe" data-kind="recept">+ Nieuw recept</button><button class="btn" data-act="newRecipe" data-kind="week">+ Nieuw setje</button></div>`;
     }
 
-    // Allergenen van één recept volgens de gekoppelde producten; ⚠ bij wat in jouw filter staat.
+    // Allergenen van één recept (ingrediëntenlijst ∪ gekoppelde producten); ⚠ bij wat in jouw filter staat.
     function algHtml(r) {
       const av = S.avoid || [], gs = r.ingredients.filter(g => g.name.trim()), by = new Map(), tr = new Map(), unk = [];
       for (const g of gs) {
@@ -560,9 +675,9 @@
         a.hit.forEach(x => by.set(x, [...(by.get(x) || []), g.name.trim()]));
         a.trace.forEach(x => tr.set(x, [...(tr.get(x) || []), g.name.trim()]));
       }
-      const line = (m, pre) => ALLERGENS.filter(([id]) => m.has(id)).map(([id, nl]) => `<div${av.includes(id) ? ' class="warnline"' : ''}>${av.includes(id) ? '⚠ ' : ''}${pre}${nl}: ${esc(m.get(id).join(', '))}</div>`).join('');
-      return (line(by, '') + line(tr, 'sporen ') || (unk.length === gs.length ? '' : '<div class="muted">Geen allergenen gemeld in de gekoppelde producten.</div>'))
-        + (unk.length ? `<div class="muted">? Niet gecontroleerd (geen product gekoppeld): ${esc(unk.join(', '))}</div>` : '');
+      const line = (m, pre) => ALLERGENS.filter(([id]) => m.has(id)).map(([id, nl]) => `<div${av.includes(id) ? ' class="warnline"' : ''}>${av.includes(id) ? '⚠ LET OP: ' : ''}${pre}${nl}: ${esc(m.get(id).join(', '))}</div>`).join('');
+      return (line(by, '') + line(tr, 'sporen ') || (unk.length === gs.length ? '' : '<div class="muted">Geen allergenen bekend.</div>'))
+        + (unk.length ? `<div class="muted">? Onbekend (niet in de ingrediëntenlijst, geen product gekoppeld): ${esc(unk.join(', '))}</div>` : '');
     }
     function nutHtml(r) {
       const n = nutri(r);
@@ -586,16 +701,18 @@
           <button class="btn nbtn" data-act="nutri" data-i="${i}" title="${esc(g.off ? g.off.label : '')}">${esc(nlabel)}</button>
         </div>`;
       }).join('');
-      return `<div class="top"><a class="btn icon" href="#/recepten" aria-label="Terug">←</a><h1>Recept</h1></div>
+      const wk = kindOf(r) === 'week';
+      return `<div class="top"><a class="btn icon" href="#/recepten" aria-label="Terug">←</a><h1>${wk ? 'Setje' : 'Recept'}</h1></div>
         <div class="field"><label>Naam</label><input value="${esc(r.name)}" data-rf="name" /></div>
-        <div class="field"><label>Ingrediënten zijn berekend voor</label>${stepper('recPers', r.id, r.persons, 'personen')}</div>
+        <div class="field"><label>Soort</label><select data-rf="kind"><option value="recept"${wk ? '' : ' selected'}>Recept (schaalt per persoon)</option><option value="week"${wk ? ' selected' : ''}>Setje weekboodschappen (vaste hoeveelheden)</option></select></div>
+        ${wk ? '' : `<div class="field"><label>Ingrediënten zijn berekend voor</label>${stepper('recPers', r.id, r.persons, 'personen')}</div>`}
         <div class="field"><label>Ingrediënten</label>${rows}<button class="btn small" data-act="ingAdd">+ Ingrediënt</button></div>
         <div class="field"><label>Voeding per portie (schatting)</label>
           <div class="card nut"><div id="nutBox">${nutHtml(r)}</div>
             <div id="autoStatus" class="muted"></div>
             <button class="btn small" data-act="autoNut" style="margin-top:8px">Voeding automatisch zoeken</button>
             <div class="muted" style="margin-top:6px">Bron: Open Food Facts (gebruikers-gegevens, controleer het gekozen product). Alleen ingrediënten met een gewicht tellen mee.</div></div></div>
-        <div class="field"><label>Allergenen (volgens gekoppelde producten)</label>
+        <div class="field"><label>Allergenen (ingrediëntenlijst + gekoppelde producten)</label>
           <div class="card nut"><div id="algBox">${algHtml(r)}</div>
             <div class="muted" style="margin-top:6px">Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></div></div>
         <div class="toolbar"><button class="btn primary" data-act="toList">Op een lijstje zetten</button>
@@ -649,6 +766,79 @@
       return name;
     }
 
+    /* ---------- beweging ----------
+       Han: "te snel en hakkelig, en de pagina begint keihard te scrollen". Daarom:
+       - één hoogte-animatie per blok (de .obody), niet per ingrediënt → geen gehakkel;
+       - nooit zelf scrollen naar iets toe: het aangetikte blok blijft onder je vinger staan (holdAnchor
+         corrigeert elke frame wat erboven in- of uitklapt);
+       - rustige curves, ~0,5 s voor in-/uitklappen en ~1,2 s voor omklappen; 'minder beweging' = direct. */
+    const EASE_OUT = 'cubic-bezier(.22, 1, .36, 1)', EASE_INOUT = 'cubic-bezier(.65, 0, .35, 1)';
+    const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const blockEl = key => [...document.querySelectorAll('[data-b]')].find(e => e.dataset.b === key);
+    function keepAnchor(key, top) { const el = blockEl(key); if (!el) return; const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > .5) scrollBy(0, d); }
+    function holdAnchor(key, top) { let on = true; (function tick() { if (!on) return; keepAnchor(key, top); requestAnimationFrame(tick); })(); return () => { on = false; }; }
+    const fadeLines = (to, ms) => { const s = $('#ovl'); if (s) s.animate([{ opacity: to ? 0 : 1 }, { opacity: to }], { duration: ms, fill: 'forwards' }); };
+    const collapse = (body, ms, delay = 0) => { const h = body.offsetHeight; return body.animate([{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: ms, delay, easing: EASE_INOUT, fill: 'forwards' }).finished; };
+    const expand = (body, ms, delay = 0) => { body.hidden = false; const h = body.offsetHeight; return body.animate([{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }], { duration: ms, delay, easing: EASE_OUT, fill: 'backwards' }).finished; };
+
+    // Eén blok per kant open: tik een kop → dat blok open, het vorige dicht (of dicht als het al open was).
+    async function accordion(blk) {
+      if (S._anim || !blk) return;
+      const key = blk.dataset.b, side = key.startsWith('cat:') ? 'cat' : 'rec', id = key.slice(4);
+      const u = (S.ui ||= {}), open = (u.open ||= {}), wasOpen = open[side] === id;
+      const prev = !wasOpen && open[side] != null ? blockEl(side + ':' + open[side]) : null;
+      open[side] = wasOpen ? null : id; u.sel = wasOpen ? null : 'b:' + key; u.adding = null; save();
+      const top = blk.getBoundingClientRect().top;
+      if (calm()) { render(); keepAnchor(key, top); return; }
+      S._anim = true;
+      const stop = holdAnchor(key, top);
+      try {
+        fadeLines(0, 150);
+        const jobs = [];
+        const shut = b => { const body = b?.querySelector('.obody'); if (body && !body.hidden) { b.querySelector('.chev').textContent = '▸'; jobs.push(collapse(body, 380)); } };
+        if (wasOpen) shut(blk);
+        else { shut(prev); blk.querySelector('.chev').textContent = '▾'; jobs.push(expand(blk.querySelector('.obody'), 520)); }
+        await Promise.all(jobs);
+      } finally { stop(); S._anim = false; }
+      render(); keepAnchor(key, top); fadeLines(1, 300);
+    }
+
+    // Omklappen: tik een smal blok aan de dichte kant. Fase 1: de open kant ruimt op en de tekst van het
+    // aangetikte blok draait plat. Fase 2: nieuwe stand; smalle blokken draaien hun tekst rechtop, het
+    // aangetikte blok draait zijn kop van staand naar liggend en klapt open; pas daarna de lijntjes.
+    async function flip(el) {
+      if (S._anim) return;
+      const l = curList(), key = el.dataset.b, toRec = key.startsWith('rec:'), id = key.slice(4), top = el.getBoundingClientRect().top;
+      const go = () => { l.view = toRec ? 'rec' : 'cat'; const u = (S.ui ||= {}); (u.open ||= {})[toRec ? 'rec' : 'cat'] = id; u.sel = 'b:' + key; u.adding = null; commit(); };
+      if (calm()) { go(); keepAnchor(key, top); return; }
+      S._anim = true;
+      try {
+        fadeLines(0, 200);
+        const leaving = $(toRec ? '#ov .ovL' : '#ov .ovR'), dx = toRec ? -14 : 14, jobs = [];
+        leaving.querySelectorAll('.obody:not([hidden])').forEach(b => jobs.push(collapse(b, 320)));
+        leaving.querySelectorAll('.oblk, .rub').forEach((b, i) => jobs.push(b.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${dx}px)` }],
+          { duration: 300, delay: 80 + Math.min(i * 12, 100), easing: EASE_INOUT, fill: 'forwards' }).finished));
+        jobs.push(el.querySelector('.vt').animate([{ transform: 'none', opacity: 1 }, { transform: 'rotate(-90deg)', opacity: 0 }], { duration: 340, easing: EASE_INOUT, fill: 'forwards' }).finished);
+        const stop1 = holdAnchor(key, top);
+        await Promise.all(jobs); stop1();
+
+        go(); keepAnchor(key, top);
+        const ov = $('#ov'), t = blockEl(key), jobs2 = [];
+        $('#ovl').style.opacity = '0';
+        ov.querySelectorAll('.vblock .vt, .vrub .vt, .vplus').forEach((v, i) => jobs2.push(v.animate([{ transform: 'rotate(-90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+          { duration: 420, delay: 50 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished));
+        ov.querySelectorAll(toRec ? '.ovR .oblk, .ovR .rub' : '.ovL .oblk').forEach((b, i) => { if (b !== t) jobs2.push(b.animate([{ opacity: 0, transform: `translateX(${-dx}px)` }, { opacity: 1, transform: 'none' }],
+          { duration: 420, delay: 120 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished); });
+        if (t) {
+          jobs2.push(t.querySelector('.ohead').animate([{ transform: 'rotate(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 480, easing: EASE_OUT, fill: 'backwards' }).finished);
+          jobs2.push(expand(t.querySelector('.obody'), 520, 240));
+        }
+        const stop2 = holdAnchor(key, top);
+        await Promise.all(jobs2); stop2();
+        drawLines(); $('#ovl').style.opacity = ''; fadeLines(1, 360);
+      } finally { S._anim = false; }
+    }
+
     /* ---------- acties ---------- */
     const clamp = n => Math.max(1, Math.min(99, n));
     const actions = {
@@ -671,21 +861,23 @@
           [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => { S.lists = S.lists.filter(x => x !== l); save(); location.hash = '#/'; } }]);
       },
       // Personen van het lijstje zetten ook alle recepten erop gelijk; per recept kan je daarna bijstellen.
-      lpers(el) { const l = curList(); l.persons = clamp(l.persons + +el.dataset.d); l.recipes.forEach(r => r.persons = l.persons); commit(); },
+      lpers(el) { const l = curList(); l.persons = clamp(l.persons + +el.dataset.d); l.recipes.forEach(lr => { const r = recipeById(lr.rid); if (r && kindOf(r) === 'recept') lr.persons = l.persons; }); commit(); },
       rpers(el) { const lr = curList().recipes.find(r => r.rid === el.dataset.id); lr.persons = clamp(lr.persons + +el.dataset.d); commit(); },
       rdel(el) { const l = curList(); l.recipes = l.recipes.filter(r => r.rid !== el.dataset.id); commit(); },
-      addRecipe() {
-        const l = curList();
-        sheet('Recept toevoegen', S.recipes.map(r => {
+      // "+" bij Recepten of Weekboodschappen: kies een bestaand recept/setje of maak meteen een nieuw.
+      addRecipe(el) {
+        const l = curList(), kind = el?.dataset.kind === 'week' ? 'week' : 'recept', what = kind === 'week' ? 'setje' : 'recept';
+        const pool = S.recipes.filter(r => kindOf(r) === kind);
+        sheet(kind === 'week' ? 'Setje toevoegen' : 'Recept toevoegen', pool.map(r => {
           const has = l.recipes.some(x => x.rid === r.id);
           return `<button class="btn pick" data-s="r-${r.id}"${has ? ' disabled' : ''}>${esc(r.name)}${has ? ' ✓' : ''}</button>`;
-        }).join('') || '<p class="muted">Nog geen recepten.</p>', [cancel, { id: 'new', label: '+ Nieuw recept', cls: 'primary', fn: () => {
+        }).join('') || `<p class="muted">Nog geen ${what}s.</p>`, [cancel, { id: 'new', label: '+ Nieuw ' + what, cls: 'primary', fn: () => {
           // meteen op dit lijstje én naar de editor, zodat je hem kunt invullen
-          const r = { id: uid(), name: 'Nieuw recept', persons: l.persons, ingredients: [ing('', 0, '', S.categories[0])] };
+          const r = { id: uid(), kind, name: kind === 'week' ? 'Nieuw setje' : 'Nieuw recept', persons: l.persons, ingredients: [ing('', 0, '', S.categories[0])] };
           S.recipes.push(r); l.recipes.push({ rid: r.id, persons: l.persons }); save(); location.hash = '#/recept/' + r.id;
         } }]);
         // keuzeknoppen worden hier pas aan de handlers gehangen (ze zijn dynamisch)
-        S.recipes.forEach(r => { dlg._h['r-' + r.id] = () => { l.recipes.push({ rid: r.id, persons: l.persons }); commit(); }; });
+        pool.forEach(r => { dlg._h['r-' + r.id] = () => { l.recipes.push({ rid: r.id, persons: l.persons }); const u = (S.ui ||= {}); (u.open ||= {}).rec = r.id; commit(); }; });
       },
       toggle(el) {
         const l = curList(), key = el.dataset.key;
@@ -706,45 +898,14 @@
               it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; { const e = d.querySelector('#f-em').value.trim(); if (e) it.emoji = e; else delete it.emoji; } commit();
             } }]);
       },
-      // Tik op een dicht blok: bord klapt om, dat blok wordt geselecteerd (lijntjes lichten op) en in beeld gescrold.
-      // Omklappen in twee fasen (Web Animations API):
-      //  1. de ingrediënten aan de open kant klappen in, lijntjes vervagen;
-      //  2. nieuwe stand renderen: dichte blokken draaien hun tekst van horizontaal naar verticaal, het
-      //     aangetikte blok draait van verticaal naar horizontaal en klapt open; daarna pas lijntjes meten.
-      // Alleen het aangetikte blok klapt animerend open: dan verschuift er niets boven hem en klopt de
-      // scrollpositie meteen. Bij 'minder beweging' direct omklappen.
-      async side(el) {
-        if (S._anim) return; // dubbel tikken tijdens een animatie negeren
-        const l = curList(), toRec = el.dataset.v === 'rec', id = toRec ? el.dataset.rid : el.dataset.cat;
-        const target = () => toRec ? $(`.orec[data-rid="${id}"]`) : [...document.querySelectorAll('.ocat')].find(e => e.dataset.cat === id);
-        const go = () => { l.view = toRec ? 'rec' : 'cat'; (S.ui ||= {}).sel = (toRec ? 'r:' : 'c:') + id; commit(); };
-        if (matchMedia('(prefers-reduced-motion: reduce)').matches) { go(); target()?.scrollIntoView({ block: 'start' }); return; }
-        const ease = 'cubic-bezier(.4, 0, .2, 1)';
-        S._anim = true;
-        try {
-          const svg = $('#ovl'); if (svg) svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' });
-          const items = [...document.querySelectorAll('#ov .item, #ov .rctl')], hs = items.map(x => x.offsetHeight); // eerst alles meten, dan animeren
-          await Promise.all(items.map((it, i) => it.animate([{ height: hs[i] + 'px', opacity: 1 }, { height: '0px', opacity: 0 }],
-            { duration: 180, delay: Math.min(i * 4, 80), easing: ease, fill: 'forwards' }).finished));
-          go();
-          const ov = $('#ov'), t = target(), nsvg = $('#ovl');
-          nsvg.style.opacity = '0';
-          if (t) scrollTo({ top: t.getBoundingClientRect().top + scrollY - 10, behavior: 'smooth' });
-          const jobs = [];
-          ov.querySelectorAll('.vblock .vt').forEach((v, i) => jobs.push(v.animate([{ transform: 'rotate(-90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
-            { duration: 300, delay: i * 20, easing: ease, fill: 'backwards' }).finished));
-          for (const card of ov.querySelectorAll(toRec ? '.orec:not(.vblock)' : '.ocat:not(.vblock)')) {
-            if (card !== t) { jobs.push(card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 120, fill: 'backwards' }).finished); continue; }
-            jobs.push(card.querySelector('.ohead').animate([{ transform: 'rotate(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
-              { duration: 280, easing: ease, fill: 'backwards' }).finished);
-            const its = [...card.querySelectorAll('.item, .rctl')], ths = its.map(x => x.offsetHeight);
-            its.forEach((it, i) => jobs.push(it.animate([{ height: '0px', opacity: 0 }, { height: ths[i] + 'px', opacity: 1 }],
-              { duration: 220, delay: 180 + i * 14, easing: ease, fill: 'backwards' }).finished));
-          }
-          await Promise.all(jobs);
-          drawLines(); // pas nu: tijdens de animatie kloppen de posities nog niet
-          nsvg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 }); nsvg.style.opacity = '';
-        } finally { S._anim = false; }
+      acc(el) { accordion(el.closest('.oblk')); },
+      side(el) { flip(el); },
+      // "+" in een kop: dat blok gaat open met een invoerregel. Tik nog eens om de regel weer te sluiten.
+      plus(el) {
+        const u = (S.ui ||= {}), open = (u.open ||= {}), t = el.dataset.t, key = el.closest('[data-b]').dataset.b, top = el.closest('[data-b]').getBoundingClientRect().top;
+        u.adding = u.adding === t ? null : t;
+        if (t.startsWith('c:')) open.cat = t.slice(2); else open.rec = t === 'o' ? '_ov' : t.slice(2);
+        commit(); keepAnchor(key, top); $('form.inl input')?.focus({ preventScroll: true });
       },
       selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
       // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
@@ -762,8 +923,9 @@
         try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); alert('Gekopieerd naar klembord.'); } }
         catch (e) { /* gebruiker annuleerde het deel-menu */ }
       },
-      newRecipe() {
-        const r = { id: uid(), name: 'Nieuw recept', persons: 4, ingredients: [ing('', 0, '', S.categories[0])] };
+      newRecipe(el) {
+        const kind = el?.dataset.kind === 'week' ? 'week' : 'recept';
+        const r = { id: uid(), kind, name: kind === 'week' ? 'Nieuw setje' : 'Nieuw recept', persons: 4, ingredients: [ing('', 0, '', S.categories[0])] };
         S.recipes.push(r); save(); location.hash = '#/recept/' + r.id;
       },
       recPers(el) { const r = curRecipe(); r.persons = clamp(r.persons + +el.dataset.d); commit(); },
@@ -844,21 +1006,27 @@
 
     document.addEventListener('click', e => {
       const el = e.target.closest('[data-act]'); if (!el || dlg.contains(el)) return;
+      const a = e.target.closest('a'); if (a && el.contains(a)) return; // link in een kop: navigeren, niet in-/uitklappen
       const fn = actions[el.dataset.act]; if (fn) fn(el);
     });
 
-    // Los item toevoegen
+    // Invoer per regel (de "+" in een kop). Categorie-+ en Overige-+ maken een los item; recept/setje-+ voegt een
+    // ingrediënt aan het recept zelf toe (Han: "aan het recept toevoegen"), zodat het meeschaalt en blijft.
+    function addLine(t, txt) {
+      const p = parseLine(txt); if (!p) return;
+      const l = curList(), cat = t.startsWith('c:') ? t.slice(2) : (guessCat(p.name) || 'Overig');
+      if (t.startsWith('r:')) {
+        const r = recipeById(t.slice(2)), lr = l.recipes.find(x => x.rid === r.id);
+        // je typt de hoeveelheid voor DIT lijstje; het recept bewaart hem voor zijn eigen aantal personen
+        r.ingredients.push(ing(p.name, p.qty / factorOf(r, lr), p.qty ? p.unit : '', cat));
+      } else l.items.push({ id: uid(), name: p.name, qty: p.qtyText, cat, done: false });
+      commit(); $('form.inl input')?.focus({ preventScroll: true });
+    }
     document.addEventListener('submit', e => {
-      if (e.target.id !== 'addForm') return;
-      e.preventDefault();
-      const f = e.target, l = curList(), name = f.name.value.trim(); if (!name) return;
-      // Categorie: bewust gekozen (select ≠ standaard) wint; anders gokken op eerdere naam.
-      const guess = guessCat(name);
-      const cat = (f.cat.dataset.touched || !guess) ? f.cat.value : guess;
-      l.items.push({ id: uid(), name, qty: f.qty.value.trim(), cat, done: false });
-      (S.ui ||= {}).lastCat = f.cat.value;
-      commit(); $('#addForm input[name=name]').focus();
+      const f = e.target; if (!f.classList.contains('inl')) return;
+      e.preventDefault(); addLine(f.dataset.t, f.line.value);
     });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && e.target.closest?.('form.inl')) { S.ui.adding = null; render(); } });
 
     document.addEventListener('change', e => {
       const t = e.target;
@@ -881,7 +1049,6 @@
         const name = handleNewCat(t);
         if (!name) return;
       }
-      if (t.tagName === 'SELECT' && t.closest('#addForm')) t.dataset.touched = '1';
       if (t.tagName === 'SELECT') t.dataset.prev = t.value;
       // recept-velden: in-place bijwerken, geen volledige render (anders verlies je focus bij typen)
       if (t.dataset.f) {
@@ -894,7 +1061,7 @@
     });
     document.addEventListener('input', e => {
       const t = e.target;
-      if (t.dataset.rf) { curRecipe()[t.dataset.rf] = t.value; save(); }
+      if (t.dataset.rf) { curRecipe()[t.dataset.rf] = t.value; save(); if (t.dataset.rf === 'kind') render(); }
       else if (t.dataset.f === 'name') { curRecipe().ingredients[+t.dataset.i].name = t.value; save(); }
     });
 
@@ -922,7 +1089,18 @@
     // Lijntjes opnieuw meten bij draaien/resizen en zodra de webfonts er zijn (tekstbreedte verandert dan).
     let rz = 0; window.addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(drawLines); });
     document.fonts?.ready.then(drawLines);
-    load(); render();
+    // Ingrediëntenlijst: eerst de bewaarde kopie (direct, ook offline), dan de verse versie uit de repo.
+    async function loadDB() {
+      try {
+        const res = await fetch('boodschappen-ingredienten.json', { cache: 'no-cache' }); if (!res.ok) throw new Error('HTTP ' + res.status);
+        const txt = await res.text(); setDB(JSON.parse(txt));
+        try { localStorage.setItem(DBKEY, txt); } catch (e) { /* vol: dan alleen deze sessie */ }
+        if (!S._anim && !document.querySelector('form.inl input:focus')) render();
+      } catch (e) { /* offline of lokaal geopend: bewaarde kopie of emoji-regels blijven gelden */ }
+    }
+    load();
+    try { const c = localStorage.getItem(DBKEY); if (c) setDB(JSON.parse(c)); } catch (e) { /* kapotte kopie: negeren */ }
+    render(); loadDB();
   })();
   </script>
 </body>
