@@ -199,10 +199,32 @@
       padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--text); color: #fff; font-size: .9rem; box-shadow: 0 6px 24px rgba(26, 31, 46, .25); }
     .toast[hidden] { display: none; }
     .toast button { border: 0; background: none; color: #9cc2ff; font-weight: 700; min-height: 36px; padding: 0 10px; white-space: nowrap; }
+    /* Voedingsadvies */
+    .adv { padding: 6px 10px 8px; border-top: 1px solid var(--line); font-size: .8rem; }
+    .nchips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+    .nchip { padding: 0 7px; border-radius: 99px; font-size: .74rem; }
+    .nchip.ok { background: #e6f2ea; color: #2f6b45; } .nchip.mid { background: #fff4e0; color: #8a5a00; } .nchip.low { background: #fde8e8; color: #b42318; }
+    .tip { display: flex; align-items: center; gap: 8px; justify-content: space-between; margin-top: 6px; font-size: .82rem; }
+    .tip .btn { flex: none; }
+    .ntab { display: grid; gap: 5px; margin: 8px 0; }
+    .nrow { display: grid; grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: .85rem; }
+    .nval, .npct { text-align: right; color: var(--muted); }
+    .npct { font-size: .78rem; }
+    .nbar { height: 6px; background: var(--line); border-radius: 6px; overflow: hidden; }
+    .nbar i { display: block; height: 100%; }
+    .nbar i.ok { background: #3f7d5a; } .nbar i.mid { background: #d29a2a; } .nbar i.low { background: #c0473b; }
+    .note { margin-top: 6px; font-size: .8rem; padding: 6px 8px; background: #f3effa; border-radius: 8px; }
+    /* Aapjesdag-achtergrond: vaste laag achter alles, licht doorschijnend, alleen transform-animatie (licht voor de GPU). */
+    .aapbg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .aapbg span { position: absolute; opacity: .16; animation: drijf var(--d) ease-in-out var(--w) infinite alternate; will-change: transform; }
+    @keyframes drijf { from { transform: translate(0, 0) rotate(-8deg); } to { transform: translate(var(--x), var(--y)) rotate(8deg); } }
+    @media (prefers-reduced-motion: reduce) { .aapbg span { animation: none; } }
+    .wrap { position: relative; z-index: 1; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
 <body>
+  <div class="aapbg" id="aapbg" aria-hidden="true"></div>
   <div class="wrap">
     <button class="aap" id="aap" type="button">🐒 Reminder: het is vandaag aapjesdag! <span>Tik hier 🙈</span></button>
     <div id="app"></div>
@@ -268,7 +290,7 @@
     function setDB(json) {
       DB = new Map();
       for (const x of json.ingredienten || []) {
-        const info = { emoji: x.emoji, cat: x.categorie, allergens: (x.allergenen || []).map(a => NL_ALG[a]).filter(Boolean), traces: (x.sporen || []).map(a => NL_ALG[a]).filter(Boolean) };
+        const info = { naam: x.naam, noTip: !!x.geen_tip, nut: x.voeding || null, gram: x.gram || null, emoji: x.emoji, cat: x.categorie, allergens: (x.allergenen || []).map(a => NL_ALG[a]).filter(Boolean), traces: (x.sporen || []).map(a => NL_ALG[a]).filter(Boolean) };
         for (const n of [x.naam, ...(x.ook || [])]) DB.set(norm(n), info);
       }
       DB_KEYS = [...DB.keys()].sort((a, b) => b.length - a.length); // langste eerst: "glutenvrije pasta" vóór "pasta"
@@ -453,20 +475,122 @@
       switch (g.unit) {
         case 'g': return q; case 'kg': return q * 1000; case 'ml': return q; case 'l': return q * 1000;
         case 'el': return q * (g.gpu || 15); case 'tl': return q * (g.gpu || 5);
-        default: return g.gpu ? q * g.gpu : null;
+        default: { const gpu = g.gpu || ingInfo(g.name)?.gram; return gpu ? q * gpu : null; } // eigen gewicht wint, anders de lijst
       }
     }
+    // Voedingsstoffen (sleutels = die van de ingrediëntenlijst). ADVISE = wat het advies toetst.
+    const NUTS = [['kcal', 'Energie', 'kcal'], ['eiwit', 'Eiwit', 'g'], ['vet', 'Vet', 'g'], ['kh', 'Koolhydraten', 'g'], ['vezels', 'Vezels', 'g'],
+      ['ijzer', 'IJzer', 'mg'], ['calcium', 'Calcium', 'mg'], ['zink', 'Zink', 'mg'], ['omega3', 'Omega-3', 'g'], ['jodium', 'Jodium', 'µg'], ['b12', 'B12', 'µg'], ['vitd', 'Vitamine D', 'µg']];
+    const NUT = Object.fromEntries(NUTS.map(([k, label, unit]) => [k, { label, unit }]));
+    const ADVISE = ['eiwit', 'vezels', 'ijzer', 'calcium', 'zink', 'omega3', 'jodium', 'b12', 'vitd'];
+    // Waarden per 100 g: uit de ingrediëntenlijst; een gekoppeld merkproduct (Open Food Facts) wint voor de macro's.
+    function per100(g) {
+      const base = ingInfo(g.name)?.nut, o = g.off;
+      if (!base && !o) return null;
+      const v = { ...(base || {}) };
+      if (o) Object.assign(v, { kcal: o.kcal, eiwit: o.p, vet: o.f, kh: o.c, vezels: o.fib });
+      return v;
+    }
+    // Per portie (= totaal / het eigen aantal personen van het recept, dus los van het lijstje).
     function nutri(r) {
-      const t = { kcal: 0, p: 0, f: 0, c: 0, fib: 0, counted: 0, total: 0, missing: [] };
+      const per = Object.fromEntries(NUTS.map(([k]) => [k, 0])), t = { per, counted: 0, total: 0, missing: [] };
       for (const g of r.ingredients) {
         if (!g.name.trim()) continue;
         t.total++;
-        const gr = gramsOf(g);
-        if (!g.off || gr === null) { t.missing.push(g.name.trim()); continue; }
-        const k = gr / 100 / r.persons; // per portie
-        t.kcal += g.off.kcal * k; t.p += g.off.p * k; t.f += g.off.f * k; t.c += g.off.c * k; t.fib += g.off.fib * k; t.counted++;
+        const gr = gramsOf(g), v = per100(g);
+        if (gr === null || !v) { t.missing.push(g.name.trim()); continue; }
+        const k = gr / 100 / r.persons;
+        for (const [n] of NUTS) per[n] += (v[n] || 0) * k;
+        t.counted++;
       }
+      t.kcal = per.kcal;
       return t;
+    }
+
+    /* ---------- voedingsadvies ----------
+       Dagbehoefte per eter (afgerond, in de lijn van de Gezondheidsraad). Eiwit in g per kg lichaamsgewicht; bij
+       een vegan dieet 10% hoger omdat plantaardig eiwit iets minder goed wordt opgenomen. Een warme maaltijd
+       (een recept) hoort ~35% van de dag te leveren. Tweetallen = [man, vrouw]; 'x' = het gemiddelde. */
+    const NEED = [
+      { tot: 3,   kcal: [1100, 1050], kg: [12, 12], epk: 1.0,  vezels: [15, 15], ijzer: [7, 7],   calcium: [600, 600],   zink: [5, 5],  omega3: [0.7, 0.7], jodium: 50,  b12: 0.8, vitd: 10 },
+      { tot: 8,   kcal: [1600, 1500], kg: [22, 22], epk: 0.9,  vezels: [20, 20], ijzer: [7, 7],   calcium: [700, 700],   zink: [6, 6],  omega3: [1.0, 1.0], jodium: 90,  b12: 1.5, vitd: 10 },
+      { tot: 13,  kcal: [2200, 2000], kg: [38, 38], epk: 0.9,  vezels: [25, 25], ijzer: [10, 11], calcium: [1100, 1100], zink: [9, 9],  omega3: [1.5, 1.4], jodium: 120, b12: 2.0, vitd: 10 },
+      { tot: 17,  kcal: [2900, 2300], kg: [60, 55], epk: 0.9,  vezels: [30, 30], ijzer: [11, 15], calcium: [1150, 1150], zink: [11, 7], omega3: [2.0, 1.6], jodium: 150, b12: 3.5, vitd: 10 },
+      { tot: 50,  kcal: [2600, 2100], kg: [75, 65], epk: 0.83, vezels: [40, 30], ijzer: [11, 16], calcium: [1000, 1000], zink: [11, 7], omega3: [2.9, 2.3], jodium: 150, b12: 4.0, vitd: 10 },
+      { tot: 69,  kcal: [2500, 2000], kg: [75, 65], epk: 0.83, vezels: [40, 30], ijzer: [11, 11], calcium: [1100, 1100], zink: [11, 7], omega3: [2.8, 2.2], jodium: 150, b12: 4.0, vitd: 10 },
+      { tot: 200, kcal: [2300, 1900], kg: [72, 62], epk: 1.0,  vezels: [40, 30], ijzer: [11, 11], calcium: [1200, 1200], zink: [11, 7], omega3: [2.5, 2.1], jodium: 150, b12: 4.0, vitd: 20 },
+    ];
+    const MEAL_SHARE = 0.35;
+    const DIETS = [['vegan', 'Vegan'], ['vegetarisch', 'Vegetarisch'], ['alles', 'Alles']];
+    const diet = () => S.diet || 'vegan'; // Han's lijstjes zijn vegan; dat is ook de standaard
+    // Wat een dieet uitsluit, uitgedrukt in allergenen uit de lijst (eieren, melk, vis…): zo hoeft de lijst niet ook nog 'vlees: ja/nee' te dragen.
+    const DIET_EXCLUDES = { vegan: ['eggs', 'milk', 'fish', 'crustaceans', 'molluscs'], vegetarisch: ['fish', 'crustaceans', 'molluscs'], alles: [] };
+    function needOf(e) {
+      const age = +e.leeftijd || 40, row = NEED.find(n => age <= n.tot) || NEED[NEED.length - 1];
+      const pick = x => !Array.isArray(x) ? x : e.geslacht === 'v' ? x[1] : e.geslacht === 'm' ? x[0] : (x[0] + x[1]) / 2;
+      const kg = +e.gewicht || pick(row.kg);
+      return { kcal: pick(row.kcal), eiwit: row.epk * (diet() === 'vegan' ? 1.1 : 1) * kg, vezels: pick(row.vezels), ijzer: pick(row.ijzer),
+        calcium: pick(row.calcium), zink: pick(row.zink), omega3: pick(row.omega3), jodium: row.jodium, b12: row.b12, vitd: row.vitd };
+    }
+    const eaters = () => S.eaters?.length ? S.eaters : [{ naam: 'volwassene', leeftijd: 40, geslacht: 'x' }];
+    function mealTarget() {
+      const es = eaters(), t = {};
+      for (const k of ['kcal', ...ADVISE]) t[k] = es.reduce((a, e) => a + needOf(e)[k], 0) / es.length * MEAL_SHARE;
+      return t;
+    }
+    const SUGGEST_CATS = new Set(['Groente & fruit', 'Aardappelen, pasta & rijst', 'Houdbaar', 'Zuivelvervangers']);
+    // Hoeveel je redelijkerwijs per persoon aan één maaltijd toevoegt: een handje noten/zaden, wat droge granen of
+    // peulvruchten, of een flinke schep groente/tofu.
+    const maxAdd = v => (v.vet || 0) > 40 || (v.kcal || 0) > 400 ? 20 : (v.kcal || 0) > 300 ? 60 : 120; // zaden/noten: een eetlepel of handje
+    function adviceFor(r) {
+      const n = nutri(r), tgt = mealTarget(), avoid = [...(S.avoid || []), ...DIET_EXCLUDES[diet()]];
+      const pct = Object.fromEntries(ADVISE.map(k => [k, tgt[k] ? n.per[k] / tgt[k] : 1]));
+      // B12, vitamine D en jodium los je niet op met een ingrediënt in een recept: die krijgen een advies, geen tip.
+      const low = ADVISE.filter(k => pct[k] < 0.6 && !['b12', 'vitd', 'jodium'].includes(k)).sort((a, b) => pct[a] - pct[b]);
+      const have = new Set(r.ingredients.map(g => norm(g.name))), seen = new Set(), cands = [];
+      for (const info of DB.values()) {
+        if (seen.has(info)) continue; seen.add(info);
+        if (!info.nut || info.noTip || !SUGGEST_CATS.has(info.cat) || have.has(norm(info.naam))) continue;
+        if (info.allergens.some(a => avoid.includes(a))) continue; // nooit iets voorstellen dat je vermijdt of dat niet bij je dieet past
+        cands.push(info);
+      }
+      const tips = [];
+      for (const k of low.slice(0, 2)) {
+        const gap = tgt[k] - n.per[k]; let best = null;
+        for (const info of cands) {
+          if (tips.some(t => t.info === info)) continue;
+          const v = info.nut, per1 = (v[k] || 0) / 100; if (per1 <= 0) continue;
+          const g = Math.min(maxAdd(v), gap / per1);
+          // dekking van dit tekort + bonus als het ook andere tekorten helpt − kleine straf voor veel extra kcal
+          const extra = low.filter(x => x !== k).reduce((a, x) => a + Math.min(1, g * (v[x] || 0) / 100 / Math.max(1e-9, tgt[x] - n.per[x])), 0);
+          const score = g * per1 / gap + 0.5 * extra - 0.3 * g * (v.kcal || 0) / 100 / tgt.kcal;
+          if (!best || score > best.score) best = { info, g, score, k };
+        }
+        if (best) tips.push(best);
+      }
+      for (const t of tips) {
+        t.grams = t.g >= 10 ? Math.round(t.g / 5) * 5 : Math.max(1, Math.round(t.g));
+        // alleen winst die ertoe doet (≥ 10% van wat een maaltijd moet leveren), grootste eerst, hooguit drie
+        t.gains = low.map(x => [x, t.grams * (t.info.nut[x] || 0) / 100]).filter(([x, v]) => v / tgt[x] >= 0.1)
+          .sort((a, b) => b[1] / tgt[b[0]] - a[1] / tgt[a[0]]).slice(0, 3);
+      }
+      const notes = [];
+      if (pct.b12 < 0.6) notes.push('B12 zit vrijwel niet in plantaardig eten: gebruik verrijkte producten (sojadrink, sojayoghurt) of een supplement.');
+      if (pct.vitd < 0.6) notes.push('Vitamine D krijg je nauwelijks uit eten: het advies is een supplement (10 µg per dag), zeker van oktober tot maart.');
+      if (pct.jodium < 0.6) notes.push('Jodium komt vooral uit brood met bakkerszout en uit jodiumzout; zeewier kan, met mate.');
+      return { n, tgt, pct, low, tips, notes };
+    }
+    const pctCls = p => p >= 0.8 ? 'ok' : p >= 0.6 ? 'mid' : 'low';
+    const fmtN = x => x >= 10 ? String(Math.round(x)) : fmt1(x);
+    const tipHtml = r => t => `<div class="tip"><span>💡 + ${t.grams} g ${esc(t.info.naam)} p.p. → ${t.gains.map(([k, v]) => `+${fmtN(v)} ${NUT[k].unit} ${NUT[k].label.toLowerCase()}`).join(', ')}</span>
+      <button class="btn small" data-act="addTip" data-rid="${r.id}" data-name="${esc(t.info.naam)}" data-g="${t.grams}">+ toevoegen</button></div>`;
+    // Compact, in een opengeklapt recept op het lijstje: de stoffen die je per maaltijd kunt sturen + de tips.
+    function adviceMini(r) {
+      const a = adviceFor(r); if (!a.n.counted) return '';
+      const show = ['eiwit', 'vezels', 'ijzer', 'calcium', 'zink', 'omega3'];
+      return `<div class="adv"><div class="muted">Per portie ≈ ${Math.round(a.n.per.kcal)} kcal · eiwit ${fmtN(a.n.per.eiwit)} g. Van een warme maaltijd:</div>
+        <div class="nchips">${show.map(k => `<span class="nchip ${pctCls(a.pct[k])}">${NUT[k].label} ${Math.round(a.pct[k] * 100)}%</span>`).join('')}</div>
+        ${a.tips.map(tipHtml(r)).join('')}</div>`;
     }
     const fmt1 = n => String(Math.round(n * 10) / 10).replace('.', ',');
     async function offSearch(q) {
@@ -516,6 +640,11 @@
       }).join('') || '<div class="empty">Nog geen lijstjes.</div>';
       return `<div class="top"><h1>Boodschappen</h1></div>${tabs('l')}${cards}
         <button class="btn primary" data-act="newList">+ Nieuw lijstje</button>
+        <div class="rub" style="margin:22px 2px 8px"><span>Wie eten er mee</span></div>
+        <div class="field"><label>Dieet</label><select data-diet>${DIETS.map(([k, t]) => `<option value="${k}"${diet() === k ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+        ${(S.eaters || []).map((e, i) => `<button class="card listcard" data-act="eater" data-i="${i}"><b>${esc(e.naam || 'Eter')}</b><div class="muted">${e.leeftijd} jaar · ${({ m: 'man', v: 'vrouw' })[e.geslacht] || 'geslacht niet opgegeven'}${e.gewicht ? ' · ' + e.gewicht + ' kg' : ''}</div></button>`).join('')
+          || '<div class="muted" style="margin-bottom:8px">Nog niemand ingesteld: het voedingsadvies rekent nu met één volwassene.</div>'}
+        <button class="btn" data-act="eater">+ Persoon</button>
         <footer class="bk"><span class="muted">Back-up (data staat alleen in deze browser):</span>
           <button class="btn small" data-act="export">Exporteer</button>
           <button class="btn small" data-act="import">Importeer</button>
@@ -616,12 +745,12 @@
             const shown = b.parts.filter(x => !(l.hideDone && x.done)).sort(byName);
             let sub = '', ctl = '';
             if (b.kind === 'recept') {
-              const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '') + algChip(b.r);
+              const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal · eiwit ${fmtN(n.per.eiwit)} g p.p.` : '') + algChip(b.r);
               ctl = `${stepper('rpers', b.id, b.lr.persons, 'pers.')}<span class="grow"></span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
             } else if (b.kind === 'week') ctl = `<span class="muted grow">vast setje</span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
             const name = esc(b.name);
             return blk(b.key, b.color, 'orec', `<span>${name}<span class="muted osub"><span class="${b.parts.length && p.t === p.d ? 'badge' : ''}">${ptext(b.parts)}</span>${sub}</span></span>${plus(t, 'Toevoegen aan ' + b.name)}`,
-              (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(x => itemHtml(x, b.kind === 'ov' ? null : b.id)).join('') + addForm(t)
+              (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(x => itemHtml(x, b.kind === 'ov' ? null : b.id)).join('') + (b.kind === 'recept' ? adviceMini(b.r) : '') + addForm(t)
               // pas zichtbaar als het blok open is: naar de volledige receptpagina (naam, personen, voeding)
               + (b.kind === 'ov' ? '' : `<a class="tolink" href="#/recept/${b.id}">${b.kind === 'week' ? 'Setje' : 'Recept'}pagina →</a>`), open.rec === b.id);
           }).join('');
@@ -704,10 +833,18 @@
         + (unk.length ? `<div class="muted">? Onbekend (niet in de ingrediëntenlijst, geen product gekoppeld): ${esc(unk.join(', '))}</div>` : '');
     }
     function nutHtml(r) {
-      const n = nutri(r);
-      return `${n.counted ? `<div class="big">≈ ${Math.round(n.kcal)} kcal</div>
-          <div class="muted">Eiwit ${fmt1(n.p)} g · Vet ${fmt1(n.f)} g · Koolhydraten ${fmt1(n.c)} g · Vezels ${fmt1(n.fib)} g</div>` : '<div class="muted">Nog geen voeding gekoppeld.</div>'}
-        <div class="muted" style="margin-top:6px">${n.counted} van ${n.total} ingrediënten meegeteld${n.missing.length ? ' — mist: ' + esc(n.missing.join(', ')) : ''}</div>`;
+      const a = adviceFor(r), n = a.n;
+      if (!n.counted) return '<div class="muted">Nog geen voedingswaarden bekend voor deze ingrediënten.</div>';
+      const who = S.eaters?.length ? `${S.eaters.length} eter${S.eaters.length > 1 ? 's' : ''} (gemiddeld), ${diet()}` : `een volwassene, ${diet()} (stel je eters in op de startpagina)`;
+      const row = ([k, label, unit]) => {
+        const p = k in a.pct ? a.pct[k] : k === 'kcal' ? n.per.kcal / a.tgt.kcal : null;
+        return `<div class="nrow"><span>${label}</span><span class="nval">${fmtN(n.per[k])} ${unit}</span>${p == null ? '<span></span><span></span>'
+          : `<span class="nbar"><i class="${k === 'kcal' ? 'ok' : pctCls(p)}" style="width:${Math.min(100, p * 100)}%"></i></span><span class="npct">${Math.round(p * 100)}%</span>`}</div>`;
+      };
+      return `<div class="muted">Per portie, en welk deel dat is van wat een warme maaltijd (35% van de dag) zou moeten leveren voor ${esc(who)}:</div>
+        <div class="ntab">${NUTS.map(row).join('')}</div>
+        ${a.tips.map(tipHtml(r)).join('')}${a.notes.map(x => `<div class="note">${x}</div>`).join('')}
+        <div class="muted" style="margin-top:6px">${n.counted} van ${n.total} ingrediënten meegeteld${n.missing.length ? ' — mist: ' + esc(n.missing.join(', ')) : ''}. Schattingen uit de ingrediëntenlijst.</div>`;
     }
 
     function viewRecipe(r) {
@@ -734,8 +871,8 @@
         <div class="field"><label>Voeding per portie (schatting)</label>
           <div class="card nut"><div id="nutBox">${nutHtml(r)}</div>
             <div id="autoStatus" class="muted"></div>
-            <button class="btn small" data-act="autoNut" style="margin-top:8px">Voeding automatisch zoeken</button>
-            <div class="muted" style="margin-top:6px">Bron: Open Food Facts (gebruikers-gegevens, controleer het gekozen product). Alleen ingrediënten met een gewicht tellen mee.</div></div></div>
+            <button class="btn small" data-act="autoNut" style="margin-top:8px">Merkproducten zoeken (optioneel)</button>
+            <div class="muted" style="margin-top:6px">Een gekoppeld merkproduct (Open Food Facts, gebruikers-gegevens) vervangt de energie, eiwit, vet, koolhydraten en vezels uit de lijst.</div></div></div>
         <div class="field"><label>Allergenen (ingrediëntenlijst + gekoppelde producten)</label>
           <div class="card nut"><div id="algBox">${algHtml(r)}</div>
             <div class="muted" style="margin-top:6px">Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></div></div>
@@ -839,9 +976,13 @@
       } finally { animBusy = false; }
     }
 
-    // Omklappen: tik een smal blok aan de dichte kant. Fase 1: de open kant vervaagt naar de rand en de tekst van
-    // het aangetikte blok draait plat. Fase 2: nieuwe stand; smalle blokken draaien hun tekst rechtop, het
-    // aangetikte blok draait zijn kop van staand naar liggend en zijn inhoud schuift open; daarna de lijntjes.
+    // Omklappen (Han: "met het draaien van de tekst moet het vak ook draaien en breder worden, tot elk vak op de
+    // doelpositie is; daarna mag het geklikte vak uitschuiven"). Elk vak bestaat aan beide kanten met dezelfde
+    // data-b, dus het is een gedeeld element:
+    //  1. open inhoud klapt in (clip-path);
+    //  2. nieuwe stand renderen met álle vakken dicht; elk vak start met een transform die het precies over zijn
+    //     oude plek legt (verschuiven + 90° draaien + schalen in zijn eigen assen) en animeert naar 'none';
+    //  3. pas als alles staat: het aangetikte vak schuift uit, wat eronder staat schuift mee (FLIP).
     async function flip(el) {
       if (animBusy) return;
       const l = curList(), key = el.dataset.b, toRec = key.startsWith('rec:'), id = key.slice(4), top = el.getBoundingClientRect().top;
@@ -849,28 +990,36 @@
       if (calm()) { go(); keepAnchor(key, top); return; }
       animBusy = true;
       try {
-        const svg = $('#ovl'); svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
-        const leaving = $(toRec ? '#ov .ovL' : '#ov .ovR'), dx = toRec ? -14 : 14, jobs = [];
-        leaving.querySelectorAll('.obody:not([hidden])').forEach(b => jobs.push(b.animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
-          { duration: 300, easing: EASE_INOUT, fill: 'forwards' }).finished));
-        [...leaving.children].forEach((b, i) => jobs.push(b.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${dx}px)` }],
-          { duration: 300, delay: 60 + Math.min(i * 12, 100), easing: EASE_INOUT, fill: 'forwards' }).finished));
-        const vt0 = el.querySelector('.vt'), b0 = vt0.classList.contains('rev') ? 180 : 0;
-        jobs.push(vt0.animate([{ transform: `rotate(${b0}deg)`, opacity: 1 }, { transform: `rotate(${b0 - 90}deg)`, opacity: 0 }], { duration: 340, easing: EASE_INOUT, fill: 'forwards' }).finished);
+        $('#ovl').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
+        await Promise.all([...document.querySelectorAll('#ov .obody:not([hidden])')].map(b => b.animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
+          { duration: 280, easing: EASE_INOUT, fill: 'forwards' }).finished));
+        // bron: van een breed vak alleen de kop = zo groot als het dichtgeklapt is
+        const from = new Map([...document.querySelectorAll('#ov [data-b]')].map(e => [e.dataset.b, (e.querySelector(':scope > .ohead') || e).getBoundingClientRect()]));
+
+        go();
+        const t = blockEl(key); if (t) setOpen(t, false); // eerst dicht naar zijn plek, daarna uitschuiven
+        keepAnchor(key, top);
+        const ov = $('#ov'), jobs = []; $('#ovl').style.opacity = '0';
+        let i = 0;
+        for (const e of ov.querySelectorAll('[data-b]')) {
+          const o = from.get(e.dataset.b); if (!o) continue;
+          const n = e.getBoundingClientRect(), isCat = e.dataset.b.startsWith('cat:');
+          // draairichting volgt de leesrichting: recepten staand = +90°, categorieën staand = −90°
+          const ang = e.classList.contains('vblock') ? (isCat ? 90 : -90) : (isCat ? -90 : 90);
+          const dx = o.left + o.width / 2 - (n.left + n.width / 2), dy = o.top + o.height / 2 - (n.top + n.height / 2);
+          // na 90° draaien wordt de eigen breedte de hoogte: schaal zo dat het vak precies over zijn oude plek valt
+          const sx = o.height / n.width, sy = o.width / n.height;
+          jobs.push(e.animate([{ transform: `translate(${dx}px, ${dy}px) rotate(${ang}deg) scale(${sx}, ${sy})`, transformOrigin: '50% 50%' },
+            { transform: 'none', transformOrigin: '50% 50%' }], { duration: 640, delay: Math.min(i++ * 22, 220), easing: EASE_INOUT, fill: 'backwards' }).finished);
+        }
+        ov.querySelectorAll('.rub, .vrub, .vplus').forEach(x => jobs.push(x.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 480, fill: 'backwards' }).finished));
         await Promise.all(jobs);
 
-        go(); keepAnchor(key, top);
-        const ov = $('#ov'), t = blockEl(key), jobs2 = [];
-        $('#ovl').style.opacity = '0';
-        ov.querySelectorAll('.vblock .vt, .vrub .vt, .vplus').forEach((v, i) => { const b = v.classList.contains('rev') ? 180 : 0; jobs2.push(v.animate([{ transform: `rotate(${b - 90}deg)`, opacity: 0 }, { transform: `rotate(${b}deg)`, opacity: 1 }],
-          { duration: 420, delay: 50 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished); });
-        [...ov.querySelector(toRec ? '.ovR' : '.ovL').children].forEach((b, i) => { if (b !== t) jobs2.push(b.animate([{ opacity: 0, transform: `translateX(${-dx}px)` }, { opacity: 1, transform: 'none' }],
-          { duration: 420, delay: 120 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished); });
         if (t) {
-          jobs2.push(t.querySelector('.ohead').animate([{ transform: 'rotate(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 480, easing: EASE_OUT, fill: 'backwards' }).finished);
-          jobs2.push(reveal(t.querySelector('.obody'), 520, 220));
+          const els = movers(), before = els.map(x => x.getBoundingClientRect().top);
+          setOpen(t, true); keepAnchor(key, top);
+          await Promise.all([...slide(els, before, 460), reveal(t.querySelector('.obody'), 460)]);
         }
-        await Promise.all(jobs2);
         drawLines(); linesIn(320);
       } finally { animBusy = false; }
     }
@@ -977,6 +1126,26 @@
              g.name = d.querySelector('#e-name').value.trim() || g.name; g.qty = (parseFloat(d.querySelector('#e-qty').value) || 0) / f;
              g.unit = d.querySelector('#e-unit').value; g.cat = sel.value; g.stock = d.querySelector('#e-stock').checked; commit();
            } }]);
+      },
+      // Eter toevoegen/aanpassen: leeftijd + geslacht bepalen de dagbehoefte; gewicht (optioneel) verfijnt eiwit.
+      eater(el) {
+        const list = (S.eaters ||= []), i = el.dataset.i == null ? -1 : +el.dataset.i, e = i >= 0 ? list[i] : { naam: '', leeftijd: 40, geslacht: 'x' };
+        sheet(i >= 0 ? 'Eter aanpassen' : 'Persoon toevoegen', `
+          <div class="field"><label>Naam</label><input id="p-naam" value="${esc(e.naam)}" placeholder="bv. Han" /></div>
+          <div class="row"><div class="field grow"><label>Leeftijd</label><input id="p-age" type="number" min="1" max="110" inputmode="numeric" value="${e.leeftijd}" /></div>
+            <div class="field grow"><label>Geslacht</label><select id="p-sex"><option value="m"${e.geslacht === 'm' ? ' selected' : ''}>man</option><option value="v"${e.geslacht === 'v' ? ' selected' : ''}>vrouw</option><option value="x"${e.geslacht === 'x' ? ' selected' : ''}>zeg ik liever niet</option></select></div></div>
+          <div class="field"><label>Gewicht in kg (optioneel, verfijnt de eiwitbehoefte)</label><input id="p-kg" type="number" min="5" max="250" inputmode="decimal" value="${e.gewicht || ''}" /></div>`,
+          [...(i >= 0 ? [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${e.naam || 'Eter'} verwijderd`, () => { list.splice(i, 1); commit(); }) }] : []), cancel,
+           { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
+             const n = { naam: d.querySelector('#p-naam').value.trim(), leeftijd: Math.max(1, Math.min(110, +d.querySelector('#p-age').value || 40)), geslacht: d.querySelector('#p-sex').value };
+             const kg = parseFloat(d.querySelector('#p-kg').value); if (kg > 0) n.gewicht = kg;
+             if (i >= 0) list[i] = n; else list.push(n); commit();
+           } }]);
+      },
+      // Tip uit het advies: het ingrediënt komt in het recept zelf, berekend voor het eigen aantal personen.
+      addTip(el) {
+        const r = recipeById(el.dataset.rid), name = el.dataset.name, g = +el.dataset.g;
+        withUndo(`${name} toegevoegd aan ${r.name}`, () => { r.ingredients.push(ing(name, g * r.persons, 'g', guessCat(name) || 'Overig')); commit(); });
       },
       selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
       // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
@@ -1117,6 +1286,7 @@
         }).catch(() => alert('Dit bestand is geen geldige back-up.'));
         return;
       }
+      if (t.dataset.diet !== undefined && t.matches('[data-diet]')) { S.diet = t.value; commit(); return; }
       if (t.dataset.avoid) {
         const a = (S.avoid ||= []), i = a.indexOf(t.dataset.avoid);
         if (i < 0) a.push(t.dataset.avoid); else a.splice(i, 1);
@@ -1159,6 +1329,12 @@
         el.animate(rise, { duration: calm ? 1400 : 2200 + Math.random() * 1800, delay: Math.random() * 600, easing: 'ease-out', fill: 'backwards' }).onfinish = () => el.remove();
       }
     });
+
+    // Achtergrond: 18 aapjes en hartjes op vaste willekeurige plekken, elk met een eigen trage drijfbeweging.
+    $('#aapbg').innerHTML = Array.from({ length: 18 }, (_, i) => {
+      const r = () => Math.random();
+      return `<span style="left:${r() * 92}vw;top:${r() * 92}vh;font-size:${22 + r() * 26}px;--d:${14 + r() * 16}s;--w:-${r() * 20}s;--x:${(r() - .5) * 60}px;--y:${(r() - .5) * 80}px">${CONF[i % CONF.length]}</span>`;
+    }).join('');
 
     // <details> meldt open/dicht via 'toggle' (borrelt niet op, dus capture); onthouden zodat een re-render het paneel niet sluit.
     document.addEventListener('toggle', e => { if (e.target.matches?.('details.alg')) (S.ui ||= {}).algOpen = e.target.open; }, true);
