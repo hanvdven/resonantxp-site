@@ -232,6 +232,7 @@
     .rctl .who { flex: 1; }
     /* Omklappen: een leeg schaduwvak rekt uit en draait; de echte inhoud draait mee zonder vervorming. */
     .ghost { position: fixed; margin: 0; z-index: 0; pointer-events: none; box-sizing: border-box; }
+    .gemo { z-index: 2; display: flex; align-items: center; justify-content: center; line-height: 1; }
     .morphing { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
@@ -572,17 +573,52 @@
     const diet = () => S.diet || 'vegan'; // Han's lijstjes zijn vegan; dat is ook de standaard
     // Wat een dieet uitsluit, uitgedrukt in allergenen uit de lijst (eieren, melk, vis…): zo hoeft de lijst niet ook nog 'vlees: ja/nee' te dragen.
     const DIET_EXCLUDES = { vegan: ['eggs', 'milk', 'fish', 'crustaceans', 'molluscs'], vegetarisch: ['fish', 'crustaceans', 'molluscs'], alles: [] };
+    // Activiteit: factor op energie en op eiwit per kg (sporters/zwaar werk hebben duidelijk meer eiwit nodig).
+    const ACTS = [['laag', 'Weinig actief'], ['gemiddeld', 'Gemiddeld actief'], ['actief', 'Actief'], ['zeer', 'Zeer actief (sport, zwaar werk)']];
+    const ACT_KCAL = { laag: 0.85, gemiddeld: 1, actief: 1.15, zeer: 1.3 }, ACT_EIWIT = { laag: 1, gemiddeld: 1, actief: 1.3, zeer: 1.6 };
     function needOf(e) {
       const age = +e.leeftijd || 40, row = NEED.find(n => age <= n.tot) || NEED[NEED.length - 1];
       const pick = x => !Array.isArray(x) ? x : e.geslacht === 'v' ? x[1] : e.geslacht === 'm' ? x[0] : (x[0] + x[1]) / 2;
-      const kg = +e.gewicht || pick(row.kg);
-      return { kcal: pick(row.kcal), eiwit: row.epk * (diet() === 'vegan' ? 1.1 : 1) * kg, vezels: pick(row.vezels), ijzer: pick(row.ijzer),
+      const kg = +e.gewicht || pick(row.kg), act = e.activiteit || 'gemiddeld', vegan = (e.dieet || diet()) === 'vegan';
+      const n = { kcal: pick(row.kcal) * ACT_KCAL[act], eiwit: row.epk * ACT_EIWIT[act] * (vegan ? 1.1 : 1) * kg, vezels: pick(row.vezels), ijzer: pick(row.ijzer),
         calcium: pick(row.calcium), zink: pick(row.zink), omega3: pick(row.omega3), jodium: row.jodium, b12: row.b12, vitd: row.vitd };
+      // zwanger (2e/3e trimester, afgerond): meer energie, eiwit, ijzer, jodium en B12
+      if (e.zwanger && e.geslacht !== 'm') Object.assign(n, { kcal: n.kcal + 300, eiwit: n.eiwit + 10, ijzer: Math.max(n.ijzer, 16), jodium: 200, b12: 4.5, calcium: Math.max(n.calcium, 1000) });
+      return n;
     }
-    const GUEST = { leeftijd: 40, geslacht: 'x' }; // een gast telt als gemiddelde volwassene
-    const peopleFor = (l, lr) => { const ws = (l.who || []).filter(w => !w.off && !(lr?.off || []).includes(w.id)); return ws.length ? ws.map(w => personOf(w) || GUEST) : eaters(); };
+    const GUEST = { leeftijd: 40, geslacht: 'x' }; // een gast zonder gegevens telt als gemiddelde volwassene
+    // Profiel achter een chip: huisgenoot uit S.eaters, of de gast zelf (gast-gegevens staan op het lijstje).
+    const profileOf = w => w.eid ? personOf(w) : { ...GUEST, ...w };
+    const peopleFor = (l, lr) => { const ws = (l.who || []).filter(w => !w.off && !(lr?.off || []).includes(w.id)); return ws.length ? ws.map(profileOf).filter(Boolean) : eaters(); };
+    // Wat de mensen aan tafel niet (willen) eten: EU-allergenen, vrije-tekst-allergieën, dieet en 'lust geen'.
+    const splitTerms = s => String(s || '').split(/[,;/]+/).map(norm).filter(Boolean);
+    const termHits = (name, t) => { const n = norm(name); return n === t || n.includes(t) || (n.length > 3 && t.includes(n)); }; // 'paprika' raakt ook 'paprikapoeder'
+    function constraintsOf(people) {
+      const c = { alg: new Map(), words: [], diet: new Map(), dislike: [] };
+      const add = (m, k, v) => m.set(k, [...(m.get(k) || []), v]);
+      for (const p of people) {
+        const who = p.naam || 'gast', d = p.dieet || diet();
+        (p.allergenen || []).forEach(a => add(c.alg, a, who));
+        DIET_EXCLUDES[d].forEach(a => add(c.diet, a, `${who}: ${d}`));
+        splitTerms(p.allergie).forEach(t => c.words.push({ t, who }));
+        splitTerms(p.lustNiet).forEach(t => c.dislike.push({ t, who }));
+      }
+      return c;
+    }
+    let CONS = null; // de beperkingen van wie op het open lijstje meeeet; gezet in viewList
+    // Meldingen per ingrediënt: allergie rood met naam, dieet rood, 'lust geen' rustig grijs (Han).
+    function personTags(r) {
+      if (!CONS) return '';
+      const algs = new Set([...(ingInfo(r.name)?.allergens || []), ...(r.allergy?.hit || [])]), out = [];
+      for (const [a, who] of CONS.alg) if (algs.has(a)) out.push(`<span class="tag warn">LET OP: ${ALG_NAME[a].toUpperCase()} (${esc(who.join(', '))})</span>`);
+      for (const { t, who } of CONS.words) if (termHits(r.name, t)) out.push(`<span class="tag warn">LET OP: ${esc(t.toUpperCase())} (${esc(who)})</span>`);
+      for (const [a, who] of CONS.diet) if (algs.has(a)) out.push(`<span class="tag warn">niet ${esc(who.map(x => x.split(': ')[1]).filter((x, i, l) => l.indexOf(x) === i).join('/'))} (${esc(who.map(x => x.split(':')[0]).join(', '))})</span>`);
+      for (const { t, who } of CONS.dislike) if (termHits(r.name, t)) out.push(`<span class="tag unk">${esc(who)} lust geen ${esc(t)}</span>`);
+      return out.join('');
+    }
     const eaters = () => S.eaters?.length ? S.eaters : [{ naam: 'volwassene', leeftijd: 40, geslacht: 'x' }];
-    function mealTarget(people = eaters()) {
+    function mealTarget(people) {
+      people = people || eaters();
       const es = people, t = {};
       for (const k of ['kcal', ...ADVISE]) t[k] = es.reduce((a, e) => a + needOf(e)[k], 0) / es.length * MEAL_SHARE;
       return t;
@@ -592,7 +628,9 @@
     // peulvruchten, of een flinke schep groente/tofu.
     const maxAdd = v => (v.vet || 0) > 40 || (v.kcal || 0) > 400 ? 20 : (v.kcal || 0) > 300 ? 60 : 120; // zaden/noten: een eetlepel of handje
     function adviceFor(r, people) {
-      const n = nutri(r), tgt = mealTarget(people), avoid = [...(S.avoid || []), ...DIET_EXCLUDES[diet()]];
+      const ps = people || eaters(), n = nutri(r), tgt = mealTarget(ps);
+      const avoid = [...(S.avoid || []), ...ps.flatMap(p => [...(p.allergenen || []), ...DIET_EXCLUDES[p.dieet || diet()]])];
+      const terms = ps.flatMap(p => [...splitTerms(p.allergie), ...splitTerms(p.lustNiet)]);
       const pct = Object.fromEntries(ADVISE.map(k => [k, tgt[k] ? n.per[k] / tgt[k] : 1]));
       // B12, vitamine D en jodium los je niet op met een ingrediënt in een recept: die krijgen een advies, geen tip.
       const low = ADVISE.filter(k => pct[k] < 0.6 && !['b12', 'vitd', 'jodium'].includes(k)).sort((a, b) => pct[a] - pct[b]);
@@ -600,7 +638,7 @@
       for (const info of DB.values()) {
         if (seen.has(info)) continue; seen.add(info);
         if (!info.nut || info.noTip || !SUGGEST_CATS.has(info.cat) || have.has(norm(info.naam))) continue;
-        if (info.allergens.some(a => avoid.includes(a))) continue; // nooit iets voorstellen dat je vermijdt of dat niet bij je dieet past
+        if (info.allergens.some(a => avoid.includes(a)) || terms.some(t => termHits(info.naam, t))) continue; // nooit iets wat iemand aan tafel vermijdt, niet past of niet lust
         cands.push(info);
       }
       const tips = [];
@@ -690,8 +728,8 @@
       return `<div class="top"><h1>Boodschappen</h1></div>${tabs('l')}${cards}
         <button class="btn primary" data-act="newList">+ Nieuw lijstje</button>
         <div class="rub" style="margin:22px 2px 8px"><span>Wie eten er mee</span></div>
-        <div class="field"><label>Dieet</label><select data-diet>${DIETS.map(([k, t]) => `<option value="${k}"${diet() === k ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
-        ${(S.eaters || []).map((e, i) => `<button class="card listcard" data-act="eater" data-i="${i}"><b>${esc(e.naam || 'Eter')}</b><div class="muted">${e.leeftijd} jaar · ${({ m: 'man', v: 'vrouw' })[e.geslacht] || 'geslacht niet opgegeven'}${e.gewicht ? ' · ' + e.gewicht + ' kg' : ''}</div></button>`).join('')
+        <div class="field"><label>Standaarddieet (voor wie niets anders heeft)</label><select data-diet>${DIETS.map(([k, t]) => `<option value="${k}"${diet() === k ? ' selected' : ''}>${t}</option>`).join('')}</select></div>
+        ${(S.eaters || []).map((e, i) => `<button class="card listcard" data-act="eater" data-i="${i}"><b>${esc(e.naam || 'Persoon')}${personMarks(e)}</b><div class="muted">${esc(personLine(e))}</div></button>`).join('')
           || '<div class="muted" style="margin-bottom:8px">Nog niemand ingesteld: het voedingsadvies rekent nu met één volwassene.</div>'}
         <button class="btn" data-act="eater">+ Persoon</button>
         <footer class="bk"><span class="muted">Back-up (data staat alleen in deze browser):</span>
@@ -702,7 +740,7 @@
 
     function algTags(r) {
       const av = S.avoid || []; if (!av.length) return '';
-      const h = r.allergy.hit.filter(a => av.includes(a)), t = r.allergy.trace.filter(a => av.includes(a));
+      const h = r.allergy.hit.filter(a => av.includes(a) && !CONS?.alg.has(a)), t = r.allergy.trace.filter(a => av.includes(a)); // persoonlijke melding wint (met naam)
       return h.map(a => `<span class="tag warn">LET OP: ${ALG_NAME[a].toUpperCase()}</span>`).join('') + t.map(a => `<span class="tag trace">sporen ${ALG_NAME[a].toLowerCase()}</span>`).join('')
         + (r.allergy.unknown ? '<span class="tag unk" title="Onbekend ingrediënt: allergenen niet gecontroleerd. Voeg het toe aan boodschappen-ingredienten.json.">?</span>' : '');
     }
@@ -730,7 +768,7 @@
       const name = `<span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}`;
       return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
-        <div class="txt grow">${r.recipe && rid ? `<button class="nm2" data-act="editIng" data-rid="${rid}" data-key="${esc(r.key)}">${name}</button>` : r.recipe ? `<span class="nm2" data-act="selIng" data-key="${esc(r.key)}">${name}</span>` : `<button class="nm2" data-act="editItem" data-id="${r.id}">${name}</button>`}${stk}${algTags(r)}</div>
+        <div class="txt grow">${r.recipe && rid ? `<button class="nm2" data-act="editIng" data-rid="${rid}" data-key="${esc(r.key)}">${name}</button>` : r.recipe ? `<span class="nm2" data-act="selIng" data-key="${esc(r.key)}">${name}</span>` : `<button class="nm2" data-act="editItem" data-id="${r.id}">${name}</button>`}${stk}${algTags(r)}${personTags(r)}</div>
         <span class="qty">${esc(r.qtyText)}</span>
       </div>`;
     }
@@ -766,10 +804,36 @@
 
     // Het bord: categorieën | recepten. Eén kant open (l.view 'rec' → rechts), daarbinnen één blok open
     // (S.ui.open.cat / .rec). Elk blok draagt data-b ('cat:<naam>' / 'rec:<id>') en data-color voor de lijntjes.
+    function personFields(e) {
+      const sel = (id, opts, v) => `<select id="${id}">${opts.map(([k, t]) => `<option value="${k}"${v === k ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+      const algs = e.allergenen || [];
+      return `<div class="field"><label>Naam</label><input id="p-naam" value="${esc(e.naam || '')}" /></div>
+        <div class="row"><div class="field grow"><label>Geslacht</label>${sel('p-sex', [['m', 'man'], ['v', 'vrouw'], ['x', 'zeg ik liever niet']], e.geslacht || 'x')}</div>
+          <div class="field" style="width:78px"><label>Leeftijd</label><input id="p-age" type="number" min="1" max="110" inputmode="numeric" value="${e.leeftijd || 40}" /></div>
+          <div class="field" style="width:78px"><label>Kg</label><input id="p-kg" type="number" min="5" max="250" inputmode="decimal" value="${e.gewicht || ''}" /></div></div>
+        <div class="row"><div class="field grow"><label>Activiteit</label>${sel('p-act', ACTS, e.activiteit || 'gemiddeld')}</div>
+          <div class="field grow"><label>Dieet</label>${sel('p-diet', DIETS, e.dieet || diet())}</div></div>
+        <div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="p-preg"${e.zwanger ? ' checked' : ''} /> Zwanger</label></div>
+        <div class="field"><label>Allergieën</label><div class="achips">${ALLERGENS.map(([id, nl]) => `<label class="achip${algs.includes(id) ? ' on' : ''}"><input type="checkbox" data-palg="${id}"${algs.includes(id) ? ' checked' : ''} /> ${nl}</label>`).join('')}</div>
+          <input id="p-alg" value="${esc(e.allergie || '')}" placeholder="andere, bv. paprika" /></div>
+        <div class="field"><label>Lust geen</label><input id="p-dis" value="${esc(e.lustNiet || '')}" placeholder="bv. champignons, koriander" /></div>`;
+    }
+    function readPerson(d, base) {
+      const n = { ...base, naam: d.querySelector('#p-naam').value.trim(), geslacht: d.querySelector('#p-sex').value,
+        leeftijd: Math.max(1, Math.min(110, +d.querySelector('#p-age').value || 40)), activiteit: d.querySelector('#p-act').value, dieet: d.querySelector('#p-diet').value,
+        zwanger: d.querySelector('#p-preg').checked, allergenen: [...d.querySelectorAll('[data-palg]:checked')].map(x => x.dataset.palg),
+        allergie: d.querySelector('#p-alg').value.trim(), lustNiet: d.querySelector('#p-dis').value.trim() };
+      const kg = parseFloat(d.querySelector('#p-kg').value); if (kg > 0) n.gewicht = kg; else delete n.gewicht;
+      return n;
+    }
+    const personMarks = p => (p?.zwanger ? ' 🤰' : '') + (p?.allergenen?.length || p?.allergie ? ' ⚠️' : '');
+    const personLine = e => [e.leeftijd + ' jaar', ({ m: 'man', v: 'vrouw' })[e.geslacht], e.gewicht && e.gewicht + ' kg', (ACTS.find(a => a[0] === (e.activiteit || 'gemiddeld')) || [])[1]?.toLowerCase(),
+      e.dieet || diet(), e.zwanger && 'zwanger', (e.allergenen?.length || e.allergie) && 'allergie: ' + [...(e.allergenen || []).map(a => ALG_NAME[a].toLowerCase()), e.allergie].filter(Boolean).join(', '),
+      e.lustNiet && 'lust geen: ' + e.lustNiet].filter(Boolean).join(' · ');
     function whoChips(l, lr) {
       const ws = (l.who || []).filter(w => !lr || !w.off); // in een recept alleen wie op het lijstje aan staat
       const chip = w => { const off = lr ? (lr.off || []).includes(w.id) : w.off;
-        return `<button class="pchip${off ? ' off' : ''}${w.eid ? '' : ' guest'}" data-act="who" data-w="${w.id}"${lr ? ` data-rid="${lr.rid}"` : ''}>${esc(whoName(w))}</button>`; };
+        return `<button class="pchip${off ? ' off' : ''}${w.eid ? '' : ' guest'}" data-act="who" data-w="${w.id}"${lr ? ` data-rid="${lr.rid}"` : ''}>${esc(whoName(w))}${personMarks(profileOf(w))}</button>`; };
       return `<span class="who">${ws.map(chip).join('')}${lr ? '' : '<button class="pchip add" data-act="addGuest">+ gast</button>'}</span>`;
     }
     // "+" onder het laatste ingrediënt (Han): knop, of de invoerregel als die open staat.
@@ -808,7 +872,8 @@
             const shown = b.parts.filter(x => !(l.hideDone && x.done)).sort(byName);
             let sub = '', ctl = '';
             if (b.kind === 'recept') {
-              const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal · eiwit ${fmtN(n.per.eiwit)} g p.p.` : '') + algChip(b.r);
+              const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal · eiwit ${fmtN(n.per.eiwit)} g p.p.` : '') + algChip(b.r)
+                + (b.parts.some(x => personTags(x).includes('tag warn')) ? ' · <b style="color:#b42318">⚠ let op</b>' : '');
               ctl = `${whoChips(l, b.lr)}<button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
             } else if (b.kind === 'week') ctl = `<span class="muted grow">vast setje</span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
             // volgorde in een open recept (Han): wie eet mee · ingrediënten · + toevoegen · voedingsadvies · receptpagina
@@ -866,7 +931,7 @@
       return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
         ${whoChips(l)}<div class="muted" style="margin-top:4px">${l.persons} ${l.persons === 1 ? 'persoon' : 'personen'} · schaalt alle recepten mee</div>
         <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${pr.d} van ${pr.t} binnen</div>
-        ${boardHtml(l, rows, rowMap)}
+        ${(CONS = constraintsOf(peopleFor(l)), boardHtml(l, rows, rowMap))}
         <div class="toolbar">
           <button class="btn small" data-act="hideDone">${l.hideDone ? 'Toon afgevinkt' : 'Verberg afgevinkt'}</button>
           <button class="btn small" data-act="uncheckAll">Alles uitvinken</button>
@@ -946,6 +1011,7 @@
     }
 
     function render() {
+      CONS = null; // alleen geldig binnen een lijstje
       const app = $('#app'), h = location.hash.replace(/^#/, '') || '/';
       const [, kind, id] = h.split('/');
       let html;
@@ -1049,13 +1115,12 @@
       } finally { animBusy = false; }
     }
 
-    // Omklappen (Han: "met het draaien van de tekst moet het vak ook draaien en breder worden, tot elk vak op de
-    // doelpositie is; daarna mag het geklikte vak uitschuiven"). Elk vak bestaat aan beide kanten met dezelfde
-    // data-b, dus het is een gedeeld element:
-    //  1. open inhoud klapt in (clip-path);
-    //  2. nieuwe stand renderen met álle vakken dicht; elk vak start met een transform die het precies over zijn
-    //     oude plek legt (verschuiven + 90° draaien + schalen in zijn eigen assen) en animeert naar 'none';
-    //  3. pas als alles staat: het aangetikte vak schuift uit, wat eronder staat schuift mee (FLIP).
+    // Omklappen (Han: "inklappen tot vierkant met enkel de emoji, dan weer uitklappen; het meest clean").
+    //  0. open inhoud klapt in (clip-path);
+    //  1. nieuwe stand renderen, alles dicht. Per vak (zelfde data-b aan beide kanten) een leeg schaduwvak dat
+    //     krimpt tot een vierkantje rond de emoji, naar de nieuwe plek schuift en uitklapt tot de nieuwe vorm;
+    //     de emoji reist rechtop mee; de echte inhoud verschijnt pas als het vak staat. Er vervormt nooit tekst.
+    //  2. het aangetikte vak schuift uit, wat eronder staat schuift mee (FLIP).
     async function flip(el) {
       if (animBusy) return;
       const l = curList(), key = el.dataset.b, toRec = key.startsWith('rec:'), id = key.slice(4), top = el.getBoundingClientRect().top;
@@ -1065,35 +1130,40 @@
       try {
         $('#ovl').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
         await Promise.all([...document.querySelectorAll('#ov .obody:not([hidden])')].map(b => b.animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
-          { duration: 280, easing: EASE_INOUT, fill: 'forwards' }).finished));
-        // bron: van een breed vak alleen de kop = zo groot als het dichtgeklapt is
-        const from = new Map([...document.querySelectorAll('#ov [data-b]')].map(e => [e.dataset.b, (e.querySelector(':scope > .ohead') || e).getBoundingClientRect()]));
+          { duration: 260, easing: EASE_INOUT, fill: 'forwards' }).finished));
+        // van een breed vak telt alleen de kop (= zo groot als het dicht is); plus waar zijn emoji staat
+        const snap = e => { const em = e.querySelector('.hemo, .vemo'), box = (e.querySelector(':scope > .ohead') || e).getBoundingClientRect(); return { box, em: em ? em.getBoundingClientRect() : box, emEl: em }; };
+        const from = new Map([...document.querySelectorAll('#ov [data-b]')].map(e => [e.dataset.b, snap(e)]));
 
         go();
         const t = blockEl(key); if (t) setOpen(t, false); // eerst dicht naar zijn plek, daarna uitschuiven
         keepAnchor(key, top);
         const ov = $('#ov'), jobs = [], ghosts = []; $('#ovl').style.opacity = '0';
-        // eerst alles meten, dan pas animaties aanmaken (geen afwisselend lezen/schrijven = geen extra layouts)
-        const pairs = [...ov.querySelectorAll('[data-b]')].map(e => ({ e, o: from.get(e.dataset.b), n: e.getBoundingClientRect() })).filter(x => x.o);
-        let i = 0;
-        for (const { e, o, n } of pairs) {
-          const isCat = e.dataset.b.startsWith('cat:');
-          // draairichting volgt de leesrichting: recepten staand = +90°, categorieën staand = −90°
-          const ang = e.classList.contains('vblock') ? (isCat ? 90 : -90) : (isCat ? -90 : 90);
-          const dx = o.left + o.width / 2 - (n.left + n.width / 2), dy = o.top + o.height / 2 - (n.top + n.height / 2);
-          // na 90° draaien wordt de eigen breedte de hoogte: schaal zo dat het vak precies over zijn oude plek valt
-          const sx = o.height / n.width, sy = o.width / n.height, opts = { duration: 640, delay: Math.min(i++ * 22, 220), easing: EASE_INOUT, fill: 'backwards' };
-          // 1) een leeg schaduwvak (zelfde klassen/kleur, geen tekst) rekt ongelijk uit: daar valt niets te vervormen
+        const pairs = [...ov.querySelectorAll('[data-b]')].map(e => ({ e, o: from.get(e.dataset.b), n: snap(e) })).filter(x => x.o); // eerst alles meten
+        const cx = r => r.left + r.width / 2, cy = r => r.top + r.height / 2;
+        pairs.forEach(({ e, o, n }, i) => {
+          const N = n.box, side = Math.min(o.box.width, o.box.height, N.width, N.height); // het vierkantje
+          const sq = em => ({ left: cx(em) - side / 2, top: cy(em) - side / 2, width: side, height: side });
+          const K = r => `translate(${cx(r) - cx(N)}px, ${cy(r) - cy(N)}px) scale(${r.width / N.width}, ${r.height / N.height})`;
+          const opts = { duration: 950, delay: Math.min(i * 18, 180), easing: 'ease-in-out', fill: 'backwards' };
+          // 1) leeg schaduwvak: oude vorm → vierkantje (35%) → verhuisd (65%) → nieuwe vorm
           const g = e.cloneNode(false); g.removeAttribute('data-b'); g.removeAttribute('data-act'); g.classList.remove('sel'); g.classList.add('ghost');
-          Object.assign(g.style, { left: n.left + 'px', top: n.top + 'px', width: n.width + 'px', height: n.height + 'px' });
+          Object.assign(g.style, { left: N.left + 'px', top: N.top + 'px', width: N.width + 'px', height: N.height + 'px' });
           document.body.appendChild(g); ghosts.push(g);
-          jobs.push(g.animate([{ transform: `translate(${dx}px, ${dy}px) rotate(${ang}deg) scale(${sx}, ${sy})` }, { transform: 'none' }], opts).finished);
-          // 2) de echte inhoud: zelfde verplaatsing en draai, maar GELIJKMATIG geschaald → letters blijven letters
+          jobs.push(g.animate([{ transform: K(o.box) }, { transform: K(sq(o.em)), offset: .35 }, { transform: K(sq(n.em)), offset: .65 }, { transform: 'none' }], opts).finished);
+          // 2) de emoji reist rechtop mee, midden in het vierkantje
+          if (n.emEl) {
+            const eg = document.createElement('span'); eg.className = 'ghost gemo'; eg.textContent = n.emEl.textContent;
+            Object.assign(eg.style, { left: n.em.left + 'px', top: n.em.top + 'px', width: n.em.width + 'px', height: n.em.height + 'px', fontSize: getComputedStyle(n.emEl).fontSize });
+            document.body.appendChild(eg); ghosts.push(eg);
+            const T = r => `translate(${cx(r) - cx(n.em)}px, ${cy(r) - cy(n.em)}px)`;
+            jobs.push(eg.animate([{ transform: T(o.em) }, { transform: T(o.em), offset: .35 }, { transform: 'none', offset: .65 }, { transform: 'none' }], opts).finished);
+          }
+          // 3) de echte inhoud (tekst) pas tonen als het vak zijn nieuwe vorm heeft
           e.classList.add('morphing');
-          jobs.push(e.animate([{ transform: `translate(${dx}px, ${dy}px) rotate(${ang}deg) scale(${Math.min(sx, sy)})`, transformOrigin: '50% 50%', opacity: .4 },
-            { transform: 'none', transformOrigin: '50% 50%', opacity: 1 }], opts).finished);
-        }
-        ov.querySelectorAll('.rub, .vrub, .vplus').forEach(x => jobs.push(x.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 480, fill: 'backwards' }).finished));
+          jobs.push(e.animate([{ opacity: 0 }, { opacity: 0, offset: .82 }, { opacity: 1 }], opts).finished);
+        });
+        ov.querySelectorAll('.rub, .vrub, .vplus').forEach(x => jobs.push(x.animate([{ opacity: 0 }, { opacity: 0, offset: .6 }, { opacity: 1 }], { duration: 950, fill: 'backwards' }).finished));
         await Promise.all(jobs);
         ghosts.forEach(g => g.remove()); ov.querySelectorAll('.morphing').forEach(e => e.classList.remove('morphing'));
 
@@ -1153,10 +1223,16 @@
           if (i < 0) off.push(w.id); else off.splice(i, 1);
           syncPersons(l); return commit();
         }
-        if (w.eid) { w.off = !w.off; syncPersons(l); return commit(); }
-        sheet('Gast', `<div class="field"><label>Naam</label><input id="g-naam" value="${esc(w.naam || 'gast')}" /></div>`,
-          [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${whoName(w)} verwijderd`, () => { l.who = l.who.filter(x => x !== w); syncPersons(l); commit(); }) }, cancel,
-           { id: 's', label: 'Opslaan', cls: 'primary', fn: d => { w.naam = d.querySelector('#g-naam').value.trim() || 'gast'; commit(); } }]);
+        // bovenaan: profiel openen (Han), met 'eet mee met dit lijstje'
+        const prof = w.eid ? personOf(w) : w;
+        sheet(whoName(w), `<div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="p-on"${w.off ? '' : ' checked'} /> Eet mee met dit lijstje</label></div>`
+          + personFields(prof) + (w.eid ? '<div class="muted">Dit is een huisgenoot: wijzigingen gelden voor al je lijstjes.</div>' : ''),
+          [...(w.eid ? [] : [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${whoName(w)} verwijderd`, () => { l.who = l.who.filter(x => x !== w); syncPersons(l); commit(); }) }]), cancel,
+           { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
+             const n = readPerson(d, prof);
+             if (w.eid) Object.assign(prof, n); else Object.assign(w, n, { naam: n.naam || 'gast' });
+             w.off = !d.querySelector('#p-on').checked; syncPersons(l); commit();
+           } }]);
       },
       addGuest() { const l = curList(); l.who.push({ id: uid(), naam: 'gast' }); syncPersons(l); commit(); },
       rdel(el) { const l = curList(), r = recipeById(el.dataset.id); withUndo(`${r ? r.name : 'Recept'} van het lijstje gehaald`, () => { l.recipes = l.recipes.filter(x => x.rid !== el.dataset.id); commit(); }); },
@@ -1226,15 +1302,10 @@
       // Eter toevoegen/aanpassen: leeftijd + geslacht bepalen de dagbehoefte; gewicht (optioneel) verfijnt eiwit.
       eater(el) {
         const list = (S.eaters ||= []), i = el.dataset.i == null ? -1 : +el.dataset.i, e = i >= 0 ? list[i] : { naam: '', leeftijd: 40, geslacht: 'x' };
-        sheet(i >= 0 ? 'Eter aanpassen' : 'Persoon toevoegen', `
-          <div class="field"><label>Naam</label><input id="p-naam" value="${esc(e.naam)}" placeholder="bv. Han" /></div>
-          <div class="row"><div class="field grow"><label>Leeftijd</label><input id="p-age" type="number" min="1" max="110" inputmode="numeric" value="${e.leeftijd}" /></div>
-            <div class="field grow"><label>Geslacht</label><select id="p-sex"><option value="m"${e.geslacht === 'm' ? ' selected' : ''}>man</option><option value="v"${e.geslacht === 'v' ? ' selected' : ''}>vrouw</option><option value="x"${e.geslacht === 'x' ? ' selected' : ''}>zeg ik liever niet</option></select></div></div>
-          <div class="field"><label>Gewicht in kg (optioneel, verfijnt de eiwitbehoefte)</label><input id="p-kg" type="number" min="5" max="250" inputmode="decimal" value="${e.gewicht || ''}" /></div>`,
-          [...(i >= 0 ? [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${e.naam || 'Eter'} verwijderd`, () => { list.splice(i, 1); S.lists.forEach(syncPersons); commit(); }) }] : []), cancel,
+        sheet(i >= 0 ? 'Persoon aanpassen' : 'Persoon toevoegen', personFields(e),
+          [...(i >= 0 ? [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${e.naam || 'Persoon'} verwijderd`, () => { list.splice(i, 1); S.lists.forEach(syncPersons); commit(); }) }] : []), cancel,
            { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
-             const n = { id: e.id || uid(), naam: d.querySelector('#p-naam').value.trim(), leeftijd: Math.max(1, Math.min(110, +d.querySelector('#p-age').value || 40)), geslacht: d.querySelector('#p-sex').value };
-             const kg = parseFloat(d.querySelector('#p-kg').value); if (kg > 0) n.gewicht = kg;
+             const n = readPerson(d, { id: e.id || uid() });
              if (i >= 0) list[i] = n; else { list.push(n); S.lists.forEach(l => { (l.who ||= []).push({ id: uid(), eid: n.id }); syncPersons(l); }); }
              commit();
            } }]);
@@ -1384,6 +1455,7 @@
         return;
       }
       if (t.dataset.diet !== undefined && t.matches('[data-diet]')) { S.diet = t.value; commit(); return; }
+      if (t.dataset.palg !== undefined) { t.closest('.achip').classList.toggle('on', t.checked); return; } // chip-kleur in het profiel
       if (t.dataset.avoid) {
         const a = (S.avoid ||= []), i = a.indexOf(t.dataset.avoid);
         if (i < 0) a.push(t.dataset.avoid); else a.splice(i, 1);
