@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boodschappen</title>
+  <meta name="description" content="Boodschappenlijstjes met categorieën, recepten en aantal personen." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#f5f4f0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&display=swap" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <style>
+    /* Zelfstandige pagina: bewust NIET style.css/nav.js/header.js — dit is een gereedschap, geen
+       onderdeel van de XP-beleving. Alleen kleuren en lettertypen volgen de site. */
+    :root {
+      --bg: #f5f4f0; --card: #fff; --text: #2c3140; --muted: #64748b; --line: #e5e2db;
+      --accent: #2563eb; --done: #3f7d5a; --danger: #b42318; --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.45 'Martel Sans', system-ui, sans-serif; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 16px 16px 96px; }
+    h1, h2 { font-family: 'Linden Hill', Georgia, serif; font-weight: 400; margin: 0; }
+    h1 { font-size: 1.9rem; } h2 { font-size: 1.25rem; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .top { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .top h1 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .btn { min-height: 44px; padding: 0 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .btn.danger { color: var(--danger); }
+    .btn.small { min-height: 36px; padding: 0 12px; font-size: .9rem; }
+    .icon { width: 44px; min-height: 44px; padding: 0; text-align: center; font-size: 1.2rem; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+    .muted { color: var(--muted); font-size: .85rem; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .grow { flex: 1; min-width: 0; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .tabs a { flex: 1; text-align: center; padding: 10px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card); }
+    .tabs a.on { background: var(--text); color: #fff; border-color: var(--text); }
+    .listcard { display: block; width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 10px; }
+    .listcard b { font-weight: 600; }
+    /* stepper */
+    .stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+    .stepper button { width: 40px; min-height: 40px; border: 0; background: none; font-size: 1.2rem; }
+    .stepper span { min-width: 78px; text-align: center; font-size: .92rem; }
+    /* voortgang */
+    .progress { height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; margin: 6px 0 4px; }
+    .progress i { display: block; height: 100%; background: var(--done); transition: width .25s; }
+    /* recepten-strip op een lijstje */
+    .rchips { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+    .rchip { padding: 8px 8px 8px 14px; }
+    .rchip a { text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+    /* toevoegen */
+    .add { display: grid; grid-template-columns: 1fr 112px; gap: 8px; margin: 14px 0; }
+    .add select { grid-column: 1 / 2; }
+    .add .btn { grid-column: 2 / 3; }
+    input, select, textarea { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+    /* categorieën + items */
+    .cat { margin: 18px 0 6px; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; }
+    .item { display: flex; align-items: center; gap: 12px; padding: 4px 8px 4px 4px; border-bottom: 1px solid var(--line); background: var(--card); }
+    .item:first-of-type { border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); }
+    .item:last-of-type { border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius); border-bottom: 0; }
+    .check { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border: 0; background: none; }
+    .check span { width: 24px; height: 24px; border: 2px solid #b8b3a7; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 15px; line-height: 1; }
+    .item.done .check span { background: var(--done); border-color: var(--done); }
+    .item .txt { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 6px 0; }
+    .item.done .txt { text-decoration: line-through; color: var(--muted); }
+    .qty { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+    .tag { display: inline-block; font-size: .72rem; padding: 0 8px; margin: 2px 4px 0 0; border-radius: 99px; background: #eef2fb; color: var(--accent); border: 0; min-height: 22px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    /* recept bewerken */
+    .ing { display: grid; grid-template-columns: 70px 84px 1fr 44px; gap: 6px; margin-bottom: 6px; padding: 8px; }
+    .ing .catsel { grid-column: 1 / 4; }
+    .field { margin: 12px 0; } .field label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+    /* dialog */
+    dialog { border: 0; border-radius: 16px; padding: 18px; width: min(92vw, 460px); max-height: 86vh; background: var(--bg); color: var(--text); }
+    dialog::backdrop { background: rgba(26, 31, 46, .45); }
+    dialog .btns { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+    .pick { display: block; width: 100%; text-align: left; margin-bottom: 8px; }
+    .pick[disabled] { opacity: .45; }
+    .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
+    footer.bk { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+  <dialog id="sheet"></dialog>
+
+  <script>
+  (() => {
+    'use strict';
+    /* ============================================================
+       Boodschappen — data in de browser (localStorage), geen server.
+       Model:
+         recipes[]  {id, name, persons, ingredients[{name, qty, unit, cat}]}
+         lists[]    {id, name, persons, recipes[{rid, persons}], items[], done{}}
+       Kernidee: de ingrediënten van een recept worden NIET naar het lijstje gekopieerd maar bij elke
+       render afgeleid uit (recept × personen). Daardoor schaalt "aantal personen" vanzelf mee, en
+       kloppen de hoeveelheden nog als je het recept later aanpast. Los toegevoegde dingen (items[])
+       zijn vrije tekst. Afvinken van een receptingrediënt staat in list.done[sleutel].
+       ============================================================ */
+    const KEY = 'boodschappen.v1';
+    const UNITS = ['', 'g', 'kg', 'ml', 'l', 'el', 'tl', 'stuk', 'teen', 'bos', 'blik', 'pak', 'fles', 'potje'];
+    // Telbare eenheden worden naar boven afgerond: 0,75 ui koop je niet.
+    const COUNT_UNITS = new Set(['stuk', 'teen', 'bos', 'blik', 'pak', 'fles', 'potje']);
+    const DEFAULT_CATS = ['Groente & fruit', 'Aardappelen, pasta & rijst', 'Brood & ontbijt', 'Houdbaar',
+      'Zuivelvervangers', 'Kruiden & sauzen', 'Beleg', 'Dranken', 'Lekkers & snacks', 'Overig'];
+
+    const uid = () => Math.random().toString(36).slice(2, 9);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const $ = s => document.querySelector(s);
+
+    /* ---------- seed: de eerste keer dat de pagina opent ---------- */
+    const ing = (name, qty, unit, cat) => ({ name, qty, unit, cat });
+    function seed() {
+      const recipes = [
+        { id: uid(), name: 'Pompoensoep', persons: 4, ingredients: [
+          ing('pompoen', 1000, 'g', 'Groente & fruit'), ing('ui', 1, 'stuk', 'Groente & fruit'),
+          ing('knoflook', 2, 'teen', 'Groente & fruit'), ing('groentebouillonblokje', 1, 'stuk', 'Houdbaar'),
+          ing('kokosmelk', 200, 'ml', 'Houdbaar'), ing('olijfolie', 2, 'el', 'Kruiden & sauzen')] },
+        { id: uid(), name: 'Salade (lunch)', persons: 4, ingredients: [
+          ing('gemengde sla', 300, 'g', 'Groente & fruit'), ing('tomaat', 4, 'stuk', 'Groente & fruit'),
+          ing('komkommer', 1, 'stuk', 'Groente & fruit'), ing('avocado', 2, 'stuk', 'Groente & fruit'),
+          ing('kikkererwten', 1, 'blik', 'Houdbaar'), ing('citroen', 1, 'stuk', 'Groente & fruit'),
+          ing('olijfolie', 2, 'el', 'Kruiden & sauzen'), ing('stokbrood', 1, 'stuk', 'Brood & ontbijt')] },
+        { id: uid(), name: 'Preisoep met pastinaak en room', persons: 4, ingredients: [
+          ing('prei', 600, 'g', 'Groente & fruit'), ing('pastinaak', 400, 'g', 'Groente & fruit'),
+          ing('aardappel (kruimig)', 300, 'g', 'Aardappelen, pasta & rijst'), ing('ui', 1, 'stuk', 'Groente & fruit'),
+          ing('groentebouillonblokje', 1, 'stuk', 'Houdbaar'), ing('plantaardige room', 200, 'ml', 'Zuivelvervangers'),
+          ing('nootmuskaat', 1, 'potje', 'Kruiden & sauzen'), ing('olijfolie', 2, 'el', 'Kruiden & sauzen')] },
+        { id: uid(), name: 'Aardappeltjes', persons: 4, ingredients: [
+          ing('krieltjes', 1000, 'g', 'Aardappelen, pasta & rijst'), ing('rozemarijn', 1, 'bos', 'Groente & fruit'),
+          ing('olijfolie', 3, 'el', 'Kruiden & sauzen')] },
+        { id: uid(), name: 'Pasta met tomatensaus', persons: 4, ingredients: [
+          ing('pasta', 400, 'g', 'Aardappelen, pasta & rijst'), ing('tomatenpassata', 1, 'pak', 'Houdbaar'),
+          ing('ui', 1, 'stuk', 'Groente & fruit'), ing('knoflook', 2, 'teen', 'Groente & fruit'),
+          ing('basilicum', 1, 'bos', 'Groente & fruit'), ing('olijfolie', 2, 'el', 'Kruiden & sauzen')] },
+      ];
+      const item = (name, qty, cat) => ({ id: uid(), name, qty, cat, done: false });
+      return {
+        v: 1, categories: [...DEFAULT_CATS], recipes,
+        lists: [{
+          id: uid(), name: 'Boodschappen 2–3 dagen', persons: 4, done: {}, hideDone: false,
+          recipes: recipes.map(r => ({ rid: r.id, persons: 4 })),
+          items: [item('beleg', '', 'Beleg'), item('Fanta', '2 fles', 'Dranken'), item('sap', '2 pak', 'Dranken'),
+            item('fruit', '12 stuks', 'Groente & fruit'), item('lekkers', '', 'Lekkers & snacks'),
+            item('snacks', '', 'Lekkers & snacks'), item('havermout (ontbijt)', '600 g', 'Brood & ontbijt'),
+            item('haverdrink (ontbijt)', '2 l', 'Zuivelvervangers')],
+        }],
+      };
+    }
+
+    let S;
+    function load() {
+      try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); return; } } catch (e) { /* privé-modus of kapotte JSON: begin opnieuw */ }
+      S = seed(); save();
+    }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* vol/geblokkeerd: app blijft werken, alleen niet bewaard */ } }
+
+    /* ---------- afgeleide data ---------- */
+    function fmtQty(q, u) {
+      if (!q) return '';
+      let n = q, unit = u;
+      if (unit === 'g' && n >= 1000) { n /= 1000; unit = 'kg'; }
+      if (unit === 'ml' && n >= 1000) { n /= 1000; unit = 'l'; }
+      n = COUNT_UNITS.has(unit) ? Math.ceil(n - 1e-9) : (unit === 'el' || unit === 'tl') ? Math.round(n * 2) / 2 : (n >= 10 ? Math.round(n) : Math.round(n * 10) / 10);
+      return String(n).replace('.', ',') + (unit ? ' ' + unit : '');
+    }
+    const recipeById = id => S.recipes.find(r => r.id === id);
+    const listById = id => S.lists.find(l => l.id === id);
+
+    // Eén regel per (naam, eenheid): "ui" uit drie recepten wordt "3 stuk". Dat is de hele
+    // meerwaarde van afleiden i.p.v. kopiëren.
+    function rowsFor(l) {
+      const map = new Map();
+      for (const lr of l.recipes) {
+        const r = recipeById(lr.rid); if (!r) continue;
+        const f = lr.persons / r.persons;
+        for (const g of r.ingredients) {
+          const name = g.name.trim(); if (!name) continue;
+          const key = name.toLowerCase() + '|' + g.unit;
+          let row = map.get(key);
+          if (!row) { row = { key, name, unit: g.unit, qty: 0, cat: g.cat, src: [], recipe: true, done: !!l.done[key] }; map.set(key, row); }
+          row.qty += (Number(g.qty) || 0) * f;
+          if (!row.src.includes(r)) row.src.push(r);
+        }
+      }
+      const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit) }));
+      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done });
+      return rows;
+    }
+    function grouped(rows, hideDone) {
+      const order = S.categories;
+      const by = new Map();
+      for (const r of rows) {
+        if (hideDone && r.done) continue;
+        const c = order.includes(r.cat) ? r.cat : 'Overig';
+        if (!by.has(c)) by.set(c, []);
+        by.get(c).push(r);
+      }
+      // Niet-afgevinkt eerst, daarna alfabetisch: wat nog moet staat altijd bovenaan elke categorie.
+      for (const arr of by.values()) arr.sort((a, b) => (a.done - b.done) || a.name.localeCompare(b.name, 'nl'));
+      return order.filter(c => by.has(c)).map(c => [c, by.get(c)]);
+    }
+    // Onthoud de categorie van eerder gebruikte namen, zodat "melk" de tweede keer vanzelf goed staat.
+    function guessCat(name) {
+      const n = name.trim().toLowerCase(); if (!n) return null;
+      for (const l of S.lists) for (const it of l.items) if (it.name.toLowerCase() === n) return it.cat;
+      for (const r of S.recipes) for (const g of r.ingredients) if (g.name.toLowerCase() === n) return g.cat;
+      return null;
+    }
+
+    /* ---------- weergave ---------- */
+    const catOptions = sel => S.categories.map(c => `<option${c === sel ? ' selected' : ''}>${esc(c)}</option>`).join('')
+      + '<option value="__new">+ Nieuwe categorie…</option>';
+    const unitOptions = sel => UNITS.map(u => `<option value="${u}"${u === sel ? ' selected' : ''}>${u || '—'}</option>`).join('');
+    const stepper = (act, id, n, label) => `<span class="stepper"><button data-act="${act}" data-id="${id}" data-d="-1" aria-label="Minder">−</button><span>${n} ${label}</span><button data-act="${act}" data-id="${id}" data-d="1" aria-label="Meer">+</button></span>`;
+    const tabs = on => `<nav class="tabs"><a href="#/" class="${on === 'l' ? 'on' : ''}">Lijstjes</a><a href="#/recepten" class="${on === 'r' ? 'on' : ''}">Recepten</a></nav>`;
+
+    function viewLists() {
+      const cards = S.lists.map(l => {
+        const rows = rowsFor(l), d = rows.filter(r => r.done).length;
+        return `<a href="#/lijst/${l.id}" class="card listcard"><b>${esc(l.name)}</b><div class="muted">${l.persons} personen · ${d}/${rows.length} binnen</div></a>`;
+      }).join('') || '<div class="empty">Nog geen lijstjes.</div>';
+      return `<div class="top"><h1>Boodschappen</h1></div>${tabs('l')}${cards}
+        <button class="btn primary" data-act="newList">+ Nieuw lijstje</button>
+        <footer class="bk"><span class="muted">Back-up (data staat alleen in deze browser):</span>
+          <button class="btn small" data-act="export">Exporteer</button>
+          <button class="btn small" data-act="import">Importeer</button>
+          <input type="file" id="importFile" accept="application/json" hidden></footer>`;
+    }
+
+    function viewList(l) {
+      const rows = rowsFor(l), done = rows.filter(r => r.done).length, pct = rows.length ? Math.round(done / rows.length * 100) : 0;
+      const chips = l.recipes.map(lr => {
+        const r = recipeById(lr.rid); if (!r) return '';
+        return `<div class="card rchip row"><a class="grow" href="#/recept/${r.id}">${esc(r.name)}</a>${stepper('rpers', r.id, lr.persons, 'pers.')}<button class="btn icon" data-act="rdel" data-id="${r.id}" aria-label="Recept van lijstje halen">×</button></div>`;
+      }).join('');
+      const groups = grouped(rows, l.hideDone).map(([c, arr]) => `
+        <div class="cat"><span>${esc(c)}</span><span>${arr.filter(r => r.done).length}/${arr.length}</span></div>
+        <div>${arr.map(r => `
+          <div class="item${r.done ? ' done' : ''}">
+            <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
+            <div class="txt grow">
+              ${r.recipe ? `<div>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}">${esc(r.name)}</button>`}
+              <div>${r.src.map(s => `<a class="tag" href="#/recept/${s.id}">${esc(s.name)}</a>`).join('')}</div>
+            </div>
+            <span class="qty">${esc(r.qtyText)}</span>
+          </div>`).join('')}</div>`).join('') || `<div class="empty">${rows.length ? 'Alles binnen 🎉' : 'Het lijstje is leeg. Voeg hierboven iets toe of kies een recept.'}</div>`;
+      return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
+        <div class="row">${stepper('lpers', l.id, l.persons, 'personen')}<span class="muted grow">schaalt alle recepten mee</span></div>
+        <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${done} van ${rows.length} binnen</div>
+        <form class="add" id="addForm" autocomplete="off">
+          <input name="name" placeholder="Wat moet je halen?" aria-label="Naam" required />
+          <input name="qty" placeholder="Aantal" aria-label="Aantal" />
+          <select name="cat" aria-label="Categorie" data-prev="${esc(S.categories[0])}">${catOptions(S.ui?.lastCat || S.categories[0])}</select>
+          <button class="btn primary">Toevoegen</button>
+        </form>
+        <div class="rchips">${chips}<button class="btn" data-act="addRecipe">+ Recept toevoegen</button></div>
+        ${groups}
+        <div class="toolbar">
+          <button class="btn small" data-act="hideDone">${l.hideDone ? 'Toon afgevinkt' : 'Verberg afgevinkt'}</button>
+          <button class="btn small" data-act="uncheckAll">Alles uitvinken</button>
+          <button class="btn small" data-act="share">Deel / kopieer</button>
+          <button class="btn small danger" data-act="delList">Lijstje verwijderen</button>
+        </div>`;
+    }
+
+    function viewRecipes() {
+      const cards = S.recipes.map(r => `<a href="#/recept/${r.id}" class="card listcard"><b>${esc(r.name)}</b><div class="muted">${r.persons} personen · ${r.ingredients.length} ingrediënten</div></a>`).join('')
+        || '<div class="empty">Nog geen recepten.</div>';
+      return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${cards}<button class="btn primary" data-act="newRecipe">+ Nieuw recept</button>`;
+    }
+
+    function viewRecipe(r) {
+      const rows = r.ingredients.map((g, i) => `
+        <div class="card ing">
+          <input type="number" step="any" min="0" inputmode="decimal" value="${g.qty || ''}" data-f="qty" data-i="${i}" aria-label="Hoeveelheid" />
+          <select data-f="unit" data-i="${i}" aria-label="Eenheid">${unitOptions(g.unit)}</select>
+          <input value="${esc(g.name)}" data-f="name" data-i="${i}" placeholder="Ingrediënt" aria-label="Ingrediënt" />
+          <button class="btn icon" data-act="ingDel" data-i="${i}" aria-label="Verwijder ingrediënt">×</button>
+          <select class="catsel" data-f="cat" data-i="${i}" data-prev="${esc(g.cat)}" aria-label="Categorie">${catOptions(g.cat)}</select>
+        </div>`).join('');
+      return `<div class="top"><a class="btn icon" href="#/recepten" aria-label="Terug">←</a><h1>Recept</h1></div>
+        <div class="field"><label>Naam</label><input value="${esc(r.name)}" data-rf="name" /></div>
+        <div class="field"><label>Ingrediënten zijn berekend voor</label>${stepper('recPers', r.id, r.persons, 'personen')}</div>
+        <div class="field"><label>Ingrediënten</label>${rows}<button class="btn small" data-act="ingAdd">+ Ingrediënt</button></div>
+        <div class="toolbar"><button class="btn primary" data-act="toList">Op een lijstje zetten</button>
+          <button class="btn danger" data-act="delRecipe">Recept verwijderen</button></div>`;
+    }
+
+    function render() {
+      const app = $('#app'), h = location.hash.replace(/^#/, '') || '/';
+      const [, kind, id] = h.split('/');
+      let html;
+      if (kind === 'lijst' && listById(id)) html = viewList(listById(id));
+      else if (kind === 'recepten') html = viewRecipes();
+      else if (kind === 'recept' && recipeById(id)) html = viewRecipe(recipeById(id));
+      else html = viewLists();
+      app.innerHTML = html;
+      document.title = (kind === 'lijst' && listById(id)) ? listById(id).name + ' · Boodschappen' : 'Boodschappen';
+    }
+    const route = () => { const [, kind, id] = (location.hash.replace(/^#/, '') || '/').split('/'); return { kind, id }; };
+    const curList = () => listById(route().id);
+    const curRecipe = () => recipeById(route().id);
+    const commit = () => { save(); render(); };
+
+    /* ---------- dialoog ---------- */
+    const dlg = $('#sheet');
+    function sheet(title, body, buttons) {
+      dlg.innerHTML = `<h2>${esc(title)}</h2><div>${body}</div><div class="btns">${buttons.map(b => `<button class="btn ${b.cls || ''}" data-s="${b.id}">${b.label}</button>`).join('')}</div>`;
+      dlg._h = Object.fromEntries(buttons.map(b => [b.id, b.fn]));
+      if (!dlg.open) dlg.showModal();
+    }
+    dlg.addEventListener('click', e => {
+      const b = e.target.closest('[data-s]'); if (!b) return;
+      const fn = dlg._h[b.dataset.s]; if (fn && fn(dlg) === false) return;
+      dlg.close();
+    });
+    const cancel = { id: 'x', label: 'Annuleren', fn: () => {} };
+
+    // "+ Nieuwe categorie…" — voor selects in dialogen én op pagina's.
+    function handleNewCat(sel) {
+      const name = (prompt('Naam van de nieuwe categorie:') || '').trim();
+      if (!name) { sel.value = sel.dataset.prev; return null; }
+      if (!S.categories.includes(name)) {
+        // vóór 'Overig' invoegen zodat de vangnet-categorie onderaan blijft
+        const i = S.categories.indexOf('Overig');
+        S.categories.splice(i < 0 ? S.categories.length : i, 0, name);
+        save();
+      }
+      const o = document.createElement('option'); o.textContent = name;
+      sel.insertBefore(o, sel.querySelector('option[value="__new"]'));
+      sel.value = name; sel.dataset.prev = name;
+      return name;
+    }
+
+    /* ---------- acties ---------- */
+    const clamp = n => Math.max(1, Math.min(99, n));
+    const actions = {
+      newList() {
+        sheet('Nieuw lijstje', `<div class="field"><label>Naam</label><input id="f-name" value="Boodschappen" /></div>
+          <div class="field"><label>Aantal personen</label><input id="f-pers" type="number" min="1" max="99" value="4" /></div>`,
+          [cancel, { id: 's', label: 'Maken', cls: 'primary', fn: d => {
+            const l = { id: uid(), name: d.querySelector('#f-name').value.trim() || 'Boodschappen', persons: clamp(+d.querySelector('#f-pers').value || 4), recipes: [], items: [], done: {}, hideDone: false };
+            S.lists.unshift(l); save(); location.hash = '#/lijst/' + l.id;
+          } }]);
+      },
+      renameList() {
+        const l = curList();
+        sheet('Naam wijzigen', `<div class="field"><input id="f-name" value="${esc(l.name)}" /></div>`,
+          [cancel, { id: 's', label: 'Opslaan', cls: 'primary', fn: d => { l.name = d.querySelector('#f-name').value.trim() || l.name; commit(); } }]);
+      },
+      delList() {
+        const l = curList();
+        sheet('Lijstje verwijderen?', `<p>“${esc(l.name)}” wordt verwijderd. Je recepten blijven bewaard.</p>`,
+          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => { S.lists = S.lists.filter(x => x !== l); save(); location.hash = '#/'; } }]);
+      },
+      // Personen van het lijstje zetten ook alle recepten erop gelijk; per recept kan je daarna bijstellen.
+      lpers(el) { const l = curList(); l.persons = clamp(l.persons + +el.dataset.d); l.recipes.forEach(r => r.persons = l.persons); commit(); },
+      rpers(el) { const lr = curList().recipes.find(r => r.rid === el.dataset.id); lr.persons = clamp(lr.persons + +el.dataset.d); commit(); },
+      rdel(el) { const l = curList(); l.recipes = l.recipes.filter(r => r.rid !== el.dataset.id); commit(); },
+      addRecipe() {
+        const l = curList();
+        if (!S.recipes.length) return sheet('Geen recepten', '<p>Maak eerst een recept onder “Recepten”.</p>', [{ id: 'o', label: 'OK', fn: () => {} }]);
+        sheet('Recept toevoegen', S.recipes.map(r => {
+          const has = l.recipes.some(x => x.rid === r.id);
+          return `<button class="btn pick" data-s="r-${r.id}"${has ? ' disabled' : ''}>${esc(r.name)}${has ? ' ✓' : ''}</button>`;
+        }).join(''), [cancel]);
+        // keuzeknoppen worden hier pas aan de handlers gehangen (ze zijn dynamisch)
+        S.recipes.forEach(r => { dlg._h['r-' + r.id] = () => { l.recipes.push({ rid: r.id, persons: l.persons }); commit(); }; });
+      },
+      toggle(el) {
+        const l = curList(), key = el.dataset.key;
+        if (key.startsWith('m:')) { const it = l.items.find(i => i.id === key.slice(2)); it.done = !it.done; }
+        else if (l.done[key]) delete l.done[key]; else l.done[key] = true;
+        commit();
+      },
+      editItem(el) {
+        const l = curList(), it = l.items.find(i => i.id === el.dataset.id);
+        sheet('Aanpassen', `<div class="field"><label>Naam</label><input id="f-name" value="${esc(it.name)}" /></div>
+          <div class="field"><label>Aantal</label><input id="f-qty" value="${esc(it.qty)}" /></div>
+          <div class="field"><label>Categorie</label><select id="f-cat" data-prev="${esc(it.cat)}">${catOptions(it.cat)}</select></div>`,
+          [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => { l.items = l.items.filter(x => x !== it); commit(); } }, cancel,
+            { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
+              const sel = d.querySelector('#f-cat'); if (sel.value === '__new') return false;
+              it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; commit();
+            } }]);
+      },
+      hideDone() { const l = curList(); l.hideDone = !l.hideDone; commit(); },
+      uncheckAll() { const l = curList(); l.done = {}; l.items.forEach(i => i.done = false); commit(); },
+      async share() {
+        const l = curList();
+        const text = l.name + ` (${l.persons} personen)\n` + grouped(rowsFor(l).filter(r => !r.done), false)
+          .map(([c, arr]) => '\n' + c + '\n' + arr.map(r => `- ${r.name}${r.qtyText ? ' — ' + r.qtyText : ''}`).join('\n')).join('\n');
+        try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); alert('Gekopieerd naar klembord.'); } }
+        catch (e) { /* gebruiker annuleerde het deel-menu */ }
+      },
+      newRecipe() {
+        const r = { id: uid(), name: 'Nieuw recept', persons: 4, ingredients: [ing('', 0, '', S.categories[0])] };
+        S.recipes.push(r); save(); location.hash = '#/recept/' + r.id;
+      },
+      recPers(el) { const r = curRecipe(); r.persons = clamp(r.persons + +el.dataset.d); commit(); },
+      ingAdd() { curRecipe().ingredients.push(ing('', 0, '', S.categories[0])); commit(); },
+      ingDel(el) { curRecipe().ingredients.splice(+el.dataset.i, 1); commit(); },
+      delRecipe() {
+        const r = curRecipe();
+        sheet('Recept verwijderen?', `<p>“${esc(r.name)}” verdwijnt ook van alle lijstjes.</p>`,
+          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => {
+            S.recipes = S.recipes.filter(x => x !== r); S.lists.forEach(l => l.recipes = l.recipes.filter(x => x.rid !== r.id)); save(); location.hash = '#/recepten';
+          } }]);
+      },
+      toList() {
+        const r = curRecipe();
+        if (!S.lists.length) return sheet('Geen lijstjes', '<p>Maak eerst een lijstje.</p>', [{ id: 'o', label: 'OK', fn: () => {} }]);
+        sheet('Op welk lijstje?', S.lists.map(l => `<button class="btn pick" data-s="l-${l.id}"${l.recipes.some(x => x.rid === r.id) ? ' disabled' : ''}>${esc(l.name)}</button>`).join(''), [cancel]);
+        S.lists.forEach(l => { dlg._h['l-' + l.id] = () => { l.recipes.push({ rid: r.id, persons: l.persons }); save(); location.hash = '#/lijst/' + l.id; }; });
+      },
+      export() {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
+        a.download = 'boodschappen-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href);
+      },
+      import() { $('#importFile').click(); },
+    };
+
+    document.addEventListener('click', e => {
+      const el = e.target.closest('[data-act]'); if (!el || dlg.contains(el)) return;
+      const fn = actions[el.dataset.act]; if (fn) fn(el);
+    });
+
+    // Los item toevoegen
+    document.addEventListener('submit', e => {
+      if (e.target.id !== 'addForm') return;
+      e.preventDefault();
+      const f = e.target, l = curList(), name = f.name.value.trim(); if (!name) return;
+      // Categorie: bewust gekozen (select ≠ standaard) wint; anders gokken op eerdere naam.
+      const guess = guessCat(name);
+      const cat = (f.cat.dataset.touched || !guess) ? f.cat.value : guess;
+      l.items.push({ id: uid(), name, qty: f.qty.value.trim(), cat, done: false });
+      (S.ui ||= {}).lastCat = f.cat.value;
+      commit(); $('#addForm input[name=name]').focus();
+    });
+
+    document.addEventListener('change', e => {
+      const t = e.target;
+      if (t.id === 'importFile') {
+        const file = t.files[0]; if (!file) return;
+        file.text().then(txt => {
+          const d = JSON.parse(txt);
+          if (!Array.isArray(d.lists) || !Array.isArray(d.recipes)) throw new Error('geen back-up');
+          if (confirm('Alles in deze browser vervangen door de back-up?')) { S = d; commit(); }
+        }).catch(() => alert('Dit bestand is geen geldige back-up.'));
+        return;
+      }
+      // categorie-select met "+ Nieuwe categorie…" (op pagina of in dialoog)
+      if (t.tagName === 'SELECT' && t.value === '__new') {
+        const name = handleNewCat(t);
+        if (!name) return;
+      }
+      if (t.tagName === 'SELECT' && t.closest('#addForm')) t.dataset.touched = '1';
+      if (t.tagName === 'SELECT') t.dataset.prev = t.value;
+      // recept-velden: in-place bijwerken, geen volledige render (anders verlies je focus bij typen)
+      if (t.dataset.f) {
+        const g = curRecipe().ingredients[+t.dataset.i];
+        g[t.dataset.f] = t.dataset.f === 'qty' ? (parseFloat(t.value) || 0) : t.value;
+        save();
+      }
+    });
+    document.addEventListener('input', e => {
+      const t = e.target;
+      if (t.dataset.rf) { curRecipe()[t.dataset.rf] = t.value; save(); }
+      else if (t.dataset.f === 'name') { curRecipe().ingredients[+t.dataset.i].name = t.value; save(); }
+    });
+
+    window.addEventListener('hashchange', () => { if (dlg.open) dlg.close(); render(); window.scrollTo(0, 0); });
+    load(); render();
+  })();
+  </script>
+</body>
+</html>
