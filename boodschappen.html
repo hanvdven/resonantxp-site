@@ -215,8 +215,13 @@
     .note { margin-top: 6px; font-size: .8rem; padding: 6px 8px; background: #f3effa; border-radius: 8px; }
     /* Aapjesdag-achtergrond: vaste laag achter alles, licht doorschijnend, alleen transform-animatie (licht voor de GPU). */
     .aapbg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .aapbg span { position: absolute; opacity: .16; animation: drijf var(--d) ease-in-out var(--w) infinite alternate; will-change: transform; }
-    @keyframes drijf { from { transform: translate(0, 0) rotate(-8deg); } to { transform: translate(var(--x), var(--y)) rotate(8deg); } }
+    /* Zacht zweven langs drie eigen punten en terug (Han: "zacht laten bewegen"); alleen transform → de GPU doet het. */
+    .aapbg span { position: absolute; opacity: .17; animation: drijf var(--d) ease-in-out var(--w) infinite; will-change: transform; }
+    @keyframes drijf {
+      0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+      33% { transform: translate(var(--x1), var(--y1)) rotate(7deg); }
+      66% { transform: translate(var(--x2), var(--y2)) rotate(-3deg); }
+    }
     @media (prefers-reduced-motion: reduce) { .aapbg span { animation: none; } }
     .wrap { position: relative; z-index: 1; }
     /* Koppen gelijk voor categorieën en recepten (Han: hoofdletters/lettertype waren niet consistent):
@@ -1021,6 +1026,7 @@
       else html = viewLists();
       app.innerHTML = html;
       if (!animBusy) drawLines(); // no-op buiten het bord; tijdens een animatie pas aan het eind (scheelt een hapering)
+      updateBg();
       document.title = (kind === 'lijst' && listById(id)) ? listById(id).name + ' · Boodschappen' : 'Boodschappen';
     }
     const route = () => { const [, kind, id] = (location.hash.replace(/^#/, '') || '/').split('/'); return { kind, id }; };
@@ -1499,11 +1505,19 @@
       }
     });
 
-    // Achtergrond: 18 aapjes en hartjes op vaste willekeurige plekken, elk met een eigen trage drijfbeweging.
-    $('#aapbg').innerHTML = Array.from({ length: 18 }, (_, i) => {
-      const r = () => Math.random();
-      return `<span style="left:${r() * 92}vw;top:${r() * 92}vh;font-size:${22 + r() * 26}px;--d:${14 + r() * 16}s;--w:-${r() * 20}s;--x:${(r() - .5) * 60}px;--y:${(r() - .5) * 80}px">${CONF[i % CONF.length]}</span>`;
-    }).join('');
+    // Achtergrond: aapjes en hartjes + de emoji's van wat je nu bekijkt (Han: "voeg de emoji's van de recepten/ingrediënten
+    // uit de lijst toe"). Alleen opnieuw opbouwen als die verzameling verandert, anders begint het zweven bij elke tik opnieuw.
+    let bgSig = '';
+    function updateBg() {
+      const l = curList(), set = new Set();
+      if (l) { rowsFor(l).forEach(r => set.add(r.emoji)); l.recipes.forEach(lr => { const r = recipeById(lr.rid); if (r) set.add(recipeEmoji(r)); }); }
+      else S.recipes.forEach(r => set.add(recipeEmoji(r)));
+      const list = [...set].filter(Boolean).slice(0, 18), sig = list.join('');
+      if (sig === bgSig && $('#aapbg').childElementCount) return;
+      bgSig = sig;
+      const all = [...CONF, ...list], n = Math.min(28, 10 + list.length), r = () => Math.random(), amp = () => (r() - .5) * 180 + 'px';
+      $('#aapbg').innerHTML = Array.from({ length: n }, (_, i) => `<span style="left:${r() * 92}vw;top:${r() * 94}vh;font-size:${22 + r() * 24}px;--d:${18 + r() * 16}s;--w:-${r() * 30}s;--x1:${amp()};--y1:${amp()};--x2:${amp()};--y2:${amp()}">${i < 10 ? CONF[i % CONF.length] : all[CONF.length + ((i - 10) % list.length)]}</span>`).join('');
+    }
 
     // <details> meldt open/dicht via 'toggle' (borrelt niet op, dus capture); onthouden zodat een re-render het paneel niet sluit.
     document.addEventListener('toggle', e => { if (e.target.matches?.('details.alg')) (S.ui ||= {}).algOpen = e.target.open; }, true);
