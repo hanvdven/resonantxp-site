@@ -114,6 +114,27 @@
     .achip { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font-size: .9rem; }
     .achip.on { background: #fde8e8; border-color: #f1b9b3; }
     .warnline { color: #b42318; font-weight: 600; margin: 4px 0; }
+    /* Overzicht: categorieën links, recepten rechts, SVG-lijntjes in de tussenruimte (30px) */
+    .ov { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 36%); column-gap: 30px; margin-top: 14px; align-items: start; }
+    .ovl { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+    .ovL, .ovR { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .ocat, .orec { overflow: hidden; }
+    .ohead { display: flex; justify-content: space-between; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; background: none; text-align: left; }
+    .ocat > .ohead { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .ocat .item { border-radius: 0 !important; border-top: 1px solid var(--line); border-bottom: 0; padding-right: 6px; gap: 4px; }
+    .ocat .check { width: 38px; }
+    .orec { border-left: 4px solid var(--rc); }
+    .ohead > span:first-child { flex: 1; min-width: 0; overflow-wrap: break-word; hyphens: auto; }
+    .ohead > span:last-child:not(:first-child) { white-space: nowrap; }
+    .orec > .ohead { font-weight: 600; font-size: .86rem; line-height: 1.25; }
+    .osub { display: block; font-weight: 400; font-size: .76rem; margin-top: 2px; }
+    .opart { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 6px; overflow-wrap: anywhere; padding: 6px 10px; border-top: 1px solid var(--line); font-size: .82rem; line-height: 1.3; }
+    .opart.done span:first-child { text-decoration: line-through; color: var(--muted); }
+    .opart.stock { opacity: .5; }
+    a.opart { color: var(--accent); justify-content: flex-start; }
+    .item.sel { background: #f3effa; }
+    .orec.sel { box-shadow: 0 0 0 2px var(--rc); }
+    [data-act=selIng] { cursor: pointer; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
@@ -157,7 +178,7 @@
     const mapTags = tags => [...new Set((tags || []).map(t => OFF_ALLERGEN[t]).filter(Boolean))];
     // Eén emoji per ingrediënt, afgeleid van de naam (eerste treffer wint, dus specifiek vóór algemeen:
     // 'bouillon' staat vóór \bui\b-achtige gevallen, haverdrink vóór havermout). Eigen keuze (g.emoji) wint altijd.
-    const EMOJI = [[/nootmuskaat/, '🌰'], [/bouillon/, '🍲'], [/\bui(en)?\b|sjalot/, '🧅'], [/knoflook/, '🧄'], [/pompoen/, '🎃'], [/tomat|passata/, '🍅'],
+    const EMOJI = [[/nootmuskaat/, '🌰'], [/bouillon/, '🍲'], [/\bui(en)?\b|sjalot/, '🧅'], [/knoflook/, '🧄'], [/pompoen/, '🎃'], [/toma+t|passata/, '🍅'],
       [/komkommer/, '🥒'], [/avocado/, '🥑'], [/citroen|limoen/, '🍋'], [/\bsla\b|spinazie|andijvie|rucola|boerenkool|prei/, '🥬'], [/broccoli/, '🥦'],
       [/wortel|pastinaak|peen/, '🥕'], [/aardappel|krieltjes|friet/, '🥔'], [/paprika/, '🫑'], [/champignon|paddenstoel/, '🍄'], [/mais/, '🌽'],
       [/basilicum|rozemarijn|peterselie|koriander|tijm|munt|bieslook|dille|kruid/, '🌿'], [/pasta|spaghetti|penne|macaroni|noodle/, '🍝'],
@@ -397,10 +418,10 @@
     function itemHtml(r, showTags) {
       const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
         : (r.canStock ? `<button class="tag stk" data-act="restock" data-key="${esc(r.key)}">toch kopen</button>` : '');
-      return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}">
+      return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
         <div class="txt grow">
-          ${r.recipe ? `<div><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
+          ${r.recipe ? `<div data-act="selIng" data-key="${esc(r.key)}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
           <div>${stk}${algTags(r)}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
         </div>
         <span class="qty">${esc(r.qtyText)}</span>
@@ -413,6 +434,66 @@
       const a = allergyOf(r.ingredients.filter(g => g.name.trim())), h = a.hit.filter(x => av.includes(x));
       return (h.length ? ` · <b style="color:#b42318">⚠ ${h.map(x => ALG_NAME[x].toLowerCase()).join(', ')}</b>` : '') + (a.unknown ? ' · ? niet gecontroleerd' : '');
     }
+    const REC_COLORS = ['#7b5ea7', '#2f7f9e', '#c2603a', '#4f8a4c', '#b0487a', '#8a7a2e'];
+    const recColor = (l, rid) => REC_COLORS[Math.max(0, l.recipes.findIndex(x => x.rid === rid)) % REC_COLORS.length];
+
+    function overviewHtml(l, rows, rowMap) {
+      const u = S.ui || {}, oc = u.openCats || {}, orr = u.openRec || {};
+      const left = grouped(rows, l.hideDone).map(([c, arr]) => {
+        const open = !!oc[c], p = progressOf(arr);
+        return `<div class="card ocat" data-cat="${esc(c)}"><button class="ohead" data-act="catToggle" data-cat="${esc(c)}" aria-expanded="${open}">
+          <span>${CAT_EMOJI[c] || '🛒'} ${esc(c)}</span><span>${p.t ? `${p.d}/${p.t}` : 'in huis'} ${open ? '▾' : '▸'}</span></button>${open ? arr.map(r => itemHtml(r, false)).join('') : ''}</div>`;
+      }).join('');
+      const right = l.recipes.map(lr => {
+        const r = recipeById(lr.rid); if (!r) return '';
+        const open = !!orr[r.id], parts = recipePartsFor(r, lr.persons, rowMap), p = progressOf(parts);
+        const shown = parts.filter(x => !(l.hideDone && x.done)).sort(byName);
+        return `<div class="card orec${u.sel === 'r:' + r.id ? ' sel' : ''}" data-rid="${r.id}" style="--rc:${recColor(l, r.id)}">
+          <button class="ohead" data-act="recToggle" data-rid="${r.id}" aria-expanded="${open}"><span>${esc(r.name)}<span class="muted osub${p.t === p.d ? ' badge' : ''}">${progressText(p)}</span></span></button>
+          ${open ? shown.map(x => `<div class="opart${x.done ? ' done' : ''}${x.stock ? ' stock' : ''}" data-pkey="${esc(x.key)}"><span>${x.emoji} ${esc(x.name)}</span><span class="qty">${esc(x.qtyText)}</span></div>`).join('')
+            + `<a class="opart" href="#/recept/${r.id}">Recept bekijken →</a>` : ''}
+        </div>`;
+      }).join('');
+      if (!left && !right) return '';
+      return `<div class="ov" id="ov"><svg class="ovl" id="ovl" aria-hidden="true"></svg><div class="ovL">${left}</div><div class="ovR">${right}</div></div>`;
+    }
+
+    // Tekent de lijntjes NA de render, op gemeten posities: dan kloppen ze ook na in-/uitklappen, lange
+    // namen die afbreken of draaien van het scherm. Eén lijn per (ingrediënt of dichte categorie) × recept.
+    function drawLines() {
+      const ov = $('#ov'), svg = $('#ovl'), l = curList(); if (!ov || !svg || !l) return;
+      const box = ov.getBoundingClientRect();
+      svg.setAttribute('width', box.width); svg.setAttribute('height', box.height);
+      const rows = rowsFor(l), byKey = new Map(rows.map(r => [r.key, r])), groups = new Map(grouped(rows, l.hideDone)), sel = S.ui?.sel;
+      // ankerpunt: bovenste ~44px van een element, zodat een regel met extra tags niet in het midden landt
+      const pt = el => { const b = el.getBoundingClientRect(); return { l: b.left - box.left, r: b.right - box.left, y: b.top - box.top + Math.min(b.height / 2, 22) }; };
+      const out = [];
+      for (const cEl of ov.querySelectorAll('.ocat')) {
+        const items = cEl.querySelectorAll('.item[data-key]');
+        const anchors = items.length ? [...items].map(el => ({ el, rs: [byKey.get(el.dataset.key)] }))
+          : [{ el: cEl.querySelector('.ohead'), rs: groups.get(cEl.dataset.cat) || [] }];
+        for (const a of anchors) {
+          const recs = new Map();
+          for (const r of a.rs) if (r && r.recipe) for (const x of r.src) { if (!recs.has(x.id)) recs.set(x.id, []); recs.get(x.id).push(r); }
+          if (!recs.size) continue;
+          const p1 = pt(a.el);
+          for (const [rid, rr] of recs) {
+            const rEl = ov.querySelector(`.orec[data-rid="${rid}"]`); if (!rEl) continue;
+            // open recept: land op precies dat ingrediënt; anders op de kop van het recept
+            const inner = rr.length === 1 && rEl.querySelector(`.opart[data-pkey="${CSS.escape(rr[0].key)}"]`);
+            const p2 = pt(inner || rEl.querySelector('.ohead'));
+            // controlepunten 26px naar binnen: de curve blijft binnen de 30px tussenruimte
+            out.push({ d: `M${p1.r},${p1.y} C${p1.r + 26},${p1.y} ${p2.l - 26},${p2.y} ${p2.l},${p2.y}`, c: recColor(l, rid),
+              active: !!sel && (sel === 'r:' + rid || rr.some(r => sel === 'k:' + r.key)), done: rr.every(r => r.done), stock: rr.every(r => r.stock) });
+          }
+        }
+      }
+      svg.innerHTML = out.sort((a, b) => a.active - b.active).map(o => {
+        const op = sel ? (o.active ? .95 : .07) : (o.done ? .15 : .42);
+        return `<path d="${o.d}" fill="none" stroke="${o.c}" stroke-width="${o.active ? 1.8 : 1}" stroke-opacity="${op}" stroke-linecap="round"${o.stock ? ' stroke-dasharray="3 3"' : ''}/>`;
+      }).join('');
+    }
+
     function viewList(l) {
       const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
@@ -437,10 +518,9 @@
         const loose = rows.filter(r => !r.recipe && !(l.hideDone && r.done)).sort(byName);
         body = (secs + (loose.length ? `<div class="cat"><span>Los toegevoegd</span><span>${loose.filter(r => r.done).length}/${loose.length}</span></div><div>${loose.map(x => itemHtml(x, false)).join('')}</div>` : '')) || empty;
       } else {
-        body = grouped(rows, l.hideDone).map(([c, arr]) => `
-          <div class="cat"><span>${esc(c)}</span><span>${arr.filter(r => r.done).length}/${arr.length}</span></div>
-          <div>${arr.map(r => itemHtml(r, true)).join('')}</div>`).join('') || empty;
+        body = overviewHtml(l, rows, rowMap) || empty;
       }
+      const anyOpen = Object.values(S.ui?.openCats || {}).some(Boolean);
       return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
         ${algPanel(rows)}
         <div class="row">${stepper('lpers', l.id, l.persons, 'personen')}<span class="muted grow">schaalt alle recepten mee</span></div>
@@ -453,8 +533,9 @@
         </form>
         <div class="rchips">${chips}<button class="btn" data-act="addRecipe">+ Recept toevoegen</button></div>
         <div class="seg" role="group" aria-label="Ordenen">
-          <button data-act="view" data-v="cat" class="${l.view === 'recept' ? '' : 'on'}">Per categorie</button>
+          <button data-act="view" data-v="cat" class="${l.view === 'recept' ? '' : 'on'}">Overzicht</button>
           <button data-act="view" data-v="recept" class="${l.view === 'recept' ? 'on' : ''}">Per recept</button></div>
+        ${l.view === 'recept' ? '' : `<button class="btn small" data-act="allCats" data-v="${anyOpen ? 0 : 1}">${anyOpen ? 'Alles dicht' : 'Alles open'}</button>`}
         ${body}
         <div class="toolbar">
           <button class="btn small" data-act="hideDone">${l.hideDone ? 'Toon afgevinkt' : 'Verberg afgevinkt'}</button>
@@ -529,6 +610,7 @@
       else if (kind === 'recept' && recipeById(id)) html = viewRecipe(recipeById(id));
       else html = viewLists();
       app.innerHTML = html;
+      drawLines(); // no-op buiten het overzicht
       document.title = (kind === 'lijst' && listById(id)) ? listById(id).name + ' · Boodschappen' : 'Boodschappen';
     }
     const route = () => { const [, kind, id] = (location.hash.replace(/^#/, '') || '/').split('/'); return { kind, id }; };
@@ -620,6 +702,11 @@
               it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; { const e = d.querySelector('#f-em').value.trim(); if (e) it.emoji = e; else delete it.emoji; } commit();
             } }]);
       },
+      catToggle(el) { const o = ((S.ui ||= {}).openCats ||= {}); o[el.dataset.cat] = !o[el.dataset.cat]; commit(); },
+      allCats(el) { (S.ui ||= {}).openCats = Object.fromEntries(S.categories.map(c => [c, el.dataset.v === '1'])); commit(); },
+      // Recept openen selecteert het ook (lijntjes lichten op); dichtklappen heft de selectie op.
+      recToggle(el) { const u = (S.ui ||= {}), o = (u.openRec ||= {}), id = el.dataset.rid; o[id] = !o[id]; u.sel = o[id] ? 'r:' + id : null; commit(); },
+      selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
       view(el) { curList().view = el.dataset.v; commit(); },
       // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
       unstock(el) { const l = curList(), k = el.dataset.key; if (k.startsWith('m:')) l.items.find(i => i.id === k.slice(2)).stock = false; else (l.buy ||= {})[k] = true; commit(); },
@@ -793,6 +880,9 @@
     document.addEventListener('toggle', e => { if (e.target.matches?.('details.alg')) (S.ui ||= {}).algOpen = e.target.open; }, true);
 
     window.addEventListener('hashchange', () => { if (dlg.open) dlg.close(); render(); window.scrollTo(0, 0); });
+    // Lijntjes opnieuw meten bij draaien/resizen en zodra de webfonts er zijn (tekstbreedte verandert dan).
+    let rz = 0; window.addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(drawLines); });
+    document.fonts?.ready.then(drawLines);
     load(); render();
   })();
   </script>
