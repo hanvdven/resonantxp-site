@@ -351,8 +351,12 @@
     }
 
     let S;
+    // Tijdelijke toestand hoort NIET in S: S wordt opgeslagen. Een opgeslagen 'animeert nog' liet na herladen
+    // elke tik op een blok negeren (Han: "tikken op groente & fruit doet niets").
+    let animBusy = false, nutBusy = false;
+    // load: _anim/_busy opruimen die oudere versies per ongeluk mee opsloegen (zie animBusy).
     function load() {
-      try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); migrate(); return; } } catch (e) { /* privé-modus of kapotte JSON: begin opnieuw */ }
+      try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); delete S._anim; delete S._busy; migrate(); return; } } catch (e) { /* privé-modus of kapotte JSON: begin opnieuw */ }
       S = seed(); save();
     }
     // v1 → v2: voeding/in-huis bestaan nog niet. Vul alleen aan wat ontbreekt, nooit iets overschrijven.
@@ -814,14 +818,14 @@
 
     // Eén blok per kant open: tik een kop → dat blok open, het vorige dicht (of dicht als het al open was).
     async function accordion(blk) {
-      if (S._anim || !blk) return;
+      if (animBusy || !blk) return;
       const key = blk.dataset.b, side = key.startsWith('cat:') ? 'cat' : 'rec', id = key.slice(4);
       const u = (S.ui ||= {}), open = (u.open ||= {}), wasOpen = open[side] === id;
       const prev = !wasOpen && open[side] != null ? blockEl(side + ':' + open[side]) : null;
       open[side] = wasOpen ? null : id; u.sel = wasOpen ? null : 'b:' + key; save();
       const top = blk.getBoundingClientRect().top;
       if (calm()) { render(); keepAnchor(key, top); return; }
-      S._anim = true;
+      animBusy = true;
       try {
         const els = movers(), before = els.map(e => e.getBoundingClientRect().top);
         $('#ovl').style.opacity = '0';
@@ -832,18 +836,18 @@
         if (!wasOpen) jobs.push(reveal(blk.querySelector('.obody'), 460));
         await Promise.all(jobs);
         drawLines(); linesIn(260);     // pas na afloop: houdt de eerste frame na de tik zo licht mogelijk
-      } finally { S._anim = false; }
+      } finally { animBusy = false; }
     }
 
     // Omklappen: tik een smal blok aan de dichte kant. Fase 1: de open kant vervaagt naar de rand en de tekst van
     // het aangetikte blok draait plat. Fase 2: nieuwe stand; smalle blokken draaien hun tekst rechtop, het
     // aangetikte blok draait zijn kop van staand naar liggend en zijn inhoud schuift open; daarna de lijntjes.
     async function flip(el) {
-      if (S._anim) return;
+      if (animBusy) return;
       const l = curList(), key = el.dataset.b, toRec = key.startsWith('rec:'), id = key.slice(4), top = el.getBoundingClientRect().top;
       const go = () => { l.view = toRec ? 'rec' : 'cat'; const u = (S.ui ||= {}); (u.open ||= {})[toRec ? 'rec' : 'cat'] = id; u.sel = 'b:' + key; u.adding = null; commit(); };
       if (calm()) { go(); keepAnchor(key, top); return; }
-      S._anim = true;
+      animBusy = true;
       try {
         const svg = $('#ovl'); svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
         const leaving = $(toRec ? '#ov .ovL' : '#ov .ovR'), dx = toRec ? -14 : 14, jobs = [];
@@ -868,7 +872,7 @@
         }
         await Promise.all(jobs2);
         drawLines(); linesIn(320);
-      } finally { S._anim = false; }
+      } finally { animBusy = false; }
     }
 
     // Ongedaan maken (Han: "per ongeluk pompoensoep verwijderd"): vóór een verwijdering een momentopname van
@@ -880,7 +884,7 @@
       const t = $('#toast');
       t.innerHTML = `<span>${esc(label)}</span><button type="button">Ongedaan maken</button>`; t.hidden = false;
       t.querySelector('button').onclick = () => {
-        S = JSON.parse(snap); delete S._anim; delete S._busy; save(); t.hidden = true; clearTimeout(toastTimer);
+        S = JSON.parse(snap); save(); t.hidden = true; clearTimeout(toastTimer);
         if (location.hash !== hash) location.hash = hash; else render();
       };
       clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 10000);
@@ -1052,7 +1056,7 @@
       // Alle ingrediënten zonder koppeling doen: eerst de cache (zelfde naam in een ander recept), anders het
       // eerste zoekresultaat. Open Food Facts begrenst zoekopdrachten (~10/min), vandaar de pauze tussen verzoeken.
       async autoNut() {
-        if (S._busy) return; S._busy = true;
+        if (nutBusy) return; nutBusy = true;
         const r = curRecipe(), status = $('#autoStatus'); let fail = null;
         const todo = r.ingredients.filter(g => g.name.trim() && !g.off);
         for (let k = 0; k < todo.length; k++) {
@@ -1067,7 +1071,7 @@
           save();
           if (k < todo.length - 1) await new Promise(res => setTimeout(res, 6500));
         }
-        delete S._busy; save();
+        nutBusy = false; save();
         if (route().id === r.id) { render(); const st = $('#autoStatus'); if (st) st.textContent = fail ? 'Gestopt: Open Food Facts niet bereikbaar (' + fail + '). Wat gelukt is, is bewaard.' : 'Klaar. Controleer de gekozen producten per ingrediënt.'; }
       },
       export() {
@@ -1109,7 +1113,7 @@
         file.text().then(txt => {
           const d = JSON.parse(txt);
           if (!Array.isArray(d.lists) || !Array.isArray(d.recipes)) throw new Error('geen back-up');
-          if (confirm('Alles in deze browser vervangen door de back-up?')) { S = d; delete S._busy; commit(); }
+          if (confirm('Alles in deze browser vervangen door de back-up?')) { S = d; delete S._anim; delete S._busy; commit(); }
         }).catch(() => alert('Dit bestand is geen geldige back-up.'));
         return;
       }
@@ -1169,7 +1173,7 @@
         const res = await fetch('boodschappen-ingredienten.json', { cache: 'no-cache' }); if (!res.ok) throw new Error('HTTP ' + res.status);
         const txt = await res.text(); setDB(JSON.parse(txt));
         try { localStorage.setItem(DBKEY, txt); } catch (e) { /* vol: dan alleen deze sessie */ }
-        if (!S._anim && !document.querySelector('form.inl input:focus')) render();
+        if (!animBusy && !document.querySelector('form.inl input:focus')) render();
       } catch (e) { /* offline of lokaal geopend: bewaarde kopie of emoji-regels blijven gelden */ }
     }
     load();
