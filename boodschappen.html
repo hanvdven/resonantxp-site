@@ -180,6 +180,8 @@
     .vgrp { display: flex; gap: 3px; }
     .vcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
     .vgrp > .vrub { width: 13px; flex: none; align-items: flex-start; }
+    .vblock:not(.vplus) { flex-direction: column; justify-content: flex-start; align-items: center; gap: 6px; }
+    .vemo { font-size: 1.45rem; line-height: 1; }
     .vplus { min-height: 40px; align-items: center; font-size: 1.1rem; }
     .inl { display: flex; gap: 6px; padding: 6px 8px 8px; border-top: 1px solid var(--line); }
     .inl input { min-height: 34px; }
@@ -777,7 +779,8 @@
     // data-b ('cat:<naam>' / 'rec:<id>') en data-color; dezelfde data-b aan beide kanten maakt het omklappen mogelijk.
     function boardHtml(l, rows, rowMap) {
       const rec = l.view === 'rec', u = S.ui || {}, sel = u.sel, open = u.open || {};
-      const vblock = (key, color, name, sub, label) => `<button class="card vblock ${key.startsWith('cat:') ? 'ocat' : 'orec'}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" data-act="side" style="--cc:${color};--rc:${color}" aria-label="${esc(label)}"><span class="vt${key.startsWith('cat:') ? ' rev' : ''}"><span>${name}</span><span class="muted">${sub}</span></span></button>`;
+      // Smal blok: emoji rechtop bovenaan (Han: "in één oogopslag duidelijk"), naam + voortgang gedraaid eronder.
+      const vblock = (key, color, emoji, name, sub, label) => `<button class="card vblock ${key.startsWith('cat:') ? 'ocat' : 'orec'}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" data-act="side" style="--cc:${color};--rc:${color}" aria-label="${esc(label)}"><span class="vemo" aria-hidden="true">${emoji}</span><span class="vt${key.startsWith('cat:') ? ' rev' : ''}"><span>${name}</span><span class="muted">${sub}</span></span></button>`;
       const blk = (key, color, cls, emoji, name, sub, body, isOpen) => `<div class="card oblk ${cls}${isOpen ? ' open' : ''}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" style="--cc:${color};--rc:${color}">
           <div class="ohead" data-act="acc" role="button" aria-expanded="${isOpen}"><span class="hemo" aria-hidden="true">${emoji}</span><span>${name}<span class="muted osub">${sub}</span></span></div>
           <div class="obody"${isOpen ? '' : ' hidden'}>${body}</div></div>`;
@@ -786,7 +789,7 @@
         : `<div class="vgrp"><div class="vcol">${inner}</div><div class="vrub"><span class="vt">${title}</span></div></div>`;
       const cats = grouped(rows, rec ? false : l.hideDone);
       const left = rec
-        ? grp('Ingrediënten', cats.map(([c, arr]) => vblock('cat:' + c, catColor(c), `${CAT_EMOJI[c] || '🛒'} ${esc(c)}`, pshort(arr), 'Categorieën openen bij ' + c)).join(''), true)
+        ? grp('Ingrediënten', cats.map(([c, arr]) => vblock('cat:' + c, catColor(c), CAT_EMOJI[c] || '🛒', esc(c), pshort(arr), 'Categorieën openen bij ' + c)).join(''), true)
         : '<div class="rub"><span>Ingrediënten</span></div>' + cats.map(([c, arr]) => {
           const done = progressOf(arr);
           return blk('cat:' + c, catColor(c), 'ocat', CAT_EMOJI[c] || '🛒', esc(c), `<span class="${done.t && done.d === done.t ? 'badge' : ''}">${progressText(done)}</span>`,
@@ -797,7 +800,7 @@
         const bs = blocks.filter(b => b.kind === k), what = k === 'week' ? 'Setje' : 'Recept';
         const emo = b => b.kind === 'ov' ? '🛒' : recipeEmoji(b.r);
         // Smalle kant: label NAAST de groep (scheelt hoogte), aan de buitenkant zodat lijnen er niet doorheen lopen.
-        if (!rec) return grp(title, bs.map(b => vblock(b.key, b.color, `${emo(b)} ${esc(b.name)}`, pshort(b.parts), b.name + ' openen')).join('')
+        if (!rec) return grp(title, bs.map(b => vblock(b.key, b.color, emo(b), esc(b.name), pshort(b.parts), b.name + ' openen')).join('')
           + (k === 'ov' ? '' : `<button class="vblock vadd vplus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`), false);
         return `<div class="rub"><span>${title}</span>${k === 'ov' ? '' : `<button class="plus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`}</div>`
           + bs.map(b => {
