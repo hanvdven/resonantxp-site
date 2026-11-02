@@ -1129,8 +1129,16 @@
       animBusy = true;
       try {
         $('#ovl').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
-        await Promise.all([...document.querySelectorAll('#ov .obody:not([hidden])')].map(b => b.animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
-          { duration: 260, easing: EASE_INOUT, fill: 'forwards' }).finished));
+        // stap 1 (Han: "eerst alles inklappen"): de inhoud veegt weg, daarna sluit het vak zich echt en schuift
+        // wat eronder staat vloeiend omhoog (FLIP) — anders sprong het lege witte vak in één keer naar klein.
+        const openBlocks = [...document.querySelectorAll('#ov .oblk.open')];
+        await Promise.all(openBlocks.map(b => b.querySelector('.obody').animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
+          { duration: 240, easing: EASE_INOUT, fill: 'forwards' }).finished));
+        if (openBlocks.length) {
+          const els = movers(), before = els.map(x => x.getBoundingClientRect().top);
+          openBlocks.forEach(b => setOpen(b, false)); keepAnchor(key, top);
+          await Promise.all(slide(els, before, 360));
+        }
         // van een breed vak telt alleen de kop (= zo groot als het dicht is); plus waar zijn emoji staat
         const snap = e => { const em = e.querySelector('.hemo, .vemo'), box = (e.querySelector(':scope > .ohead') || e).getBoundingClientRect(); return { box, em: em ? em.getBoundingClientRect() : box, emEl: em }; };
         const from = new Map([...document.querySelectorAll('#ov [data-b]')].map(e => [e.dataset.b, snap(e)]));
@@ -1145,25 +1153,25 @@
           const N = n.box, side = Math.min(o.box.width, o.box.height, N.width, N.height); // het vierkantje
           const sq = em => ({ left: cx(em) - side / 2, top: cy(em) - side / 2, width: side, height: side });
           const K = r => `translate(${cx(r) - cx(N)}px, ${cy(r) - cy(N)}px) scale(${r.width / N.width}, ${r.height / N.height})`;
-          const opts = { duration: 950, delay: Math.min(i * 18, 180), easing: 'ease-in-out', fill: 'backwards' };
+          const opts = { duration: 1100, delay: Math.min(i * 10, 80), easing: 'ease-in-out', fill: 'backwards' }; // weinig verspringing: de stappen blijven herkenbaar
           // 1) leeg schaduwvak: oude vorm → vierkantje (35%) → verhuisd (65%) → nieuwe vorm
           const g = e.cloneNode(false); g.removeAttribute('data-b'); g.removeAttribute('data-act'); g.classList.remove('sel'); g.classList.add('ghost');
           Object.assign(g.style, { left: N.left + 'px', top: N.top + 'px', width: N.width + 'px', height: N.height + 'px' });
           document.body.appendChild(g); ghosts.push(g);
-          jobs.push(g.animate([{ transform: K(o.box) }, { transform: K(sq(o.em)), offset: .35 }, { transform: K(sq(n.em)), offset: .65 }, { transform: 'none' }], opts).finished);
+          jobs.push(g.animate([{ transform: K(o.box) }, { transform: K(sq(o.em)), offset: .3 }, { transform: K(sq(o.em)), offset: .4 }, { transform: K(sq(n.em)), offset: .7 }, { transform: 'none' }], opts).finished);
           // 2) de emoji reist rechtop mee, midden in het vierkantje
           if (n.emEl) {
             const eg = document.createElement('span'); eg.className = 'ghost gemo'; eg.textContent = n.emEl.textContent;
             Object.assign(eg.style, { left: n.em.left + 'px', top: n.em.top + 'px', width: n.em.width + 'px', height: n.em.height + 'px', fontSize: getComputedStyle(n.emEl).fontSize });
             document.body.appendChild(eg); ghosts.push(eg);
             const T = r => `translate(${cx(r) - cx(n.em)}px, ${cy(r) - cy(n.em)}px)`;
-            jobs.push(eg.animate([{ transform: T(o.em) }, { transform: T(o.em), offset: .35 }, { transform: 'none', offset: .65 }, { transform: 'none' }], opts).finished);
+            jobs.push(eg.animate([{ transform: T(o.em) }, { transform: T(o.em), offset: .4 }, { transform: 'none', offset: .7 }, { transform: 'none' }], opts).finished);
           }
           // 3) de echte inhoud (tekst) pas tonen als het vak zijn nieuwe vorm heeft
           e.classList.add('morphing');
-          jobs.push(e.animate([{ opacity: 0 }, { opacity: 0, offset: .82 }, { opacity: 1 }], opts).finished);
+          jobs.push(e.animate([{ opacity: 0 }, { opacity: 0, offset: .85 }, { opacity: 1 }], opts).finished);
         });
-        ov.querySelectorAll('.rub, .vrub, .vplus').forEach(x => jobs.push(x.animate([{ opacity: 0 }, { opacity: 0, offset: .6 }, { opacity: 1 }], { duration: 950, fill: 'backwards' }).finished));
+        ov.querySelectorAll('.rub, .vrub, .vplus').forEach(x => jobs.push(x.animate([{ opacity: 0 }, { opacity: 0, offset: .7 }, { opacity: 1 }], { duration: 1100, fill: 'backwards' }).finished));
         await Promise.all(jobs);
         ghosts.forEach(g => g.remove()); ov.querySelectorAll('.morphing').forEach(e => e.classList.remove('morphing'));
 
