@@ -107,7 +107,7 @@
     /* Bord: categorieën | recepten. Eén kant open (breed, ingrediënten afvinkbaar), de andere dicht
        (smalle verticale blokken met gedraaide tekst). SVG-lijntjes in de tussenruimte van 44px. */
     .ov { position: relative; display: grid; column-gap: 44px; margin-top: 18px; align-items: start; }
-    .ov.cat { grid-template-columns: minmax(0, 1fr) 58px; }
+    .ov.cat { grid-template-columns: minmax(0, 1fr) 74px; }
     .ov.rec { grid-template-columns: 58px minmax(0, 1fr); }
     .ovl { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
     .ovL, .ovR { position: relative; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -176,6 +176,13 @@
     .vblock .vt > span:first-child { font-size: .76rem; line-height: 1.15; }
     .vrub .vt { white-space: nowrap; max-height: none; }
     .vblock { min-height: 64px; padding: 10px 2px; }
+    /* Smalle categorieblokken staan links: tekst van onder naar boven gedraaid en de kleur rechts, zodat de
+       "onderkant" van de tekst en de gekleurde rand naar de recepten wijzen (Han: voelt intuïtiever). */
+    .ocat.vblock { border-left: 1px solid var(--line); border-right: 4px solid var(--cc); }
+    .vt.rev { transform: rotate(180deg); }
+    .vgrp { display: flex; gap: 3px; }
+    .vcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+    .vgrp > .vrub { width: 13px; flex: none; align-items: flex-start; }
     .vplus { min-height: 40px; align-items: center; font-size: 1.1rem; }
     .inl { display: flex; gap: 6px; padding: 6px 8px 8px; border-top: 1px solid var(--line); }
     .inl input { min-height: 34px; }
@@ -187,6 +194,11 @@
     .item .tag { margin: 0; }
     .tag.warn { font-weight: 700; letter-spacing: .02em; }
     .algbottom { margin-top: 20px; }
+    .tolink { display: block; padding: 8px 10px; border-top: 1px solid var(--line); color: var(--accent); font-size: .85rem; }
+    .toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px);
+      padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--text); color: #fff; font-size: .9rem; box-shadow: 0 6px 24px rgba(26, 31, 46, .25); }
+    .toast[hidden] { display: none; }
+    .toast button { border: 0; background: none; color: #9cc2ff; font-weight: 700; min-height: 36px; padding: 0 10px; white-space: nowrap; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
@@ -196,6 +208,7 @@
     <div id="app"></div>
   </div>
   <dialog id="sheet"></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
 
   <script>
   (() => {
@@ -528,13 +541,14 @@
         <div class="muted">Algemene inschatting uit de ingrediëntenlijst, aangevuld met gekoppelde producten. Jouw merk kan afwijken: check bij een echte allergie altijd het etiket.</div></details>`;
     }
     // Eén regel: vinkje · emoji naam [in huis] [LET OP: …] · hoeveelheid. Tags staan achter de naam (Han: scheelt hoogte).
-    function itemHtml(r) {
+    // rid: als de regel in een open recept staat, opent een tik het bewerken van DAT recept-ingrediënt.
+    function itemHtml(r, rid) {
       const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
         : (r.canStock ? `<button class="tag stk" data-act="restock" data-key="${esc(r.key)}">toch kopen</button>` : '');
       const name = `<span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}`;
       return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
-        <div class="txt grow">${r.recipe ? `<span class="nm2" data-act="selIng" data-key="${esc(r.key)}">${name}</span>` : `<button class="nm2" data-act="editItem" data-id="${r.id}">${name}</button>`}${stk}${algTags(r)}</div>
+        <div class="txt grow">${r.recipe && rid ? `<button class="nm2" data-act="editIng" data-rid="${rid}" data-key="${esc(r.key)}">${name}</button>` : r.recipe ? `<span class="nm2" data-act="selIng" data-key="${esc(r.key)}">${name}</span>` : `<button class="nm2" data-act="editItem" data-id="${r.id}">${name}</button>`}${stk}${algTags(r)}</div>
         <span class="qty">${esc(r.qtyText)}</span>
       </div>`;
     }
@@ -549,7 +563,7 @@
     // DICHTE kant, dus per recept als de categorieën open staan en per categorie als de recepten open staan.
     const REC_COLORS = ['#7b5ea7', '#2f7f9e', '#c2603a', '#4f8a4c', '#b0487a', '#8a7a2e', '#3a7ca5', '#a0522d'];
     const CAT_COLORS = ['#4f8a4c', '#b8862b', '#c2603a', '#2f7f9e', '#7b8aa0', '#8a6d3b', '#b0487a', '#3a7ca5', '#9b59b6', '#7f8c8d'];
-    const OV_COLOR = '#8a8f98';
+    const OV_COLOR = '#8a8f98', LINE_GREY = '#a8a49b';
     const catColor = c => CAT_COLORS[Math.max(0, S.categories.indexOf(c)) % CAT_COLORS.length];
     const RUBS = [['recept', 'Recepten'], ['week', 'Weekboodschappen'], ['ov', 'Overige']];
     // De blokken rechts, vaste volgorde: recepten, setjes, Overige (= de losse items van dit lijstje).
@@ -573,7 +587,7 @@
     function boardHtml(l, rows, rowMap) {
       const rec = l.view === 'rec', u = S.ui || {}, sel = u.sel, open = u.open || {};
       const cnt = p => p.t ? `${p.d}/${p.t}` : 'in huis';
-      const vblock = (key, color, name, sub, label) => `<button class="card vblock ${key.startsWith('cat:') ? 'ocat' : 'orec'}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" data-act="side" style="--cc:${color};--rc:${color}" aria-label="${esc(label)}"><span class="vt"><span>${name}</span><span class="muted">${sub}</span></span></button>`;
+      const vblock = (key, color, name, sub, label) => `<button class="card vblock ${key.startsWith('cat:') ? 'ocat' : 'orec'}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" data-act="side" style="--cc:${color};--rc:${color}" aria-label="${esc(label)}"><span class="vt${key.startsWith('cat:') ? ' rev' : ''}"><span>${name}</span><span class="muted">${sub}</span></span></button>`;
       const blk = (key, color, cls, head, body, isOpen) => `<div class="card oblk ${cls}${isOpen ? ' open' : ''}${sel === 'b:' + key ? ' sel' : ''}" data-b="${esc(key)}" data-color="${color}" style="--cc:${color};--rc:${color}">
           <div class="ohead" data-act="acc" role="button" aria-expanded="${isOpen}">${head}<span class="chev" aria-hidden="true">${isOpen ? '▾' : '▸'}</span></div>
           <div class="obody"${isOpen ? '' : ' hidden'}>${body}</div></div>`;
@@ -582,14 +596,16 @@
         const p = progressOf(arr), em = CAT_EMOJI[c] || '🛒', col = catColor(c), key = 'cat:' + c;
         if (rec) return vblock(key, col, `${em} ${esc(c)}`, cnt(p), 'Categorieën openen bij ' + c);
         return blk(key, col, 'ocat', `<span>${em} ${esc(c)}</span><span class="cnt">${cnt(p)}</span>${plus('c:' + c, 'Toevoegen aan ' + c)}`,
-          arr.map(itemHtml).join('') + addForm('c:' + c), open.cat === c);
+          arr.map(x => itemHtml(x)).join('') + addForm('c:' + c), open.cat === c);
       }).join('');
       const blocks = rightBlocks(l, rows, rowMap);
       const right = RUBS.map(([k, title]) => {
         const bs = blocks.filter(b => b.kind === k), what = k === 'week' ? 'Setje' : 'Recept';
-        if (!rec) return `<div class="vrub"><span class="vt">${title}</span></div>`
+        // Smalle kant: label NAAST de groep (Han: scheelt 3× een lange titel in de hoogte), aan de buitenkant.
+        if (!rec) return `<div class="vgrp"><div class="vcol">`
           + bs.map(b => vblock(b.key, b.color, esc(b.name), pshort(b.parts), b.name + ' openen')).join('')
-          + (k === 'ov' ? '' : `<button class="vblock vadd vplus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`);
+          + (k === 'ov' ? '' : `<button class="vblock vadd vplus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`)
+          + `</div><div class="vrub"><span class="vt">${title}</span></div></div>`;
         return `<div class="rub"><span>${title}</span>${k === 'ov' ? '' : `<button class="plus" data-act="addRecipe" data-kind="${k}" aria-label="${what} toevoegen">+</button>`}</div>`
           + bs.map(b => {
             const p = progressOf(b.parts), t = b.kind === 'ov' ? 'o' : 'r:' + b.id;
@@ -599,9 +615,11 @@
               const n = nutri(b.r); sub = (n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '') + algChip(b.r);
               ctl = `${stepper('rpers', b.id, b.lr.persons, 'pers.')}<span class="grow"></span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
             } else if (b.kind === 'week') ctl = `<span class="muted grow">vast setje</span><button class="btn icon" data-act="rdel" data-id="${b.id}" aria-label="Van lijstje halen">×</button>`;
-            const name = b.kind === 'ov' ? 'Overige' : `<a href="#/recept/${b.id}">${esc(b.name)}</a>`;
+            const name = esc(b.name);
             return blk(b.key, b.color, 'orec', `<span>${name}<span class="muted osub"><span class="${b.parts.length && p.t === p.d ? 'badge' : ''}">${ptext(b.parts)}</span>${sub}</span></span>${plus(t, 'Toevoegen aan ' + b.name)}`,
-              (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(itemHtml).join('') + addForm(t), open.rec === b.id);
+              (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(x => itemHtml(x, b.kind === 'ov' ? null : b.id)).join('') + addForm(t)
+              // pas zichtbaar als het blok open is: naar de volledige receptpagina (naam, personen, voeding)
+              + (b.kind === 'ov' ? '' : `<a class="tolink" href="#/recept/${b.id}">${b.kind === 'week' ? 'Setje' : 'Recept'}pagina →</a>`), open.rec === b.id);
           }).join('');
       }).join('');
       return `<div class="ov ${rec ? 'rec' : 'cat'}" id="ov"><svg class="ovl" id="ovl" aria-hidden="true"></svg><div class="ovL">${left}</div><div class="ovR">${right}</div></div>`;
@@ -622,7 +640,8 @@
       const out = [];
       for (const blk of ov.querySelectorAll((rec ? '.ovR' : '.ovL') + ' .oblk')) {
         const body = blk.querySelector('.obody');
-        const anchors = !body.hidden ? [...body.querySelectorAll('.item[data-key]')].map(el => ({ el, rs: [rowMap.get(el.dataset.key)] }))
+        const isOpen = !body.hidden; // Han: alleen lijnen uit een opengeklapt blok in kleur, de rest grijs
+        const anchors = isOpen ? [...body.querySelectorAll('.item[data-key]')].map(el => ({ el, rs: [rowMap.get(el.dataset.key)] }))
           : [{ el: blk.querySelector('.ohead'), rs: blockRows.get(blk.dataset.b) || [] }];
         for (const a of anchors) {
           const tg = new Map();
@@ -633,7 +652,7 @@
             const te = els.get(k); if (!te) continue;
             const rb = rect(te), y2 = Math.max(rb.t + 12, Math.min(rb.b - 12, y1)); // zo vlak mogelijk landen
             const [x1, x2, c] = rec ? [ra.l, rb.r, -38] : [ra.r, rb.l, 38]; // controlepunten binnen de 44px goot
-            out.push({ d: `M${x1},${y1} C${x1 + c},${y1} ${x2 - c},${y2} ${x2},${y2}`, c: te.dataset.color,
+            out.push({ d: `M${x1},${y1} C${x1 + c},${y1} ${x2 - c},${y2} ${x2},${y2}`, c: isOpen ? te.dataset.color : LINE_GREY,
               active: !!sel && (sel === 'b:' + blk.dataset.b || sel === 'b:' + k || rr.some(r => sel === 'k:' + r.key)), done: rr.every(r => r.done), stock: rr.every(r => r.stock) });
           }
         }
@@ -664,7 +683,8 @@
       const card = r => `<a href="#/recept/${r.id}" class="card listcard"><b>${esc(r.name)}</b><div class="muted">${kindOf(r) === 'week' ? 'vast setje' : r.persons + ' personen'} · ${r.ingredients.length} ingrediënten</div></a>`;
       const sec = (k, t) => `<div class="rub" style="margin:14px 2px 8px">${t}</div>` + (S.recipes.filter(r => kindOf(r) === k).map(card).join('') || '<div class="muted">Nog niets.</div>');
       return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${sec('recept', 'Recepten')}${sec('week', 'Weekboodschappen')}
-        <div class="toolbar"><button class="btn primary" data-act="newRecipe" data-kind="recept">+ Nieuw recept</button><button class="btn" data-act="newRecipe" data-kind="week">+ Nieuw setje</button></div>`;
+        <div class="toolbar"><button class="btn primary" data-act="newRecipe" data-kind="recept">+ Nieuw recept</button><button class="btn" data-act="newRecipe" data-kind="week">+ Nieuw setje</button></div>
+        <div class="toolbar"><button class="btn small" data-act="restoreSeed">Voorbeeldrecepten terugzetten</button></div>`;
     }
 
     // Allergenen van één recept (ingrediëntenlijst ∪ gekoppelde producten); ⚠ bij wat in jouw filter staat.
@@ -768,18 +788,29 @@
 
     /* ---------- beweging ----------
        Han: "te snel en hakkelig, en de pagina begint keihard te scrollen". Daarom:
-       - één hoogte-animatie per blok (de .obody), niet per ingrediënt → geen gehakkel;
-       - nooit zelf scrollen naar iets toe: het aangetikte blok blijft onder je vinger staan (holdAnchor
-         corrigeert elke frame wat erboven in- of uitklapt);
+       - alleen transform / clip-path / opacity bewegen (FLIP, zie onder) → geen layout per frame;
+       - nooit zelf scrollen naar iets toe: het aangetikte blok blijft onder je vinger staan (één onzichtbare
+         correctie vóór de eerste frame);
        - rustige curves, ~0,5 s voor in-/uitklappen en ~1,2 s voor omklappen; 'minder beweging' = direct. */
     const EASE_OUT = 'cubic-bezier(.22, 1, .36, 1)', EASE_INOUT = 'cubic-bezier(.65, 0, .35, 1)';
     const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
     const blockEl = key => [...document.querySelectorAll('[data-b]')].find(e => e.dataset.b === key);
     function keepAnchor(key, top) { const el = blockEl(key); if (!el) return; const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > .5) scrollBy(0, d); }
-    function holdAnchor(key, top) { let on = true; (function tick() { if (!on) return; keepAnchor(key, top); requestAnimationFrame(tick); })(); return () => { on = false; }; }
-    const fadeLines = (to, ms) => { const s = $('#ovl'); if (s) s.animate([{ opacity: to ? 0 : 1 }, { opacity: to }], { duration: ms, fill: 'forwards' }); };
-    const collapse = (body, ms, delay = 0) => { const h = body.offsetHeight; return body.animate([{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: ms, delay, easing: EASE_INOUT, fill: 'forwards' }).finished; };
-    const expand = (body, ms, delay = 0) => { body.hidden = false; const h = body.offsetHeight; return body.animate([{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }], { duration: ms, delay, easing: EASE_OUT, fill: 'backwards' }).finished; };
+    // FLIP (First-Last-Invert-Play): posities meten, eindstand in één keer neerzetten (één layout), één keer
+    // onzichtbaar scrollen zodat het aangetikte blok blijft staan, en dan alleen transform / clip-path /
+    // opacity animeren. Die doet de GPU; er wordt per frame niets opnieuw ingedeeld. (De vorige versie
+    // animeerde hoogte en scrolde elke frame: in de testbrowser 60 fps, op Han's telefoon hakkelig.)
+    const movers = () => [...document.querySelectorAll('#ov .ovL > *, #ov .ovR > *, .toolbar, .algbottom')];
+    const slide = (els, before, ms) => els.map((e, i) => { const dy = before[i] - e.getBoundingClientRect().top;
+      return Math.abs(dy) > .5 ? e.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: ms, easing: EASE_OUT }).finished : null; }).filter(Boolean);
+    const reveal = (body, ms, delay = 0) => body.animate([{ clipPath: 'inset(0 0 100% 0)', opacity: 0 }, { clipPath: 'inset(0 0 0 0)', opacity: 1 }],
+      { duration: ms, delay, easing: EASE_OUT, fill: 'backwards' }).finished;
+    const linesIn = ms => { const s = $('#ovl'); if (!s) return; s.style.opacity = ''; s.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms }); };
+    function setOpen(b, on) {
+      if (!b) return;
+      b.querySelector('.obody').hidden = !on; b.classList.toggle('open', on);
+      b.querySelector('.chev').textContent = on ? '▾' : '▸'; b.querySelector('.ohead').setAttribute('aria-expanded', on);
+    }
 
     // Eén blok per kant open: tik een kop → dat blok open, het vorige dicht (of dicht als het al open was).
     async function accordion(blk) {
@@ -787,25 +818,26 @@
       const key = blk.dataset.b, side = key.startsWith('cat:') ? 'cat' : 'rec', id = key.slice(4);
       const u = (S.ui ||= {}), open = (u.open ||= {}), wasOpen = open[side] === id;
       const prev = !wasOpen && open[side] != null ? blockEl(side + ':' + open[side]) : null;
-      open[side] = wasOpen ? null : id; u.sel = wasOpen ? null : 'b:' + key; u.adding = null; save();
+      open[side] = wasOpen ? null : id; u.sel = wasOpen ? null : 'b:' + key; save();
       const top = blk.getBoundingClientRect().top;
       if (calm()) { render(); keepAnchor(key, top); return; }
       S._anim = true;
-      const stop = holdAnchor(key, top);
       try {
-        fadeLines(0, 150);
-        const jobs = [];
-        const shut = b => { const body = b?.querySelector('.obody'); if (body && !body.hidden) { b.querySelector('.chev').textContent = '▸'; jobs.push(collapse(body, 380)); } };
-        if (wasOpen) shut(blk);
-        else { shut(prev); blk.querySelector('.chev').textContent = '▾'; jobs.push(expand(blk.querySelector('.obody'), 520)); }
+        const els = movers(), before = els.map(e => e.getBoundingClientRect().top);
+        $('#ovl').style.opacity = '0';
+        setOpen(prev, false); setOpen(blk, !wasOpen);
+        document.querySelectorAll('#ov .sel').forEach(e => e.classList.remove('sel')); if (!wasOpen) blk.classList.add('sel');
+        keepAnchor(key, top);          // één keer, vóór de eerste frame: niemand ziet de sprong
+        const jobs = slide(els, before, 460);
+        if (!wasOpen) jobs.push(reveal(blk.querySelector('.obody'), 460));
         await Promise.all(jobs);
-      } finally { stop(); S._anim = false; }
-      render(); keepAnchor(key, top); fadeLines(1, 300);
+        drawLines(); linesIn(260);     // pas na afloop: houdt de eerste frame na de tik zo licht mogelijk
+      } finally { S._anim = false; }
     }
 
-    // Omklappen: tik een smal blok aan de dichte kant. Fase 1: de open kant ruimt op en de tekst van het
-    // aangetikte blok draait plat. Fase 2: nieuwe stand; smalle blokken draaien hun tekst rechtop, het
-    // aangetikte blok draait zijn kop van staand naar liggend en klapt open; pas daarna de lijntjes.
+    // Omklappen: tik een smal blok aan de dichte kant. Fase 1: de open kant vervaagt naar de rand en de tekst van
+    // het aangetikte blok draait plat. Fase 2: nieuwe stand; smalle blokken draaien hun tekst rechtop, het
+    // aangetikte blok draait zijn kop van staand naar liggend en zijn inhoud schuift open; daarna de lijntjes.
     async function flip(el) {
       if (S._anim) return;
       const l = curList(), key = el.dataset.b, toRec = key.startsWith('rec:'), id = key.slice(4), top = el.getBoundingClientRect().top;
@@ -813,30 +845,45 @@
       if (calm()) { go(); keepAnchor(key, top); return; }
       S._anim = true;
       try {
-        fadeLines(0, 200);
+        const svg = $('#ovl'); svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards' });
         const leaving = $(toRec ? '#ov .ovL' : '#ov .ovR'), dx = toRec ? -14 : 14, jobs = [];
-        leaving.querySelectorAll('.obody:not([hidden])').forEach(b => jobs.push(collapse(b, 320)));
-        leaving.querySelectorAll('.oblk, .rub').forEach((b, i) => jobs.push(b.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${dx}px)` }],
-          { duration: 300, delay: 80 + Math.min(i * 12, 100), easing: EASE_INOUT, fill: 'forwards' }).finished));
-        jobs.push(el.querySelector('.vt').animate([{ transform: 'none', opacity: 1 }, { transform: 'rotate(-90deg)', opacity: 0 }], { duration: 340, easing: EASE_INOUT, fill: 'forwards' }).finished);
-        const stop1 = holdAnchor(key, top);
-        await Promise.all(jobs); stop1();
+        leaving.querySelectorAll('.obody:not([hidden])').forEach(b => jobs.push(b.animate([{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 100% 0)', opacity: 0 }],
+          { duration: 300, easing: EASE_INOUT, fill: 'forwards' }).finished));
+        [...leaving.children].forEach((b, i) => jobs.push(b.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${dx}px)` }],
+          { duration: 300, delay: 60 + Math.min(i * 12, 100), easing: EASE_INOUT, fill: 'forwards' }).finished));
+        const vt0 = el.querySelector('.vt'), b0 = vt0.classList.contains('rev') ? 180 : 0;
+        jobs.push(vt0.animate([{ transform: `rotate(${b0}deg)`, opacity: 1 }, { transform: `rotate(${b0 - 90}deg)`, opacity: 0 }], { duration: 340, easing: EASE_INOUT, fill: 'forwards' }).finished);
+        await Promise.all(jobs);
 
         go(); keepAnchor(key, top);
         const ov = $('#ov'), t = blockEl(key), jobs2 = [];
         $('#ovl').style.opacity = '0';
-        ov.querySelectorAll('.vblock .vt, .vrub .vt, .vplus').forEach((v, i) => jobs2.push(v.animate([{ transform: 'rotate(-90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
-          { duration: 420, delay: 50 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished));
-        ov.querySelectorAll(toRec ? '.ovR .oblk, .ovR .rub' : '.ovL .oblk').forEach((b, i) => { if (b !== t) jobs2.push(b.animate([{ opacity: 0, transform: `translateX(${-dx}px)` }, { opacity: 1, transform: 'none' }],
+        ov.querySelectorAll('.vblock .vt, .vrub .vt, .vplus').forEach((v, i) => { const b = v.classList.contains('rev') ? 180 : 0; jobs2.push(v.animate([{ transform: `rotate(${b - 90}deg)`, opacity: 0 }, { transform: `rotate(${b}deg)`, opacity: 1 }],
+          { duration: 420, delay: 50 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished); });
+        [...ov.querySelector(toRec ? '.ovR' : '.ovL').children].forEach((b, i) => { if (b !== t) jobs2.push(b.animate([{ opacity: 0, transform: `translateX(${-dx}px)` }, { opacity: 1, transform: 'none' }],
           { duration: 420, delay: 120 + Math.min(i * 30, 300), easing: EASE_OUT, fill: 'backwards' }).finished); });
         if (t) {
           jobs2.push(t.querySelector('.ohead').animate([{ transform: 'rotate(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 480, easing: EASE_OUT, fill: 'backwards' }).finished);
-          jobs2.push(expand(t.querySelector('.obody'), 520, 240));
+          jobs2.push(reveal(t.querySelector('.obody'), 520, 220));
         }
-        const stop2 = holdAnchor(key, top);
-        await Promise.all(jobs2); stop2();
-        drawLines(); $('#ovl').style.opacity = ''; fadeLines(1, 360);
+        await Promise.all(jobs2);
+        drawLines(); linesIn(320);
       } finally { S._anim = false; }
+    }
+
+    // Ongedaan maken (Han: "per ongeluk pompoensoep verwijderd"): vóór een verwijdering een momentopname van
+    // alle data; de balk onderaan zet die 10 s lang met één tik terug, inclusief de pagina waar je was.
+    let toastTimer = 0;
+    function withUndo(label, fn) {
+      const snap = JSON.stringify(S), hash = location.hash;
+      fn();
+      const t = $('#toast');
+      t.innerHTML = `<span>${esc(label)}</span><button type="button">Ongedaan maken</button>`; t.hidden = false;
+      t.querySelector('button').onclick = () => {
+        S = JSON.parse(snap); delete S._anim; delete S._busy; save(); t.hidden = true; clearTimeout(toastTimer);
+        if (location.hash !== hash) location.hash = hash; else render();
+      };
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 10000);
     }
 
     /* ---------- acties ---------- */
@@ -858,12 +905,12 @@
       delList() {
         const l = curList();
         sheet('Lijstje verwijderen?', `<p>“${esc(l.name)}” wordt verwijderd. Je recepten blijven bewaard.</p>`,
-          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => { S.lists = S.lists.filter(x => x !== l); save(); location.hash = '#/'; } }]);
+          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`“${l.name}” verwijderd`, () => { S.lists = S.lists.filter(x => x !== l); save(); location.hash = '#/'; }) }]);
       },
       // Personen van het lijstje zetten ook alle recepten erop gelijk; per recept kan je daarna bijstellen.
       lpers(el) { const l = curList(); l.persons = clamp(l.persons + +el.dataset.d); l.recipes.forEach(lr => { const r = recipeById(lr.rid); if (r && kindOf(r) === 'recept') lr.persons = l.persons; }); commit(); },
       rpers(el) { const lr = curList().recipes.find(r => r.rid === el.dataset.id); lr.persons = clamp(lr.persons + +el.dataset.d); commit(); },
-      rdel(el) { const l = curList(); l.recipes = l.recipes.filter(r => r.rid !== el.dataset.id); commit(); },
+      rdel(el) { const l = curList(), r = recipeById(el.dataset.id); withUndo(`${r ? r.name : 'Recept'} van het lijstje gehaald`, () => { l.recipes = l.recipes.filter(x => x.rid !== el.dataset.id); commit(); }); },
       // "+" bij Recepten of Weekboodschappen: kies een bestaand recept/setje of maak meteen een nieuw.
       addRecipe(el) {
         const l = curList(), kind = el?.dataset.kind === 'week' ? 'week' : 'recept', what = kind === 'week' ? 'setje' : 'recept';
@@ -892,7 +939,7 @@
           <div class="field"><label>Emoji (leeg = automatisch)</label><input id="f-em" value="${esc(it.emoji || '')}" maxlength="4" style="width:90px" /></div>
           <div class="field"><label>Categorie</label><select id="f-cat" data-prev="${esc(it.cat)}">${catOptions(it.cat)}</select></div>
           <div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="f-stock"${it.stock ? ' checked' : ''} /> Staat in huis (gedimd, telt niet mee)</label></div>`,
-          [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => { l.items = l.items.filter(x => x !== it); commit(); } }, cancel,
+          [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${it.name} verwijderd`, () => { l.items = l.items.filter(x => x !== it); commit(); }) }, cancel,
             { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
               const sel = d.querySelector('#f-cat'); if (sel.value === '__new') return false;
               it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; { const e = d.querySelector('#f-em').value.trim(); if (e) it.emoji = e; else delete it.emoji; } commit();
@@ -907,12 +954,32 @@
         if (t.startsWith('c:')) open.cat = t.slice(2); else open.rec = t === 'o' ? '_ov' : t.slice(2);
         commit(); keepAnchor(key, top); $('form.inl input')?.focus({ preventScroll: true });
       },
+      // Een ingrediënt van een recept aanpassen zonder naar de receptpagina te gaan. De hoeveelheid toon je zoals op
+      // dít lijstje; opgeslagen wordt hij voor het eigen aantal personen van het recept.
+      editIng(el) {
+        const l = curList(), r = recipeById(el.dataset.rid), lr = l.recipes.find(x => x.rid === r.id), f = factorOf(r, lr);
+        const i = r.ingredients.findIndex(g => keyOf(g) === el.dataset.key); if (i < 0) return;
+        const g = r.ingredients[i];
+        sheet(`${r.name}: ${g.name}`, `
+          <div class="field"><label>Naam</label><input id="e-name" value="${esc(g.name)}" /></div>
+          <div class="row"><div class="field grow"><label>Hoeveelheid (voor dit lijstje)</label><input id="e-qty" type="number" step="any" min="0" inputmode="decimal" value="${g.qty ? +(g.qty * f).toFixed(2) : ''}" /></div>
+            <div class="field" style="width:110px"><label>Eenheid</label><select id="e-unit">${unitOptions(g.unit)}</select></div></div>
+          <div class="field"><label>Categorie</label><select id="e-cat" data-prev="${esc(g.cat)}">${catOptions(g.cat)}</select></div>
+          <div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="e-stock"${g.stock ? ' checked' : ''} /> Heb ik meestal in huis</label></div>
+          <div class="muted">Dit past het ${kindOf(r) === 'week' ? 'setje' : 'recept'} zelf aan, ook op andere lijstjes.</div>`,
+          [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`${g.name} uit ${r.name} verwijderd`, () => { r.ingredients.splice(i, 1); commit(); }) }, cancel,
+           { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
+             const sel = d.querySelector('#e-cat'); if (sel.value === '__new') return false;
+             g.name = d.querySelector('#e-name').value.trim() || g.name; g.qty = (parseFloat(d.querySelector('#e-qty').value) || 0) / f;
+             g.unit = d.querySelector('#e-unit').value; g.cat = sel.value; g.stock = d.querySelector('#e-stock').checked; commit();
+           } }]);
+      },
       selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
       // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
       unstock(el) { const l = curList(), k = el.dataset.key; if (k.startsWith('m:')) l.items.find(i => i.id === k.slice(2)).stock = false; else (l.buy ||= {})[k] = true; commit(); },
       restock(el) { const l = curList(); delete (l.buy || {})[el.dataset.key]; commit(); },
       hideDone() { const l = curList(); l.hideDone = !l.hideDone; commit(); },
-      uncheckAll() { const l = curList(); l.done = {}; l.items.forEach(i => i.done = false); commit(); },
+      uncheckAll() { const l = curList(); withUndo('Alles uitgevinkt', () => { l.done = {}; l.items.forEach(i => i.done = false); commit(); }); },
       async share() {
         const l = curList();
         const line = r => `- ${r.name}${r.qtyText ? ' — ' + r.qtyText : ''}`;
@@ -928,15 +995,22 @@
         const r = { id: uid(), kind, name: kind === 'week' ? 'Nieuw setje' : 'Nieuw recept', persons: 4, ingredients: [ing('', 0, '', S.categories[0])] };
         S.recipes.push(r); save(); location.hash = '#/recept/' + r.id;
       },
+      // Zet voorbeeldrecepten/-setjes terug die je niet meer hebt (op naam); je eigen recepten blijven onaangeroerd.
+      restoreSeed() {
+        const have = new Set(S.recipes.map(r => r.name.trim().toLowerCase()));
+        const missing = seed().recipes.filter(r => !have.has(r.name.toLowerCase()));
+        if (!missing.length) return sheet('Alles is er nog', '<p>Alle voorbeeldrecepten staan al in je recepten.</p>', [{ id: 'o', label: 'OK', fn: () => {} }]);
+        withUndo(`Teruggezet: ${missing.map(r => r.name).join(', ')}`, () => { S.recipes.push(...missing); commit(); });
+      },
       recPers(el) { const r = curRecipe(); r.persons = clamp(r.persons + +el.dataset.d); commit(); },
       ingAdd() { curRecipe().ingredients.push(ing('', 0, '', S.categories[0])); commit(); },
-      ingDel(el) { curRecipe().ingredients.splice(+el.dataset.i, 1); commit(); },
+      ingDel(el) { const r = curRecipe(), g = r.ingredients[+el.dataset.i]; withUndo(`${g.name || 'Ingrediënt'} verwijderd`, () => { r.ingredients.splice(+el.dataset.i, 1); commit(); }); },
       delRecipe() {
         const r = curRecipe();
         sheet('Recept verwijderen?', `<p>“${esc(r.name)}” verdwijnt ook van alle lijstjes.</p>`,
-          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => {
+          [cancel, { id: 's', label: 'Verwijderen', cls: 'danger', fn: () => withUndo(`“${r.name}” verwijderd`, () => {
             S.recipes = S.recipes.filter(x => x !== r); S.lists.forEach(l => l.recipes = l.recipes.filter(x => x.rid !== r.id)); save(); location.hash = '#/recepten';
-          } }]);
+          }) }]);
       },
       toList() {
         const r = curRecipe();
