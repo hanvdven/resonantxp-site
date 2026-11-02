@@ -59,7 +59,7 @@
     .add .btn { grid-column: 2 / 3; }
     input, select, textarea { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
     /* categorieën + items */
-    .cat { margin: 18px 0 6px; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; }
+    .cat { margin: 18px 0 6px; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
     .item { display: flex; align-items: center; gap: 12px; padding: 4px 8px 4px 4px; border-bottom: 1px solid var(--line); background: var(--card); }
     .item:first-of-type { border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); }
     .item:last-of-type { border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius); border-bottom: 0; }
@@ -72,8 +72,23 @@
     .tag { display: inline-block; font-size: .72rem; padding: 0 8px; margin: 2px 4px 0 0; border-radius: 99px; background: #eef2fb; color: var(--accent); border: 0; min-height: 22px; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
     /* recept bewerken */
-    .ing { display: grid; grid-template-columns: 70px 84px 1fr 44px; gap: 6px; margin-bottom: 6px; padding: 8px; }
-    .ing .catsel { grid-column: 1 / 4; }
+    .ing { display: grid; grid-template-columns: 86px 84px 1fr 44px; gap: 6px; margin-bottom: 6px; padding: 8px; }
+    .ing .catsel { grid-column: 1 / 5; }
+    .ing .stkl { grid-column: 1 / 3; display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+    .ing .nbtn { grid-column: 3 / 5; min-height: 36px; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    input[type=checkbox] { width: 20px; min-height: 20px; padding: 0; accent-color: var(--done); }
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--card); margin: 14px 0 0; }
+    .seg button { border: 0; background: none; min-height: 40px; padding: 0 14px; }
+    .seg button.on { background: var(--text); color: #fff; }
+    /* "In huis": gedimd, maar nog steeds leesbaar en aanklikbaar */
+    .item.stock .txt > div:first-child, .item.stock .txt > button, .item.stock .qty { opacity: .42; }
+    .item.stock .check span { border-color: #d6d2c8; }
+    .tag.stk { background: #efede7; color: var(--muted); cursor: pointer; }
+    .badge { color: var(--done); font-weight: 600; }
+    .nut { padding: 12px 14px; }
+    .nut .big { font-family: 'Linden Hill', Georgia, serif; font-size: 1.7rem; line-height: 1.2; }
+    .res { margin-top: 10px; max-height: 40vh; overflow: auto; }
+    .res .btn { display: block; width: 100%; text-align: left; margin-bottom: 6px; height: auto; padding: 8px 12px; }
     .field { margin: 12px 0; } .field label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
     /* dialog */
     dialog { border: 0; border-radius: 16px; padding: 18px; width: min(92vw, 460px); max-height: 86vh; background: var(--bg); color: var(--text); }
@@ -83,11 +98,51 @@
     .pick[disabled] { opacity: .45; }
     .empty { text-align: center; color: var(--muted); padding: 28px 8px; }
     footer.bk { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .aap { display: block; width: 100%; min-height: 48px; margin-bottom: 14px; padding: 10px 14px; border: 1px solid #f0c9d4; border-radius: var(--radius); background: #fff0f4; color: #8a2846; text-align: center; font-weight: 600; }
+    .aap span { font-weight: 400; opacity: .75; }
+    .conf { position: fixed; z-index: 99; pointer-events: none; user-select: none; will-change: transform, opacity; }
+    .em { margin-right: 6px; }
+    .nm { position: relative; }
+    .nm .em { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); margin: 0; pointer-events: none; }
+    .nm input { padding-left: 36px; }
+    .tag.warn { background: #fde8e8; color: #b42318; }
+    .tag.trace { background: #fff4e0; color: #9a5b00; }
+    .tag.unk { background: #efede7; color: var(--muted); }
+    .alg { padding: 4px 14px 10px; margin: 12px 0; }
+    .alg summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .achips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+    .achip { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font-size: .9rem; }
+    .achip.on { background: #fde8e8; border-color: #f1b9b3; }
+    .warnline { color: #b42318; font-weight: 600; margin: 4px 0; }
+    /* Overzicht: categorieën links, recepten rechts, SVG-lijntjes in de tussenruimte (30px) */
+    .ov { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 36%); column-gap: 30px; margin-top: 14px; align-items: start; }
+    .ovl { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+    .ovL, .ovR { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .ocat, .orec { overflow: hidden; }
+    .ohead { display: flex; justify-content: space-between; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; background: none; text-align: left; }
+    .ocat > .ohead { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .ocat .item { border-radius: 0 !important; border-top: 1px solid var(--line); border-bottom: 0; padding-right: 6px; gap: 4px; }
+    .ocat .check { width: 38px; }
+    .orec { border-left: 4px solid var(--rc); }
+    .ohead > span:first-child { flex: 1; min-width: 0; overflow-wrap: break-word; hyphens: auto; }
+    .ohead > span:last-child:not(:first-child) { white-space: nowrap; }
+    .orec > .ohead { font-weight: 600; font-size: .86rem; line-height: 1.25; }
+    .osub { display: block; font-weight: 400; font-size: .76rem; margin-top: 2px; }
+    .opart { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 6px; overflow-wrap: anywhere; padding: 6px 10px; border-top: 1px solid var(--line); font-size: .82rem; line-height: 1.3; }
+    .opart.done span:first-child { text-decoration: line-through; color: var(--muted); }
+    .opart.stock { opacity: .5; }
+    a.opart { color: var(--accent); justify-content: flex-start; }
+    .item.sel { background: #f3effa; }
+    .orec.sel { box-shadow: 0 0 0 2px var(--rc); }
+    [data-act=selIng] { cursor: pointer; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
 <body>
-  <div class="wrap" id="app"></div>
+  <div class="wrap">
+    <button class="aap" id="aap" type="button">🐒 Reminder: het is vandaag aapjesdag! <span>Tik hier 🙈</span></button>
+    <div id="app"></div>
+  </div>
   <dialog id="sheet"></dialog>
 
   <script>
@@ -107,6 +162,34 @@
     const UNITS = ['', 'g', 'kg', 'ml', 'l', 'el', 'tl', 'stuk', 'teen', 'bos', 'blik', 'pak', 'fles', 'potje'];
     // Telbare eenheden worden naar boven afgerond: 0,75 ui koop je niet.
     const COUNT_UNITS = new Set(['stuk', 'teen', 'bos', 'blik', 'pak', 'fles', 'potje']);
+    // Gram per stuk/teen/blik/… voor het uitrekenen van voeding (bewerkbaar per ingrediënt). Alleen een
+    // startwaarde: wat in een recept staat wint. Zelfde tabel voor seed én migratie (geen tweede kopie).
+    const GPU = { ui: 110, knoflook: 4, tomaat: 120, komkommer: 400, avocado: 150, citroen: 80, stokbrood: 250,
+      groentebouillonblokje: 10, kikkererwten: 240, tomatenpassata: 500, basilicum: 30, rozemarijn: 30, olijfolie: 14 };
+    const STOCK = new Set(['olijfolie', 'nootmuskaat']); // basis die je normaal in huis hebt
+    // De 14 EU-allergenen. Ids zijn de onze; OFF_ALLERGEN vertaalt de tags van Open Food Facts ernaartoe.
+    const ALLERGENS = [['gluten', 'Gluten'], ['crustaceans', 'Schaaldieren'], ['eggs', 'Eieren'], ['fish', 'Vis'], ['peanuts', 'Pinda’s'],
+      ['soy', 'Soja'], ['milk', 'Melk'], ['nuts', 'Noten'], ['celery', 'Selderij'], ['mustard', 'Mosterd'], ['sesame', 'Sesam'],
+      ['sulphites', 'Sulfiet'], ['lupin', 'Lupine'], ['molluscs', 'Weekdieren']];
+    const ALG_NAME = Object.fromEntries(ALLERGENS);
+    const OFF_ALLERGEN = { 'en:gluten': 'gluten', 'en:crustaceans': 'crustaceans', 'en:eggs': 'eggs', 'en:fish': 'fish', 'en:peanuts': 'peanuts',
+      'en:soybeans': 'soy', 'en:milk': 'milk', 'en:nuts': 'nuts', 'en:celery': 'celery', 'en:mustard': 'mustard', 'en:sesame-seeds': 'sesame',
+      'en:sulphur-dioxide-and-sulphites': 'sulphites', 'en:lupin': 'lupin', 'en:molluscs': 'molluscs' };
+    const mapTags = tags => [...new Set((tags || []).map(t => OFF_ALLERGEN[t]).filter(Boolean))];
+    // Eén emoji per ingrediënt, afgeleid van de naam (eerste treffer wint, dus specifiek vóór algemeen:
+    // 'bouillon' staat vóór \bui\b-achtige gevallen, haverdrink vóór havermout). Eigen keuze (g.emoji) wint altijd.
+    const EMOJI = [[/nootmuskaat/, '🌰'], [/bouillon/, '🍲'], [/\bui(en)?\b|sjalot/, '🧅'], [/knoflook/, '🧄'], [/pompoen/, '🎃'], [/toma+t|passata/, '🍅'],
+      [/komkommer/, '🥒'], [/avocado/, '🥑'], [/citroen|limoen/, '🍋'], [/\bsla\b|spinazie|andijvie|rucola|boerenkool|prei/, '🥬'], [/broccoli/, '🥦'],
+      [/wortel|pastinaak|peen/, '🥕'], [/aardappel|krieltjes|friet/, '🥔'], [/paprika/, '🫑'], [/champignon|paddenstoel/, '🍄'], [/mais/, '🌽'],
+      [/basilicum|rozemarijn|peterselie|koriander|tijm|munt|bieslook|dille|kruid/, '🌿'], [/pasta|spaghetti|penne|macaroni|noodle/, '🍝'],
+      [/rijst/, '🍚'], [/brood|wrap|tortilla|bagel/, '🥖'], [/olie/, '🫒'], [/kokos/, '🥥'], [/kikkererwt|bonen|linzen/, '🫘'],
+      [/room|melk|haverdrink|sojadrink|yoghurt|kwark/, '🥛'], [/kaas/, '🧀'], [/noot|noten|pinda|amandel|cashew/, '🥜'],
+      [/fanta|cola|limonade|frisdrank|sprite|ijsthee/, '🥤'], [/\bsap\b|smoothie/, '🧃'], [/banaan/, '🍌'], [/appel|peer|fruit|druif|mandarijn|sinaasappel|aardbei|bessen|mango/, '🍎'],
+      [/havermout|muesli|granola|cornflakes/, '🥣'], [/beleg|hummus|jam|smeer/, '🥪'], [/lekkers|snoep|chocola|koek|taart|toetje/, '🍬'],
+      [/snacks?\b|chips|popcorn/, '🍿'], [/koffie/, '☕'], [/thee/, '🍵'], [/zout|suiker|saus|ketchup|mayo|mosterd/, '🧂']];
+    const CAT_EMOJI = { 'Groente & fruit': '🥬', 'Aardappelen, pasta & rijst': '🍝', 'Brood & ontbijt': '🍞', 'Houdbaar': '🥫',
+      'Zuivelvervangers': '🥛', 'Kruiden & sauzen': '🧂', 'Beleg': '🥪', 'Dranken': '🥤', 'Lekkers & snacks': '🍬' };
+    const emojiFor = (name, cat) => { const n = name.toLowerCase(); const hit = EMOJI.find(([re]) => re.test(n)); return hit ? hit[1] : (CAT_EMOJI[cat] || '🛒'); };
     const DEFAULT_CATS = ['Groente & fruit', 'Aardappelen, pasta & rijst', 'Brood & ontbijt', 'Houdbaar',
       'Zuivelvervangers', 'Kruiden & sauzen', 'Beleg', 'Dranken', 'Lekkers & snacks', 'Overig'];
 
@@ -115,7 +198,7 @@
     const $ = s => document.querySelector(s);
 
     /* ---------- seed: de eerste keer dat de pagina opent ---------- */
-    const ing = (name, qty, unit, cat) => ({ name, qty, unit, cat });
+    const ing = (name, qty, unit, cat) => ({ name, qty, unit, cat, ...(GPU[name] ? { gpu: GPU[name] } : {}), ...(STOCK.has(name) ? { stock: true } : {}) });
     function seed() {
       const recipes = [
         { id: uid(), name: 'Pompoensoep', persons: 4, ingredients: [
@@ -142,9 +225,9 @@
       ];
       const item = (name, qty, cat) => ({ id: uid(), name, qty, cat, done: false });
       return {
-        v: 1, categories: [...DEFAULT_CATS], recipes,
+        v: 2, nutCache: {}, categories: [...DEFAULT_CATS], recipes,
         lists: [{
-          id: uid(), name: 'Boodschappen 2–3 dagen', persons: 4, done: {}, hideDone: false,
+          id: uid(), name: 'Boodschappen 2–3 dagen', persons: 4, done: {}, buy: {}, view: 'cat', hideDone: false,
           recipes: recipes.map(r => ({ rid: r.id, persons: 4 })),
           items: [item('beleg', '', 'Beleg'), item('Fanta', '2 fles', 'Dranken'), item('sap', '2 pak', 'Dranken'),
             item('fruit', '12 stuks', 'Groente & fruit'), item('lekkers', '', 'Lekkers & snacks'),
@@ -156,8 +239,20 @@
 
     let S;
     function load() {
-      try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); return; } } catch (e) { /* privé-modus of kapotte JSON: begin opnieuw */ }
+      try { const raw = localStorage.getItem(KEY); if (raw) { S = JSON.parse(raw); migrate(); return; } } catch (e) { /* privé-modus of kapotte JSON: begin opnieuw */ }
       S = seed(); save();
+    }
+    // v1 → v2: voeding/in-huis bestaan nog niet. Vul alleen aan wat ontbreekt, nooit iets overschrijven.
+    function migrate() {
+      S.nutCache ||= {};
+      if (!(S.v >= 2)) {
+        for (const r of S.recipes) for (const g of r.ingredients) {
+          const n = g.name.trim().toLowerCase();
+          if (g.gpu === undefined && GPU[n]) g.gpu = GPU[n];
+          if (g.stock === undefined && STOCK.has(n)) g.stock = true;
+        }
+        S.v = 2; save();
+      }
     }
     function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* vol/geblokkeerd: app blijft werken, alleen niet bewaard */ } }
 
@@ -173,8 +268,21 @@
     const recipeById = id => S.recipes.find(r => r.id === id);
     const listById = id => S.lists.find(l => l.id === id);
 
+    // Allergenen van een groep ingrediënten. 'unknown' = minstens één zonder (nieuwe) OFF-koppeling: leeg is
+    // dan NIET "veilig" maar "niet gecontroleerd". Oudere koppelingen zonder allergenen-veld tellen ook als onbekend.
+    function allergyOf(gs) {
+      const hit = new Set(), trace = new Set(); let unknown = false;
+      for (const g of gs) {
+        const o = g && g.off;
+        if (!o || !Array.isArray(o.allergens)) { unknown = true; continue; }
+        o.allergens.forEach(a => hit.add(a)); (o.traces || []).forEach(a => trace.add(a));
+      }
+      return { hit: [...hit], trace: [...trace].filter(a => !hit.has(a)), unknown };
+    }
+    const keyOf = g => g.name.trim().toLowerCase() + '|' + g.unit;
     // Eén regel per (naam, eenheid): "ui" uit drie recepten wordt "3 stuk". Dat is de hele
-    // meerwaarde van afleiden i.p.v. kopiëren.
+    // meerwaarde van afleiden i.p.v. kopiëren. stock = álle bijdragende recepten zeggen "in huis" en
+    // je hebt het niet op "toch kopen" gezet (l.buy).
     function rowsFor(l) {
       const map = new Map();
       for (const lr of l.recipes) {
@@ -182,17 +290,69 @@
         const f = lr.persons / r.persons;
         for (const g of r.ingredients) {
           const name = g.name.trim(); if (!name) continue;
-          const key = name.toLowerCase() + '|' + g.unit;
+          const key = keyOf(g);
           let row = map.get(key);
-          if (!row) { row = { key, name, unit: g.unit, qty: 0, cat: g.cat, src: [], recipe: true, done: !!l.done[key] }; map.set(key, row); }
+          if (!row) { row = { key, name, unit: g.unit, qty: 0, cat: g.cat, src: [], recipe: true, done: !!l.done[key], canStock: true, gs: [], emoji: g.emoji || emojiFor(name, g.cat) }; map.set(key, row); }
           row.qty += (Number(g.qty) || 0) * f;
+          if (!g.stock) row.canStock = false;
+          row.gs.push(g);
           if (!row.src.includes(r)) row.src.push(r);
         }
       }
-      const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit) }));
-      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done });
+      const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit), stock: r.canStock && !(l.buy || {})[r.key], allergy: allergyOf(r.gs) }));
+      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done, stock: !!it.stock, emoji: it.emoji || emojiFor(it.name, it.cat), allergy: allergyOf([null]) });
       return rows;
     }
+    // Wat er van één recept op dit lijstje staat, met de hoeveelheid van DAT recept; done/stock komen
+    // uit de gedeelde regel zodat afvinken in beide weergaven hetzelfde is.
+    function recipePartsFor(r, persons, rowMap) {
+      const f = persons / r.persons, out = new Map();
+      for (const g of r.ingredients) {
+        if (!g.name.trim()) continue;
+        const key = keyOf(g), p = out.get(key) || { key, qty: 0, unit: g.unit };
+        p.qty += (Number(g.qty) || 0) * f; out.set(key, p);
+      }
+      return [...out.values()].map(p => ({ ...rowMap.get(p.key), qtyText: fmtQty(p.qty, p.unit) }));
+    }
+    // "In huis" telt niet mee voor voortgang: je hoeft het niet te halen.
+    const progressOf = rows => { const rs = rows.filter(r => !r.stock); return { d: rs.filter(r => r.done).length, t: rs.length }; };
+    const progressText = p => !p.t ? '✓ alles in huis' : p.d === p.t ? '✓ alles binnen' : `${p.d}/${p.t} binnen`;
+
+    /* ---------- voeding (Open Food Facts) ---------- */
+    // Gram van één ingrediënt-regel, of null als we het niet kunnen weten (stuk zonder gewicht).
+    // ml ≈ g: goed genoeg voor schattingen (olie 0,92 wordt via gpu 14 g/el opgevangen).
+    function gramsOf(g) {
+      const q = Number(g.qty) || 0;
+      switch (g.unit) {
+        case 'g': return q; case 'kg': return q * 1000; case 'ml': return q; case 'l': return q * 1000;
+        case 'el': return q * (g.gpu || 15); case 'tl': return q * (g.gpu || 5);
+        default: return g.gpu ? q * g.gpu : null;
+      }
+    }
+    function nutri(r) {
+      const t = { kcal: 0, p: 0, f: 0, c: 0, fib: 0, counted: 0, total: 0, missing: [] };
+      for (const g of r.ingredients) {
+        if (!g.name.trim()) continue;
+        t.total++;
+        const gr = gramsOf(g);
+        if (!g.off || gr === null) { t.missing.push(g.name.trim()); continue; }
+        const k = gr / 100 / r.persons; // per portie
+        t.kcal += g.off.kcal * k; t.p += g.off.p * k; t.f += g.off.f * k; t.c += g.off.c * k; t.fib += g.off.fib * k; t.counted++;
+      }
+      return t;
+    }
+    const fmt1 = n => String(Math.round(n * 10) / 10).replace('.', ',');
+    async function offSearch(q) {
+      const url = 'https://world.openfoodfacts.org/cgi/search.pl?' + new URLSearchParams({ search_terms: q, search_simple: 1, action: 'process', json: 1, page_size: 12, fields: 'product_name,brands,nutriments,allergens_tags,traces_tags', lc: 'nl' });
+      const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      return (d.products || []).map(p => {
+        const n = p.nutriments || {}, kcal = n['energy-kcal_100g'];
+        if (kcal == null || !p.product_name) return null;
+        return { label: [p.product_name, p.brands].filter(Boolean).join(' — '), kcal: +kcal, p: +n.proteins_100g || 0, f: +n.fat_100g || 0, c: +n.carbohydrates_100g || 0, fib: +n.fiber_100g || 0, allergens: mapTags(p.allergens_tags), traces: mapTags(p.traces_tags) };
+      }).filter(Boolean);
+    }
+
     function grouped(rows, hideDone) {
       const order = S.categories;
       const by = new Map();
@@ -223,8 +383,8 @@
 
     function viewLists() {
       const cards = S.lists.map(l => {
-        const rows = rowsFor(l), d = rows.filter(r => r.done).length;
-        return `<a href="#/lijst/${l.id}" class="card listcard"><b>${esc(l.name)}</b><div class="muted">${l.persons} personen · ${d}/${rows.length} binnen</div></a>`;
+        const p = progressOf(rowsFor(l));
+        return `<a href="#/lijst/${l.id}" class="card listcard"><b>${esc(l.name)}</b><div class="muted">${l.persons} personen · ${p.d}/${p.t} binnen</div></a>`;
       }).join('') || '<div class="empty">Nog geen lijstjes.</div>';
       return `<div class="top"><h1>Boodschappen</h1></div>${tabs('l')}${cards}
         <button class="btn primary" data-act="newList">+ Nieuw lijstje</button>
@@ -234,26 +394,137 @@
           <input type="file" id="importFile" accept="application/json" hidden></footer>`;
     }
 
+    function algTags(r) {
+      const av = S.avoid || []; if (!av.length) return '';
+      const h = r.allergy.hit.filter(a => av.includes(a)), t = r.allergy.trace.filter(a => av.includes(a));
+      return h.map(a => `<span class="tag warn">⚠ ${ALG_NAME[a]}</span>`).join('') + t.map(a => `<span class="tag trace">sporen ${ALG_NAME[a].toLowerCase()}</span>`).join('')
+        + (r.allergy.unknown ? '<span class="tag unk">? niet gecontroleerd</span>' : '');
+    }
+    // Het paneel bovenaan: filter + (alleen als er iets aangevinkt is) een samenvatting over de hele lijst.
+    function algPanel(rows) {
+      const av = S.avoid || [];
+      const hitRows = rows.filter(r => r.allergy.hit.some(a => av.includes(a)));
+      const traceRows = rows.filter(r => !hitRows.includes(r) && r.allergy.trace.some(a => av.includes(a)));
+      const unk = rows.filter(r => r.allergy.unknown);
+      const status = av.length ? `${hitRows.length ? `<div class="warnline">⚠ Bevat: ${hitRows.map(r => esc(r.name)).join(', ')}</div>` : '<div class="muted">Geen treffers bij de gecontroleerde ingrediënten.</div>'}
+        ${traceRows.length ? `<div class="muted">Sporen mogelijk: ${traceRows.map(r => esc(r.name)).join(', ')}</div>` : ''}
+        ${unk.length ? `<div class="muted">? ${unk.length} van ${rows.length} niet gecontroleerd (geen product gekoppeld): ${unk.slice(0, 12).map(r => esc(r.name)).join(', ')}${unk.length > 12 ? '…' : ''}</div>` : ''}` : '';
+      const sum = av.length ? `: ${av.map(a => ALG_NAME[a].toLowerCase()).join(', ')}${hitRows.length ? ` · <b style="color:#b42318">⚠ ${hitRows.length}</b>` : ''}${unk.length ? ` · ? ${unk.length}` : ''}` : '';
+      return `<details class="card alg"${S.ui?.algOpen ? ' open' : ''}><summary>Allergenen vermijden${sum}</summary>
+        <div class="achips">${ALLERGENS.map(([id, nl]) => `<label class="achip${av.includes(id) ? ' on' : ''}"><input type="checkbox" data-avoid="${id}"${av.includes(id) ? ' checked' : ''} /> ${nl}</label>`).join('')}</div>
+        ${status}
+        <div class="muted" style="margin-top:6px">Gegevens komen uit Open Food Facts (door gebruikers ingevoerd) en gaan over het gekoppelde <i>product</i>, niet over jouw ingrediënt. Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></details>`;
+    }
+    function itemHtml(r, showTags) {
+      const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
+        : (r.canStock ? `<button class="tag stk" data-act="restock" data-key="${esc(r.key)}">toch kopen</button>` : '');
+      return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
+        <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
+        <div class="txt grow">
+          ${r.recipe ? `<div data-act="selIng" data-key="${esc(r.key)}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
+          <div>${stk}${algTags(r)}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
+        </div>
+        <span class="qty">${esc(r.qtyText)}</span>
+      </div>`;
+    }
+    const byName = (a, b) => (a.done - b.done) || a.name.localeCompare(b.name, 'nl');
+
+    function algChip(r) {
+      const av = S.avoid || []; if (!av.length) return '';
+      const a = allergyOf(r.ingredients.filter(g => g.name.trim())), h = a.hit.filter(x => av.includes(x));
+      return (h.length ? ` · <b style="color:#b42318">⚠ ${h.map(x => ALG_NAME[x].toLowerCase()).join(', ')}</b>` : '') + (a.unknown ? ' · ? niet gecontroleerd' : '');
+    }
+    const REC_COLORS = ['#7b5ea7', '#2f7f9e', '#c2603a', '#4f8a4c', '#b0487a', '#8a7a2e'];
+    const recColor = (l, rid) => REC_COLORS[Math.max(0, l.recipes.findIndex(x => x.rid === rid)) % REC_COLORS.length];
+
+    function overviewHtml(l, rows, rowMap) {
+      const u = S.ui || {}, oc = u.openCats || {}, orr = u.openRec || {};
+      const left = grouped(rows, l.hideDone).map(([c, arr]) => {
+        const open = !!oc[c], p = progressOf(arr);
+        return `<div class="card ocat" data-cat="${esc(c)}"><button class="ohead" data-act="catToggle" data-cat="${esc(c)}" aria-expanded="${open}">
+          <span>${CAT_EMOJI[c] || '🛒'} ${esc(c)}</span><span>${p.t ? `${p.d}/${p.t}` : 'in huis'} ${open ? '▾' : '▸'}</span></button>${open ? arr.map(r => itemHtml(r, false)).join('') : ''}</div>`;
+      }).join('');
+      const right = l.recipes.map(lr => {
+        const r = recipeById(lr.rid); if (!r) return '';
+        const open = !!orr[r.id], parts = recipePartsFor(r, lr.persons, rowMap), p = progressOf(parts);
+        const shown = parts.filter(x => !(l.hideDone && x.done)).sort(byName);
+        return `<div class="card orec${u.sel === 'r:' + r.id ? ' sel' : ''}" data-rid="${r.id}" style="--rc:${recColor(l, r.id)}">
+          <button class="ohead" data-act="recToggle" data-rid="${r.id}" aria-expanded="${open}"><span>${esc(r.name)}<span class="muted osub${p.t === p.d ? ' badge' : ''}">${progressText(p)}</span></span></button>
+          ${open ? shown.map(x => `<div class="opart${x.done ? ' done' : ''}${x.stock ? ' stock' : ''}" data-pkey="${esc(x.key)}"><span>${x.emoji} ${esc(x.name)}</span><span class="qty">${esc(x.qtyText)}</span></div>`).join('')
+            + `<a class="opart" href="#/recept/${r.id}">Recept bekijken →</a>` : ''}
+        </div>`;
+      }).join('');
+      if (!left && !right) return '';
+      return `<div class="ov" id="ov"><svg class="ovl" id="ovl" aria-hidden="true"></svg><div class="ovL">${left}</div><div class="ovR">${right}</div></div>`;
+    }
+
+    // Tekent de lijntjes NA de render, op gemeten posities: dan kloppen ze ook na in-/uitklappen, lange
+    // namen die afbreken of draaien van het scherm. Eén lijn per (ingrediënt of dichte categorie) × recept.
+    function drawLines() {
+      const ov = $('#ov'), svg = $('#ovl'), l = curList(); if (!ov || !svg || !l) return;
+      const box = ov.getBoundingClientRect();
+      svg.setAttribute('width', box.width); svg.setAttribute('height', box.height);
+      const rows = rowsFor(l), byKey = new Map(rows.map(r => [r.key, r])), groups = new Map(grouped(rows, l.hideDone)), sel = S.ui?.sel;
+      // ankerpunt: bovenste ~44px van een element, zodat een regel met extra tags niet in het midden landt
+      const pt = el => { const b = el.getBoundingClientRect(); return { l: b.left - box.left, r: b.right - box.left, y: b.top - box.top + Math.min(b.height / 2, 22) }; };
+      const out = [];
+      for (const cEl of ov.querySelectorAll('.ocat')) {
+        const items = cEl.querySelectorAll('.item[data-key]');
+        const anchors = items.length ? [...items].map(el => ({ el, rs: [byKey.get(el.dataset.key)] }))
+          : [{ el: cEl.querySelector('.ohead'), rs: groups.get(cEl.dataset.cat) || [] }];
+        for (const a of anchors) {
+          const recs = new Map();
+          for (const r of a.rs) if (r && r.recipe) for (const x of r.src) { if (!recs.has(x.id)) recs.set(x.id, []); recs.get(x.id).push(r); }
+          if (!recs.size) continue;
+          const p1 = pt(a.el);
+          for (const [rid, rr] of recs) {
+            const rEl = ov.querySelector(`.orec[data-rid="${rid}"]`); if (!rEl) continue;
+            // open recept: land op precies dat ingrediënt; anders op de kop van het recept
+            const inner = rr.length === 1 && rEl.querySelector(`.opart[data-pkey="${CSS.escape(rr[0].key)}"]`);
+            const p2 = pt(inner || rEl.querySelector('.ohead'));
+            // controlepunten 26px naar binnen: de curve blijft binnen de 30px tussenruimte
+            out.push({ d: `M${p1.r},${p1.y} C${p1.r + 26},${p1.y} ${p2.l - 26},${p2.y} ${p2.l},${p2.y}`, c: recColor(l, rid),
+              active: !!sel && (sel === 'r:' + rid || rr.some(r => sel === 'k:' + r.key)), done: rr.every(r => r.done), stock: rr.every(r => r.stock) });
+          }
+        }
+      }
+      svg.innerHTML = out.sort((a, b) => a.active - b.active).map(o => {
+        const op = sel ? (o.active ? .95 : .07) : (o.done ? .15 : .42);
+        return `<path d="${o.d}" fill="none" stroke="${o.c}" stroke-width="${o.active ? 1.8 : 1}" stroke-opacity="${op}" stroke-linecap="round"${o.stock ? ' stroke-dasharray="3 3"' : ''}/>`;
+      }).join('');
+    }
+
     function viewList(l) {
-      const rows = rowsFor(l), done = rows.filter(r => r.done).length, pct = rows.length ? Math.round(done / rows.length * 100) : 0;
+      const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
+      const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
       const chips = l.recipes.map(lr => {
         const r = recipeById(lr.rid); if (!r) return '';
-        return `<div class="card rchip row"><a class="grow" href="#/recept/${r.id}">${esc(r.name)}</a>${stepper('rpers', r.id, lr.persons, 'pers.')}<button class="btn icon" data-act="rdel" data-id="${r.id}" aria-label="Recept van lijstje halen">×</button></div>`;
+        const p = progressOf(recipePartsFor(r, lr.persons, rowMap)), n = nutri(r);
+        const kcal = n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '';
+        return `<div class="card rchip row"><div class="grow"><a href="#/recept/${r.id}">${esc(r.name)}</a>
+          <div class="muted"><span class="${p.t === p.d ? 'badge' : ''}">${progressText(p)}</span>${kcal}${algChip(r)}</div></div>
+          ${stepper('rpers', r.id, lr.persons, 'pers.')}<button class="btn icon" data-act="rdel" data-id="${r.id}" aria-label="Recept van lijstje halen">×</button></div>`;
       }).join('');
-      const groups = grouped(rows, l.hideDone).map(([c, arr]) => `
-        <div class="cat"><span>${esc(c)}</span><span>${arr.filter(r => r.done).length}/${arr.length}</span></div>
-        <div>${arr.map(r => `
-          <div class="item${r.done ? ' done' : ''}">
-            <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
-            <div class="txt grow">
-              ${r.recipe ? `<div>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}">${esc(r.name)}</button>`}
-              <div>${r.src.map(s => `<a class="tag" href="#/recept/${s.id}">${esc(s.name)}</a>`).join('')}</div>
-            </div>
-            <span class="qty">${esc(r.qtyText)}</span>
-          </div>`).join('')}</div>`).join('') || `<div class="empty">${rows.length ? 'Alles binnen 🎉' : 'Het lijstje is leeg. Voeg hierboven iets toe of kies een recept.'}</div>`;
+      const empty = `<div class="empty">${rows.length ? 'Alles binnen 🎉' : 'Het lijstje is leeg. Voeg hierboven iets toe of kies een recept.'}</div>`;
+      let body;
+      if (l.view === 'recept') {
+        // Per recept: elk recept met ZIJN hoeveelheid; "ui" staat dus bij drie recepten, maar één vinkje geldt voor alle.
+        const secs = l.recipes.map(lr => {
+          const r = recipeById(lr.rid); if (!r) return '';
+          const parts = recipePartsFor(r, lr.persons, rowMap), p = progressOf(parts);
+          const shown = parts.filter(x => !(l.hideDone && x.done)).sort(byName);
+          return `<div class="cat"><span>${esc(r.name)}</span><span class="${p.t === p.d ? 'badge' : ''}">${progressText(p)}</span></div><div>${shown.map(x => itemHtml(x, false)).join('')}</div>`;
+        }).join('');
+        const loose = rows.filter(r => !r.recipe && !(l.hideDone && r.done)).sort(byName);
+        body = (secs + (loose.length ? `<div class="cat"><span>Los toegevoegd</span><span>${loose.filter(r => r.done).length}/${loose.length}</span></div><div>${loose.map(x => itemHtml(x, false)).join('')}</div>` : '')) || empty;
+      } else {
+        body = overviewHtml(l, rows, rowMap) || empty;
+      }
+      const anyOpen = Object.values(S.ui?.openCats || {}).some(Boolean);
       return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
+        ${algPanel(rows)}
         <div class="row">${stepper('lpers', l.id, l.persons, 'personen')}<span class="muted grow">schaalt alle recepten mee</span></div>
-        <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${done} van ${rows.length} binnen</div>
+        <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${pr.d} van ${pr.t} binnen</div>
         <form class="add" id="addForm" autocomplete="off">
           <input name="name" placeholder="Wat moet je halen?" aria-label="Naam" required />
           <input name="qty" placeholder="Aantal" aria-label="Aantal" />
@@ -261,7 +532,11 @@
           <button class="btn primary">Toevoegen</button>
         </form>
         <div class="rchips">${chips}<button class="btn" data-act="addRecipe">+ Recept toevoegen</button></div>
-        ${groups}
+        <div class="seg" role="group" aria-label="Ordenen">
+          <button data-act="view" data-v="cat" class="${l.view === 'recept' ? '' : 'on'}">Overzicht</button>
+          <button data-act="view" data-v="recept" class="${l.view === 'recept' ? 'on' : ''}">Per recept</button></div>
+        ${l.view === 'recept' ? '' : `<button class="btn small" data-act="allCats" data-v="${anyOpen ? 0 : 1}">${anyOpen ? 'Alles dicht' : 'Alles open'}</button>`}
+        ${body}
         <div class="toolbar">
           <button class="btn small" data-act="hideDone">${l.hideDone ? 'Toon afgevinkt' : 'Verberg afgevinkt'}</button>
           <button class="btn small" data-act="uncheckAll">Alles uitvinken</button>
@@ -276,19 +551,52 @@
       return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${cards}<button class="btn primary" data-act="newRecipe">+ Nieuw recept</button>`;
     }
 
+    // Allergenen van één recept volgens de gekoppelde producten; ⚠ bij wat in jouw filter staat.
+    function algHtml(r) {
+      const av = S.avoid || [], gs = r.ingredients.filter(g => g.name.trim()), by = new Map(), tr = new Map(), unk = [];
+      for (const g of gs) {
+        const a = allergyOf([g]); if (a.unknown) { unk.push(g.name.trim()); continue; }
+        a.hit.forEach(x => by.set(x, [...(by.get(x) || []), g.name.trim()]));
+        a.trace.forEach(x => tr.set(x, [...(tr.get(x) || []), g.name.trim()]));
+      }
+      const line = (m, pre) => ALLERGENS.filter(([id]) => m.has(id)).map(([id, nl]) => `<div${av.includes(id) ? ' class="warnline"' : ''}>${av.includes(id) ? '⚠ ' : ''}${pre}${nl}: ${esc(m.get(id).join(', '))}</div>`).join('');
+      return (line(by, '') + line(tr, 'sporen ') || (unk.length === gs.length ? '' : '<div class="muted">Geen allergenen gemeld in de gekoppelde producten.</div>'))
+        + (unk.length ? `<div class="muted">? Niet gecontroleerd (geen product gekoppeld): ${esc(unk.join(', '))}</div>` : '');
+    }
+    function nutHtml(r) {
+      const n = nutri(r);
+      return `${n.counted ? `<div class="big">≈ ${Math.round(n.kcal)} kcal</div>
+          <div class="muted">Eiwit ${fmt1(n.p)} g · Vet ${fmt1(n.f)} g · Koolhydraten ${fmt1(n.c)} g · Vezels ${fmt1(n.fib)} g</div>` : '<div class="muted">Nog geen voeding gekoppeld.</div>'}
+        <div class="muted" style="margin-top:6px">${n.counted} van ${n.total} ingrediënten meegeteld${n.missing.length ? ' — mist: ' + esc(n.missing.join(', ')) : ''}</div>`;
+    }
+
     function viewRecipe(r) {
-      const rows = r.ingredients.map((g, i) => `
+      const rows = r.ingredients.map((g, i) => {
+        const needGpu = g.off && gramsOf(g) === null;
+        const nlabel = needGpu ? `⚠ gewicht per ${g.unit} ontbreekt` : g.off ? '✓ ' + g.off.label : 'Voeding koppelen';
+        return `
         <div class="card ing">
           <input type="number" step="any" min="0" inputmode="decimal" value="${g.qty || ''}" data-f="qty" data-i="${i}" aria-label="Hoeveelheid" />
           <select data-f="unit" data-i="${i}" aria-label="Eenheid">${unitOptions(g.unit)}</select>
-          <input value="${esc(g.name)}" data-f="name" data-i="${i}" placeholder="Ingrediënt" aria-label="Ingrediënt" />
+          <div class="nm"><span class="em" aria-hidden="true">${g.name.trim() ? g.emoji || emojiFor(g.name, g.cat) : ''}</span><input value="${esc(g.name)}" data-f="name" data-i="${i}" placeholder="Ingrediënt" aria-label="Ingrediënt" /></div>
           <button class="btn icon" data-act="ingDel" data-i="${i}" aria-label="Verwijder ingrediënt">×</button>
           <select class="catsel" data-f="cat" data-i="${i}" data-prev="${esc(g.cat)}" aria-label="Categorie">${catOptions(g.cat)}</select>
-        </div>`).join('');
+          <label class="stkl"><input type="checkbox" data-f="stock" data-i="${i}"${g.stock ? ' checked' : ''} /> In huis</label>
+          <button class="btn nbtn" data-act="nutri" data-i="${i}" title="${esc(g.off ? g.off.label : '')}">${esc(nlabel)}</button>
+        </div>`;
+      }).join('');
       return `<div class="top"><a class="btn icon" href="#/recepten" aria-label="Terug">←</a><h1>Recept</h1></div>
         <div class="field"><label>Naam</label><input value="${esc(r.name)}" data-rf="name" /></div>
         <div class="field"><label>Ingrediënten zijn berekend voor</label>${stepper('recPers', r.id, r.persons, 'personen')}</div>
         <div class="field"><label>Ingrediënten</label>${rows}<button class="btn small" data-act="ingAdd">+ Ingrediënt</button></div>
+        <div class="field"><label>Voeding per portie (schatting)</label>
+          <div class="card nut"><div id="nutBox">${nutHtml(r)}</div>
+            <div id="autoStatus" class="muted"></div>
+            <button class="btn small" data-act="autoNut" style="margin-top:8px">Voeding automatisch zoeken</button>
+            <div class="muted" style="margin-top:6px">Bron: Open Food Facts (gebruikers-gegevens, controleer het gekozen product). Alleen ingrediënten met een gewicht tellen mee.</div></div></div>
+        <div class="field"><label>Allergenen (volgens gekoppelde producten)</label>
+          <div class="card nut"><div id="algBox">${algHtml(r)}</div>
+            <div class="muted" style="margin-top:6px">Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></div></div>
         <div class="toolbar"><button class="btn primary" data-act="toList">Op een lijstje zetten</button>
           <button class="btn danger" data-act="delRecipe">Recept verwijderen</button></div>`;
     }
@@ -302,6 +610,7 @@
       else if (kind === 'recept' && recipeById(id)) html = viewRecipe(recipeById(id));
       else html = viewLists();
       app.innerHTML = html;
+      drawLines(); // no-op buiten het overzicht
       document.title = (kind === 'lijst' && listById(id)) ? listById(id).name + ' · Boodschappen' : 'Boodschappen';
     }
     const route = () => { const [, kind, id] = (location.hash.replace(/^#/, '') || '/').split('/'); return { kind, id }; };
@@ -384,19 +693,33 @@
         const l = curList(), it = l.items.find(i => i.id === el.dataset.id);
         sheet('Aanpassen', `<div class="field"><label>Naam</label><input id="f-name" value="${esc(it.name)}" /></div>
           <div class="field"><label>Aantal</label><input id="f-qty" value="${esc(it.qty)}" /></div>
-          <div class="field"><label>Categorie</label><select id="f-cat" data-prev="${esc(it.cat)}">${catOptions(it.cat)}</select></div>`,
+          <div class="field"><label>Emoji (leeg = automatisch)</label><input id="f-em" value="${esc(it.emoji || '')}" maxlength="4" style="width:90px" /></div>
+          <div class="field"><label>Categorie</label><select id="f-cat" data-prev="${esc(it.cat)}">${catOptions(it.cat)}</select></div>
+          <div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="f-stock"${it.stock ? ' checked' : ''} /> Staat in huis (gedimd, telt niet mee)</label></div>`,
           [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => { l.items = l.items.filter(x => x !== it); commit(); } }, cancel,
             { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
               const sel = d.querySelector('#f-cat'); if (sel.value === '__new') return false;
-              it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; commit();
+              it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; { const e = d.querySelector('#f-em').value.trim(); if (e) it.emoji = e; else delete it.emoji; } commit();
             } }]);
       },
+      catToggle(el) { const o = ((S.ui ||= {}).openCats ||= {}); o[el.dataset.cat] = !o[el.dataset.cat]; commit(); },
+      allCats(el) { (S.ui ||= {}).openCats = Object.fromEntries(S.categories.map(c => [c, el.dataset.v === '1'])); commit(); },
+      // Recept openen selecteert het ook (lijntjes lichten op); dichtklappen heft de selectie op.
+      recToggle(el) { const u = (S.ui ||= {}), o = (u.openRec ||= {}), id = el.dataset.rid; o[id] = !o[id]; u.sel = o[id] ? 'r:' + id : null; commit(); },
+      selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
+      view(el) { curList().view = el.dataset.v; commit(); },
+      // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
+      unstock(el) { const l = curList(), k = el.dataset.key; if (k.startsWith('m:')) l.items.find(i => i.id === k.slice(2)).stock = false; else (l.buy ||= {})[k] = true; commit(); },
+      restock(el) { const l = curList(); delete (l.buy || {})[el.dataset.key]; commit(); },
       hideDone() { const l = curList(); l.hideDone = !l.hideDone; commit(); },
       uncheckAll() { const l = curList(); l.done = {}; l.items.forEach(i => i.done = false); commit(); },
       async share() {
         const l = curList();
-        const text = l.name + ` (${l.persons} personen)\n` + grouped(rowsFor(l).filter(r => !r.done), false)
-          .map(([c, arr]) => '\n' + c + '\n' + arr.map(r => `- ${r.name}${r.qtyText ? ' — ' + r.qtyText : ''}`).join('\n')).join('\n');
+        const line = r => `- ${r.name}${r.qtyText ? ' — ' + r.qtyText : ''}`;
+        const open = rowsFor(l).filter(r => !r.done), stock = open.filter(r => r.stock);
+        const text = l.name + ` (${l.persons} personen)\n` + grouped(open.filter(r => !r.stock), false)
+          .map(([c, arr]) => '\n' + c + '\n' + arr.map(line).join('\n')).join('\n')
+          + (stock.length ? '\n\nCheck of je dit nog in huis hebt:\n' + stock.map(line).join('\n') : '');
         try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); alert('Gekopieerd naar klembord.'); } }
         catch (e) { /* gebruiker annuleerde het deel-menu */ }
       },
@@ -419,6 +742,58 @@
         if (!S.lists.length) return sheet('Geen lijstjes', '<p>Maak eerst een lijstje.</p>', [{ id: 'o', label: 'OK', fn: () => {} }]);
         sheet('Op welk lijstje?', S.lists.map(l => `<button class="btn pick" data-s="l-${l.id}"${l.recipes.some(x => x.rid === r.id) ? ' disabled' : ''}>${esc(l.name)}</button>`).join(''), [cancel]);
         S.lists.forEach(l => { dlg._h['l-' + l.id] = () => { l.recipes.push({ rid: r.id, persons: l.persons }); save(); location.hash = '#/lijst/' + l.id; }; });
+      },
+      // Voeding koppelen: gewicht per eenheid + zoeken in Open Food Facts.
+      nutri(el) {
+        const r = curRecipe(), g = r.ingredients[+el.dataset.i];
+        const weighed = ['g', 'kg', 'ml', 'l'].includes(g.unit);
+        const q = g.name.trim();
+        sheet('Voeding: ' + (q || 'ingrediënt'),
+          `<div class="muted">Nu: ${g.off ? esc(g.off.label) + ` (${Math.round(g.off.kcal)} kcal/100 g)` : 'niets gekoppeld'}</div>
+           ${weighed ? '' : `<div class="field"><label>Gewicht van 1 ${esc(g.unit || 'stuk')} in gram${g.unit === 'el' || g.unit === 'tl' ? ' (leeg = standaard)' : ''}</label><input id="n-gpu" type="number" step="any" min="0" inputmode="decimal" value="${g.gpu || ''}" /></div>`}
+           <div class="field"><label>Emoji (leeg = automatisch)</label><input id="n-em" value="${esc(g.emoji || '')}" maxlength="4" style="width:90px" /></div>
+           <div class="field"><label>Zoek in Open Food Facts</label><div class="row"><input id="n-q" value="${esc(q)}" /><button class="btn primary" data-s="search">Zoek</button></div></div>
+           <div class="res" id="n-res"></div>`,
+          [{ id: 'unlink', label: 'Koppeling wissen', cls: 'danger', fn: d => { saveGpu(d); delete g.off; commit(); } },
+           { id: 'ok', label: 'Klaar', cls: 'primary', fn: d => { saveGpu(d); commit(); } }]);
+        const saveGpu = d => { const i = d.querySelector('#n-gpu'); if (i) { const v = parseFloat(i.value); if (v > 0) g.gpu = v; else delete g.gpu; }
+          const em = d.querySelector('#n-em'); if (em) { const e = em.value.trim(); if (e) g.emoji = e; else delete g.emoji; } };
+        const doSearch = async () => {
+          const res = dlg.querySelector('#n-res'); res.textContent = 'Zoeken…';
+          try {
+            const hits = await offSearch(dlg.querySelector('#n-q').value.trim());
+            if (!hits.length) { res.textContent = 'Niets gevonden. Probeer een andere zoekterm.'; return; }
+            res.innerHTML = hits.map((h, i) => `<button class="btn" data-s="pick-${i}">${esc(h.label)}<div class="muted">${Math.round(h.kcal)} kcal · eiwit ${fmt1(h.p)} · vet ${fmt1(h.f)} · kh ${fmt1(h.c)} (per 100 g)</div></button>`).join('');
+            hits.forEach((h, i) => { dlg._h['pick-' + i] = d => { saveGpu(d); g.off = h; S.nutCache[q.toLowerCase()] = h;
+            // Zelfde naam in andere recepten (ui, knoflook, olijfolie…) krijgt hetzelfde product, tenzij daar al gekozen is.
+            for (const r2 of S.recipes) for (const g2 of r2.ingredients) if (!g2.off && g2.name.trim().toLowerCase() === q.toLowerCase()) g2.off = h;
+            commit(); }; });
+          } catch (e) { res.textContent = 'Open Food Facts is nu niet bereikbaar (' + e.message + '). Probeer het later nog eens.'; }
+        };
+        // 'search' mag de dialoog niet sluiten → synchroon false teruggeven, async werk loopt door.
+        dlg._h.search = () => { doSearch(); return false; };
+        dlg.querySelector('#n-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+      },
+      // Alle ingrediënten zonder koppeling doen: eerst de cache (zelfde naam in een ander recept), anders het
+      // eerste zoekresultaat. Open Food Facts begrenst zoekopdrachten (~10/min), vandaar de pauze tussen verzoeken.
+      async autoNut() {
+        if (S._busy) return; S._busy = true;
+        const r = curRecipe(), status = $('#autoStatus'); let fail = null;
+        const todo = r.ingredients.filter(g => g.name.trim() && !g.off);
+        for (let k = 0; k < todo.length; k++) {
+          const g = todo[k], key = g.name.trim().toLowerCase();
+          if (route().id !== r.id) break; // gebruiker is weggenavigeerd
+          if (S.nutCache[key]?.allergens) { g.off = S.nutCache[key]; continue; }
+          if (status) status.textContent = `Zoeken: ${g.name} (${k + 1}/${todo.length})…`;
+          try {
+            const hits = await offSearch(g.name.trim());
+            if (hits[0]) { g.off = hits[0]; S.nutCache[key] = hits[0]; }
+          } catch (e) { fail = e.message; break; }
+          save();
+          if (k < todo.length - 1) await new Promise(res => setTimeout(res, 6500));
+        }
+        delete S._busy; save();
+        if (route().id === r.id) { render(); const st = $('#autoStatus'); if (st) st.textContent = fail ? 'Gestopt: Open Food Facts niet bereikbaar (' + fail + '). Wat gelukt is, is bewaard.' : 'Klaar. Controleer de gekozen producten per ingrediënt.'; }
       },
       export() {
         const a = document.createElement('a');
@@ -453,9 +828,14 @@
         file.text().then(txt => {
           const d = JSON.parse(txt);
           if (!Array.isArray(d.lists) || !Array.isArray(d.recipes)) throw new Error('geen back-up');
-          if (confirm('Alles in deze browser vervangen door de back-up?')) { S = d; commit(); }
+          if (confirm('Alles in deze browser vervangen door de back-up?')) { S = d; delete S._busy; commit(); }
         }).catch(() => alert('Dit bestand is geen geldige back-up.'));
         return;
+      }
+      if (t.dataset.avoid) {
+        const a = (S.avoid ||= []), i = a.indexOf(t.dataset.avoid);
+        if (i < 0) a.push(t.dataset.avoid); else a.splice(i, 1);
+        (S.ui ||= {}).algOpen = true; commit(); return; // paneel blijft open na de re-render
       }
       // categorie-select met "+ Nieuwe categorie…" (op pagina of in dialoog)
       if (t.tagName === 'SELECT' && t.value === '__new') {
@@ -467,8 +847,10 @@
       // recept-velden: in-place bijwerken, geen volledige render (anders verlies je focus bij typen)
       if (t.dataset.f) {
         const g = curRecipe().ingredients[+t.dataset.i];
-        g[t.dataset.f] = t.dataset.f === 'qty' ? (parseFloat(t.value) || 0) : t.value;
+        g[t.dataset.f] = t.dataset.f === 'qty' ? (parseFloat(t.value) || 0) : t.dataset.f === 'stock' ? t.checked : t.value;
         save();
+        const nb = $('#nutBox'); if (nb) nb.innerHTML = nutHtml(curRecipe());
+        const ab = $('#algBox'); if (ab) ab.innerHTML = algHtml(curRecipe());
       }
     });
     document.addEventListener('input', e => {
@@ -477,7 +859,30 @@
       else if (t.dataset.f === 'name') { curRecipe().ingredients[+t.dataset.i].name = t.value; save(); }
     });
 
+    // Aapjesdag: emoji-regen. Web Animations API i.p.v. CSS-klassen, zodat elk deeltje zijn eigen
+    // baan krijgt en zichzelf opruimt (geen blijvende DOM-nodes). Bij 'minder beweging' alleen een korte fade.
+    const CONF = ['🐵', '🙈', '🙉', '🙊', '🐒', '❤️', '💕', '💖'];
+    $('#aap').addEventListener('click', () => {
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches, n = calm ? 12 : 48;
+      for (let i = 0; i < n; i++) {
+        const el = document.createElement('span');
+        el.className = 'conf'; el.textContent = CONF[Math.floor(Math.random() * CONF.length)];
+        el.style.left = Math.random() * 94 + 'vw'; el.style.fontSize = 22 + Math.random() * 26 + 'px';
+        el.style.top = calm ? Math.random() * 70 + 10 + 'vh' : '100vh';
+        document.body.appendChild(el);
+        const rise = calm ? [{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }]
+          : [{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translateY(-${95 + Math.random() * 20}vh) rotate(${(Math.random() - .5) * 90}deg)`, opacity: 0 }];
+        el.animate(rise, { duration: calm ? 1400 : 2200 + Math.random() * 1800, delay: Math.random() * 600, easing: 'ease-out', fill: 'backwards' }).onfinish = () => el.remove();
+      }
+    });
+
+    // <details> meldt open/dicht via 'toggle' (borrelt niet op, dus capture); onthouden zodat een re-render het paneel niet sluit.
+    document.addEventListener('toggle', e => { if (e.target.matches?.('details.alg')) (S.ui ||= {}).algOpen = e.target.open; }, true);
+
     window.addEventListener('hashchange', () => { if (dlg.open) dlg.close(); render(); window.scrollTo(0, 0); });
+    // Lijntjes opnieuw meten bij draaien/resizen en zodra de webfonts er zijn (tekstbreedte verandert dan).
+    let rz = 0; window.addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(drawLines); });
+    document.fonts?.ready.then(drawLines);
     load(); render();
   })();
   </script>
