@@ -135,6 +135,35 @@
     .item.sel { background: #f3effa; }
     .orec.sel { box-shadow: 0 0 0 2px var(--rc); }
     [data-act=selIng] { cursor: pointer; }
+    /* Compact (Han 2026-11-02: "veel padding, enorm ver scrollen op gsm"). Tikdoelen blijven ≥ 32px. */
+    .wrap { padding: 10px 12px 64px; }
+    h1 { font-size: 1.5rem; }
+    .top { margin-bottom: 8px; }
+    .btn, .icon { min-height: 38px; } .icon { width: 38px; }
+    input, select, textarea { min-height: 38px; padding: 5px 10px; }
+    .stepper button { width: 34px; min-height: 34px; } .stepper span { min-width: 64px; }
+    .aap { min-height: 0; padding: 6px 12px; margin-bottom: 8px; font-size: .88rem; }
+    .progress { margin: 4px 0 2px; height: 6px; }
+    .add { margin: 8px 0; gap: 6px; }
+    .alg { padding: 0 12px 6px; margin: 0 0 8px; }
+    .alg summary { min-height: 36px; font-size: .9rem; }
+    .achips { gap: 5px; margin: 2px 0 6px; }
+    .achip { position: relative; padding: 2px 10px; font-size: .8rem; cursor: pointer; }
+    .achip input { position: absolute; opacity: 0; width: 1px; height: 1px; } /* de chip zelf is het vinkje */
+    .achip.on { font-weight: 600; color: #b42318; }
+    .achip:focus-within { outline: 3px solid rgba(37, 99, 235, .45); }
+    .alg .muted, .alg .warnline { font-size: .78rem; margin: 2px 0; }
+    .ov { margin-top: 10px; }
+    .ovL, .ovR { gap: 12px; }
+    .ohead { min-height: 34px; padding: 5px 10px; }
+    .ocat .item, .orec .item { padding: 0 8px 0 0; overflow: hidden; }
+    .ocat .check, .orec .check { width: 34px; height: 36px; }
+    .check span { width: 20px; height: 20px; border-radius: 6px; font-size: 13px; }
+    .item .txt { padding: 3px 0; }
+    .rctl { padding: 0 10px 6px; }
+    .rctl .stepper button, .rctl .btn.icon { width: 30px; min-height: 30px; }
+    .rctl .stepper span { min-width: 52px; font-size: .82rem; }
+    .toolbar { margin-top: 16px; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
@@ -413,7 +442,7 @@
       return `<details class="card alg"${S.ui?.algOpen ? ' open' : ''}><summary>Allergenen vermijden${sum}</summary>
         <div class="achips">${ALLERGENS.map(([id, nl]) => `<label class="achip${av.includes(id) ? ' on' : ''}"><input type="checkbox" data-avoid="${id}"${av.includes(id) ? ' checked' : ''} /> ${nl}</label>`).join('')}</div>
         ${status}
-        <div class="muted" style="margin-top:6px">Gegevens komen uit Open Food Facts (door gebruikers ingevoerd) en gaan over het gekoppelde <i>product</i>, niet over jouw ingrediënt. Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></details>`;
+        <div class="muted">Uit Open Food Facts, over het gekoppelde <i>product</i>. Ontbrekend ≠ afwezig: check bij een echte allergie altijd het etiket.</div></details>`;
     }
     function itemHtml(r, showTags) {
       const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
@@ -421,7 +450,7 @@
       return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}${S.ui?.sel === 'k:' + r.key ? ' sel' : ''}" data-key="${esc(r.key)}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
         <div class="txt grow">
-          ${r.recipe ? `<div data-act="selIng" data-key="${esc(r.key)}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
+          ${r.recipe ? `<div data-act="selIng" data-key="${esc(r.key)}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
           <div>${stk}${algTags(r)}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
         </div>
         <span class="qty">${esc(r.qtyText)}</span>
@@ -678,11 +707,44 @@
             } }]);
       },
       // Tik op een dicht blok: bord klapt om, dat blok wordt geselecteerd (lijntjes lichten op) en in beeld gescrold.
-      side(el) {
+      // Omklappen in twee fasen (Web Animations API):
+      //  1. de ingrediënten aan de open kant klappen in, lijntjes vervagen;
+      //  2. nieuwe stand renderen: dichte blokken draaien hun tekst van horizontaal naar verticaal, het
+      //     aangetikte blok draait van verticaal naar horizontaal en klapt open; daarna pas lijntjes meten.
+      // Alleen het aangetikte blok klapt animerend open: dan verschuift er niets boven hem en klopt de
+      // scrollpositie meteen. Bij 'minder beweging' direct omklappen.
+      async side(el) {
+        if (S._anim) return; // dubbel tikken tijdens een animatie negeren
         const l = curList(), toRec = el.dataset.v === 'rec', id = toRec ? el.dataset.rid : el.dataset.cat;
-        l.view = toRec ? 'rec' : 'cat'; (S.ui ||= {}).sel = (toRec ? 'r:' : 'c:') + id; commit();
-        const t = toRec ? $(`.orec[data-rid="${id}"]`) : [...document.querySelectorAll('.ocat')].find(e => e.dataset.cat === id);
-        t?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const target = () => toRec ? $(`.orec[data-rid="${id}"]`) : [...document.querySelectorAll('.ocat')].find(e => e.dataset.cat === id);
+        const go = () => { l.view = toRec ? 'rec' : 'cat'; (S.ui ||= {}).sel = (toRec ? 'r:' : 'c:') + id; commit(); };
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) { go(); target()?.scrollIntoView({ block: 'start' }); return; }
+        const ease = 'cubic-bezier(.4, 0, .2, 1)';
+        S._anim = true;
+        try {
+          const svg = $('#ovl'); if (svg) svg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' });
+          const items = [...document.querySelectorAll('#ov .item, #ov .rctl')], hs = items.map(x => x.offsetHeight); // eerst alles meten, dan animeren
+          await Promise.all(items.map((it, i) => it.animate([{ height: hs[i] + 'px', opacity: 1 }, { height: '0px', opacity: 0 }],
+            { duration: 180, delay: Math.min(i * 4, 80), easing: ease, fill: 'forwards' }).finished));
+          go();
+          const ov = $('#ov'), t = target(), nsvg = $('#ovl');
+          nsvg.style.opacity = '0';
+          if (t) scrollTo({ top: t.getBoundingClientRect().top + scrollY - 10, behavior: 'smooth' });
+          const jobs = [];
+          ov.querySelectorAll('.vblock .vt').forEach((v, i) => jobs.push(v.animate([{ transform: 'rotate(-90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+            { duration: 300, delay: i * 20, easing: ease, fill: 'backwards' }).finished));
+          for (const card of ov.querySelectorAll(toRec ? '.orec:not(.vblock)' : '.ocat:not(.vblock)')) {
+            if (card !== t) { jobs.push(card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 120, fill: 'backwards' }).finished); continue; }
+            jobs.push(card.querySelector('.ohead').animate([{ transform: 'rotate(90deg)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+              { duration: 280, easing: ease, fill: 'backwards' }).finished);
+            const its = [...card.querySelectorAll('.item, .rctl')], ths = its.map(x => x.offsetHeight);
+            its.forEach((it, i) => jobs.push(it.animate([{ height: '0px', opacity: 0 }, { height: ths[i] + 'px', opacity: 1 }],
+              { duration: 220, delay: 180 + i * 14, easing: ease, fill: 'backwards' }).finished));
+          }
+          await Promise.all(jobs);
+          drawLines(); // pas nu: tijdens de animatie kloppen de posities nog niet
+          nsvg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 }); nsvg.style.opacity = '';
+        } finally { S._anim = false; }
       },
       selIng(el) { const u = (S.ui ||= {}), k = 'k:' + el.dataset.key; u.sel = u.sel === k ? null : k; commit(); },
       // "In huis" opheffen: recept-regels via l.buy (het recept zelf blijft "in huis" zeggen), eigen items direct.
