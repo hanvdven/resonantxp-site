@@ -101,6 +101,19 @@
     .aap { display: block; width: 100%; min-height: 48px; margin-bottom: 14px; padding: 10px 14px; border: 1px solid #f0c9d4; border-radius: var(--radius); background: #fff0f4; color: #8a2846; text-align: center; font-weight: 600; }
     .aap span { font-weight: 400; opacity: .75; }
     .conf { position: fixed; z-index: 99; pointer-events: none; user-select: none; will-change: transform, opacity; }
+    .em { margin-right: 6px; }
+    .nm { position: relative; }
+    .nm .em { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); margin: 0; pointer-events: none; }
+    .nm input { padding-left: 36px; }
+    .tag.warn { background: #fde8e8; color: #b42318; }
+    .tag.trace { background: #fff4e0; color: #9a5b00; }
+    .tag.unk { background: #efede7; color: var(--muted); }
+    .alg { padding: 4px 14px 10px; margin: 12px 0; }
+    .alg summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .achips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+    .achip { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font-size: .9rem; }
+    .achip.on { background: #fde8e8; border-color: #f1b9b3; }
+    .warnline { color: #b42318; font-weight: 600; margin: 4px 0; }
     :focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 1px; }
   </style>
 </head>
@@ -133,6 +146,29 @@
     const GPU = { ui: 110, knoflook: 4, tomaat: 120, komkommer: 400, avocado: 150, citroen: 80, stokbrood: 250,
       groentebouillonblokje: 10, kikkererwten: 240, tomatenpassata: 500, basilicum: 30, rozemarijn: 30, olijfolie: 14 };
     const STOCK = new Set(['olijfolie', 'nootmuskaat']); // basis die je normaal in huis hebt
+    // De 14 EU-allergenen. Ids zijn de onze; OFF_ALLERGEN vertaalt de tags van Open Food Facts ernaartoe.
+    const ALLERGENS = [['gluten', 'Gluten'], ['crustaceans', 'Schaaldieren'], ['eggs', 'Eieren'], ['fish', 'Vis'], ['peanuts', 'Pinda’s'],
+      ['soy', 'Soja'], ['milk', 'Melk'], ['nuts', 'Noten'], ['celery', 'Selderij'], ['mustard', 'Mosterd'], ['sesame', 'Sesam'],
+      ['sulphites', 'Sulfiet'], ['lupin', 'Lupine'], ['molluscs', 'Weekdieren']];
+    const ALG_NAME = Object.fromEntries(ALLERGENS);
+    const OFF_ALLERGEN = { 'en:gluten': 'gluten', 'en:crustaceans': 'crustaceans', 'en:eggs': 'eggs', 'en:fish': 'fish', 'en:peanuts': 'peanuts',
+      'en:soybeans': 'soy', 'en:milk': 'milk', 'en:nuts': 'nuts', 'en:celery': 'celery', 'en:mustard': 'mustard', 'en:sesame-seeds': 'sesame',
+      'en:sulphur-dioxide-and-sulphites': 'sulphites', 'en:lupin': 'lupin', 'en:molluscs': 'molluscs' };
+    const mapTags = tags => [...new Set((tags || []).map(t => OFF_ALLERGEN[t]).filter(Boolean))];
+    // Eén emoji per ingrediënt, afgeleid van de naam (eerste treffer wint, dus specifiek vóór algemeen:
+    // 'bouillon' staat vóór \bui\b-achtige gevallen, haverdrink vóór havermout). Eigen keuze (g.emoji) wint altijd.
+    const EMOJI = [[/nootmuskaat/, '🌰'], [/bouillon/, '🍲'], [/\bui(en)?\b|sjalot/, '🧅'], [/knoflook/, '🧄'], [/pompoen/, '🎃'], [/tomat|passata/, '🍅'],
+      [/komkommer/, '🥒'], [/avocado/, '🥑'], [/citroen|limoen/, '🍋'], [/\bsla\b|spinazie|andijvie|rucola|boerenkool|prei/, '🥬'], [/broccoli/, '🥦'],
+      [/wortel|pastinaak|peen/, '🥕'], [/aardappel|krieltjes|friet/, '🥔'], [/paprika/, '🫑'], [/champignon|paddenstoel/, '🍄'], [/mais/, '🌽'],
+      [/basilicum|rozemarijn|peterselie|koriander|tijm|munt|bieslook|dille|kruid/, '🌿'], [/pasta|spaghetti|penne|macaroni|noodle/, '🍝'],
+      [/rijst/, '🍚'], [/brood|wrap|tortilla|bagel/, '🥖'], [/olie/, '🫒'], [/kokos/, '🥥'], [/kikkererwt|bonen|linzen/, '🫘'],
+      [/room|melk|haverdrink|sojadrink|yoghurt|kwark/, '🥛'], [/kaas/, '🧀'], [/noot|noten|pinda|amandel|cashew/, '🥜'],
+      [/fanta|cola|limonade|frisdrank|sprite|ijsthee/, '🥤'], [/\bsap\b|smoothie/, '🧃'], [/banaan/, '🍌'], [/appel|peer|fruit|druif|mandarijn|sinaasappel|aardbei|bessen|mango/, '🍎'],
+      [/havermout|muesli|granola|cornflakes/, '🥣'], [/beleg|hummus|jam|smeer/, '🥪'], [/lekkers|snoep|chocola|koek|taart|toetje/, '🍬'],
+      [/snacks?\b|chips|popcorn/, '🍿'], [/koffie/, '☕'], [/thee/, '🍵'], [/zout|suiker|saus|ketchup|mayo|mosterd/, '🧂']];
+    const CAT_EMOJI = { 'Groente & fruit': '🥬', 'Aardappelen, pasta & rijst': '🍝', 'Brood & ontbijt': '🍞', 'Houdbaar': '🥫',
+      'Zuivelvervangers': '🥛', 'Kruiden & sauzen': '🧂', 'Beleg': '🥪', 'Dranken': '🥤', 'Lekkers & snacks': '🍬' };
+    const emojiFor = (name, cat) => { const n = name.toLowerCase(); const hit = EMOJI.find(([re]) => re.test(n)); return hit ? hit[1] : (CAT_EMOJI[cat] || '🛒'); };
     const DEFAULT_CATS = ['Groente & fruit', 'Aardappelen, pasta & rijst', 'Brood & ontbijt', 'Houdbaar',
       'Zuivelvervangers', 'Kruiden & sauzen', 'Beleg', 'Dranken', 'Lekkers & snacks', 'Overig'];
 
@@ -211,6 +247,17 @@
     const recipeById = id => S.recipes.find(r => r.id === id);
     const listById = id => S.lists.find(l => l.id === id);
 
+    // Allergenen van een groep ingrediënten. 'unknown' = minstens één zonder (nieuwe) OFF-koppeling: leeg is
+    // dan NIET "veilig" maar "niet gecontroleerd". Oudere koppelingen zonder allergenen-veld tellen ook als onbekend.
+    function allergyOf(gs) {
+      const hit = new Set(), trace = new Set(); let unknown = false;
+      for (const g of gs) {
+        const o = g && g.off;
+        if (!o || !Array.isArray(o.allergens)) { unknown = true; continue; }
+        o.allergens.forEach(a => hit.add(a)); (o.traces || []).forEach(a => trace.add(a));
+      }
+      return { hit: [...hit], trace: [...trace].filter(a => !hit.has(a)), unknown };
+    }
     const keyOf = g => g.name.trim().toLowerCase() + '|' + g.unit;
     // Eén regel per (naam, eenheid): "ui" uit drie recepten wordt "3 stuk". Dat is de hele
     // meerwaarde van afleiden i.p.v. kopiëren. stock = álle bijdragende recepten zeggen "in huis" en
@@ -224,14 +271,15 @@
           const name = g.name.trim(); if (!name) continue;
           const key = keyOf(g);
           let row = map.get(key);
-          if (!row) { row = { key, name, unit: g.unit, qty: 0, cat: g.cat, src: [], recipe: true, done: !!l.done[key], canStock: true }; map.set(key, row); }
+          if (!row) { row = { key, name, unit: g.unit, qty: 0, cat: g.cat, src: [], recipe: true, done: !!l.done[key], canStock: true, gs: [], emoji: g.emoji || emojiFor(name, g.cat) }; map.set(key, row); }
           row.qty += (Number(g.qty) || 0) * f;
           if (!g.stock) row.canStock = false;
+          row.gs.push(g);
           if (!row.src.includes(r)) row.src.push(r);
         }
       }
-      const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit), stock: r.canStock && !(l.buy || {})[r.key] }));
-      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done, stock: !!it.stock });
+      const rows = [...map.values()].map(r => ({ ...r, qtyText: fmtQty(r.qty, r.unit), stock: r.canStock && !(l.buy || {})[r.key], allergy: allergyOf(r.gs) }));
+      for (const it of l.items) rows.push({ key: 'm:' + it.id, id: it.id, name: it.name, qtyText: it.qty, cat: it.cat, src: [], recipe: false, done: it.done, stock: !!it.stock, emoji: it.emoji || emojiFor(it.name, it.cat), allergy: allergyOf([null]) });
       return rows;
     }
     // Wat er van één recept op dit lijstje staat, met de hoeveelheid van DAT recept; done/stock komen
@@ -274,13 +322,13 @@
     }
     const fmt1 = n => String(Math.round(n * 10) / 10).replace('.', ',');
     async function offSearch(q) {
-      const url = 'https://world.openfoodfacts.org/cgi/search.pl?' + new URLSearchParams({ search_terms: q, search_simple: 1, action: 'process', json: 1, page_size: 12, fields: 'product_name,brands,nutriments', lc: 'nl' });
+      const url = 'https://world.openfoodfacts.org/cgi/search.pl?' + new URLSearchParams({ search_terms: q, search_simple: 1, action: 'process', json: 1, page_size: 12, fields: 'product_name,brands,nutriments,allergens_tags,traces_tags', lc: 'nl' });
       const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status);
       const d = await res.json();
       return (d.products || []).map(p => {
         const n = p.nutriments || {}, kcal = n['energy-kcal_100g'];
         if (kcal == null || !p.product_name) return null;
-        return { label: [p.product_name, p.brands].filter(Boolean).join(' — '), kcal: +kcal, p: +n.proteins_100g || 0, f: +n.fat_100g || 0, c: +n.carbohydrates_100g || 0, fib: +n.fiber_100g || 0 };
+        return { label: [p.product_name, p.brands].filter(Boolean).join(' — '), kcal: +kcal, p: +n.proteins_100g || 0, f: +n.fat_100g || 0, c: +n.carbohydrates_100g || 0, fib: +n.fiber_100g || 0, allergens: mapTags(p.allergens_tags), traces: mapTags(p.traces_tags) };
       }).filter(Boolean);
     }
 
@@ -325,20 +373,46 @@
           <input type="file" id="importFile" accept="application/json" hidden></footer>`;
     }
 
+    function algTags(r) {
+      const av = S.avoid || []; if (!av.length) return '';
+      const h = r.allergy.hit.filter(a => av.includes(a)), t = r.allergy.trace.filter(a => av.includes(a));
+      return h.map(a => `<span class="tag warn">⚠ ${ALG_NAME[a]}</span>`).join('') + t.map(a => `<span class="tag trace">sporen ${ALG_NAME[a].toLowerCase()}</span>`).join('')
+        + (r.allergy.unknown ? '<span class="tag unk">? niet gecontroleerd</span>' : '');
+    }
+    // Het paneel bovenaan: filter + (alleen als er iets aangevinkt is) een samenvatting over de hele lijst.
+    function algPanel(rows) {
+      const av = S.avoid || [];
+      const hitRows = rows.filter(r => r.allergy.hit.some(a => av.includes(a)));
+      const traceRows = rows.filter(r => !hitRows.includes(r) && r.allergy.trace.some(a => av.includes(a)));
+      const unk = rows.filter(r => r.allergy.unknown);
+      const status = av.length ? `${hitRows.length ? `<div class="warnline">⚠ Bevat: ${hitRows.map(r => esc(r.name)).join(', ')}</div>` : '<div class="muted">Geen treffers bij de gecontroleerde ingrediënten.</div>'}
+        ${traceRows.length ? `<div class="muted">Sporen mogelijk: ${traceRows.map(r => esc(r.name)).join(', ')}</div>` : ''}
+        ${unk.length ? `<div class="muted">? ${unk.length} van ${rows.length} niet gecontroleerd (geen product gekoppeld): ${unk.slice(0, 12).map(r => esc(r.name)).join(', ')}${unk.length > 12 ? '…' : ''}</div>` : ''}` : '';
+      const sum = av.length ? `: ${av.map(a => ALG_NAME[a].toLowerCase()).join(', ')}${hitRows.length ? ` · <b style="color:#b42318">⚠ ${hitRows.length}</b>` : ''}${unk.length ? ` · ? ${unk.length}` : ''}` : '';
+      return `<details class="card alg"${S.ui?.algOpen ? ' open' : ''}><summary>Allergenen vermijden${sum}</summary>
+        <div class="achips">${ALLERGENS.map(([id, nl]) => `<label class="achip${av.includes(id) ? ' on' : ''}"><input type="checkbox" data-avoid="${id}"${av.includes(id) ? ' checked' : ''} /> ${nl}</label>`).join('')}</div>
+        ${status}
+        <div class="muted" style="margin-top:6px">Gegevens komen uit Open Food Facts (door gebruikers ingevoerd) en gaan over het gekoppelde <i>product</i>, niet over jouw ingrediënt. Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></details>`;
+    }
     function itemHtml(r, showTags) {
       const stk = r.stock ? `<button class="tag stk" data-act="unstock" data-key="${esc(r.key)}">in huis</button>`
         : (r.canStock ? `<button class="tag stk" data-act="restock" data-key="${esc(r.key)}">toch kopen</button>` : '');
       return `<div class="item${r.done ? ' done' : ''}${r.stock ? ' stock' : ''}">
         <button class="check" data-act="toggle" data-key="${esc(r.key)}" aria-label="Afvinken: ${esc(r.name)}" aria-pressed="${r.done}"><span>${r.done ? '✓' : ''}</span></button>
         <div class="txt grow">
-          ${r.recipe ? `<div>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}">${esc(r.name)}</button>`}
-          <div>${stk}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
+          ${r.recipe ? `<div><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</div>` : `<button class="txt" style="padding:6px 0" data-act="editItem" data-id="${r.id}"><span class="em" aria-hidden="true">${r.emoji}</span>${esc(r.name)}</button>`}
+          <div>${stk}${algTags(r)}${showTags ? r.src.map(x => `<a class="tag" href="#/recept/${x.id}">${esc(x.name)}</a>`).join('') : ''}</div>
         </div>
         <span class="qty">${esc(r.qtyText)}</span>
       </div>`;
     }
     const byName = (a, b) => (a.done - b.done) || a.name.localeCompare(b.name, 'nl');
 
+    function algChip(r) {
+      const av = S.avoid || []; if (!av.length) return '';
+      const a = allergyOf(r.ingredients.filter(g => g.name.trim())), h = a.hit.filter(x => av.includes(x));
+      return (h.length ? ` · <b style="color:#b42318">⚠ ${h.map(x => ALG_NAME[x].toLowerCase()).join(', ')}</b>` : '') + (a.unknown ? ' · ? niet gecontroleerd' : '');
+    }
     function viewList(l) {
       const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
@@ -347,7 +421,7 @@
         const p = progressOf(recipePartsFor(r, lr.persons, rowMap)), n = nutri(r);
         const kcal = n.counted ? ` · ≈ ${Math.round(n.kcal)} kcal p.p.${n.missing.length ? '*' : ''}` : '';
         return `<div class="card rchip row"><div class="grow"><a href="#/recept/${r.id}">${esc(r.name)}</a>
-          <div class="muted"><span class="${p.t === p.d ? 'badge' : ''}">${progressText(p)}</span>${kcal}</div></div>
+          <div class="muted"><span class="${p.t === p.d ? 'badge' : ''}">${progressText(p)}</span>${kcal}${algChip(r)}</div></div>
           ${stepper('rpers', r.id, lr.persons, 'pers.')}<button class="btn icon" data-act="rdel" data-id="${r.id}" aria-label="Recept van lijstje halen">×</button></div>`;
       }).join('');
       const empty = `<div class="empty">${rows.length ? 'Alles binnen 🎉' : 'Het lijstje is leeg. Voeg hierboven iets toe of kies een recept.'}</div>`;
@@ -368,6 +442,7 @@
           <div>${arr.map(r => itemHtml(r, true)).join('')}</div>`).join('') || empty;
       }
       return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
+        ${algPanel(rows)}
         <div class="row">${stepper('lpers', l.id, l.persons, 'personen')}<span class="muted grow">schaalt alle recepten mee</span></div>
         <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${pr.d} van ${pr.t} binnen</div>
         <form class="add" id="addForm" autocomplete="off">
@@ -395,6 +470,18 @@
       return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${cards}<button class="btn primary" data-act="newRecipe">+ Nieuw recept</button>`;
     }
 
+    // Allergenen van één recept volgens de gekoppelde producten; ⚠ bij wat in jouw filter staat.
+    function algHtml(r) {
+      const av = S.avoid || [], gs = r.ingredients.filter(g => g.name.trim()), by = new Map(), tr = new Map(), unk = [];
+      for (const g of gs) {
+        const a = allergyOf([g]); if (a.unknown) { unk.push(g.name.trim()); continue; }
+        a.hit.forEach(x => by.set(x, [...(by.get(x) || []), g.name.trim()]));
+        a.trace.forEach(x => tr.set(x, [...(tr.get(x) || []), g.name.trim()]));
+      }
+      const line = (m, pre) => ALLERGENS.filter(([id]) => m.has(id)).map(([id, nl]) => `<div${av.includes(id) ? ' class="warnline"' : ''}>${av.includes(id) ? '⚠ ' : ''}${pre}${nl}: ${esc(m.get(id).join(', '))}</div>`).join('');
+      return (line(by, '') + line(tr, 'sporen ') || (unk.length === gs.length ? '' : '<div class="muted">Geen allergenen gemeld in de gekoppelde producten.</div>'))
+        + (unk.length ? `<div class="muted">? Niet gecontroleerd (geen product gekoppeld): ${esc(unk.join(', '))}</div>` : '');
+    }
     function nutHtml(r) {
       const n = nutri(r);
       return `${n.counted ? `<div class="big">≈ ${Math.round(n.kcal)} kcal</div>
@@ -410,7 +497,7 @@
         <div class="card ing">
           <input type="number" step="any" min="0" inputmode="decimal" value="${g.qty || ''}" data-f="qty" data-i="${i}" aria-label="Hoeveelheid" />
           <select data-f="unit" data-i="${i}" aria-label="Eenheid">${unitOptions(g.unit)}</select>
-          <input value="${esc(g.name)}" data-f="name" data-i="${i}" placeholder="Ingrediënt" aria-label="Ingrediënt" />
+          <div class="nm"><span class="em" aria-hidden="true">${g.name.trim() ? g.emoji || emojiFor(g.name, g.cat) : ''}</span><input value="${esc(g.name)}" data-f="name" data-i="${i}" placeholder="Ingrediënt" aria-label="Ingrediënt" /></div>
           <button class="btn icon" data-act="ingDel" data-i="${i}" aria-label="Verwijder ingrediënt">×</button>
           <select class="catsel" data-f="cat" data-i="${i}" data-prev="${esc(g.cat)}" aria-label="Categorie">${catOptions(g.cat)}</select>
           <label class="stkl"><input type="checkbox" data-f="stock" data-i="${i}"${g.stock ? ' checked' : ''} /> In huis</label>
@@ -426,6 +513,9 @@
             <div id="autoStatus" class="muted"></div>
             <button class="btn small" data-act="autoNut" style="margin-top:8px">Voeding automatisch zoeken</button>
             <div class="muted" style="margin-top:6px">Bron: Open Food Facts (gebruikers-gegevens, controleer het gekozen product). Alleen ingrediënten met een gewicht tellen mee.</div></div></div>
+        <div class="field"><label>Allergenen (volgens gekoppelde producten)</label>
+          <div class="card nut"><div id="algBox">${algHtml(r)}</div>
+            <div class="muted" style="margin-top:6px">Ontbrekend betekent niet afwezig. Controleer bij een echte allergie altijd het etiket.</div></div></div>
         <div class="toolbar"><button class="btn primary" data-act="toList">Op een lijstje zetten</button>
           <button class="btn danger" data-act="delRecipe">Recept verwijderen</button></div>`;
     }
@@ -521,12 +611,13 @@
         const l = curList(), it = l.items.find(i => i.id === el.dataset.id);
         sheet('Aanpassen', `<div class="field"><label>Naam</label><input id="f-name" value="${esc(it.name)}" /></div>
           <div class="field"><label>Aantal</label><input id="f-qty" value="${esc(it.qty)}" /></div>
+          <div class="field"><label>Emoji (leeg = automatisch)</label><input id="f-em" value="${esc(it.emoji || '')}" maxlength="4" style="width:90px" /></div>
           <div class="field"><label>Categorie</label><select id="f-cat" data-prev="${esc(it.cat)}">${catOptions(it.cat)}</select></div>
           <div class="field"><label class="row" style="color:var(--text);font-size:.95rem"><input type="checkbox" id="f-stock"${it.stock ? ' checked' : ''} /> Staat in huis (gedimd, telt niet mee)</label></div>`,
           [{ id: 'd', label: 'Verwijderen', cls: 'danger', fn: () => { l.items = l.items.filter(x => x !== it); commit(); } }, cancel,
             { id: 's', label: 'Opslaan', cls: 'primary', fn: d => {
               const sel = d.querySelector('#f-cat'); if (sel.value === '__new') return false;
-              it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; commit();
+              it.name = d.querySelector('#f-name').value.trim() || it.name; it.qty = d.querySelector('#f-qty').value.trim(); it.cat = sel.value; it.stock = d.querySelector('#f-stock').checked; { const e = d.querySelector('#f-em').value.trim(); if (e) it.emoji = e; else delete it.emoji; } commit();
             } }]);
       },
       view(el) { curList().view = el.dataset.v; commit(); },
@@ -573,18 +664,23 @@
         sheet('Voeding: ' + (q || 'ingrediënt'),
           `<div class="muted">Nu: ${g.off ? esc(g.off.label) + ` (${Math.round(g.off.kcal)} kcal/100 g)` : 'niets gekoppeld'}</div>
            ${weighed ? '' : `<div class="field"><label>Gewicht van 1 ${esc(g.unit || 'stuk')} in gram${g.unit === 'el' || g.unit === 'tl' ? ' (leeg = standaard)' : ''}</label><input id="n-gpu" type="number" step="any" min="0" inputmode="decimal" value="${g.gpu || ''}" /></div>`}
+           <div class="field"><label>Emoji (leeg = automatisch)</label><input id="n-em" value="${esc(g.emoji || '')}" maxlength="4" style="width:90px" /></div>
            <div class="field"><label>Zoek in Open Food Facts</label><div class="row"><input id="n-q" value="${esc(q)}" /><button class="btn primary" data-s="search">Zoek</button></div></div>
            <div class="res" id="n-res"></div>`,
           [{ id: 'unlink', label: 'Koppeling wissen', cls: 'danger', fn: d => { saveGpu(d); delete g.off; commit(); } },
            { id: 'ok', label: 'Klaar', cls: 'primary', fn: d => { saveGpu(d); commit(); } }]);
-        const saveGpu = d => { const i = d.querySelector('#n-gpu'); if (i) { const v = parseFloat(i.value); if (v > 0) g.gpu = v; else delete g.gpu; } };
+        const saveGpu = d => { const i = d.querySelector('#n-gpu'); if (i) { const v = parseFloat(i.value); if (v > 0) g.gpu = v; else delete g.gpu; }
+          const em = d.querySelector('#n-em'); if (em) { const e = em.value.trim(); if (e) g.emoji = e; else delete g.emoji; } };
         const doSearch = async () => {
           const res = dlg.querySelector('#n-res'); res.textContent = 'Zoeken…';
           try {
             const hits = await offSearch(dlg.querySelector('#n-q').value.trim());
             if (!hits.length) { res.textContent = 'Niets gevonden. Probeer een andere zoekterm.'; return; }
             res.innerHTML = hits.map((h, i) => `<button class="btn" data-s="pick-${i}">${esc(h.label)}<div class="muted">${Math.round(h.kcal)} kcal · eiwit ${fmt1(h.p)} · vet ${fmt1(h.f)} · kh ${fmt1(h.c)} (per 100 g)</div></button>`).join('');
-            hits.forEach((h, i) => { dlg._h['pick-' + i] = d => { saveGpu(d); g.off = h; S.nutCache[q.toLowerCase()] = h; commit(); }; });
+            hits.forEach((h, i) => { dlg._h['pick-' + i] = d => { saveGpu(d); g.off = h; S.nutCache[q.toLowerCase()] = h;
+            // Zelfde naam in andere recepten (ui, knoflook, olijfolie…) krijgt hetzelfde product, tenzij daar al gekozen is.
+            for (const r2 of S.recipes) for (const g2 of r2.ingredients) if (!g2.off && g2.name.trim().toLowerCase() === q.toLowerCase()) g2.off = h;
+            commit(); }; });
           } catch (e) { res.textContent = 'Open Food Facts is nu niet bereikbaar (' + e.message + '). Probeer het later nog eens.'; }
         };
         // 'search' mag de dialoog niet sluiten → synchroon false teruggeven, async werk loopt door.
@@ -600,7 +696,7 @@
         for (let k = 0; k < todo.length; k++) {
           const g = todo[k], key = g.name.trim().toLowerCase();
           if (route().id !== r.id) break; // gebruiker is weggenavigeerd
-          if (S.nutCache[key]) { g.off = S.nutCache[key]; continue; }
+          if (S.nutCache[key]?.allergens) { g.off = S.nutCache[key]; continue; }
           if (status) status.textContent = `Zoeken: ${g.name} (${k + 1}/${todo.length})…`;
           try {
             const hits = await offSearch(g.name.trim());
@@ -649,6 +745,11 @@
         }).catch(() => alert('Dit bestand is geen geldige back-up.'));
         return;
       }
+      if (t.dataset.avoid) {
+        const a = (S.avoid ||= []), i = a.indexOf(t.dataset.avoid);
+        if (i < 0) a.push(t.dataset.avoid); else a.splice(i, 1);
+        (S.ui ||= {}).algOpen = true; commit(); return; // paneel blijft open na de re-render
+      }
       // categorie-select met "+ Nieuwe categorie…" (op pagina of in dialoog)
       if (t.tagName === 'SELECT' && t.value === '__new') {
         const name = handleNewCat(t);
@@ -662,6 +763,7 @@
         g[t.dataset.f] = t.dataset.f === 'qty' ? (parseFloat(t.value) || 0) : t.dataset.f === 'stock' ? t.checked : t.value;
         save();
         const nb = $('#nutBox'); if (nb) nb.innerHTML = nutHtml(curRecipe());
+        const ab = $('#algBox'); if (ab) ab.innerHTML = algHtml(curRecipe());
       }
     });
     document.addEventListener('input', e => {
@@ -686,6 +788,9 @@
         el.animate(rise, { duration: calm ? 1400 : 2200 + Math.random() * 1800, delay: Math.random() * 600, easing: 'ease-out', fill: 'backwards' }).onfinish = () => el.remove();
       }
     });
+
+    // <details> meldt open/dicht via 'toggle' (borrelt niet op, dus capture); onthouden zodat een re-render het paneel niet sluit.
+    document.addEventListener('toggle', e => { if (e.target.matches?.('details.alg')) (S.ui ||= {}).algOpen = e.target.open; }, true);
 
     window.addEventListener('hashchange', () => { if (dlg.open) dlg.close(); render(); window.scrollTo(0, 0); });
     load(); render();
