@@ -193,6 +193,7 @@
     .item .tag { margin: 0; }
     .tag.warn { font-weight: 700; letter-spacing: .02em; }
     .algbottom { margin-top: 20px; }
+    .lnut .stepper button { width: 28px; min-height: 28px; } .lnut .stepper span { min-width: 34px; font-size: .8rem; }
     .tolink { display: block; padding: 8px 10px; border-top: 1px solid var(--line); color: var(--accent); font-size: .85rem; }
     .toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 24px);
       padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--text); color: #fff; font-size: .9rem; box-shadow: 0 6px 24px rgba(26, 31, 46, .25); }
@@ -309,6 +310,8 @@
       DB_KEYS = [...DB.keys()].sort((a, b) => b.length - a.length); // langste eerst: "glutenvrije pasta" vóór "pasta"
       infoCache.clear();
     }
+    // Alleen http(s)-links tonen (geen javascript:-links uit een geïmporteerd of ingetypt recept)
+    const safeUrl = u => { try { const x = new URL(String(u || '').trim()); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch (e) { return ''; } };
     const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     // Exacte naam of alias; anders het langste lijst-woord dat als heel woord in de naam staat ("gemengde sla" → sla).
     function ingInfo(name) {
@@ -423,6 +426,7 @@
         for (const l of S.lists) initWho(l);
         S.v = 4; save();
       }
+      for (const l of S.lists) if (!l.days) l.days = 3; // dagen per lijstje (voor dag-/weektotalen); Han's lijstje is "2-3 dagen"
     }
     /* Wie eet er mee: per lijstje een rij mensen, l.who = [{ id, eid } (iemand uit het huishouden) | { id, naam } (gast)].
        Iemand uitzetten voor het hele lijstje: w.off; voor één recept: lr.off = [ids]. l.persons en lr.persons blijven
@@ -879,6 +883,7 @@
             const body = (ctl ? `<div class="row rctl">${ctl}</div>` : '') + shown.map(x => itemHtml(x, b.kind === 'ov' ? null : b.id)).join('')
               + addRow(t, b.kind === 'ov' ? 'Toevoegen' : 'Ingrediënt toevoegen')
               + (b.kind === 'recept' && isOpen ? adviceMini(b.r, peopleFor(l, b.lr)) : '')
+              + (b.kind !== 'ov' && safeUrl(b.r.bron) ? `<a class="tolink" href="${esc(safeUrl(b.r.bron))}" target="_blank" rel="noopener">Bron: ${esc(new URL(safeUrl(b.r.bron)).hostname.replace(/^www\./, ''))} ↗</a>` : '')
               + (b.kind === 'ov' ? '' : `<a class="tolink" href="#/recept/${b.id}">${b.kind === 'week' ? 'Setje' : 'Recept'}pagina →</a>`);
             return blk(b.key, b.color, 'orec', emo(b), esc(b.name), `<span class="${b.parts.length && p.t === p.d ? 'badge' : ''}">${ptext(b.parts)}</span>${sub}`, body, isOpen);
           }).join('');
@@ -924,6 +929,52 @@
       }).join('');
     }
 
+    // 7. Wat het hele lijstje oplevert: recepten zoals geschaald, setjes, en losse items met een herkenbare hoeveelheid.
+    function listNutrition(l) {
+      const tot = Object.fromEntries(NUTS.map(([k]) => [k, 0])); let counted = 0, total = 0;
+      const add = (g, f) => { total++; const gr = gramsOf(g), v = per100(g); if (gr == null || !v) return; for (const [k] of NUTS) tot[k] += (v[k] || 0) * gr / 100 * f; counted++; };
+      for (const lr of l.recipes) { const r = recipeById(lr.rid); if (r) r.ingredients.forEach(g => g.name.trim() && add(g, factorOf(r, lr))); }
+      for (const it of l.items) { const q = parseLine(`${it.qty || ''} ${it.name}`.trim()); if (q && q.qty) add({ name: q.name, qty: q.qty, unit: q.unit }, 1); }
+      return { tot, counted, total };
+    }
+    // 9. Plantendiversiteit: verschillende plantensoorten op het lijstje; kruiden en specerijen tellen als ¼
+    // (de "30 planten per week"-vuistregel). Dranken, snoep, olie, zout en non-food tellen niet.
+    const PLANT_CATS = new Set(['Groente & fruit', 'Aardappelen, pasta & rijst', 'Brood & ontbijt', 'Houdbaar', 'Zuivelvervangers', 'Beleg', 'Kruiden & sauzen']);
+    const NOT_PLANT = new Set(['suiker', 'zout', 'water', 'gist', 'bakpoeder', 'maizena', 'beleg', 'groentebouillon', 'azijn', 'ketchup', 'sambal', 'sriracha', 'worcestersaus', 'currypasta', 'jam']);
+    function plantCount(rows) {
+      const seen = new Map();
+      for (const r of rows) {
+        const info = ingInfo(r.name); if (!info || !PLANT_CATS.has(info.cat) || NOT_PLANT.has(info.naam) || seen.has(info.naam)) continue;
+        if (info.emoji === '🫒' && /olie/.test(info.naam)) continue; // olie is geen plantensoort voor deze telling
+        seen.set(info.naam, info.emoji === '🌿' || info.emoji === '🧂' || info.emoji === '🌰' || info.emoji === '🌶️' ? .25 : 1);
+      }
+      return { n: [...seen.values()].reduce((a, b) => a + b, 0), names: [...seen.keys()] };
+    }
+    function listNutHtml(l, rows) {
+      const ps = peopleFor(l), days = l.days || 3, ln = listNutrition(l);
+      const need = Object.fromEntries(['kcal', ...ADVISE].map(k => [k, ps.reduce((a, p) => a + needOf(p)[k], 0) * days]));
+      const pct = Object.fromEntries(['kcal', ...ADVISE].map(k => [k, need[k] ? ln.tot[k] / need[k] : 1]));
+      const pc = plantCount(rows), goal = Math.round(30 * days / 7);
+      const row = k => `<div class="nrow"><span>${NUT[k].label}</span><span class="nval">${fmtN(ln.tot[k] / (ps.length * days))} ${NUT[k].unit}</span>
+        <span class="nbar"><i class="${k === 'kcal' ? 'ok' : pctCls(pct[k])}" style="width:${Math.min(100, pct[k] * 100)}%"></i></span><span class="npct">${Math.round(pct[k] * 100)}%</span></div>`;
+      // 10. Recepten die de grootste tekorten aanvullen (uit je eigen recepten, niets wat iemand aan tafel niet mag/lust)
+      const low = ADVISE.filter(k => pct[k] < 0.8 && !['b12', 'vitd', 'jodium'].includes(k));
+      const recs = S.recipes.filter(r => kindOf(r) === 'recept' && !l.recipes.some(x => x.rid === r.id))
+        .filter(r => !r.ingredients.some(g => g.name.trim() && personTags({ name: g.name, allergy: allergyOf([g]) }).includes('tag warn')))
+        .map(r => { const n = nutri(r); const gains = low.map(k => [k, n.per[k] * l.persons / need[k]]).filter(([, v]) => v >= .03).sort((a, b) => b[1] - a[1]);
+          // score: per tekort hoeveel dit recept aanvult, maar nooit meer dan er ontbreekt
+          return { r, gains, score: gains.reduce((a, [k, v]) => a + Math.min(v, Math.max(0, 1 - pct[k])), 0) }; })
+        .filter(x => x.gains.length).sort((a, b) => b.score - a.score).slice(0, 2);
+      const preg = ps.some(p => p.zwanger && p.geslacht !== 'm');
+      return `<div class="card nut lnut"><div class="rub" style="margin:0 0 4px"><span>Voeding van dit lijstje</span></div>
+        <div class="muted">Wat de boodschappen samen leveren, per persoon per dag, voor ${ps.length} ${ps.length === 1 ? 'persoon' : 'personen'} × ${days} ${days === 1 ? 'dag' : 'dagen'} ${stepper('ldays', l.id, days, 'd.')}</div>
+        <div class="ntab">${['kcal', ...ADVISE].map(row).join('')}</div>
+        <div class="note">🌱 Variatie: <b>${fmtN(pc.n)}</b> plantensoorten (doel ~${goal} voor ${days} dagen)${pc.n >= goal ? ' ✓' : ''}</div>
+        ${recs.map(x => `<div class="tip"><span>🍽️ Aanvulling: <b>${esc(x.r.name)}</b> → ${x.gains.slice(0, 3).map(([k, v]) => `+${Math.round(v * 100)}% ${NUT[k].label.toLowerCase()}`).join(', ')}</span><button class="btn small" data-act="recToList" data-rid="${x.r.id}">+ op lijstje</button></div>`).join('')}
+        ${preg ? `<div class="note">🤰 Zwanger en vegan: let extra op <b>foliumzuur</b> (supplement 400 µg tot week 10), <b>vitamine D</b> (10 µg), <b>B12</b>, <b>jodium</b> en <b>DHA</b> (omega-3 uit algenolie). Foliumzuur en DHA volgt deze app niet. Bespreek supplementen met je verloskundige.</div>` : ''}
+        <div class="muted" style="margin-top:6px">${ln.counted} van ${ln.total} ingrediënten meegeteld. Eet je ergens buiten de deur, dan ligt het echt hoger; zonder ontbijt-/lunchsetje ligt het lager. Schattingen.</div></div>`;
+    }
+
     function viewList(l) {
       const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
@@ -937,6 +988,7 @@
           <button class="btn small" data-act="share">Deel / kopieer</button>
           <button class="btn small danger" data-act="delList">Lijstje verwijderen</button>
         </div>
+        <div class="algbottom">${listNutHtml(l, rows)}</div>
         <div class="algbottom">${algPanel(rows)}</div>`;
     }
 
@@ -994,6 +1046,7 @@
       return `<div class="top"><a class="btn icon" href="#/recepten" aria-label="Terug">←</a><h1>${wk ? 'Setje' : 'Recept'}</h1></div>
         <div class="field"><label>Naam</label><input value="${esc(r.name)}" data-rf="name" /></div>
         <div class="field"><label>Emoji (leeg = automatisch: ${recipeEmoji({ name: r.name })})</label><input value="${esc(r.emoji || '')}" data-rf="emoji" maxlength="4" style="width:90px" /></div>
+        <div class="field"><label>Bron (link naar het recept, bv. BBC Good Food)</label><input value="${esc(r.bron || '')}" data-rf="bron" inputmode="url" placeholder="https://…" />${safeUrl(r.bron) ? ` <a class="tolink" style="border:0;padding:6px 0" href="${esc(safeUrl(r.bron))}" target="_blank" rel="noopener">Open bron ↗</a>` : ''}</div>
         <div class="field"><label>Soort</label><select data-rf="kind"><option value="recept"${wk ? '' : ' selected'}>Recept (schaalt per persoon)</option><option value="week"${wk ? ' selected' : ''}>Setje weekboodschappen (vaste hoeveelheden)</option></select></div>
         ${wk ? '' : `<div class="field"><label>Ingrediënten zijn berekend voor</label>${stepper('recPers', r.id, r.persons, 'personen')}</div>`}
         <div class="field"><label>Ingrediënten</label>${rows}<button class="btn small" data-act="ingAdd">+ Ingrediënt</button></div>
@@ -1319,6 +1372,9 @@
            } }]);
       },
       // Tip uit het advies: het ingrediënt komt in het recept zelf, berekend voor het eigen aantal personen.
+      ldays(el) { const l = curList(); l.days = Math.max(1, Math.min(14, (l.days || 3) + +el.dataset.d)); commit(); },
+      // Aanvullende receptsuggestie: op het lijstje, met dezelfde mensen
+      recToList(el) { const l = curList(), r = recipeById(el.dataset.rid); withUndo(`${r.name} op het lijstje gezet`, () => { l.recipes.push({ rid: r.id, persons: l.persons, off: [] }); syncPersons(l); commit(); }); },
       addTip(el) {
         const r = recipeById(el.dataset.rid), name = el.dataset.name, g = +el.dataset.g;
         withUndo(`${name} toegevoegd aan ${r.name}`, () => { r.ingredients.push(ing(name, g * r.persons, 'g', guessCat(name) || 'Overig')); commit(); });
