@@ -1,3 +1,6 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "boodschappen.resonantxp.com" }], "destination": "/boodschappen" }
+  ]
 }

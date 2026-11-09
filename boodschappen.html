@@ -6,6 +6,12 @@
   <title>Boodschappen</title>
   <meta name="description" content="Boodschappenlijstjes met categorieën, recepten en aantal personen." />
   <meta name="robots" content="noindex" />
+  <script>
+    // De app woont op een eigen subdomein (Han 2026-11-09). Het oude adres (test.resonantxp.com/boodschappen of een
+    // ander resonantxp.com-adres) stuurt door; de gegevens daar mochten weg. Vercel-previews en localhost blijven werken.
+    if (/(^|\.)resonantxp\.com$/.test(location.hostname) && location.hostname !== 'boodschappen.resonantxp.com')
+      location.replace('https://boodschappen.resonantxp.com/' + location.hash);
+  </script>
   <meta name="theme-color" content="#f5f4f0" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1333,6 +1339,8 @@
        (bs_save weigert een verouderde rev → nieuwste ophalen, samenvoegen, opnieuw). Live via Realtime. */
     const SB_URL = 'https://qwjeqrzvprvldnswlgjp.supabase.co', SB_KEY = 'sb_publishable_tgCJqsC9_uWBXfnNpvGWQA_VPAWqOHA';
     const SYNC_KEY = 'boodschappen.sync', JOIN_KEY = 'boodschappen.join';
+    // Het adres van de app zelf: '/' op boodschappen.resonantxp.com, '/boodschappen' op Vercel-previews en lokaal.
+    const APP_PATH = location.pathname.startsWith('/boodschappen') ? '/boodschappen' : '/', APP_URL = location.origin + APP_PATH;
     let sb = null, sync = null, syncTimer = 0, syncBusy = false, syncApplying = false, syncState = '', syncUser = null, syncChan = null, pendingRender = false;
     try { sync = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch (e) { sync = null; }
     const saveSync = () => { try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch (e) { /* vol */ } };
@@ -1453,7 +1461,7 @@
     async function inviteLink() {
       let code = sync.code;
       if (!code) { const c = await client(); const { data } = await c.from('bs_households').select('invite_code').eq('id', sync.hid).single(); code = data?.invite_code; sync.code = code; saveSync(); }
-      return `${location.origin}/boodschappen#/join/${code}`;
+      return `${APP_URL}#/join/${code}`;
     }
     // Paneel op de startpagina
     function syncPanel() {
@@ -1594,10 +1602,10 @@
       },
       async syncMail() {
         const mail = ($('#sync-mail')?.value || '').trim(); if (!/.+@.+\..+/.test(mail)) return alert('Vul je e-mailadres in.');
-        const c = await client(); const { error } = await c.auth.signInWithOtp({ email: mail, options: { shouldCreateUser: true, emailRedirectTo: location.origin + '/boodschappen' } });
+        const c = await client(); const { error } = await c.auth.signInWithOtp({ email: mail, options: { shouldCreateUser: true, emailRedirectTo: APP_URL } });
         alert(error ? 'Versturen mislukt: ' + error.message : 'Kijk in je mail en open de inloglink op dit apparaat.');
       },
-      async syncGoogle() { const c = await client(); await c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/boodschappen' } }); },
+      async syncGoogle() { const c = await client(); await c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: APP_URL } }); },
       syncCreate() { createHousehold(); },
       async syncInvite() {
         const link = await inviteLink(), text = 'Doe mee met onze boodschappenlijstjes: ' + link;
@@ -1889,8 +1897,9 @@
         if (!animBusy && !document.querySelector('form.inl input:focus')) render();
       } catch (e) { /* offline of lokaal geopend: bewaarde kopie of emoji-regels blijven gelden */ }
     }
-    // Offline/installeerbaar: service worker alleen voor /boodschappen (niet voor de rest van resonantxp.com).
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('/boodschappen-sw.js', { scope: '/boodschappen' }).catch(() => {});
+    // Offline/installeerbaar. Op het subdomein is de app de hele site (scope '/'); op previews alleen /boodschappen,
+    // zodat de service worker de rest van resonantxp.com nooit raakt.
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('/boodschappen-sw.js', { scope: APP_PATH }).catch(() => {});
     load();
     try { const c = localStorage.getItem(DBKEY); if (c) setDB(JSON.parse(c)); } catch (e) { /* kapotte kopie: negeren */ }
     render(); loadDB();

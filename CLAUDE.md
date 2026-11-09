@@ -15,6 +15,12 @@ Instructions from Han (the owner) for every AI agent working in this repository.
 Static site, no build step. `main` deploys via GitHub Pages (`.github/workflows/deploy.yml`) and Vercel
 (`vercel.json`, `cleanUrls`), so `boodschappen.html` is served at `/boodschappen`.
 
+**Boodschappen has its own subdomain: `boodschappen.resonantxp.com`** (Han 2026-11-09, Vercel only). A host rule in
+`vercel.json` rewrites `/` on that host to `/boodschappen`. The page itself redirects any other `*.resonantxp.com` host
+(e.g. the old `test.resonantxp.com/boodschappen`) to the subdomain; Vercel previews and localhost keep working at
+`/boodschappen`. Paths in the app go through `APP_PATH`/`APP_URL` (`/` on the subdomain, `/boodschappen` elsewhere) —
+never hard-code `/boodschappen` again. Supabase Redirect URLs must include `https://boodschappen.resonantxp.com/**`.
+
 ## boodschappen.html — shopping lists
 
 A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired into the site's
@@ -42,8 +48,8 @@ A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired
 - `boodschappen-ingredienten.json` — ingrediëntenlijst (emoji, categorie, allergenen, voeding per 100 g, gewicht per stuk,
   `geen_tip`). Han bewerkt die op GitHub; de pagina haalt hem op en bewaart een kopie voor offline.
 - `boodschappen.webmanifest`, `icons/boodschappen-*.png` — installeren als app (aapje als icoon).
-- `boodschappen-sw.js` — service worker, geregistreerd met scope `/boodschappen` zodat hij de rest van de site niet
-  raakt. Netwerk eerst, cache als terugval (offline in de supermarkt).
+- `boodschappen-sw.js` — service worker, scope `APP_PATH` (`/` op het subdomein, `/boodschappen` op previews) zodat hij
+  de rest van de site niet raakt. Netwerk eerst, cache als terugval (offline in de supermarkt).
 - `supabase/boodschappen.sql` — tabellen/RLS/functies voor gedeelde huishoudens; Han draait het in de Supabase SQL Editor.
   Herhaalbaar. Test lokaal tegen PostgreSQL met nagebootst `auth`-schema (zie de PR die dit toevoegde).
 - `api/recept.js` — Vercel-functie voor recept-import: haalt een receptpagina op en geeft de schema.org-Recipe terug.
