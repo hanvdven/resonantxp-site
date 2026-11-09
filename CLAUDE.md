@@ -33,3 +33,13 @@ A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired
 - **Overview view:** the lines between ingredients and recipes are an SVG drawn by `drawLines()` after
   every render from measured DOM positions; call it after any layout change.
 - Test at phone width (390px) and check `document.documentElement.scrollWidth` stays 390.
+
+### Bestanden die bij boodschappen horen
+- `boodschappen-ingredienten.json` — ingrediëntenlijst (emoji, categorie, allergenen, voeding per 100 g, gewicht per stuk,
+  `geen_tip`). Han bewerkt die op GitHub; de pagina haalt hem op en bewaart een kopie voor offline.
+- `boodschappen.webmanifest`, `icons/boodschappen-*.png` — installeren als app (aapje als icoon).
+- `boodschappen-sw.js` — service worker, geregistreerd met scope `/boodschappen` zodat hij de rest van de site niet
+  raakt. Netwerk eerst, cache als terugval (offline in de supermarkt).
+- `api/recept.js` — Vercel-functie voor recept-import: haalt een receptpagina op en geeft de schema.org-Recipe terug.
+  Werkt alleen op Vercel (niet op GitHub Pages). Beschermd tegen SSRF: alleen http(s), geen privé-IP's (ook na
+  doorverwijzingen), max 3 MB / 8 s. Niet uitbreiden tot een algemene proxy.

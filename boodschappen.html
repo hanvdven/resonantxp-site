@@ -11,6 +11,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Linden+Hill:ital@0;1&family=Martel+Sans:wght@300;400;600;800&display=swap" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- Installeren als app (Han: aapje als icoon) -->
+  <link rel="manifest" href="boodschappen.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/boodschappen-apple-180.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Boodschappen" />
   <style>
     /* Zelfstandige pagina: bewust NIET style.css/nav.js/header.js — dit is een gereedschap, geen
        onderdeel van de XP-beleving. Alleen kleuren en lettertypen volgen de site. */
@@ -996,7 +1001,7 @@
       const card = r => `<a href="#/recept/${r.id}" class="card listcard"><b>${esc(r.name)}</b><div class="muted">${kindOf(r) === 'week' ? 'vast setje' : r.persons + ' personen'} · ${r.ingredients.length} ingrediënten</div></a>`;
       const sec = (k, t) => `<div class="rub" style="margin:14px 2px 8px">${t}</div>` + (S.recipes.filter(r => kindOf(r) === k).map(card).join('') || '<div class="muted">Nog niets.</div>');
       return `<div class="top"><h1>Recepten</h1></div>${tabs('r')}${sec('recept', 'Recepten')}${sec('week', 'Weekboodschappen')}
-        <div class="toolbar"><button class="btn primary" data-act="newRecipe" data-kind="recept">+ Nieuw recept</button><button class="btn" data-act="newRecipe" data-kind="week">+ Nieuw setje</button></div>
+        <div class="toolbar"><button class="btn primary" data-act="newRecipe" data-kind="recept">+ Nieuw recept</button><button class="btn" data-act="newRecipe" data-kind="week">+ Nieuw setje</button><button class="btn" data-act="importRecipe">🔗 Importeer via link</button></div>
         <div class="toolbar"><button class="btn small" data-act="restoreSeed">Voorbeeldrecepten terugzetten</button></div>`;
     }
 
@@ -1252,6 +1257,71 @@
       clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 10000);
     }
 
+    /* ---------- recept importeren ---------- */
+    const FRACT = { '½': .5, '¼': .25, '¾': .75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': .125 };
+    // Engelse eenheden → onze eenheden (met omrekenfactor); volgorde = eerste treffer wint
+    const EN_UNIT = [[/^(tbsp|tbs|tablespoons?)\b\.?/, 'el', 1], [/^(tsp|teaspoons?)\b\.?/, 'tl', 1], [/^(kg|kilos?|kilograms?)\b/, 'kg', 1], [/^(g|gr|grams?)\b/, 'g', 1],
+      [/^(ml|millilit(?:er|re)s?)\b/, 'ml', 1], [/^(l|lit(?:er|re)s?)\b/, 'l', 1], [/^cups?\b/, 'ml', 240], [/^(oz|ounces?)\b/, 'g', 28], [/^(lbs?|pounds?)\b/, 'g', 454],
+      [/^cloves?\b/, 'teen', 1], [/^(cans?|tins?)\b/, 'blik', 1], [/^(bunch(?:es)?)\b/, 'bos', 1], [/^handfuls?\b/, 'g', 30], [/^(pinch|dash|splash)\b/, '', 0],
+      [/^(el|eetlepels?)\b/, 'el', 1], [/^(tl|theelepels?)\b/, 'tl', 1], [/^(stuks?|teentjes?|tenen)\b/, 'stuk', 1]];
+    // Engelse ingrediëntnamen → namen uit onze ingrediëntenlijst (specifiek vóór algemeen)
+    const EN_NL = [['olive oil', 'olijfolie'], ['sesame oil', 'sesamolie'], ['vegetable oil', 'zonnebloemolie'], ['sunflower oil', 'zonnebloemolie'], ['coconut milk', 'kokosmelk'],
+      ['coconut cream', 'kokosroom'], ['soya milk', 'sojadrink'], ['soy milk', 'sojadrink'], ['oat milk', 'haverdrink'], ['almond milk', 'amandeldrink'], ['plant milk', 'sojadrink'],
+      ['vegetable stock', 'groentebouillon'], ['stock cube', 'groentebouillon'], ['stock', 'groentebouillon'], ['chopped tomatoes', 'tomatenblokjes'], ['tomato purée', 'tomatenpuree'],
+      ['tomato puree', 'tomatenpuree'], ['passata', 'tomatenpassata'], ['cherry tomatoes', 'tomaat'], ['tomato', 'tomaat'], ['sweet potato', 'zoete aardappel'], ['potato', 'aardappel'],
+      ['butternut squash', 'pompoen'], ['squash', 'pompoen'], ['pumpkin', 'pompoen'], ['spring onion', 'lente-ui'], ['red onion', 'rode ui'], ['shallot', 'sjalot'], ['onion', 'ui'],
+      ['garlic', 'knoflook'], ['ginger', 'gember'], ['red pepper', 'paprika'], ['bell pepper', 'paprika'], ['yellow pepper', 'paprika'], ['chilli flakes', 'chilivlokken'],
+      ['chilli', 'peper'], ['chili', 'peper'], ['black pepper', 'zwarte peper'], ['pepper', 'zwarte peper'], ['sea salt', 'zout'], ['salt', 'zout'], ['carrot', 'wortel'],
+      ['parsnip', 'pastinaak'], ['leek', 'prei'], ['celery', 'bleekselderij'], ['courgette', 'courgette'], ['zucchini', 'courgette'], ['aubergine', 'aubergine'], ['eggplant', 'aubergine'],
+      ['mushroom', 'champignons'], ['spinach', 'spinazie'], ['kale', 'boerenkool'], ['broccoli', 'broccoli'], ['cauliflower', 'bloemkool'], ['frozen peas', 'doperwten'], ['peas', 'doperwten'],
+      ['sweetcorn', 'mais'], ['corn', 'mais'], ['cucumber', 'komkommer'], ['avocado', 'avocado'], ['lettuce', 'sla'], ['rocket', 'rucola'], ['lemon', 'citroen'], ['lime', 'limoen'],
+      ['coriander', 'koriander'], ['cilantro', 'koriander'], ['parsley', 'peterselie'], ['basil', 'basilicum'], ['mint', 'munt'], ['thyme', 'tijm'], ['rosemary', 'rozemarijn'],
+      ['ground cumin', 'komijn'], ['cumin', 'komijn'], ['smoked paprika', 'paprikapoeder'], ['paprika', 'paprikapoeder'], ['turmeric', 'kurkuma'], ['cinnamon', 'kaneel'],
+      ['nutmeg', 'nootmuskaat'], ['curry powder', 'kerrie'], ['curry paste', 'currypasta'], ['garam masala', 'garam masala'], ['bay leaf', 'laurier'], ['bay leaves', 'laurier'],
+      ['chickpeas', 'kikkererwten'], ['red lentils', 'linzen'], ['lentils', 'linzen'], ['kidney beans', 'bruine bonen'], ['black beans', 'bruine bonen'], ['beans', 'bruine bonen'],
+      ['tofu', 'tofu'], ['tempeh', 'tempeh'], ['soy sauce', 'sojasaus'], ['soya sauce', 'sojasaus'], ['tamari', 'tamari'], ['miso', 'miso'], ['tahini', 'tahin'], ['peanut butter', 'pindakaas'],
+      ['peanuts', "pinda's"], ['cashew', 'cashewnoten'], ['walnut', 'walnoten'], ['almonds', 'amandelen'], ['pine nuts', 'gemengde noten'], ['sesame seeds', 'sesamzaad'], ['chia', 'chiazaad'],
+      ['linseed', 'lijnzaad'], ['flaxseed', 'lijnzaad'], ['pumpkin seeds', 'pompoenpitten'], ['sunflower seeds', 'zonnebloempitten'], ['maple syrup', 'ahornsiroop'], ['agave', 'ahornsiroop'],
+      ['nutritional yeast', 'gistvlokken'], ['plain flour', 'bloem'], ['flour', 'bloem'], ['sugar', 'suiker'], ['vinegar', 'azijn'], ['mustard', 'mosterd'], ['spaghetti', 'pasta'],
+      ['penne', 'pasta'], ['pasta', 'pasta'], ['noodles', 'rijstnoedels'], ['basmati', 'rijst'], ['rice', 'rijst'], ['couscous', 'couscous'], ['bulgur', 'bulgur'], ['quinoa', 'quinoa'],
+      ['oats', 'havermout'], ['bread', 'brood'], ['baguette', 'stokbrood'], ['tortilla', 'wraps'], ['wrap', 'wraps'], ['pitta', 'pita'], ['apple', 'appel'], ['banana', 'banaan'],
+      ['raisins', 'rozijnen'], ['dates', 'dadels'], ['olives', 'olijven'], ['capers', 'kappertjes'], ['vegan butter', 'plantaardige boter'], ['dairy-free', ''], ['vegan', '']];
+    const EN_DROP = /^(?:of|small|medium|large|big|fresh|freshly|ripe|finely|roughly|thinly|chopped|sliced|diced|grated|crushed|minced|peeled|tinned|canned|dried|ground|a|an|the|good|pinch of|knob of|drizzle of|bunch of)\s+/;
+    function parseForeign(line) {
+      let t = String(line).toLowerCase().replace(/\(.*?\)/g, ' ').replace(/[½¼¾⅓⅔⅛]/g, m => ' ' + FRACT[m]).replace(/\s+/g, ' ').trim();
+      t = t.split(',')[0].replace(/\s+-\s+.*$/, '').trim(); // ", finely chopped" / " - to serve" weg
+      let qty = 0, unit = '', m;
+      if ((m = t.match(/^(\d+(?:[.,]\d+)?)\s*x\s*\d+\s*(?:g|ml)\s*(can|tin|pack|carton|jar|pot)s?\s+(?:of\s+)?(.*)$/))) { qty = +m[1].replace(',', '.'); unit = /can|tin/.test(m[2]) ? 'blik' : 'pak'; t = m[3]; }
+      else if ((m = t.match(/^((?:\d+(?:[.,]\d+)?\s*)+|\d+\/\d+)\s*(?:-\s*\d+(?:[.,]\d+)?\s*)?(.*)$/))) {
+        qty = m[1].includes('/') ? (([a, b]) => a / b)(m[1].split('/').map(Number)) : m[1].trim().split(/\s+/).reduce((a, x) => a + +x.replace(',', '.'), 0); t = m[2];
+        unit = 'stuk';
+        for (const [re, u, f] of EN_UNIT) if (re.test(t)) { unit = u; qty = f ? qty * f : 0; t = t.replace(re, '').trim(); break; }
+      }
+      if (unit === 'stuk' && /\bcloves?\b/.test(t)) unit = 'teen'; // "2 garlic cloves": de eenheid staat ná de naam
+      for (let k = 0; k < 4; k++) t = t.replace(EN_DROP, '');
+      t = t.replace(/^of\s+/, '').trim();
+      const hit = EN_NL.find(([en]) => t.includes(en));
+      const name = (hit && hit[1]) || t || String(line).trim();
+      return { name, qty: Math.round(qty * 100) / 100, unit: qty ? unit : '', cat: guessCat(name) || 'Overig' };
+    }
+    async function doImport(d, l) {
+      const msg = d.querySelector('#i-msg'), url = safeUrl(d.querySelector('#i-url').value);
+      if (!url) { msg.textContent = 'Plak een volledige link, beginnend met https://'; return; }
+      msg.textContent = 'Recept ophalen…';
+      try {
+        const res = await fetch('/api/recept?url=' + encodeURIComponent(url));
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('json')) throw new Error('Importeren werkt alleen op de echte site (de import-functie draait op Vercel).');
+        const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Ophalen mislukt');
+        const r = { id: uid(), kind: 'recept', name: data.name || 'Geïmporteerd recept', persons: data.persons || 4, bron: data.url || url,
+          ingredients: data.ingredients.map(parseForeign).map(x => ing(x.name, x.qty, x.unit, x.cat)) };
+        if (!r.ingredients.length) throw new Error('Geen ingrediënten gevonden op die pagina.');
+        S.recipes.push(r);
+        if (l) { l.recipes.push({ rid: r.id, persons: l.persons, off: [] }); syncPersons(l); }
+        save(); dlg.close(); location.hash = '#/recept/' + r.id;
+      } catch (e) { msg.textContent = e.message || 'Ophalen mislukt'; }
+    }
+
     /* ---------- acties ---------- */
     const clamp = n => Math.max(1, Math.min(99, n));
     const actions = {
@@ -1304,7 +1374,7 @@
         sheet(kind === 'week' ? 'Setje toevoegen' : 'Recept toevoegen', pool.map(r => {
           const has = l.recipes.some(x => x.rid === r.id);
           return `<button class="btn pick" data-s="r-${r.id}"${has ? ' disabled' : ''}>${esc(r.name)}${has ? ' ✓' : ''}</button>`;
-        }).join('') || `<p class="muted">Nog geen ${what}s.</p>`, [cancel, { id: 'new', label: '+ Nieuw ' + what, cls: 'primary', fn: () => {
+        }).join('') || `<p class="muted">Nog geen ${what}s.</p>`, [cancel, ...(kind === 'recept' ? [{ id: 'imp', label: '🔗 Importeer', fn: () => { setTimeout(() => actions.importRecipe(), 0); } }] : []), { id: 'new', label: '+ Nieuw ' + what, cls: 'primary', fn: () => {
           // meteen op dit lijstje én naar de editor, zodat je hem kunt invullen
           const r = { id: uid(), kind, name: kind === 'week' ? 'Nieuw setje' : 'Nieuw recept', persons: l.persons, ingredients: [ing('', 0, '', S.categories[0])] };
           S.recipes.push(r); l.recipes.push({ rid: r.id, persons: l.persons, off: [] }); save(); location.hash = '#/recept/' + r.id;
@@ -1406,6 +1476,14 @@
         const missing = seed().recipes.filter(r => !have.has(r.name.toLowerCase()));
         if (!missing.length) return sheet('Alles is er nog', '<p>Alle voorbeeldrecepten staan al in je recepten.</p>', [{ id: 'o', label: 'OK', fn: () => {} }]);
         withUndo(`Teruggezet: ${missing.map(r => r.name).join(', ')}`, () => { S.recipes.push(...missing); commit(); });
+      },
+      // Recept importeren via een link: /api/recept (Vercel-functie) leest de schema.org-Recipe van de pagina; de regels
+      // worden hier vertaald/omgerekend (parseForeign). Daarna naar de receptpagina om na te kijken.
+      importRecipe() {
+        const l = curList();
+        sheet('Recept importeren', `<div class="field"><label>Link naar een recept (bv. BBC Good Food, Allerhande)</label><input id="i-url" inputmode="url" placeholder="https://…" /></div>
+          <div class="muted" id="i-msg">De app leest het recept dat de site zelf aanbiedt; daarna kun je alles nakijken en aanpassen.</div>`,
+          [cancel, { id: 'go', label: 'Importeer', cls: 'primary', fn: d => { doImport(d, l); return false; } }]);
       },
       recPers(el) { const r = curRecipe(); r.persons = clamp(r.persons + +el.dataset.d); commit(); },
       ingAdd() { curRecipe().ingredients.push(ing('', 0, '', S.categories[0])); commit(); },
@@ -1638,6 +1716,8 @@
         if (!animBusy && !document.querySelector('form.inl input:focus')) render();
       } catch (e) { /* offline of lokaal geopend: bewaarde kopie of emoji-regels blijven gelden */ }
     }
+    // Offline/installeerbaar: service worker alleen voor /boodschappen (niet voor de rest van resonantxp.com).
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('/boodschappen-sw.js', { scope: '/boodschappen' }).catch(() => {});
     load();
     try { const c = localStorage.getItem(DBKEY); if (c) setDB(JSON.parse(c)); } catch (e) { /* kapotte kopie: negeren */ }
     render(); loadDB();
