@@ -455,7 +455,8 @@
       for (const lr of l.recipes) { const extra = l.who.length - (lr.persons || target); lr.off = extra > 0 ? l.who.slice(-extra).map(w => w.id) : []; }
       syncPersons(l);
     }
-    function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* vol/geblokkeerd: app blijft werken, alleen niet bewaard */ } }
+    function save() { saveLocal(); if (sync?.hid && !syncApplying) schedulePush(); }
+    function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* vol/geblokkeerd: app blijft werken, alleen niet bewaard */ } }
 
     /* ---------- afgeleide data ---------- */
     function fmtQty(q, u) {
@@ -740,6 +741,7 @@
         ${(S.eaters || []).map((e, i) => `<button class="card listcard" data-act="eater" data-i="${i}"><b>${esc(e.naam || 'Persoon')}${personMarks(e)}</b><div class="muted">${esc(personLine(e))}</div></button>`).join('')
           || '<div class="muted" style="margin-bottom:8px">Nog niemand ingesteld: het voedingsadvies rekent nu met één volwassene.</div>'}
         <button class="btn" data-act="eater">+ Persoon</button>
+        ${syncPanel()}
         <footer class="bk"><span class="muted">Back-up (data staat alleen in deze browser):</span>
           <button class="btn small" data-act="export">Exporteer</button>
           <button class="btn small" data-act="import">Importeer</button>
@@ -983,7 +985,7 @@
     function viewList(l) {
       const rows = rowsFor(l), rowMap = new Map(rows.map(r => [r.key, r]));
       const pr = progressOf(rows), pct = pr.t ? Math.round(pr.d / pr.t * 100) : 0;
-      return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1></div>
+      return `<div class="top"><a class="btn icon" href="#/" aria-label="Terug">←</a><h1 data-act="renameList" style="cursor:pointer">${esc(l.name)}</h1>${sync?.hid ? `<span id="syncdot" title="Gedeeld huishouden">${SYNC_ICON[syncState] || '☁️'}</span>` : ''}</div>
         ${whoChips(l)}<div class="muted" style="margin-top:4px">${l.persons} ${l.persons === 1 ? 'persoon' : 'personen'} · schaalt alle recepten mee</div>
         <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${pr.d} van ${pr.t} binnen</div>
         ${(CONS = constraintsOf(peopleFor(l)), boardHtml(l, rows, rowMap))}
@@ -1072,6 +1074,7 @@
       const app = $('#app'), h = location.hash.replace(/^#/, '') || '/';
       const [, kind, id] = h.split('/');
       let html;
+      if (kind === 'join' && id) { try { localStorage.setItem(JOIN_KEY, id); } catch (e) { /* privé-modus */ } history.replaceState(null, '', location.pathname); client().then(() => { if (syncUser) afterLogin(); }); }
       if (kind === 'lijst' && listById(id)) html = viewList(listById(id));
       else if (kind === 'recepten') html = viewRecipes();
       else if (kind === 'recept' && recipeById(id)) html = viewRecipe(recipeById(id));
@@ -1093,6 +1096,7 @@
       dlg._h = Object.fromEntries(buttons.map(b => [b.id, b.fn]));
       if (!dlg.open) dlg.showModal();
     }
+    dlg.addEventListener('close', () => { if (pendingRender) { pendingRender = false; render(); } });
     dlg.addEventListener('click', e => {
       const b = e.target.closest('[data-s]'); if (!b) return;
       const fn = dlg._h[b.dataset.s]; if (fn && fn(dlg) === false) return;
@@ -1170,7 +1174,7 @@
         if (!wasOpen) jobs.push(reveal(blk.querySelector('.obody'), 460));
         await Promise.all(jobs);
         drawLines(); linesIn(260);     // pas na afloop: houdt de eerste frame na de tik zo licht mogelijk
-      } finally { animBusy = false; }
+      } finally { animBusy = false; if (pendingRender) { pendingRender = false; render(); } }
     }
 
     // Omklappen (Han: "inklappen tot vierkant met enkel de emoji, dan weer uitklappen; het meest clean").
@@ -1322,6 +1326,153 @@
       } catch (e) { msg.textContent = e.message || 'Ophalen mislukt'; }
     }
 
+    /* ---------- samen (Supabase): gedeeld huishouden ----------
+       Zelfde Supabase-project als het spel (publieke URL + publishable key; afscherming via RLS in
+       supabase/boodschappen.sql). Eigen inlogsessie (storageKey) zodat die van het spel ongemoeid blijft.
+       Samenvoegen: drieweg-merge t.o.v. de laatst gesynchroniseerde versie (sync.base); opslaan met versie
+       (bs_save weigert een verouderde rev → nieuwste ophalen, samenvoegen, opnieuw). Live via Realtime. */
+    const SB_URL = 'https://qwjeqrzvprvldnswlgjp.supabase.co', SB_KEY = 'sb_publishable_tgCJqsC9_uWBXfnNpvGWQA_VPAWqOHA';
+    const SYNC_KEY = 'boodschappen.sync', JOIN_KEY = 'boodschappen.join';
+    let sb = null, sync = null, syncTimer = 0, syncBusy = false, syncApplying = false, syncState = '', syncUser = null, syncChan = null, pendingRender = false;
+    try { sync = JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch (e) { sync = null; }
+    const saveSync = () => { try { localStorage.setItem(SYNC_KEY, JSON.stringify(sync)); } catch (e) { /* vol */ } };
+    const clone = x => JSON.parse(JSON.stringify(x));
+    const shareable = () => { const { ui, ...rest } = S; return clone(rest); }; // weergave-keuzes blijven per apparaat
+    // LET OP: S en sync.base mogen nooit objecten delen (anders verandert de referentieversie mee met een vinkje en
+    // denkt de app dat er niets te versturen is — zo ging in de test een vinkje verloren). Daarom overal clone().
+
+    const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const idOf = x => isObj(x) ? (x.id ?? x.rid) : undefined;
+    // Drieweg-merge: wat alleen ik veranderde → van mij; alleen de ander → van de ander; allebei → per onderdeel verder.
+    // Lijsten met id's (lijstjes, recepten, items, mensen) per id; lijstjes van waarden als verzameling; botsende losse
+    // waarden: die van dit apparaat. Verwijderd door de een maar gewijzigd door de ander: de wijziging blijft.
+    function merge3(base, local, remote) {
+      if (same(local, remote)) return local;
+      if (same(local, base)) return remote;
+      if (same(remote, base)) return local;
+      if (isObj(local) && isObj(remote)) {
+        const b = isObj(base) ? base : {}, out = {};
+        for (const k of new Set([...Object.keys(remote), ...Object.keys(local), ...Object.keys(b)])) { const v = merge3(b[k], local[k], remote[k]); if (v !== undefined) out[k] = v; }
+        return out;
+      }
+      if (Array.isArray(local) && Array.isArray(remote)) {
+        const b = Array.isArray(base) ? base : [];
+        if ([...local, ...remote].every(x => idOf(x) !== undefined)) {
+          const bm = new Map(b.map(x => [idOf(x), x])), lm = new Map(local.map(x => [idOf(x), x])), rm = new Map(remote.map(x => [idOf(x), x]));
+          const order = [...remote.map(idOf), ...local.map(idOf).filter(id => !rm.has(id))];
+          return order.map(id => merge3(bm.get(id), lm.get(id), rm.get(id))).filter(x => x !== undefined);
+        }
+        if ([...local, ...remote].every(x => typeof x !== 'object')) {
+          const bs = new Set(b), out = remote.filter(x => !(bs.has(x) && !local.includes(x)));
+          for (const x of local) if (!bs.has(x) && !out.includes(x)) out.push(x);
+          return out;
+        }
+      }
+      return local !== undefined ? local : remote;
+    }
+
+    async function client() {
+      if (sb) return sb;
+      if (window.__bsFakeSupabase) sb = window.__bsFakeSupabase; // alleen voor tests
+      else {
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
+        sb = createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce', storageKey: 'boodschappen-auth' } });
+      }
+      sb.auth.onAuthStateChange((_e, session) => {
+        const u = session?.user && !session.user.is_anonymous ? session.user : null, was = syncUser?.id;
+        syncUser = u; if (u && u.id !== was) afterLogin(); safeRender();
+      });
+      return sb;
+    }
+    function setSyncState(st) { syncState = st; const d = $('#syncdot'); if (d) d.textContent = SYNC_ICON[st] || ''; }
+    const SYNC_ICON = { ok: '☁️✓', bezig: '☁️…', offline: '☁️⚠️' };
+    function safeRender() { if (animBusy || document.querySelector('form.inl input:focus, dialog[open], [data-rf]:focus, [data-f]:focus')) pendingRender = true; else render(); }
+    const schedulePush = () => { clearTimeout(syncTimer); syncTimer = setTimeout(push, 700); };
+
+    function integrate(remote, rev) {
+      if (!sync || rev <= sync.rev) return;
+      const merged = merge3(sync.base, shareable(), remote);
+      syncApplying = true;
+      try { S = { ...clone(merged), ui: S.ui }; migrate(); saveLocal(); } finally { syncApplying = false; }
+      sync.base = clone(remote); sync.rev = rev; saveSync();
+      if (!same(shareable(), remote)) schedulePush(); // eigen wijzigingen die de ander nog niet heeft
+      safeRender();
+    }
+    async function pull() {
+      const c = await client(); const { data, error } = await c.from('bs_docs').select('data,rev').eq('household_id', sync.hid).single();
+      if (error) throw error; integrate(data.data, data.rev);
+    }
+    async function push() {
+      if (!sync?.hid || !syncUser) return;
+      if (syncBusy) return schedulePush();
+      syncBusy = true; setSyncState('bezig');
+      try {
+        for (let i = 0; i < 5; i++) {
+          const data = shareable(); if (same(data, sync.base)) break;
+          const c = await client(); const { data: rev, error } = await c.rpc('bs_save', { p_household: sync.hid, p_data: data, p_rev: sync.rev });
+          if (error) throw error;
+          if (rev > 0) { sync.base = data; sync.rev = rev; saveSync(); break; }
+          await pull(); // botsing: de ander was net eerder → nieuwste ophalen, samenvoegen, opnieuw proberen
+        }
+        setSyncState('ok');
+      } catch (e) { setSyncState('offline'); } finally { syncBusy = false; }
+    }
+    async function subscribe() {
+      const c = await client(); try { syncChan?.unsubscribe(); } catch (e) { /* al weg */ }
+      syncChan = c.channel('bs-' + sync.hid).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bs_docs', filter: 'household_id=eq.' + sync.hid },
+        p => { if (p.new && p.new.rev > sync.rev) integrate(p.new.data, p.new.rev); }).subscribe();
+    }
+    async function startSync() { setSyncState('bezig'); try { await subscribe(); await pull(); await push(); setSyncState('ok'); } catch (e) { setSyncState('offline'); } }
+    async function afterLogin() {
+      const code = localStorage.getItem(JOIN_KEY);
+      if (code) { localStorage.removeItem(JOIN_KEY); return joinHousehold(code); }
+      if (sync?.hid) startSync();
+    }
+    async function createHousehold() {
+      const c = await client(), data = shareable();
+      const { data: rows, error } = await c.rpc('bs_create_household', { p_name: (S.eaters || []).map(e => e.naam).filter(Boolean).join(' & ') || 'Huishouden', p_data: data });
+      if (error) return alert(error.message);
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      sync = { hid: row.household_id, rev: row.rev, base: data, code: row.invite_code }; saveSync(); startSync(); render();
+    }
+    async function joinHousehold(code) {
+      const c = await client();
+      const { data: hid, error } = await c.rpc('bs_join_household', { p_code: code });
+      if (error) { alert(error.message); return render(); }
+      const { data: doc, error: e2 } = await c.from('bs_docs').select('data,rev').eq('household_id', hid).single();
+      if (e2) return alert(e2.message);
+      try { localStorage.setItem('boodschappen.backup', JSON.stringify(S)); } catch (e) { /* vol */ }
+      // Nieuw apparaat: standaard de gegevens van het huishouden; wie al eigen lijstjes had kan ze laten toevoegen.
+      const mine = S.lists.length && confirm('Je lijstjes op dit apparaat ook toevoegen aan het gedeelde huishouden?\n\nOK = toevoegen · Annuleren = alleen de gegevens van het huishouden gebruiken (een back-up van je eigen gegevens blijft bewaard).');
+      syncApplying = true;
+      try { S = { ...clone(mine ? merge3({}, shareable(), doc.data) : doc.data), ui: S.ui }; migrate(); saveLocal(); } finally { syncApplying = false; }
+      sync = { hid, rev: doc.rev, base: clone(doc.data) }; saveSync(); startSync(); location.hash = '#/';
+      render();
+    }
+    async function inviteLink() {
+      let code = sync.code;
+      if (!code) { const c = await client(); const { data } = await c.from('bs_households').select('invite_code').eq('id', sync.hid).single(); code = data?.invite_code; sync.code = code; saveSync(); }
+      return `${location.origin}/boodschappen#/join/${code}`;
+    }
+    // Paneel op de startpagina
+    function syncPanel() {
+      const invited = localStorage.getItem(JOIN_KEY);
+      let body;
+      if (!syncUser) body = `<div class="muted">${invited ? '💌 Je bent uitgenodigd voor een gedeeld huishouden. Log in om mee te doen.' : 'Log in om je lijstjes veilig op te slaan en samen te gebruiken (bv. met Nele). Zonder inloggen werkt alles gewoon op dit apparaat.'}</div>
+          <div class="row" style="margin-top:6px"><input id="sync-mail" type="email" inputmode="email" placeholder="je e-mailadres" /><button class="btn small primary" data-act="syncMail">Stuur inloglink</button></div>
+          <button class="btn small" data-act="syncGoogle" style="margin-top:6px">Inloggen met Google</button>
+          <div class="muted" style="margin-top:4px">Open de inloglink op dit apparaat, in deze browser.</div>`;
+      else if (!sync?.hid) body = `<div class="muted">Ingelogd als ${esc(syncUser.email || '')}.</div>
+          <button class="btn small primary" data-act="syncCreate" style="margin-top:6px">Maak een gedeeld huishouden</button>
+          <div class="muted" style="margin-top:4px">Je huidige lijstjes, recepten en mensen gaan mee. Kreeg je een uitnodigingslink? Open die gewoon.</div>
+          <button class="btn small" data-act="syncLogout" style="margin-top:6px">Uitloggen</button>`;
+      else body = `<div><span id="syncdot">${SYNC_ICON[syncState] || '☁️'}</span> Gedeeld huishouden · ${esc(syncUser.email || '')}</div>
+          <div class="toolbar" style="margin-top:6px"><button class="btn small primary" data-act="syncInvite">Nodig iemand uit</button>
+          <button class="btn small" data-act="syncNewCode">Nieuwe uitnodigingslink</button><button class="btn small" data-act="syncLeave">Verlaat huishouden</button><button class="btn small" data-act="syncLogout">Uitloggen</button></div>`;
+      return `<div class="rub" style="margin:22px 2px 8px"><span>Samen</span></div><div class="card nut">${body}</div>`;
+    }
+
     /* ---------- acties ---------- */
     const clamp = n => Math.max(1, Math.min(99, n));
     const actions = {
@@ -1441,6 +1592,28 @@
              commit();
            } }]);
       },
+      async syncMail() {
+        const mail = ($('#sync-mail')?.value || '').trim(); if (!/.+@.+\..+/.test(mail)) return alert('Vul je e-mailadres in.');
+        const c = await client(); const { error } = await c.auth.signInWithOtp({ email: mail, options: { shouldCreateUser: true, emailRedirectTo: location.origin + '/boodschappen' } });
+        alert(error ? 'Versturen mislukt: ' + error.message : 'Kijk in je mail en open de inloglink op dit apparaat.');
+      },
+      async syncGoogle() { const c = await client(); await c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/boodschappen' } }); },
+      syncCreate() { createHousehold(); },
+      async syncInvite() {
+        const link = await inviteLink(), text = 'Doe mee met onze boodschappenlijstjes: ' + link;
+        try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(link); alert('Uitnodigingslink gekopieerd.'); } } catch (e) { /* geannuleerd */ }
+      },
+      async syncNewCode() {
+        if (!confirm('Een nieuwe link maken? De oude uitnodigingslink werkt dan niet meer.')) return;
+        const c = await client(); const { data, error } = await c.rpc('bs_new_invite', { p_household: sync.hid }); if (error) return alert(error.message);
+        sync.code = data; saveSync(); actions.syncInvite();
+      },
+      async syncLeave() {
+        if (!confirm('Het gedeelde huishouden verlaten? Je gegevens blijven op dit apparaat staan.')) return;
+        const c = await client(); await c.from('bs_members').delete().eq('household_id', sync.hid).eq('user_id', syncUser.id);
+        try { syncChan?.unsubscribe(); } catch (e) { /* al weg */ } sync = null; saveSync(); render();
+      },
+      async syncLogout() { const c = await client(); try { syncChan?.unsubscribe(); } catch (e) { /* al weg */ } await c.auth.signOut(); syncUser = null; sync = null; saveSync(); render(); },
       // Tip uit het advies: het ingrediënt komt in het recept zelf, berekend voor het eigen aantal personen.
       ldays(el) { const l = curList(); l.days = Math.max(1, Math.min(14, (l.days || 3) + +el.dataset.d)); commit(); },
       // Aanvullende receptsuggestie: op het lijstje, met dezelfde mensen
@@ -1721,6 +1894,10 @@
     load();
     try { const c = localStorage.getItem(DBKEY); if (c) setDB(JSON.parse(c)); } catch (e) { /* kapotte kopie: negeren */ }
     render(); loadDB();
+    if (sync?.hid || localStorage.getItem(JOIN_KEY) || localStorage.getItem('boodschappen-auth') || /[?&]code=/.test(location.search) || /#\/join\//.test(location.hash)) client().catch(() => setSyncState('offline'));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && sync?.hid && syncUser) pull().catch(() => setSyncState('offline')); });
+    addEventListener('online', () => { if (sync?.hid && syncUser) { pull().then(push).catch(() => setSyncState('offline')); } });
+    window.__boodschappen = { merge3 }; // voor tests
   })();
   </script>
 </body>

@@ -20,8 +20,12 @@ Static site, no build step. `main` deploys via GitHub Pages (`.github/workflows/
 A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired into the site's
 `style.css`/`header.js`/`nav.js`, and `noindex`: it is a personal tool, not part of the XP site.
 
-- **Storage:** `localStorage` key `boodschappen.v1`, per browser only (no server, no sync).
-  Export/import JSON is the backup. The data has a version field `v`; when adding fields, extend
+- **Storage:** `localStorage` key `boodschappen.v1`. Optional sync (login with e-mail link or Google) shares the
+  data in a household via Supabase — same project as the game, tables `bs_*` from `supabase/boodschappen.sql`.
+  Sync = three-way merge (`merge3`) against the last synced version (`sync.base`) + `bs_save` with a revision
+  number (rejects stale writes → pull, merge, retry) + Realtime. `S.ui` stays per device. NEVER let `S` and
+  `sync.base` share objects (always `clone()`): a shared reference once silently dropped a tick in testing.
+  Export/import JSON is still the backup. The data has a version field `v`; when adding fields, extend
   `migrate()` so it only fills in what is missing and never overwrites existing data.
 - **Core idea:** recipe ingredients are never copied onto a list. `rowsFor(list)` derives them on every
   render from (recipe × servings) and merges equal (name, unit) pairs, so scaling and recipe edits stay
@@ -40,6 +44,8 @@ A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired
 - `boodschappen.webmanifest`, `icons/boodschappen-*.png` — installeren als app (aapje als icoon).
 - `boodschappen-sw.js` — service worker, geregistreerd met scope `/boodschappen` zodat hij de rest van de site niet
   raakt. Netwerk eerst, cache als terugval (offline in de supermarkt).
+- `supabase/boodschappen.sql` — tabellen/RLS/functies voor gedeelde huishoudens; Han draait het in de Supabase SQL Editor.
+  Herhaalbaar. Test lokaal tegen PostgreSQL met nagebootst `auth`-schema (zie de PR die dit toevoegde).
 - `api/recept.js` — Vercel-functie voor recept-import: haalt een receptpagina op en geeft de schema.org-Recipe terug.
   Werkt alleen op Vercel (niet op GitHub Pages). Beschermd tegen SSRF: alleen http(s), geen privé-IP's (ook na
   doorverwijzingen), max 3 MB / 8 s. Niet uitbreiden tot een algemene proxy.
