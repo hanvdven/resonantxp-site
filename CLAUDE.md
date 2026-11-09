@@ -11,7 +11,7 @@ Instructions from Han (the owner) for every AI agent working in this repository.
 ## Deploy
 
 Static site, no build step. `main` deploys via GitHub Pages (`.github/workflows/deploy.yml`) and Vercel
-(`vercel.json`, `cleanUrls`), so `boodschappen.html` is served at `/boodschappen`.
+(`vercel.json`, `cleanUrls`: `about.html` is served at `/about`).
 
 ## boodschappen — moved out
 
