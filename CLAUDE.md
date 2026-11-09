@@ -4,54 +4,16 @@ Instructions from Han (the owner) for every AI agent working in this repository.
 
 ## Merging
 
-- **`boodschappen.html`: merge directly to `main`** (Han 2026-11-02). Changes that touch only
-  `boodschappen.html` may be merged by the agent without asking, once its own checks pass. Still work via
-  a PR (Vercel builds a preview per PR and it leaves a trail), then merge it yourself.
-- **Everything else in this repo: ask Han before merging.** The rule above does not extend to other
-  files, and not to other repositories (e.g. `music-melody-trainer`, which has its own UAT process).
+- **Ask Han before merging.** (The earlier exception for `boodschappen.html`, Han 2026-11-02, moved with the app to
+  `hanvdven/boodschappen`.) This does not extend to other repositories (e.g. `music-melody-trainer`, which has its
+  own UAT process).
 
 ## Deploy
 
 Static site, no build step. `main` deploys via GitHub Pages (`.github/workflows/deploy.yml`) and Vercel
 (`vercel.json`, `cleanUrls`), so `boodschappen.html` is served at `/boodschappen`.
 
-**Boodschappen has its own subdomain: `boodschappen.resonantxp.com`** (Han 2026-11-09, Vercel only). A host rule in
-`vercel.json` rewrites `/` on that host to `/boodschappen`. The page itself redirects any other `*.resonantxp.com` host
-(e.g. the old `test.resonantxp.com/boodschappen`) to the subdomain; Vercel previews and localhost keep working at
-`/boodschappen`. Paths in the app go through `APP_PATH`/`APP_URL` (`/` on the subdomain, `/boodschappen` elsewhere) —
-never hard-code `/boodschappen` again. Supabase Redirect URLs must include `https://boodschappen.resonantxp.com/**`.
+## boodschappen — moved out
 
-## boodschappen.html — shopping lists
-
-A self-contained page (inline CSS + JS, no dependencies). Deliberately NOT wired into the site's
-`style.css`/`header.js`/`nav.js`, and `noindex`: it is a personal tool, not part of the XP site.
-
-- **Storage:** `localStorage` key `boodschappen.v1`. Optional sync (login with e-mail link or Google) shares the
-  data in a household via Supabase — same project as the game, tables `bs_*` from `supabase/boodschappen.sql`.
-  Sync = three-way merge (`merge3`) against the last synced version (`sync.base`) + `bs_save` with a revision
-  number (rejects stale writes → pull, merge, retry) + Realtime. `S.ui` stays per device. NEVER let `S` and
-  `sync.base` share objects (always `clone()`): a shared reference once silently dropped a tick in testing.
-  Export/import JSON is still the backup. The data has a version field `v`; when adding fields, extend
-  `migrate()` so it only fills in what is missing and never overwrites existing data.
-- **Core idea:** recipe ingredients are never copied onto a list. `rowsFor(list)` derives them on every
-  render from (recipe × servings) and merges equal (name, unit) pairs, so scaling and recipe edits stay
-  correct. Ticking off a recipe ingredient lives in `list.done[key]`; loose items are in `list.items`.
-- **Open Food Facts** (nutrition + allergens) is fetched live from the browser. It is blocked from the
-  Claude Code sandbox (proxy 403), so test it with a mocked response (Playwright `page.route`) and say so.
-- **Allergens:** missing data must show as "niet gecontroleerd", never as safe. Do not add any wording
-  that suggests something is allergen-free.
-- **Overview view:** the lines between ingredients and recipes are an SVG drawn by `drawLines()` after
-  every render from measured DOM positions; call it after any layout change.
-- Test at phone width (390px) and check `document.documentElement.scrollWidth` stays 390.
-
-### Bestanden die bij boodschappen horen
-- `boodschappen-ingredienten.json` — ingrediëntenlijst (emoji, categorie, allergenen, voeding per 100 g, gewicht per stuk,
-  `geen_tip`). Han bewerkt die op GitHub; de pagina haalt hem op en bewaart een kopie voor offline.
-- `boodschappen.webmanifest`, `icons/boodschappen-*.png` — installeren als app (aapje als icoon).
-- `boodschappen-sw.js` — service worker, scope `APP_PATH` (`/` op het subdomein, `/boodschappen` op previews) zodat hij
-  de rest van de site niet raakt. Netwerk eerst, cache als terugval (offline in de supermarkt).
-- `supabase/boodschappen.sql` — tabellen/RLS/functies voor gedeelde huishoudens; Han draait het in de Supabase SQL Editor.
-  Herhaalbaar. Test lokaal tegen PostgreSQL met nagebootst `auth`-schema (zie de PR die dit toevoegde).
-- `api/recept.js` — Vercel-functie voor recept-import: haalt een receptpagina op en geeft de schema.org-Recipe terug.
-  Werkt alleen op Vercel (niet op GitHub Pages). Beschermd tegen SSRF: alleen http(s), geen privé-IP's (ook na
-  doorverwijzingen), max 3 MB / 8 s. Niet uitbreiden tot een algemene proxy.
+The shopping-list app lives in its own repo since 2026-11-09: `hanvdven/boodschappen`, served at
+`boodschappen.resonantxp.com`. `vercel.json` here only redirects `/boodschappen` there (308). Do not add app files back.
