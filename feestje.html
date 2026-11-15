@@ -158,11 +158,11 @@
 
     /* ---------- de volvelle (klok) ---------- */
     .clock-wrap { display: grid; justify-items: center; gap: 14px; }
-    .orloj { width: min(440px, 78vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 8px 10px rgba(60,30,10,.3)); }
-    .orloj .handle { cursor: grab; touch-action: none; }
+    .orloj { width: min(440px, 84vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 10px 14px rgba(40,20,5,.45)); }
+    .orloj .handle { cursor: grab; touch-action: none; outline: none; }
+    .orloj .handle:focus-visible { stroke: var(--ochre); stroke-width: 3; }
     .orloj.dragging .handle { cursor: grabbing; }
     .orloj text { user-select: none; -webkit-user-select: none; }
-    @media (max-width: 560px) { #pennant text { display: none; } }
     .clock-cap { font-size: .92rem; text-align: center; color: var(--ink-soft); margin: 0; min-height: 1.4em; max-width: 30em; }
     .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
@@ -535,54 +535,52 @@
 
       <div class="clock-wrap">
         <svg class="orloj" id="orloj" viewBox="-200 -200 400 400" aria-labelledby="orloj-title">
-          <title id="orloj-title">Volvelle: een 24-uurs wijzerplaat. De zon toont het uur, de rode band het feest van 16:00 tot na middernacht.</title>
+          <title id="orloj-title">Het wachtwiel uit Kingdom Come: Deliverance II: een 24-uurswiel dat meedraait, met het huidige uur bovenaan, de dag in wit en goud en de nacht in blauw met sterren.</title>
           <defs>
-            <pattern id="p-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">
-              <rect width="6" height="6" fill="#a2302a" /><line x1="0" y1="0" x2="0" y2="6" stroke="#6b1a16" stroke-width="1.4" />
-            </pattern>
-            <radialGradient id="g-vel" r=".7"><stop offset="0" stop-color="#f3e6c8" /><stop offset=".8" stop-color="#e6d2a8" /><stop offset="1" stop-color="#d2b884" /></radialGradient>
+            <radialGradient id="w-hout" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#6e4526"/><stop offset=".6" stop-color="#43280f"/><stop offset="1" stop-color="#24160a"/></radialGradient>
+            <filter id="w-nerf" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="3" seed="8"/>
+              <feColorMatrix values="0 0 0 0 .1  0 0 0 0 .05  0 0 0 0 0  0 0 0 .55 -.1"/>
+              <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
+            <filter id="w-craq" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="turbulence" baseFrequency=".09" numOctaves="2" seed="3"/>
+              <feColorMatrix values="0 0 0 0 .45  0 0 0 0 .4  0 0 0 0 .34  -2.6 0 0 0 1.1"/>
+              <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
+            <radialGradient id="w-gloed"><stop offset="0" stop-color="#fff2b0" stop-opacity=".9"/><stop offset=".55" stop-color="#f3c447" stop-opacity=".55"/><stop offset="1" stop-color="#f3c447" stop-opacity="0"/></radialGradient>
+            <clipPath id="w-ring"><path d="M0,-188 A188,188 0 1 1 0,188 A188,188 0 1 1 0,-188 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z" clip-rule="evenodd"/></clipPath>
           </defs>
-          <!-- het blad -->
-          <circle r="197" fill="url(#g-vel)" filter="url(#inky)" />
-          <g fill="none" stroke="#2a1f16" filter="url(#inky)">
-            <circle r="192" stroke-width="2.2" />
-            <circle r="187" stroke-width=".8" />
-            <circle r="166" stroke-width="1.6" />
-          </g>
-          <g id="disc" filter="url(#wash)"></g>
-          <g id="disc-stars"></g>
-          <path id="party-band" fill="url(#p-hatch)" stroke="#2a1f16" stroke-width="1" filter="url(#inky)" />
-          <g id="ticks" filter="url(#inky)"></g>
-          <circle r="150" fill="none" stroke="#2a1f16" stroke-width="1.6" filter="url(#inky)" />
-          <g id="marks"></g>
-          <path id="sleep-arc" fill="rgba(243,231,203,.32)" stroke="#e3b84f" stroke-width="2" stroke-dasharray="5 4" display="none" />
-          <g id="numerals" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="14" fill="#2a1f16" text-anchor="middle" dominant-baseline="central"></g>
-          <g id="pennant"></g>
-          <g id="cartouche" transform="translate(0,66)">
-            <rect x="-34" y="-14" width="68" height="28" rx="3" fill="#efe2c2" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
-            <text id="dial-time" y="1" text-anchor="middle" dominant-baseline="central" font-family="IM Fell English, Georgia, serif" font-weight="500" font-size="19" fill="#2a1f16"></text>
-          </g>
-          <text id="dial-note" y="98" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="13" fill="#efe2c2" style="paint-order:stroke" stroke="rgba(20,14,8,.75)" stroke-width="3"></text>
-          <g id="moon-hand"></g>
-          <g id="hand">
-            <path d="M-3,24 L-4,-96 L0,-108 L4,-96 L3,24 Z" fill="#c4943c" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
-            <path d="M-10,24 L0,46 L10,24 Z" fill="#c4943c" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
-            <g transform="translate(0,-124)">
-              <g id="rays" fill="#d9a548" stroke="#2a1f16" stroke-width="1" stroke-linejoin="round" filter="url(#inky)"></g>
-              <circle r="15" fill="#e3b356" stroke="#2a1f16" stroke-width="1.4" filter="url(#inky)" />
-              <g fill="none" stroke="#2a1f16" stroke-width="1.2" stroke-linecap="round">
-                <path d="M-7,-3 q2.5,-2 5,0 M2,-3 q2.5,-2 5,0" /><path d="M0,-1 v4 l-1.5,1" /><path d="M-5,6 q5,3 10,0" />
-              </g>
+          <circle r="199" fill="#111" />
+          <circle r="194" fill="#1d1b19" stroke="#000" stroke-width="2" />
+          <g id="w-dial">
+            <g clip-path="url(#w-ring)">
+              <g id="w-segs"></g>
+              <g id="w-glow"></g>
+              <circle r="190" fill="#fff" filter="url(#w-craq)" opacity=".5" style="mix-blend-mode:multiply" />
+              <g id="w-stars"></g>
             </g>
-            <circle class="handle" id="handle" cy="-124" r="32" fill="transparent"
-                    role="slider" tabindex="0" aria-label="Zon: sleep of gebruik de pijltjestoetsen om door de dag te reizen"
-                    aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0" />
+            <g id="w-marks"></g>
           </g>
-          <g filter="url(#inky)">
-            <circle r="15" fill="#c4943c" stroke="#2a1f16" stroke-width="1.4" />
-            <circle r="7" fill="#efe2c2" stroke="#2a1f16" stroke-width="1.2" />
-            <circle r="2.4" fill="#2a1f16" />
+          <path id="sleep-arc" fill="rgba(70,35,5,.3)" stroke="#e2b544" stroke-width="3" stroke-linejoin="round" display="none" />
+          <g id="w-nums" font-family="UnifrakturMaguntia, serif" font-size="17" text-anchor="middle" dominant-baseline="central"></g>
+          <circle r="188" fill="none" stroke="#0d0c0b" stroke-width="2.5" />
+          <circle r="146" fill="#16120e" stroke="#0d0c0b" stroke-width="2" />
+          <g id="w-ticks"></g>
+          <g id="w-sunmoon"></g>
+          <circle r="134" fill="url(#w-hout)" stroke="#c8a24a" stroke-width="1.6" />
+          <circle r="134" fill="#000" filter="url(#w-nerf)" />
+          <circle r="129" fill="none" stroke="#120b05" stroke-width="1" opacity=".7" />
+          <text id="dial-date" y="-58" text-anchor="middle" font-family="UnifrakturMaguntia, serif" font-size="21" fill="#f3ead6"></text>
+          <text id="dial-time" y="-6" text-anchor="middle" dominant-baseline="central" font-family="UnifrakturMaguntia, serif" font-size="58" fill="#fbf6ea" style="paint-order:stroke" stroke="rgba(0,0,0,.45)" stroke-width="3"></text>
+          <g id="w-stats" font-family="UnifrakturMaguntia, serif" font-size="19" fill="#f3ead6" text-anchor="middle"></g>
+          <text id="dial-note" y="104" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-size="14" fill="#f3d27a"></text>
+          <g id="w-pointer">
+            <path d="M0,-150 L-7,-196 L7,-196 Z" fill="#fbf6ea" stroke="#1a140d" stroke-width="1.5" stroke-linejoin="round" />
           </g>
+          <circle class="handle" id="handle" r="190" fill="transparent"
+                  role="slider" tabindex="0" aria-label="Wachtwiel: sleep het wiel of gebruik de pijltjestoetsen om door de dag te reizen"
+                  aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0" />
         </svg>
         <p class="clock-cap" id="clock-cap">&nbsp;</p>
         <div id="cd" aria-live="off"><p class="cd-label">Donderdag 31 december 2026, 16:00</p></div>
@@ -1141,144 +1139,129 @@
      DE VOLVELLE (klok)
      ========================================================= */
   const Clock = (() => {
+    // Het wachtwiel van KCD2: de wijzer staat bovenaan stil, het wiel draait mee zodat het huidige uur boven staat.
     const svg = $('#orloj');
-    const angle = h => (h - 12) * 15;                         // graden, met de klok mee vanaf boven
-    const pt = (r, h) => { const a = angle(h) * Math.PI / 180; return [r * Math.sin(a), -r * Math.cos(a)]; };
     const f = n => n.toFixed(2);
-
-    const ticks = $('#ticks'), nums = $('#numerals');
-    for (let q = 0; q < 96; q++) {
-      const h = q / 4, major = q % 4 === 0;
-      const [x1, y1] = pt(major ? 150 : 158, h), [x2, y2] = pt(166, h);
-      svgEl('line', { x1: f(x1), y1: f(y1), x2: f(x2), y2: f(y2), stroke: '#2a1f16', 'stroke-width': major ? 1.4 : .7 }, ticks);
-    }
-    for (let h = 1; h <= 24; h++) {
-      const [x, y] = pt(177, h);
-      const t = svgEl('text', { x: f(x), y: f(y) }, nums);
-      t.textContent = toRoman(h);
-      if (h === 24 || h === 12) { t.setAttribute('font-size', '16'); t.setAttribute('fill', '#a2302a'); }
-    }
-
-    // feestband
-    const arc = (r1, r2, h1, h2) => {
-      const [a, b] = pt(r2, h1), [c, d] = pt(r2, h2), [e, g] = pt(r1, h2), [i, j] = pt(r1, h1);
-      const large = (h2 - h1) * 15 > 180 ? 1 : 0;
-      return `M${f(a)},${f(b)} A${r2},${r2} 0 ${large} 1 ${f(c)},${f(d)} L${f(e)},${f(g)} A${r1},${r1} 0 ${large} 0 ${f(i)},${f(j)} Z`;
+    const pos = (r, a) => { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; }; // a: graden met de klok mee vanaf boven
+    const RING = [
+      [-18, '#0f1d48'], [-11, '#18296a'], [-6, '#3d5aa0'], [-2.5, '#9fb2d6'], [0, '#ded9cf'],
+      [4, '#efe9dc'], [14, '#f2e6c4'], [28, '#f3d27a'], [60, '#f0c24a'],
+    ];
+    const ringColor = el => {
+      if (el <= RING[0][0]) return RING[0][1];
+      for (let i = 1; i < RING.length; i++) if (el <= RING[i][0]) {
+        const [e0, c0] = RING[i - 1], [e1, c1] = RING[i];
+        return mix(c0, c1, (el - e0) / (e1 - e0));
+      }
+      return RING.at(-1)[1];
     };
-    $('#party-band').setAttribute('d', arc(151, 166, CONFIG.partyFrom, CONFIG.partyTo));
+    const lum = hex => { const [r, g, b] = hex2rgb(hex); return (r * .3 + g * .59 + b * .11) / 255; };
 
-    // programma-ruitjes op de band
-    for (const [h, title] of CONFIG.program) {
-      if (h === CONFIG.partyFrom) continue;
-      const [x, y] = pt(158.5, h);
-      const g = svgEl('g', { transform: `translate(${f(x)},${f(y)}) rotate(${angle(h)})` }, $('#marks'));
-      svgEl('path', { d: 'M0,-6 L4,0 L0,6 L-4,0 Z', fill: '#efe2c2', stroke: '#2a1f16', 'stroke-width': 1 }, g);
-      svgEl('title', {}, g).textContent = fmtH(h) + ' — ' + title;
-    }
-
-    // vaantje bij 16:00
-    (function pennant() {
-      const g = $('#pennant');
-      const [x, y] = pt(199, CONFIG.partyFrom);
-      const grp = svgEl('g', { transform: `translate(${f(x)},${f(y)}) rotate(${angle(CONFIG.partyFrom)})`, filter: 'url(#inky)' }, g);
-      svgEl('line', { x1: 0, y1: 6, x2: 0, y2: -24, stroke: '#2a1f16', 'stroke-width': 2 }, grp);
-      svgEl('path', { d: 'M0,-24 L30,-18 L22,-13 L30,-8 L0,-6 Z', fill: '#a2302a', stroke: '#2a1f16', 'stroke-width': 1 }, grp);
-      const lbl = svgEl('g', { transform: `translate(${f(x)},${f(y)})` }, g);
-      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'UnifrakturMaguntia, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#a2302a' }, lbl);
-      t.textContent = 'Feest!';
-    })();
-
-    // zonnestralen: afwisselend recht en golvend, zoals in handschriften
-    const rays = $('#rays');
-    for (let i = 0; i < 16; i++) {
-      svgEl('path', { d: i % 2 ? 'M-3,-14 Q3,-20 -1,-25 Q4,-21 3,-14 Z' : 'M-4,-14 L0,-29 L4,-14 Z', transform: `rotate(${i * 22.5})` }, rays);
-    }
-
-    // hemelschijf: elke 10 minuten een taartpunt, als waterverf gekleurd naar de echte zonshoogte
-    let discDay = null;
-    function paintDisc(day) {
+    // Het wiel zelf (segmenten, sterren, gloed en markeringen) tekenen we één keer per dag;
+    // daarna draaien we alleen de groep. De cijfers blijven rechtop staan en worden per frame verplaatst.
+    let wheelDay = null, sun = { rise: null, set: null }, hourCol = [];
+    function paintWheel(day) {
       const key = dayStart(day).getTime();
-      if (key === discDay) return;
-      discDay = key;
-      const disc = $('#disc'), starsG = $('#disc-stars');
-      disc.textContent = ''; starsG.textContent = '';
-      for (let s = 0; s < 144; s++) {
-        const h1 = s / 6 - .03, h2 = (s + 1) / 6 + .03;
-        const [a, b] = pt(150, h1), [c, d] = pt(150, h2);
-        svgEl('path', { d: `M0,0 L${f(a)},${f(b)} A150,150 0 0 1 ${f(c)},${f(d)} Z`, fill: washAt(sunElevation(atHours(day, (s + .5) / 6))) }, disc);
+      if (key === wheelDay) return;
+      wheelDay = key;
+      const segs = $('#w-segs'), stars = $('#w-stars'), glow = $('#w-glow'), marks = $('#w-sunmoon');
+      segs.textContent = ''; stars.textContent = ''; glow.textContent = ''; marks.textContent = '';
+      for (let i = 0; i < 144; i++) { // elke 10 minuten een taartpunt in de kleur van de zonshoogte
+        const h = i / 6, a1 = h * 15 - .15, a2 = (h + 1 / 6) * 15 + .15;
+        const [x1, y1] = pos(190, a1), [x2, y2] = pos(190, a2);
+        svgEl('path', { d: `M0,0 L${f(x1)},${f(y1)} A190,190 0 0 1 ${f(x2)},${f(y2)} Z`, fill: ringColor(sunElevation(atHours(day, h + 1 / 12))) }, segs);
       }
-      // okergele sterretjes in het nachtdeel
-      const rnd = seeded(26);
-      for (let i = 0; i < 34; i++) {
-        const h = rnd() * 24, r = 46 + rnd() * 96;
-        if (sunElevation(atHours(day, h)) > -9) continue;
-        const [x, y] = pt(r, h), s = 2 + rnd() * 2;
-        svgEl('path', { d: `M${f(x)},${f(y - s)} L${f(x + s * .3)},${f(y - s * .3)} L${f(x + s)},${f(y)} L${f(x + s * .3)},${f(y + s * .3)} L${f(x)},${f(y + s)} L${f(x - s * .3)},${f(y + s * .3)} L${f(x - s)},${f(y)} L${f(x - s * .3)},${f(y - s * .3)} Z`, fill: '#d9a548' }, starsG);
+      hourCol = Array.from({ length: 24 }, (_, h) => ringColor(sunElevation(atHours(day, h === 0 ? 24 : h))));
+      // gouden gloed rond het middaguur
+      let noon = 12, top = -90;
+      for (let m = 0; m < 1440; m += 10) { const el = sunElevation(atHours(day, m / 60)); if (el > top) { top = el; noon = m / 60; } }
+      const [gx, gy] = pos(167, noon * 15);
+      svgEl('circle', { cx: f(gx), cy: f(gy), r: 70, fill: 'url(#w-gloed)' }, glow);
+      // gouden sterretjes in de nacht
+      const rnd = seeded(31);
+      for (let i = 0; i < 70; i++) {
+        const h = rnd() * 24, r = 150 + rnd() * 36;
+        if (sunElevation(atHours(day, h)) > -7) continue;
+        const [x, y] = pos(r, h * 15), z = 1.2 + rnd() * 2.2;
+        svgEl('path', { d: `M${f(x)},${f(y - z)} L${f(x + z * .3)},${f(y - z * .3)} L${f(x + z)},${f(y)} L${f(x + z * .3)},${f(y + z * .3)} L${f(x)},${f(y + z)} L${f(x - z * .3)},${f(y + z * .3)} L${f(x - z)},${f(y)} L${f(x - z * .3)},${f(y - z * .3)} Z`, fill: '#e9c45a', opacity: (.55 + rnd() * .45).toFixed(2) }, stars);
       }
-      // horizonstreepjes bij zonsopgang en -ondergang
-      const { rise, set } = sunTimes(day);
-      for (const h of [rise, set]) {
-        if (h == null) continue;
-        const [x1, y1] = pt(118, h), [x2, y2] = pt(150, h);
-        svgEl('line', { x1: f(x1), y1: f(y1), x2: f(x2), y2: f(y2), stroke: '#2a1f16', 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: .7 }, starsG);
-      }
+      sun = sunTimes(day);
+      // zon bij zonsopgang, maan bij zonsondergang (aan de binnenkant van de ring)
+      if (sun.rise != null) { const [x, y] = pos(153, (sun.rise + .6) * 15); svgEl('circle', { cx: f(x), cy: f(y), r: 8, fill: '#f1c44c', stroke: '#7a4f12', 'stroke-width': 1.2 }, marks);
+        for (let k = 0; k < 8; k++) { const [a, b] = pos(10, k * 45), [c, d] = pos(13, k * 45); svgEl('line', { x1: f(x + a), y1: f(y + b), x2: f(x + c), y2: f(y + d), stroke: '#f1c44c', 'stroke-width': 1.6 }, marks); } }
+      if (sun.set != null) { const [x, y] = pos(153, (sun.set + .6) * 15); svgEl('path', { d: 'M-9,-3.5 A9.5,9.5 0 1 0 9,-3.5 A10,10 0 0 1 -9,-3.5 Z', transform: `translate(${f(x)},${f(y)}) rotate(${f(-(sun.set + .6) * 15)})`, fill: '#f3ead6', stroke: '#2a2a3a', 'stroke-width': 1.2 }, marks); }
+      // streepjes op de binnenring, met een rode band voor het feest
+      const ticks = $('#w-ticks'); ticks.textContent = '';
+      const [b1x, b1y] = pos(140, CONFIG.partyFrom * 15), [b2x, b2y] = pos(140, CONFIG.partyTo * 15);
+      ticks.innerHTML = `<path d="M${f(b1x)},${f(b1y)} A140,140 0 0 1 ${f(b2x)},${f(b2y)}" fill="none" stroke="#8f2a24" stroke-width="4" opacity=".9"/>`;
     }
-
-    // maan: een kortere wijzer, ongeveer waar de maan aan de hemel staat
-    const moonPath = (p, r) => {
-      const k = Math.cos(2 * Math.PI * p), rx = Math.abs(k) * r;
-      return `M0,${-r} A${r},${r} 0 0 1 0,${r} A${f(rx)},${r} 0 0 ${k > 0 ? 0 : 1} 0,${-r} Z`;
-    };
-    function drawMoon(h, p) {
-      const g = $('#moon-hand'); g.textContent = '';
-      g.setAttribute('transform', `rotate(${f(angle(h))})`);
-      svgEl('line', { x1: 0, y1: 0, x2: 0, y2: -81, stroke: '#2a1f16', 'stroke-width': 1.2, opacity: .8 }, g);
-      const m = svgEl('g', { transform: `translate(0,-92) rotate(${f(-angle(h))})` }, g);
-      svgEl('circle', { r: 11, fill: '#55606e', stroke: '#2a1f16', 'stroke-width': 1.2 }, m);
-      svgEl('path', { d: moonPath(p, 11), fill: '#e9e4d6', transform: p < .5 ? '' : 'scale(-1,1)' }, m);
-      svgEl('circle', { r: 11, fill: 'none', stroke: '#2a1f16', 'stroke-width': 1.2 }, m);
+    function paintTicks(rot) { // de streepjes (en zon/maan) draaien mee met het wiel
+      $('#w-ticks').setAttribute('transform', `rotate(${f(rot)})`);
+      $('#w-sunmoon').setAttribute('transform', `rotate(${f(rot)})`);
+      if ($('#w-ticks').dataset.done) return;
+      let t = '';
+      for (let q = 0; q < 96; q++) { const big = q % 4 === 0, [x1, y1] = pos(big ? 136 : 140, q * 3.75), [x2, y2] = pos(145, q * 3.75); t += `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="#c8a24a" stroke-width="${big ? 1.4 : .7}" opacity="${big ? .9 : .6}"/>`; }
+      $('#w-ticks').insertAdjacentHTML('beforeend', t); $('#w-ticks').dataset.done = 1;
+    }
+    // de cijfers 1–24: rechtop, met rondjes voor zonsopgang/-ondergang (goud), middernacht (wit) en het feest (rood)
+    const nums = $('#w-nums');
+    for (let h = 1; h <= 24; h++) { const g = svgEl('g', {}, nums); svgEl('circle', { r: 11.5, fill: 'none' }, g); svgEl('text', {}, g).textContent = h; }
+    function paintNums(rot) {
+      const rise = sun.rise != null ? Math.round(sun.rise) : -1, set = sun.set != null ? Math.round(sun.set) : -1;
+      [...nums.children].forEach((g, i) => {
+        const h = i + 1, [x, y] = pos(167, h * 15 + rot);
+        g.setAttribute('transform', `translate(${f(x)},${f(y)})`);
+        const c = g.firstChild, t = g.lastChild, bg = hourCol[h % 24] || '#efe9dc';
+        let ring = 'none', fill = lum(bg) > .55 ? '#1d1712' : '#f6f0e2';
+        if (h === 24) { ring = '#f3efe6'; fill = '#1d1712'; }
+        else if (h === CONFIG.partyFrom) { ring = '#a2302a'; fill = '#fff3e0'; }
+        else if (h === rise || h === set) { ring = '#e2b544'; fill = '#1d1712'; }
+        c.setAttribute('fill', ring); c.setAttribute('stroke', ring === 'none' ? 'none' : '#1a140d');
+        t.setAttribute('fill', fill);
+      });
     }
 
     let preview = null; // uren, of null = nu
     const handle = $('#handle');
+    const DAGEN = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'], MAANDEN = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
     function render() {
       const t = now();
       const h = preview ?? localHours(t);
-      paintDisc(t);
-      $('#hand').setAttribute('transform', `rotate(${f(angle(h))})`);
-      const p = moonPhase(t);
-      drawMoon((h + p * 24) % 24, p);
+      paintWheel(t);
+      const rot = -h * 15;
+      $('#w-dial').setAttribute('transform', `rotate(${f(rot)})`);
+      paintTicks(rot); paintNums(rot);
       paintSky(preview == null ? t : atHours(t, h));
       $('#dial-time').textContent = fmtH(h);
+      $('#dial-date').textContent = `${DAGEN[t.getDay()]} ${t.getDate()} ${MAANDEN[t.getMonth()]}`;
+      // onder de tijd, zoals de waarden op de wijzerplaat: tot de poort opengaat en tot middernacht
+      const toGate = (CONFIG.start - t) / 3600e3, toMid = (CONFIG.midnight - t) / 3600e3;
+      const short = hrs => hrs <= 0 ? 'nu' : hrs >= 48 ? Math.floor(hrs / 24) + 'd' : Math.floor(hrs) + 'u';
+      const stats = $('#w-stats');
+      if (!stats.dataset.v) stats.innerHTML = `<image href="feestje-img/kcd/herberg.png" x="-62" y="28" width="30" height="30"/><text id="w-s1" x="-47" y="78"></text>
+        <image href="feestje-img/kcd/ster.png" x="32" y="28" width="30" height="30"/><text id="w-s2" x="47" y="78"></text>`, stats.dataset.v = 1;
+      $('#w-s1').textContent = short(toGate); $('#w-s2').textContent = toMid < -6 ? '✓' : short(toMid);
       let note = '';
       if (preview != null) {
         const hh = h < CONFIG.partyTo - 24 ? h + 24 : h;
         const item = CONFIG.program.find(([ph]) => Math.abs(ph - hh) < 1 / 60);
-        const inParty = hh >= CONFIG.partyFrom && hh < CONFIG.partyTo;
-        note = item ? item[1] : inParty ? 'Feesttijd' : '';
+        note = item ? item[1] : (hh >= CONFIG.partyFrom && hh < CONFIG.partyTo ? 'Feesttijd' : '');
       }
-      $('#dial-note').textContent = note;
+      if (!$('#dial-note').dataset.lock) $('#dial-note').textContent = note;
       handle.setAttribute('aria-valuenow', Math.round(h * 60) % 1440);
       handle.setAttribute('aria-valuetext', fmtH(h) + (note ? ' — ' + note : ''));
     }
 
-    // slepen, met vastklikken op de programma-uren
-    let dragging = false, back = null;
+    // slepen: draai het wiel. Tegen de klok in draaien brengt de komende uren naar boven.
+    let dragging = false, back = null, dragA0 = 0, dragH0 = 0;
     const snaps = CONFIG.program.map(([h]) => h % 24);
-    function hoursFromEvent(e) {
-      const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
-      const q = p.matrixTransform(svg.getScreenCTM().inverse());
-      const a = Math.atan2(q.x, -q.y) * 180 / Math.PI;
-      let h = ((a / 15 + 12) % 24 + 24) % 24;
-      for (const s of snaps) if (Math.abs(h - s) < .12) h = s;
-      return h;
-    }
+    const angleOf = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; const q = p.matrixTransform(svg.getScreenCTM().inverse()); return Math.atan2(q.x, -q.y) * 180 / Math.PI; };
     function returnToNow(delay = 0) {
       cancelAnimationFrame(back); clearTimeout(returnToNow.t);
       returnToNow.t = setTimeout(() => {
         if (preview == null) return;
         const from = preview, t0 = performance.now(), dur = reduceMotion ? 1 : 900;
-        const delta = ((localHours(now()) - from + 36) % 24) - 12; // kortste weg rond de wijzerplaat
+        const delta = ((localHours(now()) - from + 36) % 24) - 12;
         const step = ts => {
           const k = clamp((ts - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
           preview = ((from + delta * e) % 24 + 24) % 24;
@@ -1290,11 +1273,19 @@
     }
     handle.addEventListener('pointerdown', e => {
       dragging = true; cancelAnimationFrame(back); clearTimeout(returnToNow.t);
+      dragA0 = angleOf(e); dragH0 = preview ?? localHours(now());
       handle.setPointerCapture(e.pointerId); svg.classList.add('dragging');
-      $('#clock-cap').textContent = 'Laat los, en de zon keert terug naar het nu.';
+      $('#clock-cap').textContent = 'Laat los, en het wiel draait terug naar het nu.';
       e.preventDefault();
     });
-    handle.addEventListener('pointermove', e => { if (!dragging) return; preview = hoursFromEvent(e); render(); });
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      let d = angleOf(e) - dragA0; d = ((d + 540) % 360) - 180;
+      let h = ((dragH0 - d / 15) % 24 + 24) % 24;
+      for (const sn of snaps) if (Math.abs(h - sn) < .12) h = sn;
+      preview = h; render();
+      dragA0 += d; dragH0 = h; // klein stapje per beweging: geen sprong bij een hele omwenteling
+    });
     const end = () => { if (!dragging) return; dragging = false; svg.classList.remove('dragging'); caption(); returnToNow(500); };
     handle.addEventListener('pointerup', end);
     handle.addEventListener('pointercancel', end);
@@ -1318,28 +1309,31 @@
       const parts = [];
       if (rise != null && set != null) parts.push(`Vandaag: zon op ${fmtH(rise)}, onder ${fmtH(set)}`);
       parts.push(`maan ${pct}% ${p < .5 ? 'wassend' : 'afnemend'}`);
-      $('#clock-cap').textContent = parts.join(' · ') + '. Sleep de zon langs de wijzerplaat.';
+      $('#clock-cap').textContent = parts.join(' · ') + '. Draai aan het wiel, of druk op T.';
     }
-    // slaapboog: van nu tot het moment van wakker worden, zoals op het slaapscherm in de game
+    // wachtboog: van de wijzer (nu) met de klok mee tot het eind van het wachten, zoals in het wachtmenu
     function showArc(hours) {
       const el = $('#sleep-arc');
       if (!hours) { el.setAttribute('display', 'none'); return; }
-      const h1 = preview ?? localHours(now()), h2 = h1 + hours;
-      const [a, b] = pt(150, h1), [c, d] = pt(150, h2);
-      el.setAttribute('d', hours >= 23.99 ? 'M0,-150 A150,150 0 1 1 0,150 A150,150 0 1 1 0,-150 Z' // een volle dag: de hele schijf
-        : `M0,0 L${f(a)},${f(b)} A150,150 0 ${hours > 12 ? 1 : 0} 1 ${f(c)},${f(d)} Z`);
+      if (hours >= 23.99) { el.setAttribute('d', 'M0,-188 A188,188 0 1 1 0,188 A188,188 0 1 1 0,-188 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z'); el.setAttribute('fill-rule', 'evenodd'); }
+      else {
+        const a = hours * 15, [o1x, o1y] = pos(188, 0), [o2x, o2y] = pos(188, a), [i2x, i2y] = pos(146, a), [i1x, i1y] = pos(146, 0), L = a > 180 ? 1 : 0;
+        el.setAttribute('d', `M${f(o1x)},${f(o1y)} A188,188 0 ${L} 1 ${f(o2x)},${f(o2y)} L${f(i2x)},${f(i2y)} A146,146 0 ${L} 0 ${f(i1x)},${f(i1y)} Z`);
+      }
       el.setAttribute('display', '');
     }
-    // de zon versneld door de nacht laten lopen
+    // het wiel versneld laten draaien (wachten/slapen)
     function fastForward(hours, done, sleeping = true) {
       cancelAnimationFrame(back); clearTimeout(returnToNow.t);
       const from = localHours(now()), t0 = performance.now(), dur = reduceMotion ? 1 : 900 + Math.min(hours, 12) * 260 + Math.max(0, hours - 12) * 120;
+      $('#dial-note').dataset.lock = 1;
       const step = ts => {
         const k = clamp((ts - t0) / dur, 0, 1), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         preview = (from + hours * e) % 24;
         render(); showArc(hours * (1 - e));
         $('#dial-note').textContent = k < 1 ? (sleeping ? 'Zzz…' : 'Wachten…') : (sleeping ? 'Goedemorgen' : '');
-        if (k < 1) back = requestAnimationFrame(step); else { showArc(0); done(); returnToNow(2600); }
+        if (k < 1) back = requestAnimationFrame(step);
+        else { showArc(0); delete $('#dial-note').dataset.lock; done(); returnToNow(2600); }
       };
       back = requestAnimationFrame(step);
     }
