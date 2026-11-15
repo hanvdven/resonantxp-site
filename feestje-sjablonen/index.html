@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Sjablonen naar Malešov</title>
+  <style>
+    @font-face { font-family: "IM Fell English"; src: url(../feestje-fonts/im-fell-english.woff2) format("woff2"); }
+    @font-face { font-family: "UnifrakturMaguntia"; src: url(../feestje-fonts/unifraktur-maguntia.woff2) format("woff2"); }
+    :root { --ink: #2a1f16; --oker: #d9a23e; --rood: #7c2d1a; }
+    body { margin: 0; font-family: "IM Fell English", Georgia, serif; color: var(--ink); background: #f3e7cb; line-height: 1.5; }
+    header, main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    h1 { font-family: "UnifrakturMaguntia", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.4rem); margin: 0 0 .2em; color: var(--rood); }
+    h2 { font-family: "UnifrakturMaguntia", serif; font-weight: 400; font-size: 1.8rem; margin: 0 0 .2em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+    .kaart { background: var(--oker); background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 58px, rgba(90,50,10,.25) 58px 60px); padding: 18px; border-radius: 4px; text-align: center; }
+    .kaart img { width: 100%; height: 190px; object-fit: contain; }
+    .kaart p { margin: .4em 0 0; font-size: .95rem; }
+    .kaart a { color: var(--rood); font-weight: bold; }
+    ol li { margin-bottom: .4em; }
+    .print-pagina { display: none; }
+    .knop { display: inline-block; background: var(--rood); color: #fff3df; padding: 8px 16px; border-radius: 3px; text-decoration: none; border: 0; font: inherit; cursor: pointer; }
+    @media print {
+      @page { size: A4; margin: 12mm; }
+      body { background: none; }
+      header, main { display: none; }
+      .print-pagina { display: block; page-break-after: always; text-align: center; }
+      .print-pagina img { display: block; margin: 8mm auto 4mm; }
+      .print-pagina .maat { width: 50mm; height: 3mm; margin: 4mm auto; border: .3mm solid #000; border-top: 0; }
+      .print-pagina small { font-size: 9pt; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sjablonen naar Malešov</h1>
+    <p>Nagetekend naar de beschilderde houten wanden en het sterrenplafond van tvrz Malešov bij Kutná Hora (het Maleshov uit
+      <i>Kingdom Come: Deliverance II</i>). Het zijn geen exacte kopieën: ik heb ze getekend naar een foto, en zo dat ze uit
+      één stuk te snijden zijn. <b>Zwart = uitsnijden.</b></p>
+    <p><button class="knop" onclick="print()">Alles afdrukken op A4 (ware grootte)</button></p>
+  </header>
+  <main>
+    <div class="grid">
+      <div class="kaart"><img src="fries-herten-boom.svg" alt="Levensboom met twee herten" /><h2>Herten en boom</h2><p>Bovenfries · 30 × 20 cm · <a href="fries-herten-boom.svg" download>SVG</a></p></div>
+      <div class="kaart"><img src="rozet-bladen.svg" alt="Rozet met acht bladen en vlinders" /><h2>Bladrozet</h2><p>Ø 20 cm · <a href="rozet-bladen.svg" download>SVG</a></p></div>
+      <div class="kaart"><img src="rozet-kant.svg" alt="Geometrische kantrozet" /><h2>Kantrozet</h2><p>Ø 20 cm · <a href="rozet-kant.svg" download>SVG</a></p></div>
+      <div class="kaart"><img src="fries-lopend-hert.svg" alt="Lopend hert" /><h2>Lopend hert</h2><p>Onderfries, herhaalbaar · 12 × 8 cm · <a href="fries-lopend-hert.svg" download>SVG</a></p></div>
+      <div class="kaart"><img src="ster-8.svg" alt="Achtpuntige ster" /><h2>Zwarte ster</h2><p>Voor de zuil · 10 cm · <a href="ster-8.svg" download>SVG</a></p></div>
+      <div class="kaart" style="background:#1d2a4e;color:#eef"><img src="ster-20.svg" alt="Twintigpuntige ster" style="filter:invert(1)" /><h2>Plafondster</h2><p>Zilver op nachtblauw · 10 cm · <a href="ster-20.svg" download style="color:#cfd8ff">SVG</a></p></div>
+    </div>
+
+    <h2 style="margin-top:1.4em">Zo maak je het</h2>
+    <ol>
+      <li><b>Printen.</b> Druk af op ware grootte (zet in het printvenster "schaal: 100%", niet "passend maken"). Controleer met
+        een liniaal of het streepje onder elk sjabloon 5 cm is. Groter of kleiner? Print op A3, of laat het in een copyshop schalen.</li>
+      <li><b>Snijden.</b> Leg de print op <b>sjabloonfolie (mylar, 0,1–0,2 mm)</b> of dun karton en snij met een scherp hobbymes op
+        een snijmat. Begin met de kleine binnenstukjes, eindig met de grote vormen. Laat de witte bruggetjes heel: die houden het sjabloon bij elkaar.
+        Een snijplotter (Cricut, Silhouette) leest de SVG-bestanden rechtstreeks.</li>
+      <li><b>Ondergrond.</b> In Malešov is het okergeel op hout. Op een gepleisterde muur: twee lagen okergeel (krijtverf of
+        kalkverf geeft het mooiste, matte effect), goed laten drogen.</li>
+      <li><b>Schilderen.</b> Zet het sjabloon vast met schilderstape of lichte spuitlijm. Stip de verf erin met een
+        <b>droge stencilkwast</b> of een sponsje (weinig verf, veel tikken), nooit vegen. Zwart voor de herten en de rozetten,
+        donker roodbruin voor de kantrozetten zoals in Malešov. Til het sjabloon recht omhoog.</li>
+      <li><b>Patroon.</b> Bovenaan een band herten en bomen, daaronder rozetten om en om in twee rijen, onderaan de lopende
+        herten. Trek eerst met potlood en waterpas hulplijnen. Kleine onregelmatigheden zijn juist goed: het is tenslotte handwerk uit 1400.</li>
+    </ol>
+    <p style="font-size:.9rem;opacity:.8">Wie het echt wil leren: tvrz Malešov organiseert seminars in gotische sjabloonschildering
+      (<a href="https://www.tvrzmalesov.cz/">tvrzmalesov.cz</a>).</p>
+  </main>
+
+  <!-- printversie: één sjabloon per A4 op ware grootte -->
+  <div class="print-pagina"><img src="fries-herten-boom.svg" style="width:180mm" alt="" /><div class="maat"></div><small>Herten en boom · 18 cm breed op A4 · voor de volle 30 cm: print het SVG-bestand op A3 liggend.</small></div>
+  <div class="print-pagina"><img src="rozet-bladen.svg" style="width:180mm" alt="" /><div class="maat"></div><small>Bladrozet · Ø 18 cm · maatstreep = 5 cm</small></div>
+  <div class="print-pagina"><img src="rozet-kant.svg" style="width:180mm" alt="" /><div class="maat"></div><small>Kantrozet · Ø 18 cm · maatstreep = 5 cm</small></div>
+  <div class="print-pagina"><img src="fries-lopend-hert.svg" style="width:120mm" alt="" /><img src="fries-lopend-hert.svg" style="width:120mm" alt="" /><div class="maat"></div><small>Lopend hert · 12 × 8 cm (2 stuks)</small></div>
+  <div class="print-pagina"><img src="ster-8.svg" style="width:80mm" alt="" /><img src="ster-20.svg" style="width:80mm" alt="" /><div class="maat"></div><small>Sterren · 8 cm</small></div>
+</body>
+</html>
