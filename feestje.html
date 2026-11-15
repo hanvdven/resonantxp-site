@@ -18,7 +18,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@400;700&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Grenze+Gotisch:wght@400;600;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=UnifrakturMaguntia&display=swap" />
   <!--
     feestje.html — interactieve uitnodiging, oud & nieuw 2026 (Kingdom Come-thema).
     Eén zelfstandig bestand, geen build, geen afhankelijkheden behalve Google Fonts.
@@ -27,8 +27,8 @@
     (rode koppen), spaarzame azuur- en okertinten, pentekeningen met een waterverflaagje.
     Alles staat op perkamentbladen; de dag/nacht-hemel is een ingelijste miniatuur op het titelblad.
     Verluchtingen: echte miniaturen uit handschriften (publiek domein, Wikimedia Commons) in feestje-img/.
-      - Grenze Gotisch  (titels: gotisch maar leesbaar)
-      - Alegreya / Alegreya SC (lopende tekst: kalligrafische romein)
+      - UnifrakturMaguntia (titels: textura, zoals op de KCD2-kaarten)
+      - IM Fell English / SC (lopende tekst: drukletter uit de 17e eeuw)
       - "Handgetekend": SVG-filters (#inky, #deckle) vervormen strakke lijnen en randen
         subtiel met ruis (feTurbulence + feDisplacementMap). Geen afbeeldingen nodig.
 
@@ -60,9 +60,9 @@
       --hill-near: #0b0c0c;
       --stars: 1;
 
-      --body: "Alegreya", Georgia, "Times New Roman", serif;
-      --sc: "Alegreya SC", "Alegreya", Georgia, serif;
-      --goth: "Grenze Gotisch", "Alegreya SC", Georgia, serif;
+      --body: "IM Fell English", Georgia, "Times New Roman", serif;
+      --sc: "IM Fell English SC", "IM Fell English", Georgia, serif;
+      --goth: "UnifrakturMaguntia", "IM Fell English SC", Georgia, serif;
 
       --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .5 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       --stain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900' preserveAspectRatio='none'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .15 1.4 0 0 0 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
@@ -74,12 +74,13 @@
     body {
       margin: 0;
       font-family: var(--body);
-      font-size: 19px;
-      line-height: 1.55;
+      font-size: 20px;
+      line-height: 1.5;
       color: var(--ink);
       background: #1b1510 var(--grain); background-size: 220px;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      font-synthesis-weight: none; /* deze letters hebben geen vet; liever geen nep-vet */
     }
     button { font: inherit; color: inherit; }
     a { color: var(--rubric); }
@@ -134,6 +135,13 @@
       color: var(--ink); letter-spacing: .005em;
     }
     h1 .r { color: var(--rubric); }
+    .motto { margin: -.2em 0 .7em; }
+    .motto span {
+      display: inline-block; padding: 6px 34px 4px; font-family: var(--goth); font-size: 1.45rem; color: var(--rubric);
+      background: var(--vellum-hi);
+      clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%);
+      box-shadow: inset 0 1.5px 0 var(--ink), inset 0 -1.5px 0 var(--ink);
+    }
     .lede { font-size: 1.18rem; max-width: 33em; margin: 0 auto; }
     @media (min-width: 920px) { .lede { margin: 0; } }
     .lede b { font-weight: 700; color: var(--rubric); }
@@ -280,7 +288,8 @@
     .hours .when { text-align: right; line-height: 1.1; }
     .hours .when b { display: block; font-family: var(--sc); font-weight: 700; font-size: 1.35rem; letter-spacing: .04em; color: var(--rubric); }
     .hours .when small { font-family: var(--sc); color: var(--ink-soft); font-size: .85rem; letter-spacing: .05em; }
-    .hours h3 { margin: 0; }
+    .hours h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
+    .hours .pi { width: 34px; height: 34px; object-fit: contain; margin: -6px 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
     .hours p { margin: .1em 0 0; }
     .hours li.now { background: linear-gradient(90deg, rgba(162,48,42,.12), transparent 80%); }
     .hours li.now h3::after { content: " · nu"; color: var(--rubric); }
@@ -327,7 +336,7 @@
     .facts { display: grid; grid-template-columns: 1fr; gap: 0; margin: 10px 0 24px; }
     @media (min-width: 700px) { .facts { grid-template-columns: 170px 1fr; } }
     .facts dt { font-family: var(--sc); font-weight: 700; letter-spacing: .06em; color: var(--rubric); padding-top: 12px; }
-    .facts dd { margin: 0; padding: 2px 0 12px; border-bottom: 1px solid rgba(42,31,22,.22); }
+    .facts dd { margin: 0; padding: 2px 0 12px; border-bottom: 1px solid rgba(42,31,22,.22); min-width: 0; } /* grid-cel mag smaller dan de kaart */
     @media (min-width: 700px) { .facts dd { padding-top: 12px; } }
     .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 
@@ -352,6 +361,9 @@
     @keyframes toast-out { to { opacity: 0; transform: translateX(-16px); } }
     .toast .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 1.25rem;
       background: radial-gradient(circle at 35% 30%, #6c5a3e, #2a2016); border: 1.5px solid #b98a2e; box-shadow: inset 0 0 0 2px #1a140d; }
+    .toast .ic.img { background: none; border: 0; box-shadow: none; }
+    .toast .ic img { width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+    .toast .dic { display: block; width: 44px; height: 44px; margin: 0 auto 2px; }
     .toast b { display: block; font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: .82rem; color: #e3b84f; text-transform: uppercase; }
     .toast span { font-size: 1.02rem; line-height: 1.25; }
     .toast.discover { grid-template-columns: 1fr; text-align: center; color: var(--ink);
@@ -402,6 +414,32 @@
     .dream p.on { opacity: 1; transform: none; }
     .dream small { position: absolute; z-index: 2; bottom: 22px; left: 0; right: 0; text-align: center; font-family: var(--sc); letter-spacing: .1em; font-size: .8rem; color: rgba(241,226,189,.5); }
 
+    /* ---------- de haas: gedragsindicator zoals in KCD 2 ---------- */
+    .hare-ind {
+      position: fixed; top: 12px; right: 12px; z-index: 55; width: 70px; height: 70px; padding: 6px; border: 0; cursor: pointer;
+      border-radius: 50%; background: radial-gradient(circle, rgba(14,11,8,.82) 0 55%, rgba(14,11,8,0) 71%);
+    }
+    .hare-ind img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .25s; }
+    .hare-ind.alert::before {
+      content: ""; position: absolute; inset: -14px; border-radius: 50%; z-index: -1;
+      background: repeating-conic-gradient(rgba(220,40,20,.9) 0 6deg, transparent 6deg 18deg);
+      -webkit-mask: radial-gradient(circle, transparent 30%, #000 32%, #000 52%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 32%, #000 52%, transparent 70%);
+      animation: burst .9s ease-out both;
+    }
+    @keyframes burst { from { transform: scale(.4) rotate(-20deg); opacity: 0; } 40% { opacity: 1; } to { transform: scale(1.05) rotate(0); opacity: .85; } }
+    .hare-ind.alert img { animation: hop .5s ease-out; }
+    @keyframes hop { 40% { transform: translateY(-6px) scale(1.08); } }
+    @media (max-width: 560px) { .hare-ind { width: 54px; height: 54px; top: 8px; right: 8px; } }
+
+    /* ---------- de kaart, naar de KCD2-kaarten ---------- */
+    .kaart { margin: 10px 0 6px; }
+    .kaart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; outline: 1.5px solid var(--ink); }
+    .kaart svg { width: 100%; min-width: 640px; height: auto; display: block; }
+    .kaart .place { cursor: pointer; }
+    .kaart .place:hover image, .kaart .place:focus-visible image { filter: drop-shadow(0 0 6px #fff3c4); }
+    .kaart .place:focus { outline: none; }
+    .kaart figcaption { font-style: italic; color: var(--ink-soft); font-size: .9rem; margin-top: 8px; }
+
     /* ---------- laadscherm-tips ---------- */
     .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
     .tip b { font-style: normal; font-family: var(--sc); color: var(--rubric); }
@@ -449,6 +487,7 @@
       <div>
         <p class="kicker">Kingdom Come · Oud &amp; Nieuw · Anno MMXXVI</p>
         <h1><span class="r">H</span>et Oudejaars&shy;gastmaal</h1>
+        <p class="motto"><span>Fortuna audentes iuvat!</span></p>
         <p class="lede"><b id="hosts-lede">Han en Nele van Kessel-Lo</b> openen op oudejaarsdag hun poort voor een avond vol
           verkleedpartijen, ridderspelen en riddersnacks, tot het nieuwe jaar is ingeluid. Bohemen, 1403, of daaromtrent.</p>
         <a class="hero-cta" href="#brief">Er is een brief voor u <span aria-hidden="true">↓</span></a>
@@ -477,13 +516,13 @@
           <circle r="150" fill="none" stroke="#2a1f16" stroke-width="1.6" filter="url(#inky)" />
           <g id="marks"></g>
           <path id="sleep-arc" fill="rgba(243,231,203,.32)" stroke="#e3b84f" stroke-width="2" stroke-dasharray="5 4" display="none" />
-          <g id="numerals" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="14" fill="#2a1f16" text-anchor="middle" dominant-baseline="central"></g>
+          <g id="numerals" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="14" fill="#2a1f16" text-anchor="middle" dominant-baseline="central"></g>
           <g id="pennant"></g>
           <g id="cartouche" transform="translate(0,66)">
             <rect x="-34" y="-14" width="68" height="28" rx="3" fill="#efe2c2" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
-            <text id="dial-time" y="1" text-anchor="middle" dominant-baseline="central" font-family="Alegreya, Georgia, serif" font-weight="500" font-size="19" fill="#2a1f16"></text>
+            <text id="dial-time" y="1" text-anchor="middle" dominant-baseline="central" font-family="IM Fell English, Georgia, serif" font-weight="500" font-size="19" fill="#2a1f16"></text>
           </g>
-          <text id="dial-note" y="98" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="13" fill="#efe2c2" style="paint-order:stroke" stroke="rgba(20,14,8,.75)" stroke-width="3"></text>
+          <text id="dial-note" y="98" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="13" fill="#efe2c2" style="paint-order:stroke" stroke="rgba(20,14,8,.75)" stroke-width="3"></text>
           <g id="moon-hand"></g>
           <g id="hand">
             <path d="M-3,24 L-4,-96 L0,-108 L4,-96 L3,24 Z" fill="#c4943c" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
@@ -562,9 +601,9 @@
                   <path id="wax-blob" fill="url(#g-wax)" />
                   <circle r="40" fill="none" stroke="#55100c" stroke-width="2.5" opacity=".7" />
                   <circle r="35" fill="none" stroke="#e0705f" stroke-width="1" opacity=".35" />
-                  <text y="2" text-anchor="middle" dominant-baseline="central" font-family="Grenze Gotisch, Georgia, serif" font-weight="800" font-size="34" fill="#64130f" stroke="#d9665a" stroke-opacity=".45" stroke-width=".8">H·N</text>
-                  <text y="-25" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="8" fill="#64130f" letter-spacing="1.5">KESSEL·LO</text>
-                  <text y="31" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="8.5" fill="#64130f" letter-spacing="1.5">MMXXVI</text>
+                  <text y="2" text-anchor="middle" dominant-baseline="central" font-family="UnifrakturMaguntia, Georgia, serif" font-weight="800" font-size="34" fill="#64130f" stroke="#d9665a" stroke-opacity=".45" stroke-width=".8">H·N</text>
+                  <text y="-25" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="8" fill="#64130f" letter-spacing="1.5">KESSEL·LO</text>
+                  <text y="31" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="8.5" fill="#64130f" letter-spacing="1.5">MMXXVI</text>
                 </g>
               </defs>
               <g class="half l" clip-path="url(#c-l)"><use href="#wax" /></g>
@@ -734,7 +773,11 @@
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
       <dl class="facts">
         <dt>Wanneer</dt><dd>Donderdag 31 december 2026, vanaf <b>16:00</b> tot ver na middernacht</dd>
-        <dt>Waar</dt><dd id="where">Kessel-Lo</dd>
+        <dt>Waar</dt><dd><span id="where">Kessel-Lo</span>
+          <figure class="kaart">
+            <div class="kaart-scroll"><svg id="kaart" viewBox="0 0 900 520" role="group" aria-label="Kaart van Kessel-Lo en omstreken, in de stijl van de KCD2-kaarten"></svg></div>
+            <figcaption>Niet op schaal, en ook niet helemaal op de juiste plek. Tik op een icoon, of veeg om de kaart te verschuiven.</figcaption>
+          </figure></dd>
         <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
         <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
         <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
@@ -749,12 +792,17 @@
     </section>
   </main>
 
+  <button class="hare-ind" id="hare" type="button" aria-label="Gedragsindicator: niemand let op u">
+    <img src="feestje-img/kcd/haas-zoekt.png" alt="" width="128" height="128" />
+  </button>
+
   <footer>
     <button class="greet" id="greet" type="button">„Geloofd zij Jezus Christus.”</button>
     <span class="reply" id="reply" aria-live="polite"></span>
     <p class="credits">Verluchtingen uit de <i>Très Riches Heures</i> (Musée Condé), de <i>Codex Manesse</i> (Universitätsbibliothek Heidelberg),
       de <i>Velislav-bijbel</i> (Národní knihovna, Praag) en het <i>Luttrell Psalter</i> (British Library): publiek domein, via
-      <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>.</p>
+      <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>. Iconen uit <i>Kingdom Come: Deliverance II</i> © Warhorse Studios,
+      via de <a href="https://kingdom-come-deliverance.fandom.com/">KCD-wiki</a>. Een fanuitnodiging, geen officieel product.</p>
   </footer>
 
   <script>
@@ -776,13 +824,13 @@
     partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
     // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
     program: [
-      [16,    'De poort gaat open', 'Welkomstmede, de kostuumkeuring en het ophangen van de wapenschilden.'],
-      [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf. Jonge schildknapen doen mee.'],
-      [18,    'Het gastmaal', 'De ketel gaat open, de kip gaat rond. Kinderen worden rond deze tijd opgehaald.'],
-      [20,    'Dobbelen om groschen', 'Zes stenen, één kans. Valsspelers belanden in de schandpaal.'],
-      [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz. Prijs: eeuwige roem, en misschien een worst.'],
-      [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.'],
-      [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Smoutebollen en oliebollen.'],
+      [16,    'De poort gaat open', 'Welkomstmede, de kostuumkeuring en het ophangen van de wapenschilden.', 'herberg'],
+      [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf, zoals op het toernooi van Kuttenberg. Jonge schildknapen doen mee.', 'arena'],
+      [18,    'Het gastmaal', 'De ketel gaat open, de kip gaat rond. Kinderen worden rond deze tijd opgehaald.', 'eten'],
+      [20,    'Dobbelen om groschen', 'Zes stenen, één kans, insignes toegestaan. Valsspelers belanden in de schandpaal.', 'dobbel'],
+      [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een worst.', 'lezen'],
+      [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.', 'brandewijn'],
+      [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Smoutebollen en oliebollen.', 'ster'],
     ],
   };
 
@@ -822,7 +870,11 @@
       if (key) { if (once.has(key)) return; once.add(key); }
       const el = document.createElement('div');
       el.className = 'toast ' + kind;
-      el.innerHTML = kind === 'discover' ? `<div><b>${label}</b><span>${text}</span></div>` : `<div class="ic" aria-hidden="true">${icon}</div><div><b>${label}</b><span>${text}</span></div>`;
+      const isImg = /^[a-z-]+$/.test(icon);
+      const ic = isImg ? `<img src="feestje-img/kcd/${icon}.png" alt="">` : icon;
+      el.innerHTML = kind === 'discover'
+        ? `<div>${isImg ? `<img class="dic" src="feestje-img/kcd/${icon}.png" alt="">` : ''}<b>${label}</b><span>${text}</span></div>`
+        : `<div class="ic${isImg ? ' img' : ''}" aria-hidden="true">${ic}</div><div><b>${label}</b><span>${text}</span></div>`;
       box.appendChild(el);
       while (box.children.length > 2) box.firstChild.remove();
       setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 450); }, ms);
@@ -939,22 +991,56 @@
     const defs = svgEl('defs', {}, svg);
     defs.innerHTML = '<linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9c6c0" stop-opacity="0"/><stop offset=".5" stop-color="#c9c6c0" stop-opacity=".18"/><stop offset="1" stop-color="#c9c6c0" stop-opacity="0"/></linearGradient>';
     svgEl('path', { d: ridge(150, 22, 260, 6, 11), fill: 'var(--hill-far)' }, svg);
-    // burcht op de middelste heuvel
+    // Trosky: de burcht op twee basaltrotsen (Baba en Panna), het decor van KCD 2
     const castle = svgEl('g', { fill: 'var(--hill-mid)' }, svg);
     castle.innerHTML = `
-      <path d="M1040,170 L1060,128 L1075,118 L1180,116 L1200,132 L1222,170 Z"/>
-      <rect x="1070" y="86" width="120" height="36"/>
-      <rect x="1078" y="58" width="26" height="40"/><polygon points="1074,60 1091,30 1108,60"/>
-      <rect x="1118" y="34" width="38" height="56"/><path d="M1118,34 h6 v-6 h6 v6 h7 v-6 h6 v6 h7 v-6 h6 v6 Z"/>
-      <rect x="1166" y="64" width="22" height="30"/><polygon points="1162,66 1177,42 1192,66"/>
-      <path d="M1070,86 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v4 h-120 Z"/>
-      <rect x="1136" y="10" width="2" height="20"/>`;
-    svgEl('path', { d: 'M1138,10 l16,5 l-16,5 Z', fill: '#7b201c' }, svg);
+      <path d="M1010,172 C1040,160 1058,140 1066,112 L1074,74 L1082,66 L1096,66 L1102,80 L1110,112 C1116,124 1124,128 1134,124
+               C1142,120 1146,108 1150,96 L1156,86 L1168,84 L1174,94 L1182,122 C1196,150 1220,164 1250,172 Z"/>
+      <rect x="1076" y="30" width="22" height="40"/><path d="M1076,30 h4 v-5 h5 v5 h4 v-5 h5 v5 h4 v-5 Z"/>
+      <rect x="1152" y="52" width="20" height="36"/><polygon points="1149,54 1162,30 1175,54"/>
+      <path d="M1100,104 L1150,94 L1150,112 L1104,122 Z"/>
+      <path d="M1100,104 h5 v-4 h5 v4 h5 v-4 h5 v4 h5 v-4 h5 v4 h5 v-4 h5 v4 h5 v-4 h5 v4 v4 h-50 Z"/>
+      <rect x="1161" y="12" width="2" height="20"/>`;
+    svgEl('path', { d: 'M1163,12 l16,5 l-16,5 Z', fill: '#7b201c' }, svg);
     const win = svgEl('g', { fill: '#e9b85a', opacity: 'var(--stars)' }, svg);
-    win.innerHTML = '<rect x="1088" y="70" width="4" height="8" rx="2"/><rect x="1134" y="48" width="5" height="9" rx="2.5"/><rect x="1134" y="68" width="5" height="9" rx="2.5"/><rect x="1175" y="74" width="4" height="7" rx="2"/>';
+    win.innerHTML = '<rect x="1084" y="40" width="5" height="9" rx="2.5"/><rect x="1084" y="56" width="5" height="8" rx="2.5"/><rect x="1159" y="62" width="4" height="8" rx="2"/><rect x="1122" y="106" width="4" height="6" rx="2"/>';
     svgEl('path', { d: ridge(186, 18, 210, 14, 23), fill: 'var(--hill-mid)' }, svg);
     svgEl('rect', { x: 0, y: 176, width: W, height: 40, fill: 'url(#mist)', opacity: .5 }, svg); // nevel
     svgEl('path', { d: ridge(222, 12, 180, 24, 37), fill: 'var(--hill-near)' }, svg);
+
+    // het haasje: hupt af en toe door het beeld. Vangen = stropen = misdaad.
+    const hare = svgEl('g', { class: 'poach', role: 'button', tabindex: 0, 'aria-label': 'Een haas', style: 'cursor:pointer', display: 'none' }, svg);
+    hare.innerHTML = `<rect x="-34" y="-50" width="72" height="62" fill="transparent"/>
+      <g fill="#6b5236" stroke="#2a1f16" stroke-width="1.4" stroke-linejoin="round">
+        <path d="M-14,0 C-20,-2 -22,-12 -14,-18 C-6,-24 8,-22 12,-14 C14,-10 13,-4 10,0 Z"/>
+        <path d="M8,-15 C10,-22 18,-24 22,-19 C25,-15 22,-10 16,-10 C13,-10 10,-12 8,-15 Z"/>
+        <path d="M15,-21 C13,-30 13,-38 17,-41 C19,-36 19,-28 18,-21 Z"/><path d="M18,-21 C19,-30 22,-36 25,-37 C25,-31 22,-25 20,-20 Z"/>
+        <path d="M-6,0 L-10,4 M6,0 L9,4" fill="none"/>
+      </g><circle cx="-18" cy="-12" r="3.5" fill="#efe6cf" stroke="#2a1f16" stroke-width="1"/><circle cx="19" cy="-16" r="1.2" fill="#2a1f16"/>`;
+    let running = false, raf = null;
+    function run() {
+      if (running || document.hidden) return;
+      running = true; hare.setAttribute('display', '');
+      const dir = Math.random() < .5 ? 1 : -1, x0 = dir > 0 ? -40 : W + 40, dist = W + 80, dur = 9000 + Math.random() * 3000, t0 = performance.now();
+      const step = now => {
+        const k = (now - t0) / dur;
+        if (k >= 1 || !running) { hare.setAttribute('display', 'none'); running = false; return; }
+        const x = x0 + dir * dist * k, hopPh = (k * 46) % 1, y = 246 - (hopPh < .6 ? Math.sin(hopPh / .6 * Math.PI) * 9 : 0);
+        hare.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${dir},1)`);
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+    function poach() {
+      if (!running) return;
+      running = false; cancelAnimationFrame(raf); hare.setAttribute('display', 'none');
+      Hare.set('report');
+      Toast('Je kreeg', '1 × Hazenvlees', { icon: 'hazenvlees' });
+      setTimeout(() => { Hare.set('confront', 4500); Toast('Misdaad: stroperij', 'Het wild is van de heer. Boete: één smoutebol, of een uur in de schandpaal.', { icon: 'gezocht', ms: 4800 }); }, 1500);
+    }
+    hare.addEventListener('click', poach);
+    hare.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); poach(); } });
+    if (!reduceMotion) { setTimeout(run, 3500); setInterval(run, 26000); }
   })();
 
   const rootStyle = document.documentElement.style;
@@ -1018,7 +1104,7 @@
       svgEl('line', { x1: 0, y1: 6, x2: 0, y2: -24, stroke: '#2a1f16', 'stroke-width': 2 }, grp);
       svgEl('path', { d: 'M0,-24 L30,-18 L22,-13 L30,-8 L0,-6 Z', fill: '#a2302a', stroke: '#2a1f16', 'stroke-width': 1 }, grp);
       const lbl = svgEl('g', { transform: `translate(${f(x)},${f(y)})` }, g);
-      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'Grenze Gotisch, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#a2302a' }, lbl);
+      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'UnifrakturMaguntia, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#a2302a' }, lbl);
       t.textContent = 'Feest!';
     })();
 
@@ -1228,10 +1314,10 @@
      ========================================================= */
   (function hours() {
     const ol = $('#hours');
-    for (const [h, title, desc] of CONFIG.program) {
+    for (const [h, title, desc, icon] of CONFIG.program) {
       const li = document.createElement('li');
       li.dataset.h = h;
-      li.innerHTML = `<div class="when"><b>${toRoman(Math.floor(h))}</b><small>${fmtH(h)}</small></div><div><h3>${title}</h3><p>${desc}</p></div>`;
+      li.innerHTML = `<div class="when"><b>${toRoman(Math.floor(h))}</b><small>${fmtH(h)}</small></div><div><h3>${icon ? `<img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">` : ''}${title}</h3><p>${desc}</p></div>`;
       ol.appendChild(li);
     }
   })();
@@ -1267,7 +1353,8 @@
     setOpen(store.get('feestje.zegel', false), false);
     seal.addEventListener('click', () => {
       setOpen(true, true);
-      Toast('Taak gestart', 'Overleef oudejaar.', { icon: '!' });
+      Hare.set('investigate', 3200);
+      Toast('Taak gestart', 'Overleef oudejaar.', { icon: 'taak' });
       decipher();
     });
     // Hendrik kon in het begin niet lezen: in de game zie je dan door elkaar gehusselde letters.
@@ -1287,7 +1374,7 @@
           n.textContent = out;
         });
         if (k < 1) requestAnimationFrame(step);
-        else Toast('Vaardigheid geleerd', 'Lezen. Godzijdank, de schrijver van Rataje heeft u les gegeven.', { icon: '✒', ms: 4600 });
+        else Toast('Vaardigheid geleerd', 'Lezen. Godzijdank, de schrijver van Rataje heeft u les gegeven.', { icon: 'lezen', ms: 4600 });
       };
       requestAnimationFrame(step);
     }
@@ -1370,7 +1457,7 @@
     if (withBanner) {
       const size = title.length > 26 ? 10 : title.length > 20 ? 12 : 14;
       out += `<g ${fil}><path d="M4,254 H196 L186,268 L196,282 H4 L14,268 Z" fill="#f1e3c2" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round"/></g>
-        <text x="100" y="269" text-anchor="middle" dominant-baseline="central" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="${size}" fill="#2a1f16">${title.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]))}</text>`;
+        <text x="100" y="269" text-anchor="middle" dominant-baseline="central" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="${size}" fill="#2a1f16">${title.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]))}</text>`;
     }
     return out;
   }
@@ -1390,7 +1477,7 @@
       b.addEventListener('click', () => {
         s.stand = id; update();
         const [ch, extra] = CHARISMA[id];
-        Toast('Uitrusting aangetrokken', `${name}: Charisma ${ch}${extra ? ' · ' + extra : ''}`, { icon: '♞' });
+        Toast('Uitrusting aangetrokken', `${name}: Charisma ${ch}${extra ? ' · ' + extra : ''}`, { icon: 'charisma' });
       });
       box.appendChild(b);
     }
@@ -1450,7 +1537,7 @@
     let rolls = 0;
     $('#dice').addEventListener('click', () => {
       roll();
-      if (++rolls === 5) Toast('Tip', 'U kunt blijven dobbelen, maar de Duivel wint altijd.', { icon: '⚄' });
+      if (++rolls === 5) Toast('Tip', 'U kunt blijven dobbelen, maar de Duivel wint altijd.', { icon: 'duivelsdobbel' });
     });
 
     // als afbeelding bewaren (deelbaar in de groepsapp)
@@ -1464,7 +1551,7 @@
         const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
         cv.getContext('2d').drawImage(img, 0, 0, W, H);
         const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
-        Toast('Je kreeg', '1 × Wapenschild (eigen ontwerp)', { icon: '⛨' });
+        Toast('Je kreeg', '1 × Wapenschild (eigen ontwerp)', { icon: 'schild' });
         const fname = 'wapen-' + (nameOr().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'gast') + '.png';
         const file = new File([blob], fname, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1557,7 +1644,7 @@
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(ang) * len, y - Math.sin(ang) * len); ctx.stroke();
         if (k >= 1) land();
       }
-      ctx.textAlign = 'center'; ctx.font = '700 24px "Grenze Gotisch", Georgia, serif';
+      ctx.textAlign = 'center'; ctx.font = '700 24px "UnifrakturMaguntia", Georgia, serif';
       pops = pops.filter(p => t - p.t < 900);
       for (const p of pops) {
         const k = (t - p.t) / 900;
@@ -1585,9 +1672,9 @@
         ctx.beginPath(); ctx.moveTo(-6 - pull * 34, 0); ctx.lineTo(4 - pull * 34, -6); ctx.lineTo(10 - pull * 34, 0); ctx.lineTo(4 - pull * 34, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
       }
       ctx.restore();
-      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = '700 20px "Alegreya SC", Georgia, serif';
+      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = '700 20px "IM Fell English SC", Georgia, serif';
       ctx.fillText(`Pijl ${Math.min(shots + 1, SHOTS)}/${SHOTS}   ·   ${score} punten`, 18, 32);
-      ctx.font = '700 15px "Alegreya SC", Georgia, serif'; ctx.fillStyle = '#a2302a';
+      ctx.font = '700 15px "IM Fell English SC", Georgia, serif'; ctx.fillStyle = '#a2302a';
       ctx.fillText(`Beste ronde: ${best}`, 18, 54);
     }
     function drawStuck(x, y) {
@@ -1607,8 +1694,8 @@
     }
     function finish() {
       if (score > best) { best = score; store.set('feestje.boog', best); }
-      if (score >= 28) Toast('U bent een niveau gestegen in', 'Boogschieten', { icon: '➶' });
-      else if (score === 0) Toast('Tip', 'Probeer eens op de schijf te mikken.', { icon: '?' });
+      if (score >= 28) Toast('U bent een niveau gestegen in', 'Boogschieten', { icon: 'boog' });
+      else if (score === 0) Toast('Tip', 'Probeer eens op de schijf te mikken.', { icon: 'boog' });
       const rank = score >= 50 ? 'Volmaakt. Zelfs de kapitein van Rataje buigt het hoofd.'
         : score >= 40 ? 'Meesterschutter. Dat is een extra worst waard.'
         : score >= 28 ? 'Degelijk. Goed genoeg voor de wacht van Talmberk.'
@@ -1619,12 +1706,12 @@
     }
     function start(t) {
       if (shots >= SHOTS || flying || drawing) return;
-      drawing = true; drawT0 = t;
+      drawing = true; drawT0 = t; Hare.set('combat');
       msg('Spannen… en <b>los</b> als het vizier op de roos hangt.');
     }
     function release(t) {
       if (!drawing) return;
-      drawing = false;
+      drawing = false; Hare.set('search', 1);
       if (t - drawT0 < 300) { msg('Te vlug! Houd vast om de boog te spannen.'); return; }
       const [ax, ay] = aim(t);
       const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 4;
@@ -1680,8 +1767,8 @@
       b.addEventListener('click', () => {
         const open = b.getAttribute('aria-pressed') !== 'true';
         b.setAttribute('aria-pressed', open);
-        if (open && name.startsWith('Heilands')) Toast('Spel opgeslagen', 'U bent lichtjes beschonken.', { icon: '⚱', key: 'save' });
-        if (open && name.startsWith('Mede')) Toast('Je kreeg', '1 × Mede · Zichtvermogen −1', { icon: '🍺', key: 'mede' });
+        if (open && name.startsWith('Heilands')) Toast('Spel opgeslagen', 'U bent lichtjes beschonken.', { icon: 'brandewijn', key: 'save' });
+        if (open && name.startsWith('Mede')) Toast('Je kreeg', '1 × Mede · Zichtvermogen −1', { icon: 'dronken', key: 'mede' });
       });
       box.appendChild(b);
     });
@@ -1700,7 +1787,7 @@
       $('#rsvp-text').textContent = 'Laat even weten of u komt, liefst ruim voor oudejaarsdag.';
     }
     $('#ics').addEventListener('click', () => {
-      Toast('Taak bijgewerkt', 'Sta om 16:00 voor de poort in Kessel-Lo.', { icon: '!' });
+      Toast('Taak bijgewerkt', 'Sta om 16:00 voor de poort in Kessel-Lo.', { icon: 'taak' });
       const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
       const esc = s => s.replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
       const lines = [
@@ -1724,10 +1811,10 @@
   })();
 
   (function discoveries() {
-    const map = { praktisch: 'Kessel-Lo', toernooi: 'Het toernooiveld', gastmaal: 'De herberg', getijden: 'Het getijdenboek' };
+    const map = { praktisch: ['Kessel-Lo', 'dorp'], toernooi: ['Het toernooiveld', 'arena'], gastmaal: ['De herberg', 'herberg'], getijden: ['Het getijdenboek', 'klooster'] };
     const io = new IntersectionObserver(es => {
       for (const e of es) if (e.isIntersecting) {
-        Toast('U ontdekte', map[e.target.id], { kind: 'discover', key: 'd-' + e.target.id, ms: 3000 });
+        Toast('U ontdekte', map[e.target.id][0], { kind: 'discover', icon: map[e.target.id][1], key: 'd-' + e.target.id, ms: 3000 });
         io.unobserve(e.target);
       }
     }, { threshold: .35 });
@@ -1758,7 +1845,7 @@
     $('#sl-plus').addEventListener('click', () => {
       if (h >= 12) return;
       h++; fx();
-      if (h === 12) Toast('Tip', 'U kunt hooguit 12 uur aan één stuk slapen. Ook op oudejaar.', { icon: '☾' });
+      if (h === 12) Toast('Tip', 'U kunt hooguit 12 uur aan één stuk slapen. Ook op oudejaar.', { icon: 'slaap' });
     });
     $('#sl-go').addEventListener('click', () => {
       if (busy) return;
@@ -1767,12 +1854,12 @@
       const wake = () => {
         if (!slept || !dreamt) return;
         busy = false; $('#sl-go').disabled = false; open(false); toggle.focus({ preventScroll: true });
-        Toast('U hebt ' + h + ' uur geslapen', 'Energie +' + Math.min(100 - ENERGY, h * 9) + ' · Voeding −' + Math.min(FOOD, h * 5), { icon: '☾' });
+        Toast('U hebt ' + h + ' uur geslapen', 'Energie +' + Math.min(100 - ENERGY, h * 9) + ' · Voeding −' + Math.min(FOOD, h * 5), { icon: 'slaap' });
         const days = Math.ceil((CONFIG.start - now()) / 864e5);
         const msg = days > 1 ? `U droomde van het feest. Nog ${days} dagen, dan is het echt.`
           : days === 1 ? 'U droomde van het feest. Morgen is het echt.'
           : 'U droomde van het feest. Wakker worden: het is echt!';
-        setTimeout(() => Toast('Het was maar een droom', msg, { icon: '✶', ms: 4600 }), 1200);
+        setTimeout(() => Toast('Het was maar een droom', msg, { icon: 'ster', ms: 4600 }), 1200);
       };
       Clock.fastForward(h, () => { slept = true; wake(); });
       dream(h, () => { dreamt = true; wake(); });
@@ -1827,6 +1914,82 @@
     setInterval(() => { if (!panel.hidden && !busy) fx(); }, 30000);
   })();
 
+  /* ---------- de kaart van Kessel-Lo, naar de KCD2-kaarten ---------- */
+  (function kaart() {
+    const svg = $('#kaart'), rnd = seeded(1866);
+    const g = (attrs, html) => { const el = svgEl('g', attrs, svg); if (html) el.innerHTML = html; return el; };
+    g({}, `<defs><marker id="pijl" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2a1f16"/></marker></defs>
+      <rect width="900" height="520" fill="#d9cf9a"/>
+      <rect width="900" height="520" fill="#bfc28a" opacity=".55"/>
+      <path d="M318,0 C300,60 340,110 318,170 C296,230 330,280 304,350 C286,400 310,460 296,520" fill="none" stroke="#5f8aa6" stroke-width="9" stroke-linecap="round"/>
+      <path d="M40,250 C160,230 260,240 380,215 C470,196 560,214 660,205 C740,198 800,205 830,205" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
+      <path d="M380,215 C420,280 450,340 470,410" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
+      <path d="M300,330 C280,380 262,410 250,440" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
+      <text x="326" y="300" font-family="IM Fell English, serif" font-style="italic" font-size="16" fill="#3d5f78" transform="rotate(80 326 300)">Dijle</text>`);
+    // bosjes: boompjes zoals op de kaart in de game
+    let trees = '';
+    const forest = (cx, cy, rx, ry, n) => { for (let i = 0; i < n; i++) {
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()), x = (cx + Math.cos(a) * rx * r).toFixed(1), y = (cy + Math.sin(a) * ry * r).toFixed(1), z = (7 + rnd() * 5).toFixed(1);
+      trees += rnd() < .5
+        ? `<path d="M${x},${y} l${-z * .6},${z * 1.3} h${z * 1.2} Z" fill="#5d7a45"/>`
+        : `<circle cx="${x}" cy="${(+y + z * .5).toFixed(1)}" r="${(z * .7).toFixed(1)}" fill="#6f8b4f"/>`;
+    } };
+    forest(700, 360, 120, 60, 70); forest(130, 130, 90, 45, 40); forest(590, 470, 110, 35, 40); forest(820, 440, 60, 55, 26); forest(130, 480, 90, 30, 26);
+    g({ stroke: '#2a1f16', 'stroke-width': 1 }, trees);
+    // titelcartouche met rode initiaal, zoals "Trosky" op de kaart
+    g({}, `<rect x="24" y="20" width="244" height="64" rx="4" fill="#efe6cf" stroke="#2a1f16" stroke-width="1.5"/>
+      <text x="40" y="70" font-family="UnifrakturMaguntia, serif" font-size="48" fill="#a2302a">K</text>
+      <text x="74" y="68" font-family="UnifrakturMaguntia, serif" font-size="38" fill="#2a1f16">essel-Lo</text>`);
+    // windroos
+    g({ transform: 'translate(840,470)' }, `<circle r="30" fill="#efe6cf" stroke="#2a1f16"/><path d="M0,-28 L6,0 L0,28 L-6,0 Z" fill="#a2302a" stroke="#2a1f16"/><path d="M-28,0 L0,6 L28,0 L0,-6 Z" fill="#2a1f16" opacity=".75"/><text y="-34" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="14">N</text>`);
+    g({}, `<path d="M772,205 L808,205" stroke="#2a1f16" stroke-width="2.5" marker-end="url(#pijl)"/>`);
+    const PLACES = [
+      [520, 205, 'herberg', 'Het Oudejaarsgastmaal', 'Hoofdtaak. Vanaf 16:00 op 31 december. Het precieze adres volgt per bode.', true],
+      [230, 232, 'stad', 'Leuven', 'Een stad met meer studenten dan Kuttenberg zilver had. En een stadhuis waar Hans Capon jaloers op zou zijn.'],
+      [380, 150, 'reizen', 'Station', 'Snel reizen mogelijk. Kans op struikrovers: laag. Kans op vertraging: aanzienlijk.'],
+      [230, 430, 'kasteel', 'Kasteel van Arenberg', 'Een echt kasteel. Heer Otto von Bergow woont er niet. Studenten wel.'],
+      [470, 412, 'klooster', 'Abdij van Park', 'Monniken, vijvers en een stilte waar Hendrik nooit aan went.'],
+      [690, 318, 'jager', 'Provinciedomein', 'Hier hupt het haasje. Niet stropen: het wild is van de heer.'],
+      [848, 205, 'kasteel', 'Trosky', 'Trosky en Kuttenberg: ruim 900 km oostwaarts. Een paard wordt aanbevolen. Pebbles is niet beschikbaar.'],
+    ];
+    for (const [x, y, icon, name, text, main] of PLACES) {
+      const pl = g({ class: 'place', role: 'button', tabindex: 0, 'aria-label': name + ': ' + text, transform: `translate(${x},${y})` });
+      pl.innerHTML = `${main ? '<circle r="40" fill="#a2302a" opacity=".14"/><circle r="40" fill="none" stroke="#a2302a" stroke-width="2" stroke-dasharray="4 4"/>' : ''}
+        <image href="feestje-img/kcd/${icon}.png" x="-24" y="-30" width="48" height="48"/>
+        ${main ? '<image href="feestje-img/kcd/taak.png" x="14" y="-50" width="30" height="30"/>' : ''}
+        <text y="38" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="18" fill="#2a1f16" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`;
+      const go = () => Toast(name, text, { icon, ms: 4400 });
+      pl.addEventListener('click', go);
+      pl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    }
+  })();
+
+  /* ---------- de haas (gedragsindicator) ---------- */
+  const Hare = (() => {
+    const btn = $('#hare'), img = btn.querySelector('img');
+    const STATES = {
+      search:      ['haas-zoekt', 'Niemand let op u. Zolang u zich gedraagt, bent u veilig.'],
+      investigate: ['haas-onderzoekt', 'Iemand bekijkt u aandachtig.'],
+      report:      ['haas-meldt', 'Een getuige rent naar de wacht!'],
+      confront:    ['haas-confronteert', 'Halt! U bent betrapt.'],
+      combat:      ['haas-gevecht', 'Gevecht! Vechten of vluchten.'],
+    };
+    let cur = 'search', t = null;
+    function set(state, hold = 0) {
+      clearTimeout(t);
+      const [file, text] = STATES[state];
+      if (state !== cur) {
+        img.src = `feestje-img/kcd/${file}.png`;
+        btn.classList.remove('alert'); void btn.offsetWidth;
+        if (state === 'report' || state === 'confront') btn.classList.add('alert');
+      }
+      cur = state; btn.setAttribute('aria-label', 'Gedragsindicator: ' + text);
+      if (hold) t = setTimeout(() => set('search'), hold);
+    }
+    btn.addEventListener('click', () => Toast('Gedragsindicator', STATES[cur][1], { icon: STATES[cur][0] }));
+    return { set };
+  })();
+
   /* ---------- laadscherm-tips, zoals in de game ---------- */
   (function tips() {
     const TIPS = [
@@ -1841,6 +2004,14 @@
       'Een overtuigend gesprek begint met goede kleren en een glimlach. Een zwaard helpt ook.',
       'Wie na middernacht nog door wil feesten, krijgt de status ‘Kater’. Duur: één werkdag.',
       'Geloofd zij Jezus Christus! Antwoord: in eeuwigheid, amen. Oefen het alvast.',
+      'Fortuna audentes iuvat. Wie verkleed komt, krijgt de eerste worst.',
+      'Hans Capon heeft beloofd zich te gedragen. Niemand gelooft het.',
+      'Trosky staat op twee rotsen. Ons feest gewoon op de begane grond.',
+      'Ziet u een haas? Niet stropen. De jachtopziener kijkt mee, en de haas rechtsboven ook.',
+      'Pebbles komt niet. Pebbles is een paard, en paarden mogen niet binnen.',
+      'In Kuttenberg zat het zilver in de grond. In Kessel-Lo zit het in de spaarpot voor de smoutebollen.',
+      'Een dobbelinsigne mag u inzetten. Een verzwaarde dobbelsteen niet.',
+      'Mutt is welkom. Andere honden ook, als ze gehoorzamen.',
     ];
     const el = $('#tip');
     let i = Math.floor(Math.random() * TIPS.length);
