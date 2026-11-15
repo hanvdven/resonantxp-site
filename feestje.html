@@ -14,7 +14,7 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="nl_NL" />
-  <meta name="theme-color" content="#0b0d14" />
+  <meta name="theme-color" content="#1b1510" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,7 +25,8 @@
 
     STIJL (v2, richting KCD): codex/handschrift. Perkament, ijzergalinkt, rubricering
     (rode koppen), spaarzame azuur- en okertinten, pentekeningen met een waterverflaagje.
-    De opening is donker en filmisch; de inhoud staat op losse perkamentbladen.
+    Alles staat op perkamentbladen; de dag/nacht-hemel is een ingelijste miniatuur op het titelblad.
+    Verluchtingen: echte miniaturen uit handschriften (publiek domein, Wikimedia Commons) in feestje-img/.
       - Grenze Gotisch  (titels: gotisch maar leesbaar)
       - Alegreya / Alegreya SC (lopende tekst: kalligrafische romein)
       - "Handgetekend": SVG-filters (#inky, #deckle) vervormen strakke lijnen en randen
@@ -76,7 +77,7 @@
       font-size: 19px;
       line-height: 1.55;
       color: var(--ink);
-      background: #0b0c0c;
+      background: #1b1510 var(--grain); background-size: 220px;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
@@ -86,74 +87,86 @@
     :focus-visible { outline: 3px solid var(--ochre); outline-offset: 3px; }
     .defs { position: absolute; width: 0; height: 0; }
 
-    /* ---------- hemel ---------- */
-    .sky { position: fixed; inset: 0; z-index: -3; background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-top) 22%, var(--sky-bot) 100%); }
-    .stars { position: fixed; inset: 0; z-index: -2; width: 100%; height: 100%; opacity: var(--stars); pointer-events: none; }
-    .stars .tw { animation: twinkle 4s ease-in-out infinite; }
+    /* ---------- de miniatuur: de hemel boven Kessel-Lo, nu ---------- */
+    .miniature-wrap { margin: 34px 0 0; }
+    .miniature {
+      position: relative; height: clamp(150px, 24vw, 280px); overflow: hidden;
+      border: 2px solid var(--ink);
+      box-shadow: 0 0 0 5px var(--vellum), 0 0 0 7px var(--azure), 0 0 0 10px var(--vellum), 0 0 0 11.5px var(--rubric);
+      margin: 12px;
+    }
+    .miniature .sky { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-top) 15%, var(--sky-bot) 100%); }
+    .miniature .stars { position: absolute; inset: 0; width: 100%; height: 100%; opacity: var(--stars); }
+    .miniature .stars .tw { animation: twinkle 4s ease-in-out infinite; }
     @keyframes twinkle { 50% { opacity: .2; } }
+    .miniature .landscape { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; }
+    .miniature::after { /* geschilderd op perkament: korrel en vlekken over de verf */
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: var(--stain), var(--grain); background-size: 100% 100%, 220px 220px; mix-blend-mode: multiply; opacity: .55;
+    }
+    .miniature-wrap figcaption { text-align: center; font-style: italic; color: var(--ink-soft); font-size: .92rem; margin-top: 14px; }
 
-    /* ---------- hero: donker, filmisch ---------- */
-    .hero {
-      position: relative; min-height: 100svh;
-      display: grid; place-items: center;
-      padding: 40px 16px 200px; color: var(--on-dark); overflow: hidden;
-    }
-    .hero::after { /* vignet */
-      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
-      background: radial-gradient(ellipse at 50% 40%, transparent 50%, rgba(0,0,0,.5) 100%);
-    }
-    .hero::before { /* filmkorrel */
-      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
-      background: var(--film); background-size: 200px 200px; opacity: .14; mix-blend-mode: overlay;
-    }
+    /* ---------- verluchtingen (afbeeldingen uit handschriften) ---------- */
+    .minia { margin: 0; }
+    .minia .fr { background: #d8c08e; padding: 5px; border: 1.5px solid var(--ink); box-shadow: 2px 3px 0 rgba(42,31,22,.3); }
+    .minia img { display: block; width: 100%; height: auto; border: 1px solid var(--ink); }
+    .minia figcaption { font-size: .86rem; font-style: italic; color: var(--ink-soft); margin-top: 7px; line-height: 1.35; }
+    .minia figcaption cite { font-style: normal; font-family: var(--sc); }
+    .minia.right { float: right; width: min(290px, 40%); margin: 6px 0 14px 26px; }
+    .minia.wide { margin: 4px 0 28px; }
+    .minia.side { max-width: 300px; margin-top: 22px; }
+    @media (max-width: 640px) { .minia.right { float: none; width: auto; max-width: 320px; margin: 6px auto 22px; } }
+
+    /* ---------- opening: het titelblad ---------- */
+    .hero { padding: 28px 16px 0; }
+    .panel.hero-page { max-width: 1180px; }
     .hero-inner {
-      position: relative; z-index: 3; width: 100%; max-width: 1120px;
+      position: relative; width: 100%;
       display: grid; gap: 30px; align-items: center; grid-template-columns: 1fr; text-align: center;
     }
     @media (min-width: 920px) { .hero-inner { grid-template-columns: 1.05fr 1fr; text-align: left; gap: 56px; } }
-    .kicker { font-family: var(--sc); letter-spacing: .14em; font-size: .9rem; margin: 0; color: #d9b46a; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+    .kicker { font-family: var(--sc); letter-spacing: .14em; font-size: .9rem; margin: 0; color: var(--rubric); }
     h1 {
       font-family: var(--goth); font-weight: 800;
       font-size: clamp(3rem, 9vw, 6rem); line-height: .92; margin: .15em 0 .25em;
-      color: var(--on-dark); letter-spacing: .005em;
-      text-shadow: 0 3px 0 rgba(0,0,0,.55), 0 0 40px rgba(0,0,0,.6);
+      color: var(--ink); letter-spacing: .005em;
     }
-    h1 .r { color: #d4574c; }
-    .lede { font-size: 1.18rem; max-width: 33em; margin: 0 auto; text-shadow: 0 1px 4px rgba(0,0,0,.9); }
+    h1 .r { color: var(--rubric); }
+    .lede { font-size: 1.18rem; max-width: 33em; margin: 0 auto; }
     @media (min-width: 920px) { .lede { margin: 0; } }
-    .lede b { font-weight: 500; color: #f6e9c8; }
+    .lede b { font-weight: 700; color: var(--rubric); }
     .hero-cta {
       display: inline-flex; align-items: center; gap: 10px; margin-top: 24px;
-      font-family: var(--sc); letter-spacing: .08em; font-size: 1rem; color: var(--on-dark); text-decoration: none;
-      border-top: 1px solid rgba(217,180,106,.6); border-bottom: 1px solid rgba(217,180,106,.6); padding: 8px 6px;
+      font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: 1rem; color: var(--ink); text-decoration: none;
+      border-top: 1px solid var(--rubric); border-bottom: 1px solid var(--rubric); padding: 8px 6px;
     }
-    .hero-cta:hover { color: #fff; border-color: #d9b46a; }
-    .landscape { position: absolute; left: 0; bottom: 0; width: 100%; height: 260px; z-index: 1; }
+    .hero-cta:hover { color: var(--rubric); }
 
     /* ---------- de volvelle (klok) ---------- */
     .clock-wrap { display: grid; justify-items: center; gap: 14px; }
-    .orloj { width: min(440px, 78vw); height: auto; display: block; overflow: visible; filter: drop-shadow(0 22px 34px rgba(0,0,0,.7)); }
+    .orloj { width: min(440px, 78vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 8px 10px rgba(60,30,10,.3)); }
     .orloj .handle { cursor: grab; touch-action: none; }
     .orloj.dragging .handle { cursor: grabbing; }
     .orloj text { user-select: none; -webkit-user-select: none; }
-    .clock-cap { font-size: .92rem; text-align: center; opacity: .9; text-shadow: 0 1px 3px rgba(0,0,0,.9); margin: 0; min-height: 1.4em; max-width: 30em; }
+    @media (max-width: 560px) { #pennant text { display: none; } }
+    .clock-cap { font-size: .92rem; text-align: center; color: var(--ink-soft); margin: 0; min-height: 1.4em; max-width: 30em; }
     .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-    .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(217,180,106,.55); border-bottom: 1px solid rgba(217,180,106,.55); }
-    .cd-num { font-size: 2.4rem; line-height: 1; color: var(--on-dark); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
+    .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
+    .cd-num { font-size: 2.4rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
     .cd-num.roman { font-family: var(--sc); font-size: 1.6rem; padding: 6px 0 4px; }
-    .cd-lab { font-family: var(--sc); font-size: .8rem; letter-spacing: .12em; color: #d9b46a; }
-    .cd-label { margin: 0; text-align: center; font-size: 1.05rem; text-shadow: 0 1px 4px rgba(0,0,0,.9); }
-    .cd-label strong { font-family: var(--sc); font-weight: 400; color: #f6e9c8; letter-spacing: .04em; }
-    .cd-msg { font-family: var(--goth); font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; color: var(--on-dark); text-align: center; margin: 0 0 6px; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+    .cd-lab { font-family: var(--sc); font-weight: 700; font-size: .8rem; letter-spacing: .12em; color: var(--rubric); }
+    .cd-label { margin: 0; text-align: center; font-size: 1.05rem; }
+    .cd-label strong { font-family: var(--sc); font-weight: 700; color: var(--rubric); letter-spacing: .04em; }
+    .cd-msg { font-family: var(--goth); font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; color: var(--rubric); text-align: center; margin: 0 0 6px; }
     .roman-toggle {
       background: none; border: 0; padding: 4px 8px; cursor: pointer;
-      font-family: var(--sc); font-size: .85rem; letter-spacing: .06em; color: var(--on-dark); opacity: .7;
+      font-family: var(--sc); font-size: .85rem; letter-spacing: .06em; color: var(--ink); opacity: .75;
       text-decoration: underline dotted; text-underline-offset: 4px;
     }
     .roman-toggle:hover { opacity: 1; }
 
     /* ---------- perkamentbladen ---------- */
-    main { padding: 24px 16px 40px; background: linear-gradient(var(--hill-near) 0, #0c0b09 700px); }
+    main { padding: 0 16px 40px; }
     .panel {
       position: relative; isolation: isolate;
       max-width: 1000px; margin: 0 auto 72px;
@@ -316,7 +329,9 @@
     @media (min-width: 700px) { .facts dd { padding-top: 12px; } }
     .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 
-    footer { text-align: center; color: var(--on-dark); background: #0c0b09; padding: 10px 16px 70px; }
+    footer { text-align: center; color: var(--on-dark); padding: 10px 16px 70px; }
+    .credits { font-size: .82rem; color: rgba(239,226,196,.6); margin: 28px auto 0; max-width: 46em; }
+    .credits a { color: inherit; }
     .greet { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; color: var(--on-dark); padding: 6px; }
     .reply { display: block; font-family: var(--goth); font-weight: 600; font-size: 1.8rem; color: #d9b46a; min-height: 1.5em; }
 
@@ -355,11 +370,9 @@
     </defs>
   </svg>
 
-  <div class="sky" aria-hidden="true"></div>
-  <svg class="stars" id="stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
-
   <!-- ===================== HERO ===================== -->
   <header class="hero">
+   <div class="panel hero-page">
     <div class="hero-inner">
       <div>
         <p class="kicker">Kingdom Come · Oud &amp; Nieuw · Anno MMXXVI</p>
@@ -424,7 +437,15 @@
         <button class="roman-toggle" id="roman" type="button" aria-pressed="false">Romeinse cijfers</button>
       </div>
     </div>
-    <svg class="landscape" id="landscape" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+    <figure class="miniature-wrap">
+      <div class="miniature" aria-hidden="true">
+        <div class="sky"></div>
+        <svg class="stars" id="stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"></svg>
+        <svg class="landscape" id="landscape" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice"></svg>
+      </div>
+      <figcaption>De hemel boven Kessel-Lo, op dit eigenste ogenblik.</figcaption>
+    </figure>
+   </div>
   </header>
 
   <main>
@@ -465,6 +486,7 @@
       </div>
       <div class="letter-body" id="proc">
         <div class="proc">
+          <figure class="minia right"><div class="fr"><img src="feestje-img/janvier.jpg" width="640" height="990" alt="Middeleeuwse miniatuur: een hertog aan een feestmaal met gasten, bedienden en een hondje; bovenin een halve hemelschijf met sterrenbeelden." loading="lazy" decoding="async" /></div><figcaption>Nieuwjaar bij de hertog van Berry: geschenken, een feestdis en een toernooi op het wandtapijt. <cite>Très Riches Heures</cite>, ca. 1412–1416.</figcaption></figure>
           <p>Wij, Han en Nele van Kessel-Lo, groeten allen die dit lezen. Het jaar onzes Heren tweeduizend zesentwintig
             loopt ten einde, en dat zal niet ongemerkt gebeuren. Op oudejaarsdag openen wij onze poort voor een gastmaal
             in de geest van het koninkrijk Bohemen, anno 1403: met worst en mede, met zwaard en boog, en met dobbelstenen
@@ -489,18 +511,6 @@
           <p class="eyebrow">Verkleden verplicht · fantasie toegestaan</p>
           <h2 id="stand-h">Kies uw stand</h2>
         </div>
-        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
-          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
-            <path d="M60,6 C52,14 50,20 58,24 C54,16 62,12 60,6 Z" fill="#a2302a" />
-            <path d="M28,34 Q28,20 60,18 Q92,20 92,34 L95,92 Q60,110 25,92 Z" fill="#b8bcb6" />
-            <path d="M28,34 Q60,26 92,34" fill="none" />
-            <rect x="56" y="18" width="8" height="84" fill="#c4943c" />
-            <rect x="27" y="58" width="66" height="7" fill="#c4943c" />
-            <rect x="32" y="45" width="22" height="6" fill="#2a1f16" /><rect x="66" y="45" width="22" height="6" fill="#2a1f16" />
-            <g fill="#2a1f16" stroke="none"><circle cx="72" cy="74" r="1.8" /><circle cx="80" cy="74" r="1.8" /><circle cx="72" cy="81" r="1.8" /><circle cx="80" cy="81" r="1.8" /><circle cx="76" cy="88" r="1.8" /></g>
-            <path d="M34,40 L36,90" fill="none" stroke-width="1" opacity=".5" />
-          </g>
-        </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
       <div class="stand-grid">
@@ -509,6 +519,7 @@
             Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe.</p>
           <div class="stands" id="stands" role="group" aria-label="Stand"></div>
           <p class="dracht" id="dracht" aria-live="polite"></p>
+          <figure class="minia side"><div class="fr"><img src="feestje-img/manesse-wolfram.jpg" width="560" height="850" alt="Middeleeuwse miniatuur: een ridder met helm, wapenrok en schild in dezelfde kleuren, met zijn paard en een schildknaap." loading="lazy" decoding="async" /></div><figcaption>Wolfram von Eschenbach in vol ornaat: helm, wapenrok, schild en paard in dezelfde kleuren. Zo doet u het. <cite>Codex Manesse</cite>, ca. 1300–1340.</figcaption></figure>
         </div>
         <div class="herald">
           <svg class="shield-big" id="shield" viewBox="0 0 200 292" role="img" aria-label="Uw wapenschild"></svg>
@@ -567,21 +578,9 @@
           <p class="eyebrow">Ridderspelen · voor jong en oud</p>
           <h2 id="toernooi-h">Het toernooi</h2>
         </div>
-        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
-          <g filter="url(#inky)" stroke="#2a1f16" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M30,108 C92,100 108,48 98,12" fill="none" stroke="#6b4a2a" stroke-width="6" />
-            <path d="M30,108 C92,100 108,48 98,12" fill="none" stroke-width="1.4" />
-            <path d="M30,108 L98,12" fill="none" stroke-width="1" />
-            <path d="M14,20 L100,100" fill="none" stroke-width="2.4" />
-            <path d="M100,100 l-12,-2 l10,-10 Z" fill="#b8bcb6" stroke-width="1.6" />
-            <path d="M14,20 l4,12 l6,-6 Z M14,20 l12,4 l-6,6 Z" fill="#a2302a" stroke-width="1.4" />
-            <path d="M20,64 L76,8" fill="none" stroke-width="2.4" />
-            <path d="M76,8 l-1,11 l-9,-9 Z" fill="#b8bcb6" stroke-width="1.6" />
-            <path d="M20,64 l11,-1 l-3,8 Z M20,64 l1,-11 l8,3 Z" fill="#3b5a87" stroke-width="1.4" />
-          </g>
-        </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <figure class="minia wide"><div class="fr"><img src="feestje-img/velislav-ruiters.jpg" width="960" height="520" alt="Middeleeuwse pentekening met waterverf: twee groepen geharnaste ruiters stormen met zwaarden op elkaar af." loading="lazy" decoding="async" /></div><figcaption>Boheemse ruiters in het gevecht, getekend in Praag rond 1340. <cite>Velislav-bijbel</cite>, Nationale Bibliotheek van Tsjechië.</figcaption></figure>
       <div class="tourney">
         <div>
           <p>Op het erf wordt om eer gestreden, bij het laatste daglicht. Geen echte zwaarden en geen echte paarden, maar wel echte roem.</p>
@@ -591,6 +590,7 @@
             <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade.</li>
             <li><span class="pilcrow" aria-hidden="true">¶</span><b>Kennis van het rijk.</b> Wie weet het meest over Bohemen, bier en boerenwijsheid?</li>
           </ul>
+          <figure class="minia side"><div class="fr"><img src="feestje-img/luttrell-boogschutters.jpg" width="720" height="489" alt="Middeleeuwse miniatuur: boogschutters in kleurige kappen schieten op een schietschijf." loading="lazy" decoding="async" /></div><figcaption>Oefenen op de schijf, zoals elke zondag verplicht was. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
         </div>
         <div class="range">
           <canvas id="boog" width="640" height="360" tabindex="0"
@@ -610,20 +610,9 @@
           <p class="eyebrow">Riddersnacks · een voorproefje</p>
           <h2 id="gastmaal-h">De dis</h2>
         </div>
-        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
-          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
-            <path d="M44,22 q-6,-8 0,-14 M60,24 q6,-9 0,-18 M76,22 q-6,-8 0,-14" fill="none" stroke-width="1.6" opacity=".7" />
-            <path d="M30,44 Q30,26 60,26 Q90,26 90,44" fill="none" stroke-width="2.4" />
-            <ellipse cx="60" cy="46" rx="38" ry="7" fill="#7a5a3a" />
-            <path d="M22,46 Q22,92 60,94 Q98,92 98,46" fill="#4a4440" />
-            <path d="M30,58 Q60,66 90,58" fill="none" stroke="#8a827a" stroke-width="1.4" />
-            <path d="M34,90 L26,106 M86,90 L94,106 M60,94 V106" />
-            <path d="M40,108 q6,-16 12,-4 q4,-12 10,-2 q6,-14 12,0 q4,-8 8,6 Z" fill="#c4943c" stroke-width="1.6" />
-            <path d="M48,108 q4,-10 8,-2 q4,-8 8,0 q4,-6 6,2 Z" fill="#a2302a" stroke-width="1.2" />
-          </g>
-        </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <figure class="minia wide"><div class="fr"><img src="feestje-img/luttrell-maaltijd.jpg" width="960" height="549" alt="Middeleeuwse miniatuur: een heer en zijn gezelschap aan een lange gedekte tafel, met bedienden die eten aandragen." loading="lazy" decoding="async" /></div><figcaption>Sir Geoffrey Luttrell aan tafel, met familie, monniken en een knielende bediende. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
       <p>De herbergier houdt de kaart nog geheim, maar uit de keuken lekte het volgende. Draai een kaart om.</p>
       <div class="menu" id="menu"></div>
       <p class="muted" style="margin-top:22px">Brengt u iets mee voor de dis? Graag! Meld het even bij <span class="hosts-or">Han of Nele</span>,
@@ -671,6 +660,9 @@
   <footer>
     <button class="greet" id="greet" type="button">„Geloofd zij Jezus Christus.”</button>
     <span class="reply" id="reply" aria-live="polite"></span>
+    <p class="credits">Verluchtingen uit de <i>Très Riches Heures</i> (Musée Condé), de <i>Codex Manesse</i> (Universitätsbibliothek Heidelberg),
+      de <i>Velislav-bijbel</i> (Národní knihovna, Praag) en het <i>Luttrell Psalter</i> (British Library): publiek domein, via
+      <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>.</p>
   </footer>
 
   <script>
@@ -763,9 +755,9 @@
   const localHours = d => d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
   const fmtH = h => { h = ((h % 24) + 24) % 24; const m = Math.round(h * 60) % 1440; return pad(Math.floor(m / 60)) + ':' + pad(m % 60); };
 
-  function sunTimes(day) {
+  function sunTimes(day) { // per minuut zoeken waar de zon door de horizon gaat (-0,833° = met lichtbreking)
     let rise = null, set = null, prev = sunElevation(atHours(day, 0));
-    for (let m = 2; m <= 1440; m += 2) {
+    for (let m = 1; m <= 1440; m++) {
       const el = sunElevation(atHours(day, m / 60));
       if (prev < -0.833 && el >= -0.833) rise = m / 60;
       if (prev >= -0.833 && el < -0.833) set = m / 60;
@@ -865,10 +857,9 @@
     rootStyle.setProperty('--sky-bot', bot);
     rootStyle.setProperty('--stars', clamp((-el - 3) / 8, 0, 1).toFixed(3));
     // luchtperspectief: verre heuvels nemen de kleur van de lucht aan
-    rootStyle.setProperty('--hill-far', mix(bot, mix('#10131a', '#3c4a3a', day), .55));
-    rootStyle.setProperty('--hill-mid', mix(bot, mix('#0b0d10', '#26301f', day), .78));
-    rootStyle.setProperty('--hill-near', mix('#090a09', '#1a2016', day));
-    $('meta[name="theme-color"]').content = top;
+    rootStyle.setProperty('--hill-far', mix(bot, mix('#1d2430', '#8a9a72', day), .45));
+    rootStyle.setProperty('--hill-mid', mix(bot, mix('#141a1e', '#5d7148', day), .62));
+    rootStyle.setProperty('--hill-near', mix('#0e110e', '#3f5534', day));
   }
 
   /* =========================================================
@@ -918,7 +909,7 @@
       svgEl('line', { x1: 0, y1: 6, x2: 0, y2: -24, stroke: '#2a1f16', 'stroke-width': 2 }, grp);
       svgEl('path', { d: 'M0,-24 L30,-18 L22,-13 L30,-8 L0,-6 Z', fill: '#a2302a', stroke: '#2a1f16', 'stroke-width': 1 }, grp);
       const lbl = svgEl('g', { transform: `translate(${f(x)},${f(y)})` }, g);
-      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'Grenze Gotisch, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#efe2c4', stroke: 'rgba(0,0,0,.6)', 'stroke-width': 3, style: 'paint-order:stroke' }, lbl);
+      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'Grenze Gotisch, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#a2302a' }, lbl);
       t.textContent = 'Feest!';
     })();
 
