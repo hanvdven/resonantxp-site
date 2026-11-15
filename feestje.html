@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Oudejaarsgastmaal — Anno 1403</title>
+  <meta name="description" content="Han en Nele van Kessel-Lo nodigen u uit voor oud en nieuw in de geest van Kingdom Come: Deliverance. Verkleed komen, ridderspelen, riddersnacks. 31 december, vanaf 16:00." />
+  <meta property="og:title" content="Oudejaarsgastmaal — Anno 1403" />
+  <meta property="og:description" content="Han en Nele van Kessel-Lo openen hun poort. Verkleed komen, ridderspelen, riddersnacks. 31 december, vanaf 16:00." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://resonantxp.com/feestje" />
+  <meta property="og:image" content="https://resonantxp.com/feestje-og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="nl_NL" />
+  <meta name="theme-color" content="#1b1510" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@400;700&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Grenze+Gotisch:wght@400;600;800&display=swap" />
+  <!--
+    feestje.html — interactieve uitnodiging, oud & nieuw 2026 (Kingdom Come-thema).
+    Eén zelfstandig bestand, geen build, geen afhankelijkheden behalve Google Fonts.
+
+    STIJL (v2, richting KCD): codex/handschrift. Perkament, ijzergalinkt, rubricering
+    (rode koppen), spaarzame azuur- en okertinten, pentekeningen met een waterverflaagje.
+    Alles staat op perkamentbladen; de dag/nacht-hemel is een ingelijste miniatuur op het titelblad.
+    Verluchtingen: echte miniaturen uit handschriften (publiek domein, Wikimedia Commons) in feestje-img/.
+      - Grenze Gotisch  (titels: gotisch maar leesbaar)
+      - Alegreya / Alegreya SC (lopende tekst: kalligrafische romein)
+      - "Handgetekend": SVG-filters (#inky, #deckle) vervormen strakke lijnen en randen
+        subtiel met ruis (feTurbulence + feDisplacementMap). Geen afbeeldingen nodig.
+
+    AANPASSEN: alles staat in het CONFIG-object bovenaan het <script>:
+    gastgevers, locatie, aanmeldlink, kinderen, het programma (dat zowel de lijst
+    "De getijden" als de markeringen op de klok vult) en coördinaten voor de zon.
+
+    TESTEN: ?nu=2026-12-31T17:30 laat de pagina doen alsof het dat tijdstip is.
+  -->
+  <style>
+    :root {
+      --vellum: #ead9b4;
+      --vellum-hi: #f3e7cb;
+      --vellum-lo: #d9c294;
+      --ink: #2a1f16;
+      --ink-soft: #5d4a36;
+      --rubric: #a2302a;
+      --rubric-dk: #7b201c;
+      --azure: #3b5a87;
+      --verdigris: #4f6b4a;
+      --ochre: #c4943c;
+      --on-dark: #efe2c4;
+
+      /* door JS gezet op basis van de zonshoogte */
+      --sky-top: #070b1c;
+      --sky-bot: #141a33;
+      --hill-far: #1b2030;
+      --hill-mid: #12151c;
+      --hill-near: #0b0c0c;
+      --stars: 1;
+
+      --body: "Alegreya", Georgia, "Times New Roman", serif;
+      --sc: "Alegreya SC", "Alegreya", Georgia, serif;
+      --goth: "Grenze Gotisch", "Alegreya SC", Georgia, serif;
+
+      --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .5 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      --stain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900' preserveAspectRatio='none'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .15 1.4 0 0 0 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
+      --film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--body);
+      font-size: 19px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: #1b1510 var(--grain); background-size: 220px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    button { font: inherit; color: inherit; }
+    a { color: var(--rubric); }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    :focus-visible { outline: 3px solid var(--ochre); outline-offset: 3px; }
+    .defs { position: absolute; width: 0; height: 0; }
+
+    /* ---------- de miniatuur: de hemel boven Kessel-Lo, nu ---------- */
+    .miniature-wrap { margin: 34px 0 0; }
+    .miniature {
+      position: relative; height: clamp(150px, 24vw, 280px); overflow: hidden;
+      border: 2px solid var(--ink);
+      box-shadow: 0 0 0 5px var(--vellum), 0 0 0 7px var(--azure), 0 0 0 10px var(--vellum), 0 0 0 11.5px var(--rubric);
+      margin: 12px;
+    }
+    .miniature .sky { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-top) 15%, var(--sky-bot) 100%); }
+    .miniature .stars { position: absolute; inset: 0; width: 100%; height: 100%; opacity: var(--stars); }
+    .miniature .stars .tw { animation: twinkle 4s ease-in-out infinite; }
+    @keyframes twinkle { 50% { opacity: .2; } }
+    .miniature .landscape { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; }
+    .miniature::after { /* geschilderd op perkament: korrel en vlekken over de verf */
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: var(--stain), var(--grain); background-size: 100% 100%, 220px 220px; mix-blend-mode: multiply; opacity: .55;
+    }
+    .miniature-wrap figcaption { text-align: center; font-style: italic; color: var(--ink-soft); font-size: .92rem; margin-top: 14px; }
+
+    /* ---------- verluchtingen (afbeeldingen uit handschriften) ---------- */
+    .minia { margin: 0; }
+    .minia .fr { background: #d8c08e; padding: 5px; border: 1.5px solid var(--ink); box-shadow: 2px 3px 0 rgba(42,31,22,.3); }
+    .minia img { display: block; width: 100%; height: auto; border: 1px solid var(--ink); }
+    .minia figcaption { font-size: .86rem; font-style: italic; color: var(--ink-soft); margin-top: 7px; line-height: 1.35; }
+    .minia figcaption cite { font-style: normal; font-family: var(--sc); }
+    .minia.right { float: right; width: min(290px, 40%); margin: 6px 0 14px 26px; }
+    .minia.wide { margin: 4px 0 28px; }
+    .minia.side { max-width: 300px; margin-top: 22px; }
+    @media (max-width: 640px) { .minia.right { float: none; width: auto; max-width: 320px; margin: 6px auto 22px; } }
+
+    /* ---------- opening: het titelblad ---------- */
+    .hero { padding: 28px 16px 0; }
+    .panel.hero-page { max-width: 1180px; }
+    .hero-inner {
+      position: relative; width: 100%;
+      display: grid; gap: 30px; align-items: center; grid-template-columns: 1fr; text-align: center;
+    }
+    @media (min-width: 920px) { .hero-inner { grid-template-columns: 1.05fr 1fr; text-align: left; gap: 56px; } }
+    .kicker { font-family: var(--sc); letter-spacing: .14em; font-size: .9rem; margin: 0; color: var(--rubric); }
+    h1 {
+      font-family: var(--goth); font-weight: 800;
+      font-size: clamp(3rem, 9vw, 6rem); line-height: .92; margin: .15em 0 .25em;
+      color: var(--ink); letter-spacing: .005em;
+    }
+    h1 .r { color: var(--rubric); }
+    .lede { font-size: 1.18rem; max-width: 33em; margin: 0 auto; }
+    @media (min-width: 920px) { .lede { margin: 0; } }
+    .lede b { font-weight: 700; color: var(--rubric); }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 10px; margin-top: 24px;
+      font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: 1rem; color: var(--ink); text-decoration: none;
+      border-top: 1px solid var(--rubric); border-bottom: 1px solid var(--rubric); padding: 8px 6px;
+    }
+    .hero-cta:hover { color: var(--rubric); }
+
+    /* ---------- de volvelle (klok) ---------- */
+    .clock-wrap { display: grid; justify-items: center; gap: 14px; }
+    .orloj { width: min(440px, 78vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 8px 10px rgba(60,30,10,.3)); }
+    .orloj .handle { cursor: grab; touch-action: none; }
+    .orloj.dragging .handle { cursor: grabbing; }
+    .orloj text { user-select: none; -webkit-user-select: none; }
+    @media (max-width: 560px) { #pennant text { display: none; } }
+    .clock-cap { font-size: .92rem; text-align: center; color: var(--ink-soft); margin: 0; min-height: 1.4em; max-width: 30em; }
+    .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+    .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
+    .cd-num { font-size: 2.4rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
+    .cd-num.roman { font-family: var(--sc); font-size: 1.6rem; padding: 6px 0 4px; }
+    .cd-lab { font-family: var(--sc); font-weight: 700; font-size: .8rem; letter-spacing: .12em; color: var(--rubric); }
+    .cd-label { margin: 0; text-align: center; font-size: 1.05rem; }
+    .cd-label strong { font-family: var(--sc); font-weight: 700; color: var(--rubric); letter-spacing: .04em; }
+    .cd-msg { font-family: var(--goth); font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; color: var(--rubric); text-align: center; margin: 0 0 6px; }
+    .roman-toggle {
+      background: none; border: 0; padding: 4px 8px; cursor: pointer;
+      font-family: var(--sc); font-size: .85rem; letter-spacing: .06em; color: var(--ink); opacity: .75;
+      text-decoration: underline dotted; text-underline-offset: 4px;
+    }
+    .roman-toggle:hover { opacity: 1; }
+
+    /* ---------- perkamentbladen ---------- */
+    main { padding: 0 16px 40px; }
+    .panel {
+      position: relative; isolation: isolate;
+      max-width: 1000px; margin: 0 auto 72px;
+      padding: clamp(28px, 5.5vw, 60px) clamp(22px, 5.5vw, 64px);
+    }
+    .panel::before { /* het blad zelf, met gerafelde rand */
+      content: ""; position: absolute; inset: 0; z-index: -1;
+      background-color: var(--vellum);
+      background-image: var(--stain), var(--grain), radial-gradient(ellipse at 50% 40%, var(--vellum-hi) 0%, var(--vellum) 55%, var(--vellum-lo) 100%);
+      background-size: 100% 100%, 220px 220px, 100% 100%;
+      background-repeat: no-repeat, repeat, no-repeat;
+      filter: url(#deckle) drop-shadow(0 22px 36px rgba(0,0,0,.6));
+    }
+    .head { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end; margin-bottom: 8px; }
+    .vignet { width: clamp(82px, 14vw, 128px); height: auto; display: block; }
+    .eyebrow { font-family: var(--sc); letter-spacing: .14em; font-size: .88rem; color: var(--rubric); margin: 0; }
+    h2 {
+      font-family: var(--goth); font-weight: 800;
+      font-size: clamp(2.3rem, 6vw, 3.5rem); line-height: 1; color: var(--ink); margin: .1em 0 .1em;
+    }
+    h2::first-letter { color: var(--rubric); }
+    h3 { font-family: var(--sc); font-weight: 700; font-size: 1.15rem; margin: 0 0 .3em; letter-spacing: .03em; }
+    .flourish { display: block; width: min(320px, 70%); height: 18px; margin: 4px 0 22px; color: var(--rubric); overflow: visible; }
+    .panel p { max-width: 40em; }
+    .muted { color: var(--ink-soft); font-size: .95rem; }
+    .pilcrow { color: var(--rubric); font-weight: 700; margin-right: .2em; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--sc); font-weight: 700; letter-spacing: .06em; font-size: 1rem;
+      padding: 9px 18px; border-radius: 2px; cursor: pointer;
+      background: var(--rubric); color: var(--vellum-hi); border: 1.5px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink); text-decoration: none;
+    }
+    .btn:hover { background: #b6382f; }
+    .btn:active { transform: translate(2px, 2px); box-shadow: none; }
+    .btn.ghost { background: transparent; color: var(--ink); }
+    .btn.ghost:hover { background: rgba(255,255,255,.35); }
+
+    /* ---------- de brief met zegel ---------- */
+    .letter { max-width: 800px; }
+    .letter-closed { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .6s ease .5s, opacity .4s ease .4s; }
+    .letter-closed > div { overflow: hidden; display: grid; justify-items: center; gap: 6px; text-align: center; padding-bottom: 6px; }
+    .letter.open .letter-closed { grid-template-rows: 0fr; opacity: 0; }
+    .addr { font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; margin: 0; }
+    .addr small { display: block; font-family: var(--body); font-style: italic; letter-spacing: 0; color: var(--ink-soft); font-size: 1rem; }
+    .seal { width: 136px; height: 136px; padding: 0; border: 0; background: none; cursor: pointer; margin: 12px 0 4px; border-radius: 50%; }
+    .seal svg { width: 100%; height: 100%; overflow: visible; display: block; }
+    .seal:hover .half { filter: brightness(1.12); }
+    .seal .half { transform-box: fill-box; transform-origin: center; transition: transform .8s cubic-bezier(.2,.8,.2,1), opacity .6s ease .25s; }
+    .letter.open .seal .l { transform: translate(-46px, 30px) rotate(-38deg); opacity: 0; }
+    .letter.open .seal .r { transform: translate(48px, 36px) rotate(32deg); opacity: 0; }
+    .seal-hint { font-family: var(--sc); color: var(--rubric); letter-spacing: .1em; font-size: 1rem; margin: 0; animation: nudge 2.4s ease-in-out infinite; }
+    @keyframes nudge { 50% { transform: translateY(-3px); } }
+    .letter-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 1s ease .45s; }
+    .letter.open .letter-body { grid-template-rows: 1fr; }
+    .letter-body > div { overflow: hidden; }
+    .proc p { font-size: 1.14rem; }
+    .proc p:first-of-type::first-letter { /* initiaal: rode letter in een azuren kader */
+      font-family: var(--goth); font-weight: 800; color: var(--rubric);
+      float: left; font-size: 3.6em; line-height: .82;
+      padding: .1em .14em .06em; margin: .06em .14em 0 0;
+      background: #efe0bd; border: 2px solid var(--azure); box-shadow: inset 0 0 0 3px #efe0bd, inset 0 0 0 4px var(--azure);
+    }
+    .signed { text-align: right; font-style: italic; margin-top: 1.6em; }
+    .signed span { display: block; font-family: var(--goth); font-style: normal; font-weight: 600; font-size: 2rem; color: var(--rubric); line-height: 1.1; }
+    .reseal { background: none; border: 0; cursor: pointer; color: var(--ink-soft); font-size: .9rem; text-decoration: underline; padding: 0; }
+
+    /* ---------- stand & wapen ---------- */
+    .stand-grid { display: grid; gap: 32px; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .stand-grid { grid-template-columns: 1.1fr 1fr; } }
+    .stands { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin: 14px 0; }
+    .stand {
+      text-align: left; cursor: pointer; padding: 9px 12px; border-radius: 1px;
+      background: rgba(255,248,230,.38); border: 1px solid rgba(42,31,22,.45);
+      transition: background .15s;
+    }
+    .stand:hover { background: rgba(255,248,230,.7); }
+    .stand b { display: block; font-family: var(--sc); font-weight: 700; font-size: 1.05rem; }
+    .stand span { font-size: .88rem; color: var(--ink-soft); line-height: 1.3; display: block; }
+    .stand[aria-pressed="true"] { background: #f6ecd2; border-color: var(--rubric); box-shadow: inset 0 0 0 2px #f6ecd2, inset 0 0 0 3px var(--rubric); }
+    .stand[aria-pressed="true"] b { color: var(--rubric); }
+    .dracht { border-left: 3px double var(--rubric); padding: 6px 0 6px 16px; margin: 6px 0 0; font-size: 1.04rem; min-height: 3.2em; }
+    .dracht b { font-family: var(--sc); color: var(--rubric); }
+    .herald { display: grid; gap: 16px; justify-items: center; }
+    .shield-big { width: min(260px, 70vw); height: auto; display: block; filter: drop-shadow(2px 6px 6px rgba(60,30,10,.3)); }
+    .herald-title { font-family: var(--sc); font-weight: 700; font-size: 1.3rem; text-align: center; margin: 0; line-height: 1.25; }
+    .herald-title small { display: block; font-family: var(--body); font-weight: 400; font-style: italic; font-size: 1rem; color: var(--ink-soft); }
+    .name-row { display: flex; gap: 8px; width: 100%; max-width: 360px; }
+    .name-row input {
+      flex: 1; min-width: 0; font: inherit; font-size: 1.05rem; padding: 8px 12px;
+      background: rgba(255,250,236,.65); border: 1px solid var(--ink); border-radius: 1px; color: var(--ink);
+    }
+    .icon-btn { flex: none; width: 44px; border-radius: 1px; cursor: pointer; background: rgba(255,250,236,.5); border: 1px solid var(--ink); font-size: 1.15rem; }
+    .controls { width: 100%; display: grid; gap: 12px; }
+    .controls fieldset { border: 0; margin: 0; padding: 0; }
+    .controls legend { font-family: var(--sc); font-size: .92rem; letter-spacing: .1em; color: var(--rubric); margin-bottom: 6px; padding: 0; }
+    .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sw { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; padding: 0; border: 1.5px solid var(--ink); }
+    .sw[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .mini { width: 44px; height: 52px; padding: 3px; cursor: pointer; border-radius: 1px; background: rgba(255,250,236,.35); border: 1px solid rgba(42,31,22,.35); }
+    .mini svg { width: 100%; height: 100%; display: block; }
+    .mini[aria-pressed="true"] { background: #f6ecd2; border: 2px solid var(--rubric); padding: 2px; }
+    .herald-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    /* ---------- de getijden ---------- */
+    .hours { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 0; }
+    .hours li { display: grid; grid-template-columns: 74px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(42,31,22,.22); align-items: baseline; }
+    .hours li:last-child { border-bottom: 0; }
+    .hours .when { text-align: right; line-height: 1.1; }
+    .hours .when b { display: block; font-family: var(--sc); font-weight: 700; font-size: 1.35rem; letter-spacing: .04em; color: var(--rubric); }
+    .hours .when small { font-family: var(--sc); color: var(--ink-soft); font-size: .85rem; letter-spacing: .05em; }
+    .hours h3 { margin: 0; }
+    .hours p { margin: .1em 0 0; }
+    .hours li.now { background: linear-gradient(90deg, rgba(162,48,42,.12), transparent 80%); }
+    .hours li.now h3::after { content: " · nu"; color: var(--rubric); }
+
+    /* ---------- toernooi ---------- */
+    .tourney { display: grid; gap: 28px; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .tourney { grid-template-columns: 1fr 1.5fr; align-items: start; } }
+    .disciplines { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
+    .disciplines li { padding-left: 1.3em; text-indent: -1.3em; }
+    .disciplines b { font-family: var(--sc); }
+    .range { display: grid; gap: 10px; }
+    .range canvas {
+      width: 100%; aspect-ratio: 16 / 9; display: block; cursor: crosshair; border-radius: 1px;
+      border: 1.5px solid var(--ink); box-shadow: inset 0 0 0 4px var(--vellum), inset 0 0 0 5px var(--ink);
+      touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+      background: #e8d6ad;
+    }
+    .range-msg { min-height: 1.5em; margin: 0; font-size: 1.02rem; }
+    .range-msg b { font-family: var(--sc); color: var(--rubric); }
+    .range-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* ---------- de dis ---------- */
+    .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; margin-top: 18px; }
+    .dish { perspective: 900px; border: 0; padding: 0; background: none; cursor: pointer; text-align: left; height: 180px; }
+    .dish-in { position: relative; width: 100%; height: 100%; transition: transform .6s cubic-bezier(.3,.7,.3,1); transform-style: preserve-3d; }
+    .dish[aria-pressed="true"] .dish-in { transform: rotateY(180deg); }
+    .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; padding: 16px 18px; display: flex; flex-direction: column; border-radius: 1px; }
+    .front {
+      background: #dcc596 var(--grain); background-size: 220px;
+      border: 1.5px solid var(--ink); box-shadow: inset 0 0 0 4px #dcc596, inset 0 0 0 5px var(--rubric), 2px 3px 0 rgba(42,31,22,.35);
+      justify-content: space-between;
+    }
+    .front .roman { font-family: var(--sc); font-weight: 700; color: var(--rubric); font-size: .95rem; letter-spacing: .15em; }
+    .front .name { font-family: var(--goth); font-weight: 800; font-size: 1.7rem; line-height: 1.02; color: var(--ink); }
+    .front .tap { font-size: .85rem; font-style: italic; color: var(--ink-soft); }
+    .back {
+      transform: rotateY(180deg); background: #f4e9cf var(--grain); background-size: 220px;
+      border: 1.5px solid var(--ink); box-shadow: 2px 3px 0 rgba(42,31,22,.35);
+      font-size: 1.02rem; line-height: 1.4; justify-content: center;
+    }
+    .back b { font-family: var(--sc); color: var(--rubric); display: block; margin-bottom: 4px; }
+
+    /* ---------- praktisch ---------- */
+    .facts { display: grid; grid-template-columns: 1fr; gap: 0; margin: 10px 0 24px; }
+    @media (min-width: 700px) { .facts { grid-template-columns: 170px 1fr; } }
+    .facts dt { font-family: var(--sc); font-weight: 700; letter-spacing: .06em; color: var(--rubric); padding-top: 12px; }
+    .facts dd { margin: 0; padding: 2px 0 12px; border-bottom: 1px solid rgba(42,31,22,.22); }
+    @media (min-width: 700px) { .facts dd { padding-top: 12px; } }
+    .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+
+    footer { text-align: center; color: var(--on-dark); padding: 10px 16px 70px; }
+    .credits { font-size: .82rem; color: rgba(239,226,196,.6); margin: 28px auto 0; max-width: 46em; }
+    .credits a { color: inherit; }
+    .greet { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; color: var(--on-dark); padding: 6px; }
+    .reply { display: block; font-family: var(--goth); font-weight: 600; font-size: 1.8rem; color: #d9b46a; min-height: 1.5em; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- gedeelde SVG-filters: het "handgetekende" effect -->
+  <svg class="defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="inky" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id="wash" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="3" seed="9" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" result="d" />
+        <feTurbulence type="fractalNoise" baseFrequency=".6" numOctaves="2" seed="2" result="g" />
+        <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -.9 .62" result="ga" />
+        <feComposite in="d" in2="ga" operator="arithmetic" k1="0" k2="1" k3="-.18" k4="0" result="w" />
+        <feComposite in="w" in2="SourceGraphic" operator="in" />
+      </filter>
+      <filter id="deckle" x="-3%" y="-3%" width="106%" height="106%">
+        <feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="3" seed="3" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <symbol id="flourish" viewBox="0 0 320 18">
+        <path d="M2,9 C40,9 60,2 92,9 S150,16 180,9 S250,2 300,9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        <path d="M300,9 c6,-6 14,-6 16,0 c-2,6 -10,6 -16,0 Z" fill="currentColor" />
+        <circle cx="92" cy="9" r="2.4" fill="currentColor" /><circle cx="180" cy="9" r="2.4" fill="currentColor" />
+        <path d="M2,9 c4,-4 8,-4 10,0" fill="none" stroke="currentColor" stroke-width="1.4" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+   <div class="panel hero-page">
+    <div class="hero-inner">
+      <div>
+        <p class="kicker">Kingdom Come · Oud &amp; Nieuw · Anno MMXXVI</p>
+        <h1><span class="r">H</span>et Oudejaars&shy;gastmaal</h1>
+        <p class="lede"><b id="hosts-lede">Han en Nele van Kessel-Lo</b> openen op oudejaarsdag hun poort voor een avond vol
+          verkleedpartijen, ridderspelen en riddersnacks, tot het nieuwe jaar is ingeluid. Bohemen, 1403, of daaromtrent.</p>
+        <a class="hero-cta" href="#brief">Er is een brief voor u <span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="clock-wrap">
+        <svg class="orloj" id="orloj" viewBox="-200 -200 400 400" aria-labelledby="orloj-title">
+          <title id="orloj-title">Volvelle: een 24-uurs wijzerplaat. De zon toont het uur, de rode band het feest van 16:00 tot na middernacht.</title>
+          <defs>
+            <pattern id="p-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">
+              <rect width="6" height="6" fill="#a2302a" /><line x1="0" y1="0" x2="0" y2="6" stroke="#6b1a16" stroke-width="1.4" />
+            </pattern>
+            <radialGradient id="g-vel" r=".7"><stop offset="0" stop-color="#f3e6c8" /><stop offset=".8" stop-color="#e6d2a8" /><stop offset="1" stop-color="#d2b884" /></radialGradient>
+          </defs>
+          <!-- het blad -->
+          <circle r="197" fill="url(#g-vel)" filter="url(#inky)" />
+          <g fill="none" stroke="#2a1f16" filter="url(#inky)">
+            <circle r="192" stroke-width="2.2" />
+            <circle r="187" stroke-width=".8" />
+            <circle r="166" stroke-width="1.6" />
+          </g>
+          <g id="disc" filter="url(#wash)"></g>
+          <g id="disc-stars"></g>
+          <path id="party-band" fill="url(#p-hatch)" stroke="#2a1f16" stroke-width="1" filter="url(#inky)" />
+          <g id="ticks" filter="url(#inky)"></g>
+          <circle r="150" fill="none" stroke="#2a1f16" stroke-width="1.6" filter="url(#inky)" />
+          <g id="marks"></g>
+          <g id="numerals" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="14" fill="#2a1f16" text-anchor="middle" dominant-baseline="central"></g>
+          <g id="pennant"></g>
+          <g id="cartouche" transform="translate(0,66)">
+            <rect x="-34" y="-14" width="68" height="28" rx="3" fill="#efe2c2" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
+            <text id="dial-time" y="1" text-anchor="middle" dominant-baseline="central" font-family="Alegreya, Georgia, serif" font-weight="500" font-size="19" fill="#2a1f16"></text>
+          </g>
+          <text id="dial-note" y="98" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="13" fill="#efe2c2" style="paint-order:stroke" stroke="rgba(20,14,8,.75)" stroke-width="3"></text>
+          <g id="moon-hand"></g>
+          <g id="hand">
+            <path d="M-3,24 L-4,-96 L0,-108 L4,-96 L3,24 Z" fill="#c4943c" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
+            <path d="M-10,24 L0,46 L10,24 Z" fill="#c4943c" stroke="#2a1f16" stroke-width="1.2" filter="url(#inky)" />
+            <g transform="translate(0,-124)">
+              <g id="rays" fill="#d9a548" stroke="#2a1f16" stroke-width="1" stroke-linejoin="round" filter="url(#inky)"></g>
+              <circle r="15" fill="#e3b356" stroke="#2a1f16" stroke-width="1.4" filter="url(#inky)" />
+              <g fill="none" stroke="#2a1f16" stroke-width="1.2" stroke-linecap="round">
+                <path d="M-7,-3 q2.5,-2 5,0 M2,-3 q2.5,-2 5,0" /><path d="M0,-1 v4 l-1.5,1" /><path d="M-5,6 q5,3 10,0" />
+              </g>
+            </g>
+            <circle class="handle" id="handle" cy="-124" r="32" fill="transparent"
+                    role="slider" tabindex="0" aria-label="Zon: sleep of gebruik de pijltjestoetsen om door de dag te reizen"
+                    aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0" />
+          </g>
+          <g filter="url(#inky)">
+            <circle r="15" fill="#c4943c" stroke="#2a1f16" stroke-width="1.4" />
+            <circle r="7" fill="#efe2c2" stroke="#2a1f16" stroke-width="1.2" />
+            <circle r="2.4" fill="#2a1f16" />
+          </g>
+        </svg>
+        <p class="clock-cap" id="clock-cap">&nbsp;</p>
+        <div id="cd" aria-live="off"><p class="cd-label">Donderdag 31 december 2026, 16:00</p></div>
+        <button class="roman-toggle" id="roman" type="button" aria-pressed="false">Romeinse cijfers</button>
+      </div>
+    </div>
+    <figure class="miniature-wrap">
+      <div class="miniature" aria-hidden="true">
+        <div class="sky"></div>
+        <svg class="stars" id="stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"></svg>
+        <svg class="landscape" id="landscape" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice"></svg>
+      </div>
+      <figcaption>De hemel boven Kessel-Lo, op dit eigenste ogenblik.</figcaption>
+    </figure>
+   </div>
+  </header>
+
+  <main>
+    <!-- ===================== DE BRIEF ===================== -->
+    <section class="panel letter" id="brief" aria-labelledby="brief-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Per bode bezorgd</p>
+          <h2 id="brief-h">Een proclamatie</h2>
+        </div>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <div class="letter-closed">
+        <div>
+          <p class="addr">Aan de edele gast, alhier<small>Niet te openen vóór het lezen van dit opschrift.</small></p>
+          <button class="seal" id="seal" type="button" aria-expanded="false" aria-controls="proc">
+            <span class="sr">Breek het zegel en lees de brief</span>
+            <svg viewBox="-70 -70 140 140" aria-hidden="true">
+              <defs>
+                <radialGradient id="g-wax" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#c8463a" /><stop offset=".6" stop-color="#8f2119" /><stop offset="1" stop-color="#55100c" /></radialGradient>
+                <clipPath id="c-l"><path d="M-80,-80 H4 L-6,-30 L8,0 L-4,30 L6,80 H-80 Z" /></clipPath>
+                <clipPath id="c-r"><path d="M80,-80 H4 L-6,-30 L8,0 L-4,30 L6,80 H80 Z" /></clipPath>
+                <g id="wax">
+                  <path id="wax-blob" fill="url(#g-wax)" />
+                  <circle r="40" fill="none" stroke="#55100c" stroke-width="2.5" opacity=".7" />
+                  <circle r="35" fill="none" stroke="#e0705f" stroke-width="1" opacity=".35" />
+                  <text y="2" text-anchor="middle" dominant-baseline="central" font-family="Grenze Gotisch, Georgia, serif" font-weight="800" font-size="34" fill="#64130f" stroke="#d9665a" stroke-opacity=".45" stroke-width=".8">H·N</text>
+                  <text y="-25" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="8" fill="#64130f" letter-spacing="1.5">KESSEL·LO</text>
+                  <text y="31" text-anchor="middle" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="8.5" fill="#64130f" letter-spacing="1.5">MMXXVI</text>
+                </g>
+              </defs>
+              <g class="half l" clip-path="url(#c-l)"><use href="#wax" /></g>
+              <g class="half r" clip-path="url(#c-r)"><use href="#wax" /></g>
+            </svg>
+          </button>
+          <p class="seal-hint" aria-hidden="true">Breek het zegel</p>
+        </div>
+      </div>
+      <div class="letter-body" id="proc">
+        <div class="proc">
+          <figure class="minia right"><div class="fr"><img src="feestje-img/janvier.jpg" width="640" height="990" alt="Middeleeuwse miniatuur: een hertog aan een feestmaal met gasten, bedienden en een hondje; bovenin een halve hemelschijf met sterrenbeelden." loading="lazy" decoding="async" /></div><figcaption>Nieuwjaar bij de hertog van Berry: geschenken, een feestdis en een toernooi op het wandtapijt. <cite>Très Riches Heures</cite>, ca. 1412–1416.</figcaption></figure>
+          <p>Wij, Han en Nele van Kessel-Lo, groeten allen die dit lezen. Het jaar onzes Heren tweeduizend zesentwintig
+            loopt ten einde, en dat zal niet ongemerkt gebeuren. Op oudejaarsdag openen wij onze poort voor een gastmaal
+            in de geest van het koninkrijk Bohemen, anno 1403: met worst en mede, met zwaard en boog, en met dobbelstenen
+            die vermoedelijk verzwaard zijn.</p>
+          <p><span class="pilcrow" aria-hidden="true">¶</span>Kom gekleed naar uw stand. Ridder of rover, monnik of molenaarsdochter, kruidenvrouw
+            of kroegbaas: alles mag, behalve een spijkerbroek zonder schaamte. Wie geen harnas heeft, redt het met een cape,
+            een riem en een vastberaden blik.</p>
+          <p><span class="pilcrow" aria-hidden="true">¶</span>Er wordt gestreden om eer, gegeten tot de riem knelt, en om middernacht luiden wij het
+            nieuwe jaar in. <span id="sunset-line"></span></p>
+          <p><span class="pilcrow" aria-hidden="true">¶</span>Wie <em>Kingdom Come</em> nooit heeft gespeeld: geen nood. Het zijn gewoon de
+            middeleeuwen, maar dan met snacks.</p>
+          <p class="signed">Gegeven onder ons zegel te Kessel-Lo, ten jare MMXXVI<span>Han &amp; Nele</span></p>
+          <button class="reseal" id="reseal" type="button">Verzegel de brief opnieuw</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STAND & WAPEN ===================== -->
+    <section class="panel" id="stand" aria-labelledby="stand-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Verkleden verplicht · fantasie toegestaan</p>
+          <h2 id="stand-h">Kies uw stand</h2>
+        </div>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <div class="stand-grid">
+        <div>
+          <p>In Bohemen weet iedereen wie u bent aan wat u draagt. Kies uw stand, dan fluisteren wij wat u kunt aantrekken.
+            Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe.</p>
+          <div class="stands" id="stands" role="group" aria-label="Stand"></div>
+          <p class="dracht" id="dracht" aria-live="polite"></p>
+          <figure class="minia side"><div class="fr"><img src="feestje-img/manesse-wolfram.jpg" width="560" height="850" alt="Middeleeuwse miniatuur: een ridder met helm, wapenrok en schild in dezelfde kleuren, met zijn paard en een schildknaap." loading="lazy" decoding="async" /></div><figcaption>Wolfram von Eschenbach in vol ornaat: helm, wapenrok, schild en paard in dezelfde kleuren. Zo doet u het. <cite>Codex Manesse</cite>, ca. 1300–1340.</figcaption></figure>
+        </div>
+        <div class="herald">
+          <svg class="shield-big" id="shield" viewBox="0 0 200 292" role="img" aria-label="Uw wapenschild"></svg>
+          <p class="herald-title" id="herald-title"></p>
+          <div class="name-row">
+            <label class="sr" for="naam">Uw naam</label>
+            <input id="naam" type="text" maxlength="22" placeholder="Uw naam" autocomplete="given-name" />
+            <button class="icon-btn" id="reroll-place" type="button" title="Een ander dorp" aria-label="Kies een ander dorp">↻</button>
+          </div>
+          <div class="controls">
+            <fieldset><legend>Veld</legend><div class="opts" id="opt-t1"></div></fieldset>
+            <fieldset><legend>Deling</legend><div class="opts" id="opt-div"></div></fieldset>
+            <fieldset id="fs-t2"><legend>Tweede kleur</legend><div class="opts" id="opt-t2"></div></fieldset>
+            <fieldset><legend>Stuk</legend><div class="opts" id="opt-ch"></div></fieldset>
+            <fieldset id="fs-c"><legend>Kleur van het stuk</legend><div class="opts" id="opt-c"></div></fieldset>
+          </div>
+          <div class="herald-actions">
+            <button class="btn ghost" id="dice" type="button">⚄ Laat het lot beslissen</button>
+            <button class="btn" id="save-arms" type="button">Bewaar uw wapen</button>
+          </div>
+          <p class="muted" style="text-align:center;margin:0">Borduur, plak of schilder het op uw tuniek of schild.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DE GETIJDEN ===================== -->
+    <section class="panel" id="getijden" aria-labelledby="getijden-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Het verloop van de avond · onder voorbehoud</p>
+          <h2 id="getijden-h">De getijden</h2>
+        </div>
+        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
+          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M14,20 H106" stroke-width="5" stroke="#6b4a2a" />
+            <path d="M24,20 V12 M96,20 V12" />
+            <path d="M60,20 V28" />
+            <path d="M38,40 Q38,28 60,28 Q82,28 82,40 L88,84 Q92,94 104,98 H16 Q28,94 32,84 Z" fill="#c4943c" />
+            <path d="M34,74 H86" fill="none" stroke-width="1.4" /><path d="M32,82 H88" fill="none" stroke-width="1.4" />
+            <circle cx="60" cy="106" r="6" fill="#6b4a2a" />
+            <path d="M8,60 q-6,8 0,16 M112,60 q6,8 0,16" fill="none" stroke="#a2302a" />
+            <path d="M14,52 q-8,14 0,30 M106,52 q8,14 0,30" fill="none" stroke="#a2302a" stroke-width="1.4" />
+          </g>
+        </svg>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met worst. De uren staan ook als
+        ruitjes op de klok bovenaan.</p>
+      <ol class="hours" id="hours"></ol>
+    </section>
+
+    <!-- ===================== TOERNOOI ===================== -->
+    <section class="panel" id="toernooi" aria-labelledby="toernooi-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Ridderspelen · voor jong en oud</p>
+          <h2 id="toernooi-h">Het toernooi</h2>
+        </div>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <figure class="minia wide"><div class="fr"><img src="feestje-img/velislav-ruiters.jpg" width="960" height="520" alt="Middeleeuwse pentekening met waterverf: twee groepen geharnaste ruiters stormen met zwaarden op elkaar af." loading="lazy" decoding="async" /></div><figcaption>Boheemse ruiters in het gevecht, getekend in Praag rond 1340. <cite>Velislav-bijbel</cite>, Nationale Bibliotheek van Tsjechië.</figcaption></figure>
+      <div class="tourney">
+        <div>
+          <p>Op het erf wordt om eer gestreden, bij het laatste daglicht. Geen echte zwaarden en geen echte paarden, maar wel echte roem.</p>
+          <ul class="disciplines">
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Het zwaardgevecht.</b> Zacht van schuim, hard van wil.</li>
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Boogschieten.</b> Zonder vizier, zoals het hoort. Oefen hiernaast.</li>
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade.</li>
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Kennis van het rijk.</b> Wie weet het meest over Bohemen, bier en boerenwijsheid?</li>
+          </ul>
+          <figure class="minia side"><div class="fr"><img src="feestje-img/luttrell-boogschutters.jpg" width="720" height="489" alt="Middeleeuwse miniatuur: boogschutters in kleurige kappen schieten op een schietschijf." loading="lazy" decoding="async" /></div><figcaption>Oefenen op de schijf, zoals elke zondag verplicht was. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
+        </div>
+        <div class="range">
+          <canvas id="boog" width="640" height="360" tabindex="0"
+                  aria-label="Boogschietbaan. Houd ingedrukt (of houd de spatiebalk vast) om de boog te spannen, laat los om te schieten."></canvas>
+          <div class="range-row">
+            <p class="range-msg" id="range-msg" aria-live="polite">Houd ingedrukt om te spannen, laat los om te schieten. Vijf pijlen.</p>
+            <button class="btn ghost" id="range-reset" type="button">Nieuwe ronde</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DE DIS ===================== -->
+    <section class="panel" id="gastmaal" aria-labelledby="gastmaal-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Riddersnacks · een voorproefje</p>
+          <h2 id="gastmaal-h">De dis</h2>
+        </div>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <figure class="minia wide"><div class="fr"><img src="feestje-img/luttrell-maaltijd.jpg" width="960" height="549" alt="Middeleeuwse miniatuur: een heer en zijn gezelschap aan een lange gedekte tafel, met bedienden die eten aandragen." loading="lazy" decoding="async" /></div><figcaption>Sir Geoffrey Luttrell aan tafel, met familie, monniken en een knielende bediende. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
+      <p>De herbergier houdt de kaart nog geheim, maar uit de keuken lekte het volgende. Draai een kaart om.</p>
+      <div class="menu" id="menu"></div>
+      <p class="muted" style="margin-top:22px">Brengt u iets mee voor de dis? Graag! Meld het even bij <span class="hosts-or">Han of Nele</span>,
+        dan staan er straks geen zeven ketels stoofpot.</p>
+    </section>
+
+    <!-- ===================== PRAKTISCH ===================== -->
+    <section class="panel" id="praktisch" aria-labelledby="praktisch-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Voor wie liever geen raadsels leest</p>
+          <h2 id="praktisch-h">Wat, wanneer, waar</h2>
+        </div>
+        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
+          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round">
+            <path d="M58,10 V2" /><path d="M58,2 l18,5 l-18,5 Z" fill="#a2302a" stroke-width="1.4" />
+            <path d="M44,34 L58,10 L72,34 Z" fill="#a2302a" />
+            <rect x="44" y="34" width="28" height="74" fill="#d8c8a4" />
+            <path d="M16,54 h8 v-6 h8 v6 h8 v-6 h4 V108 H16 Z" fill="#cdbb94" />
+            <path d="M72,54 v-6 h8 v6 h8 v-6 h8 v6 h8 V108 H72 Z" fill="#cdbb94" />
+            <path d="M48,108 V86 Q58,72 68,86 V108" fill="#2a1f16" />
+            <path d="M50,92 H66 M50,98 H66 M54,86 V108 M58,82 V108 M62,86 V108" stroke="#c4943c" stroke-width="1.2" />
+            <rect x="54" y="46" width="8" height="12" rx="4" fill="#2a1f16" />
+            <rect x="24" y="66" width="6" height="10" rx="3" fill="#2a1f16" /><rect x="90" y="66" width="6" height="10" rx="3" fill="#2a1f16" />
+            <path d="M6,108 H114" stroke-width="2.4" />
+          </g>
+        </svg>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <dl class="facts">
+        <dt>Wanneer</dt><dd>Donderdag 31 december 2026, vanaf <b>16:00</b> tot ver na middernacht</dd>
+        <dt>Waar</dt><dd id="where">Kessel-Lo</dd>
+        <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
+        <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
+        <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin en eventueel iets voor de dis</dd>
+        <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
+      </dl>
+      <div class="actions">
+        <button class="btn" id="ics" type="button">Zet in uw agenda</button>
+        <a class="btn ghost" id="rsvp-btn" hidden>Ik kom!</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button class="greet" id="greet" type="button">„Geloofd zij Jezus Christus.”</button>
+    <span class="reply" id="reply" aria-live="polite"></span>
+    <p class="credits">Verluchtingen uit de <i>Très Riches Heures</i> (Musée Condé), de <i>Codex Manesse</i> (Universitätsbibliothek Heidelberg),
+      de <i>Velislav-bijbel</i> (Národní knihovna, Praag) en het <i>Luttrell Psalter</i> (British Library): publiek domein, via
+      <a href="https://commons.wikimedia.org/">Wikimedia Commons</a>.</p>
+  </footer>
+
+  <script>
+  'use strict';
+
+  /* =========================================================
+     CONFIG — hier pas je het feest aan
+     ========================================================= */
+  const CONFIG = {
+    start:    new Date(Date.UTC(2026, 11, 31, 15, 0)), // 31 dec 2026, 16:00 (CET = UTC+1)
+    midnight: new Date(Date.UTC(2026, 11, 31, 23, 0)), // 1 jan 2027, 00:00
+    end:      new Date(Date.UTC(2027, 0, 1, 5, 0)),    // tot wanneer "zalig nieuwjaar" blijft staan
+    hostsOr: 'Han of Nele',
+    location: 'Kessel-Lo',
+    locationNote: 'Het precieze adres volgt per bode.',
+    rsvp: '',   // bv. 'https://wa.me/32...' of 'mailto:...' (leeg = geen knop)
+    kids: 'Jonge schildknapen en jonkvrouwen zijn welkom van 16:00 tot 18:00, voor het toernooi. Daarna is het feest voor volwassenen.', // leeg = regel verbergen
+    lat: 50.885, lon: 4.725, // Kessel-Lo, voor de zonnestand op de klok
+    partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
+    // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
+    program: [
+      [16,    'De poort gaat open', 'Welkomstmede, de kostuumkeuring en het ophangen van de wapenschilden.'],
+      [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf. Jonge schildknapen doen mee.'],
+      [18,    'Het gastmaal', 'De ketel gaat open, de kip gaat rond. Kinderen worden rond deze tijd opgehaald.'],
+      [20,    'Dobbelen om groschen', 'Zes stenen, één kans. Valsspelers belanden in de schandpaal.'],
+      [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz. Prijs: eeuwige roem, en misschien een worst.'],
+      [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.'],
+      [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Smoutebollen en oliebollen.'],
+    ],
+  };
+
+  /* ---------- hulpjes ---------- */
+  const $ = (s, el = document) => el.querySelector(s);
+  const NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag, attrs = {}, parent) => {
+    const el = document.createElementNS(NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(el);
+    return el;
+  };
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const pad = n => String(n).padStart(2, '0');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const seeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  // ?nu=2026-12-31T17:30 laat de pagina doen alsof het dat tijdstip is (om de fases te testen)
+  const OFFSET = (() => {
+    const q = new URLSearchParams(location.search).get('nu');
+    const t = q ? Date.parse(q) : NaN;
+    return isNaN(t) ? 0 : t - Date.now();
+  })();
+  const now = () => new Date(Date.now() + OFFSET);
+
+  function toRoman(n) {
+    if (n === 0) return 'N'; // nulla — zo schreven middeleeuwse rekenmeesters nul
+    const map = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+    let out = '';
+    for (const [v, s] of map) while (n >= v) { out += s; n -= v; }
+    return out;
+  }
+
+  /* ---------- kleuren ---------- */
+  const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const rgb2hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+  const mix = (a, b, t) => rgb2hex(hex2rgb(a).map((v, i) => v + (hex2rgb(b)[i] - v) * t));
+
+  /* =========================================================
+     ZON & MAAN — eenvoudige astronomie (nauwkeurig op ~1 minuut)
+     ========================================================= */
+  function sunElevation(date, lat = CONFIG.lat, lon = CONFIG.lon) {
+    const rad = Math.PI / 180;
+    const d = date.getTime() / 864e5 - 10957.5;            // dagen sinds J2000.0
+    const g = (357.529 + 0.98560028 * d) * rad;            // middelbare anomalie
+    const q = 280.459 + 0.98564736 * d;                    // middelbare lengte
+    const L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * rad;
+    const e = (23.439 - 0.00000036 * d) * rad;             // scheefstand ecliptica
+    const ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L));
+    const dec = Math.asin(Math.sin(e) * Math.sin(L));
+    const gmst = (18.697374558 + 24.06570982441908 * d) % 24;
+    const ha = (gmst * 15 + lon) * rad - ra;               // uurhoek
+    const la = lat * rad;
+    return Math.asin(Math.sin(la) * Math.sin(dec) + Math.cos(la) * Math.cos(dec) * Math.cos(ha)) / rad;
+  }
+  const dayStart = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const atHours = (day, h) => new Date(dayStart(day).getTime() + h * 3600e3);
+  const localHours = d => d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+  const fmtH = h => { h = ((h % 24) + 24) % 24; const m = Math.round(h * 60) % 1440; return pad(Math.floor(m / 60)) + ':' + pad(m % 60); };
+
+  function sunTimes(day) { // per minuut zoeken waar de zon door de horizon gaat (-0,833° = met lichtbreking)
+    let rise = null, set = null, prev = sunElevation(atHours(day, 0));
+    for (let m = 1; m <= 1440; m++) {
+      const el = sunElevation(atHours(day, m / 60));
+      if (prev < -0.833 && el >= -0.833) rise = m / 60;
+      if (prev >= -0.833 && el < -0.833) set = m / 60;
+      prev = el;
+    }
+    return { rise, set };
+  }
+  const SYNODIC = 29.530588853, NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+  const moonPhase = date => ((((date - NEW_MOON) / 864e5) % SYNODIC) + SYNODIC) % SYNODIC / SYNODIC; // 0 nieuw, .5 vol
+
+  /* hemelkleur bij een zonshoogte: [boven, horizon] — iets gedempt, filmisch */
+  const SKY = [
+    [-18, '#05070f', '#0b0f1e'],
+    [-12, '#070a18', '#131a30'],
+    [-7,  '#0e1430', '#272a4e'],
+    [-3,  '#1b2448', '#5a3a52'],
+    [0,   '#28375f', '#a85a3a'],
+    [3,   '#32507c', '#c98a4e'],
+    [8,   '#3a5e86', '#9fb3be'],
+    [25,  '#3b6390', '#a3b9c4'],
+    [90,  '#355d8a', '#9ab2c0'],
+  ];
+  function skyAt(el) {
+    if (el <= SKY[0][0]) return [SKY[0][1], SKY[0][2]];
+    for (let i = 1; i < SKY.length; i++) {
+      if (el <= SKY[i][0]) {
+        const [e0, t0, b0] = SKY[i - 1], [e1, t1, b1] = SKY[i];
+        const t = (el - e0) / (e1 - e0);
+        return [mix(t0, t1, t), mix(b0, b1, t)];
+      }
+    }
+    return [SKY.at(-1)[1], SKY.at(-1)[2]];
+  }
+  /* dezelfde hemel, maar als waterverf op perkament (voor de wijzerplaat) */
+  const VELLUM = '#ead9b4';
+  const washAt = el => { const [t, b] = skyAt(el); return mix(mix(t, b, .45), VELLUM, el > 0 ? .3 : .12); };
+
+  /* =========================================================
+     STERREN, LANDSCHAP, PAGINAHEMEL
+     ========================================================= */
+  (function makeStars() {
+    const svg = $('#stars'), rnd = seeded(1403);
+    for (let i = 0; i < 150; i++) {
+      const c = svgEl('circle', { cx: (rnd() * 1000).toFixed(1), cy: (rnd() * 760).toFixed(1), r: (rnd() * 1.2 + .3).toFixed(2), fill: '#fff3d6', opacity: (rnd() * .6 + .3).toFixed(2) }, svg);
+      if (rnd() < .3) { c.classList.add('tw'); c.style.animationDelay = (rnd() * 4).toFixed(2) + 's'; }
+    }
+  })();
+
+  (function makeLandscape() {
+    // Boslijnen als silhouet: een golvende heuvel met daarop een "boomkruinen"-rand.
+    const svg = $('#landscape'), W = 1440, H = 260;
+    function ridge(base, amp, waves, tree, seed) {
+      const rnd = seeded(seed);
+      const ph = [rnd() * 6, rnd() * 6, rnd() * 6];
+      const ground = x => base + amp * (Math.sin(x / waves + ph[0]) * .6 + Math.sin(x / (waves * .43) + ph[1]) * .3 + Math.sin(x / (waves * .17) + ph[2]) * .1);
+      let d = `M0,${H} L0,${ground(0).toFixed(1)} `;
+      let x = 0;
+      while (x < W) {
+        const w = 6 + rnd() * 12;
+        // open plekken in het bos
+        if (rnd() < .08) { x += w * 3; d += `L${x.toFixed(1)},${ground(x).toFixed(1)} `; continue; }
+        const h = tree * (.35 + rnd() * .9), mid = x + w / 2, top = ground(mid) - h;
+        if (rnd() < .55) d += `L${mid.toFixed(1)},${top.toFixed(1)} `; // naaldboom: spits
+        else d += `Q${(x - 2).toFixed(1)},${top.toFixed(1)} ${mid.toFixed(1)},${top.toFixed(1)} Q${(x + w + 2).toFixed(1)},${top.toFixed(1)} ${(x + w).toFixed(1)},${(ground(x + w) - h * .3).toFixed(1)} `; // loofboom: rond
+        x += w;
+        d += `L${x.toFixed(1)},${(ground(x) - h * .2).toFixed(1)} `;
+      }
+      return d + `L${W},${H} Z`;
+    }
+    const defs = svgEl('defs', {}, svg);
+    defs.innerHTML = '<linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9c6c0" stop-opacity="0"/><stop offset=".5" stop-color="#c9c6c0" stop-opacity=".18"/><stop offset="1" stop-color="#c9c6c0" stop-opacity="0"/></linearGradient>';
+    svgEl('path', { d: ridge(150, 22, 260, 6, 11), fill: 'var(--hill-far)' }, svg);
+    // burcht op de middelste heuvel
+    const castle = svgEl('g', { fill: 'var(--hill-mid)' }, svg);
+    castle.innerHTML = `
+      <path d="M1040,170 L1060,128 L1075,118 L1180,116 L1200,132 L1222,170 Z"/>
+      <rect x="1070" y="86" width="120" height="36"/>
+      <rect x="1078" y="58" width="26" height="40"/><polygon points="1074,60 1091,30 1108,60"/>
+      <rect x="1118" y="34" width="38" height="56"/><path d="M1118,34 h6 v-6 h6 v6 h7 v-6 h6 v6 h7 v-6 h6 v6 Z"/>
+      <rect x="1166" y="64" width="22" height="30"/><polygon points="1162,66 1177,42 1192,66"/>
+      <path d="M1070,86 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v-5 h6 v5 h6 v4 h-120 Z"/>
+      <rect x="1136" y="10" width="2" height="20"/>`;
+    svgEl('path', { d: 'M1138,10 l16,5 l-16,5 Z', fill: '#7b201c' }, svg);
+    const win = svgEl('g', { fill: '#e9b85a', opacity: 'var(--stars)' }, svg);
+    win.innerHTML = '<rect x="1088" y="70" width="4" height="8" rx="2"/><rect x="1134" y="48" width="5" height="9" rx="2.5"/><rect x="1134" y="68" width="5" height="9" rx="2.5"/><rect x="1175" y="74" width="4" height="7" rx="2"/>';
+    svgEl('path', { d: ridge(186, 18, 210, 14, 23), fill: 'var(--hill-mid)' }, svg);
+    svgEl('rect', { x: 0, y: 176, width: W, height: 40, fill: 'url(#mist)', opacity: .5 }, svg); // nevel
+    svgEl('path', { d: ridge(222, 12, 180, 24, 37), fill: 'var(--hill-near)' }, svg);
+  })();
+
+  const rootStyle = document.documentElement.style;
+  function paintSky(date) {
+    const el = sunElevation(date);
+    const [top, bot] = skyAt(el);
+    const day = clamp((el + 6) / 14, 0, 1);
+    rootStyle.setProperty('--sky-top', top);
+    rootStyle.setProperty('--sky-bot', bot);
+    rootStyle.setProperty('--stars', clamp((-el - 3) / 8, 0, 1).toFixed(3));
+    // luchtperspectief: verre heuvels nemen de kleur van de lucht aan
+    rootStyle.setProperty('--hill-far', mix(bot, mix('#1d2430', '#8a9a72', day), .45));
+    rootStyle.setProperty('--hill-mid', mix(bot, mix('#141a1e', '#5d7148', day), .62));
+    rootStyle.setProperty('--hill-near', mix('#0e110e', '#3f5534', day));
+  }
+
+  /* =========================================================
+     DE VOLVELLE (klok)
+     ========================================================= */
+  const Clock = (() => {
+    const svg = $('#orloj');
+    const angle = h => (h - 12) * 15;                         // graden, met de klok mee vanaf boven
+    const pt = (r, h) => { const a = angle(h) * Math.PI / 180; return [r * Math.sin(a), -r * Math.cos(a)]; };
+    const f = n => n.toFixed(2);
+
+    const ticks = $('#ticks'), nums = $('#numerals');
+    for (let q = 0; q < 96; q++) {
+      const h = q / 4, major = q % 4 === 0;
+      const [x1, y1] = pt(major ? 150 : 158, h), [x2, y2] = pt(166, h);
+      svgEl('line', { x1: f(x1), y1: f(y1), x2: f(x2), y2: f(y2), stroke: '#2a1f16', 'stroke-width': major ? 1.4 : .7 }, ticks);
+    }
+    for (let h = 1; h <= 24; h++) {
+      const [x, y] = pt(177, h);
+      const t = svgEl('text', { x: f(x), y: f(y) }, nums);
+      t.textContent = toRoman(h);
+      if (h === 24 || h === 12) { t.setAttribute('font-size', '16'); t.setAttribute('fill', '#a2302a'); }
+    }
+
+    // feestband
+    const arc = (r1, r2, h1, h2) => {
+      const [a, b] = pt(r2, h1), [c, d] = pt(r2, h2), [e, g] = pt(r1, h2), [i, j] = pt(r1, h1);
+      const large = (h2 - h1) * 15 > 180 ? 1 : 0;
+      return `M${f(a)},${f(b)} A${r2},${r2} 0 ${large} 1 ${f(c)},${f(d)} L${f(e)},${f(g)} A${r1},${r1} 0 ${large} 0 ${f(i)},${f(j)} Z`;
+    };
+    $('#party-band').setAttribute('d', arc(151, 166, CONFIG.partyFrom, CONFIG.partyTo));
+
+    // programma-ruitjes op de band
+    for (const [h, title] of CONFIG.program) {
+      if (h === CONFIG.partyFrom) continue;
+      const [x, y] = pt(158.5, h);
+      const g = svgEl('g', { transform: `translate(${f(x)},${f(y)}) rotate(${angle(h)})` }, $('#marks'));
+      svgEl('path', { d: 'M0,-6 L4,0 L0,6 L-4,0 Z', fill: '#efe2c2', stroke: '#2a1f16', 'stroke-width': 1 }, g);
+      svgEl('title', {}, g).textContent = fmtH(h) + ' — ' + title;
+    }
+
+    // vaantje bij 16:00
+    (function pennant() {
+      const g = $('#pennant');
+      const [x, y] = pt(199, CONFIG.partyFrom);
+      const grp = svgEl('g', { transform: `translate(${f(x)},${f(y)}) rotate(${angle(CONFIG.partyFrom)})`, filter: 'url(#inky)' }, g);
+      svgEl('line', { x1: 0, y1: 6, x2: 0, y2: -24, stroke: '#2a1f16', 'stroke-width': 2 }, grp);
+      svgEl('path', { d: 'M0,-24 L30,-18 L22,-13 L30,-8 L0,-6 Z', fill: '#a2302a', stroke: '#2a1f16', 'stroke-width': 1 }, grp);
+      const lbl = svgEl('g', { transform: `translate(${f(x)},${f(y)})` }, g);
+      const t = svgEl('text', { x: 26, y: -20, 'font-family': 'Grenze Gotisch, Georgia, serif', 'font-weight': 800, 'font-size': 17, fill: '#a2302a' }, lbl);
+      t.textContent = 'Feest!';
+    })();
+
+    // zonnestralen: afwisselend recht en golvend, zoals in handschriften
+    const rays = $('#rays');
+    for (let i = 0; i < 16; i++) {
+      svgEl('path', { d: i % 2 ? 'M-3,-14 Q3,-20 -1,-25 Q4,-21 3,-14 Z' : 'M-4,-14 L0,-29 L4,-14 Z', transform: `rotate(${i * 22.5})` }, rays);
+    }
+
+    // hemelschijf: elke 10 minuten een taartpunt, als waterverf gekleurd naar de echte zonshoogte
+    let discDay = null;
+    function paintDisc(day) {
+      const key = dayStart(day).getTime();
+      if (key === discDay) return;
+      discDay = key;
+      const disc = $('#disc'), starsG = $('#disc-stars');
+      disc.textContent = ''; starsG.textContent = '';
+      for (let s = 0; s < 144; s++) {
+        const h1 = s / 6 - .03, h2 = (s + 1) / 6 + .03;
+        const [a, b] = pt(150, h1), [c, d] = pt(150, h2);
+        svgEl('path', { d: `M0,0 L${f(a)},${f(b)} A150,150 0 0 1 ${f(c)},${f(d)} Z`, fill: washAt(sunElevation(atHours(day, (s + .5) / 6))) }, disc);
+      }
+      // okergele sterretjes in het nachtdeel
+      const rnd = seeded(26);
+      for (let i = 0; i < 34; i++) {
+        const h = rnd() * 24, r = 46 + rnd() * 96;
+        if (sunElevation(atHours(day, h)) > -9) continue;
+        const [x, y] = pt(r, h), s = 2 + rnd() * 2;
+        svgEl('path', { d: `M${f(x)},${f(y - s)} L${f(x + s * .3)},${f(y - s * .3)} L${f(x + s)},${f(y)} L${f(x + s * .3)},${f(y + s * .3)} L${f(x)},${f(y + s)} L${f(x - s * .3)},${f(y + s * .3)} L${f(x - s)},${f(y)} L${f(x - s * .3)},${f(y - s * .3)} Z`, fill: '#d9a548' }, starsG);
+      }
+      // horizonstreepjes bij zonsopgang en -ondergang
+      const { rise, set } = sunTimes(day);
+      for (const h of [rise, set]) {
+        if (h == null) continue;
+        const [x1, y1] = pt(118, h), [x2, y2] = pt(150, h);
+        svgEl('line', { x1: f(x1), y1: f(y1), x2: f(x2), y2: f(y2), stroke: '#2a1f16', 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: .7 }, starsG);
+      }
+    }
+
+    // maan: een kortere wijzer, ongeveer waar de maan aan de hemel staat
+    const moonPath = (p, r) => {
+      const k = Math.cos(2 * Math.PI * p), rx = Math.abs(k) * r;
+      return `M0,${-r} A${r},${r} 0 0 1 0,${r} A${f(rx)},${r} 0 0 ${k > 0 ? 0 : 1} 0,${-r} Z`;
+    };
+    function drawMoon(h, p) {
+      const g = $('#moon-hand'); g.textContent = '';
+      g.setAttribute('transform', `rotate(${f(angle(h))})`);
+      svgEl('line', { x1: 0, y1: 0, x2: 0, y2: -81, stroke: '#2a1f16', 'stroke-width': 1.2, opacity: .8 }, g);
+      const m = svgEl('g', { transform: `translate(0,-92) rotate(${f(-angle(h))})` }, g);
+      svgEl('circle', { r: 11, fill: '#55606e', stroke: '#2a1f16', 'stroke-width': 1.2 }, m);
+      svgEl('path', { d: moonPath(p, 11), fill: '#e9e4d6', transform: p < .5 ? '' : 'scale(-1,1)' }, m);
+      svgEl('circle', { r: 11, fill: 'none', stroke: '#2a1f16', 'stroke-width': 1.2 }, m);
+    }
+
+    let preview = null; // uren, of null = nu
+    const handle = $('#handle');
+    function render() {
+      const t = now();
+      const h = preview ?? localHours(t);
+      paintDisc(t);
+      $('#hand').setAttribute('transform', `rotate(${f(angle(h))})`);
+      const p = moonPhase(t);
+      drawMoon((h + p * 24) % 24, p);
+      paintSky(preview == null ? t : atHours(t, h));
+      $('#dial-time').textContent = fmtH(h);
+      let note = '';
+      if (preview != null) {
+        const hh = h < CONFIG.partyTo - 24 ? h + 24 : h;
+        const item = CONFIG.program.find(([ph]) => Math.abs(ph - hh) < 1 / 60);
+        const inParty = hh >= CONFIG.partyFrom && hh < CONFIG.partyTo;
+        note = item ? item[1] : inParty ? 'Feesttijd' : '';
+      }
+      $('#dial-note').textContent = note;
+      handle.setAttribute('aria-valuenow', Math.round(h * 60) % 1440);
+      handle.setAttribute('aria-valuetext', fmtH(h) + (note ? ' — ' + note : ''));
+    }
+
+    // slepen, met vastklikken op de programma-uren
+    let dragging = false, back = null;
+    const snaps = CONFIG.program.map(([h]) => h % 24);
+    function hoursFromEvent(e) {
+      const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+      const q = p.matrixTransform(svg.getScreenCTM().inverse());
+      const a = Math.atan2(q.x, -q.y) * 180 / Math.PI;
+      let h = ((a / 15 + 12) % 24 + 24) % 24;
+      for (const s of snaps) if (Math.abs(h - s) < .12) h = s;
+      return h;
+    }
+    function returnToNow(delay = 0) {
+      cancelAnimationFrame(back); clearTimeout(returnToNow.t);
+      returnToNow.t = setTimeout(() => {
+        if (preview == null) return;
+        const from = preview, t0 = performance.now(), dur = reduceMotion ? 1 : 900;
+        const delta = ((localHours(now()) - from + 36) % 24) - 12; // kortste weg rond de wijzerplaat
+        const step = ts => {
+          const k = clamp((ts - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
+          preview = ((from + delta * e) % 24 + 24) % 24;
+          render();
+          if (k < 1) back = requestAnimationFrame(step); else { preview = null; render(); }
+        };
+        back = requestAnimationFrame(step);
+      }, delay);
+    }
+    handle.addEventListener('pointerdown', e => {
+      dragging = true; cancelAnimationFrame(back); clearTimeout(returnToNow.t);
+      handle.setPointerCapture(e.pointerId); svg.classList.add('dragging');
+      $('#clock-cap').textContent = 'Laat los, en de zon keert terug naar het nu.';
+      e.preventDefault();
+    });
+    handle.addEventListener('pointermove', e => { if (!dragging) return; preview = hoursFromEvent(e); render(); });
+    const end = () => { if (!dragging) return; dragging = false; svg.classList.remove('dragging'); caption(); returnToNow(500); };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+    handle.addEventListener('keydown', e => {
+      const cur = preview ?? localHours(now());
+      let h = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') h = cur + (e.shiftKey ? 1 : .25);
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') h = cur - (e.shiftKey ? 1 : .25);
+      else if (e.key === 'Home') h = CONFIG.partyFrom;
+      else if (e.key === 'Escape') { preview = null; render(); return; }
+      if (h == null) return;
+      e.preventDefault(); cancelAnimationFrame(back);
+      preview = ((Math.round(h * 4) / 4) % 24 + 24) % 24;
+      render(); returnToNow(4000);
+    });
+    handle.addEventListener('blur', () => returnToNow(0));
+
+    function caption() {
+      const t = now(), { rise, set } = sunTimes(t), p = moonPhase(t);
+      const pct = Math.round((1 - Math.cos(2 * Math.PI * p)) / 2 * 100);
+      const parts = [];
+      if (rise != null && set != null) parts.push(`Vandaag: zon op ${fmtH(rise)}, onder ${fmtH(set)}`);
+      parts.push(`maan ${pct}% ${p < .5 ? 'wassend' : 'afnemend'}`);
+      $('#clock-cap').textContent = parts.join(' · ') + '. Sleep de zon langs de wijzerplaat.';
+    }
+    return { render, caption, isPreview: () => preview != null };
+  })();
+
+  /* =========================================================
+     AFTELLEN
+     ========================================================= */
+  let roman = store.get('feestje.roman', false);
+  function tick() {
+    const t = now(), cd = $('#cd');
+    const units = (ms, withDays) => {
+      let s = Math.max(0, Math.floor(ms / 1000));
+      const d = Math.floor(s / 86400); s -= d * 86400;
+      const h = Math.floor(s / 3600); s -= h * 3600;
+      const m = Math.floor(s / 60); s -= m * 60;
+      const cell = (n, lab, plain) => `<div class="cd-unit"><div class="cd-num${roman ? ' roman' : ''}">${roman ? toRoman(n) : plain ? n : pad(n)}</div><div class="cd-lab">${lab}</div></div>`;
+      return `<div class="countdown">${withDays && d > 0 ? cell(d, d === 1 ? 'dag' : 'dagen', true) : ''}${cell(h, 'uur')}${cell(m, 'min')}${cell(s, 'sec')}</div>`;
+    };
+    let html;
+    if (t < CONFIG.start) {
+      html = `<p class="cd-label">Nog</p>${units(CONFIG.start - t, true)}<p class="cd-label">tot de poort opengaat: <strong>donderdag 31 december, 16:00</strong></p>`;
+    } else if (t < CONFIG.midnight) {
+      html = `<p class="cd-msg">Het feest is begonnen!</p>${units(CONFIG.midnight - t, false)}<p class="cd-label">tot het nieuwe jaar wordt ingeluid</p>`;
+    } else if (t < CONFIG.end) {
+      html = `<p class="cd-msg">Zalig nieuwjaar!</p><p class="cd-label"><strong>Anno Domini MMXXVII</strong>. Moge uw zwaard scherp en uw beker vol zijn.</p>`;
+    } else {
+      html = `<p class="cd-msg">Het feest is gevierd</p><p class="cd-label">Dank u, edele gasten. Tot een volgend gastmaal.</p>`;
+    }
+    if (cd.dataset.last !== html) { cd.innerHTML = html; cd.dataset.last = html; }
+    $('#roman').hidden = t >= CONFIG.midnight;
+    if (!Clock.isPreview()) Clock.render();
+    markNow(t);
+  }
+  const setRomanLabel = () => { $('#roman').setAttribute('aria-pressed', roman); $('#roman').textContent = roman ? 'Gewone cijfers' : 'Romeinse cijfers'; };
+  setRomanLabel();
+  $('#roman').addEventListener('click', () => { roman = !roman; store.set('feestje.roman', roman); setRomanLabel(); tick(); });
+
+  // zonsondergang op de feestdag, voor in de brief (altijd in Belgische/Nederlandse tijd: 31 dec = UTC+1)
+  (function sunsetLine() {
+    const t0 = Date.UTC(2026, 11, 31, 11); // 12:00 CET
+    let set = null;
+    for (let m = 0; m < 480; m++) if (sunElevation(new Date(t0 + m * 60e3)) < -0.833) { set = 12 + m / 60; break; }
+    if (set == null) return;
+    $('#sunset-line').textContent = set > CONFIG.partyFrom
+      ? `Die dag gaat de zon om ${fmtH(set)} onder: wie om vier uur binnenrijdt, ziet het laatste licht nog.`
+      : `De zon is dan al onder (${fmtH(set)}), dus neem een fakkel mee.`;
+  })();
+
+  /* =========================================================
+     DE GETIJDEN
+     ========================================================= */
+  (function hours() {
+    const ol = $('#hours');
+    for (const [h, title, desc] of CONFIG.program) {
+      const li = document.createElement('li');
+      li.dataset.h = h;
+      li.innerHTML = `<div class="when"><b>${toRoman(Math.floor(h))}</b><small>${fmtH(h)}</small></div><div><h3>${title}</h3><p>${desc}</p></div>`;
+      ol.appendChild(li);
+    }
+  })();
+  function markNow(t) {
+    const base = Date.UTC(2026, 11, 30, 23); // 31 dec 00:00 CET
+    const hh = (t - base) / 3600e3;
+    let cur = null;
+    if (hh >= CONFIG.program[0][0] && hh < CONFIG.partyTo) for (const [h] of CONFIG.program) if (hh >= h) cur = h;
+    for (const li of $('#hours').children) li.classList.toggle('now', +li.dataset.h === cur);
+  }
+
+  /* =========================================================
+     DE BRIEF
+     ========================================================= */
+  (function letter() {
+    let d = '';
+    for (let i = 0; i <= 64; i++) { // grillige lakrand
+      const a = i / 64 * Math.PI * 2;
+      const r = 50 + 3.2 * Math.sin(a * 7) + 2 * Math.sin(a * 11 + 1.3) + 1.2 * Math.sin(a * 23 + .4);
+      d += (i ? 'L' : 'M') + (r * Math.cos(a)).toFixed(2) + ',' + (r * Math.sin(a)).toFixed(2);
+    }
+    $('#wax-blob').setAttribute('d', d + 'Z');
+    const box = $('#brief'), seal = $('#seal');
+    const setOpen = (open, focus) => {
+      box.classList.toggle('open', open);
+      seal.setAttribute('aria-expanded', open);
+      $('#proc').inert = !open;
+      $('.letter-closed').inert = open;
+      store.set('feestje.zegel', open);
+      if (focus) setTimeout(() => (open ? $('#proc .proc') : seal).focus?.(), 900);
+    };
+    $('#proc .proc').tabIndex = -1;
+    setOpen(store.get('feestje.zegel', false), false);
+    seal.addEventListener('click', () => setOpen(true, true));
+    $('#reseal').addEventListener('click', () => setOpen(false, true));
+  })();
+
+  /* =========================================================
+     STAND & WAPENSCHILD
+     ========================================================= */
+  const STANDS = [
+    ['ridder', 'Ridder', 'Zwaard, eer, cape', 'Een tuniek met uw wapen erop, een brede riem en een cape. Gebreide maliën tellen gewoon mee, net als een helm van karton.'],
+    ['edel', 'Edele', 'Fluweel en ringen', 'Fluweel, nepbont, een hoofdband of kroontje en veel te veel ringen. Kijk een beetje neer op de rest.'],
+    ['boer', 'Boer of boerin', 'Linnen en modder', 'Linnen of jute, een schort, een strohoed of hoofddoek. Modder naar smaak, een hooivork op eigen risico.'],
+    ['kruid', 'Kruidenvrouw', 'Kruiden en geheimen', 'Een omslagdoek, buideltjes met kruiden aan de riem en een blik alsof u weet wat er in de stoofpot zit.'],
+    ['monnik', 'Monnik of non', 'Pij en koord', 'Een bruine pij, of een badjas met een koord. De zwijgplicht is optioneel; brandewijn stoken mag.'],
+    ['rover', 'Rover', 'Kap en buit', 'Een kap of capuchon, een doek voor de mond en een verdacht volle buidel. Verlaat het feest met meer dan u bracht.'],
+    ['speelman', 'Speelman', 'Bellen en luit', 'Bont en gestreept, belletjes, een luit (of ukelele). Elk lied over de gastgevers moet lovend zijn.'],
+    ['smid', 'Smid', 'Schort en roet', 'Een leren schort, opgerolde mouwen, roet op de wangen. Een hamer van schuim is welkom, een aambeeld niet.'],
+  ];
+  const TINCT = {
+    or:      ['Goud',   '#c99a3a', 1],
+    argent:  ['Zilver', '#efe8d8', 1],
+    gules:   ['Rood',   '#a2302a', 0],
+    azure:   ['Blauw',  '#3b5a87', 0],
+    vert:    ['Groen',  '#4a6b3c', 0],
+    sable:   ['Zwart',  '#2a2420', 0],
+    purpure: ['Purper', '#6b4a78', 0],
+  };
+  const DIVS = { plain: 'Effen', pale: 'Gedeeld', fess: 'Doorsneden', bend: 'Geschuind', quarterly: 'Gevierendeeld', chevron: 'Keper' };
+  const CHARGES = { none: 'Geen', ster: 'Ster', kruis: 'Kruis', maan: 'Maan', zwaard: 'Zwaard', kroon: 'Kroon', roos: 'Roos', beker: 'Beker' };
+  const PLACES = ['Skalice', 'Rataje', 'Talmberk', 'Sázava', 'Úžice', 'Ledečko', 'Mrchojedy', 'Samopše', 'Kutná Hora', 'Pirkštejn', 'Sedlec', 'Zbořený Kostelec', 'Malešov', 'Rataje nad Sázavou'];
+  const SHIELD = 'M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z';
+
+  function chargeMarkup(ch, fill) {
+    const st = `fill="${fill}" stroke="#2a1f16" stroke-width="2.5" stroke-linejoin="round"`;
+    switch (ch) {
+      case 'ster': {
+        let p = '';
+        for (let i = 0; i < 10; i++) { const r = i % 2 ? 16 : 40, a = -Math.PI / 2 + i * Math.PI / 5; p += `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)} `; }
+        return `<polygon points="${p}" ${st}/>`;
+      }
+      case 'kruis': return `<path d="M-11,-48 H11 V-11 H48 V11 H11 V48 H-11 V11 H-48 V-11 H-11 Z" ${st}/>`;
+      case 'maan': return `<path d="M-36,-14 A38,38 0 1 0 36,-14 A40,40 0 0 1 -36,-14 Z" ${st}/>`;
+      case 'zwaard': return `<g ${st}><path d="M-6,-54 L0,-64 L6,-54 V22 H-6 Z"/><rect x="-26" y="22" width="52" height="8" rx="2"/><rect x="-4" y="30" width="8" height="18"/><circle cy="54" r="7"/></g>`;
+      case 'kroon': return `<g ${st}><path d="M-42,18 V-22 L-21,0 L0,-34 L21,0 L42,-22 V18 Z"/><rect x="-42" y="18" width="84" height="13"/><circle cx="-42" cy="-26" r="5"/><circle cx="0" cy="-38" r="5"/><circle cx="42" cy="-26" r="5"/></g>`;
+      case 'roos': {
+        let c = '';
+        for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; c += `<circle cx="${(22 * Math.cos(a)).toFixed(1)}" cy="${(22 * Math.sin(a)).toFixed(1)}" r="17"/>`; }
+        return `<g ${st}>${c}</g><circle r="11" fill="#c99a3a" stroke="#2a1f16" stroke-width="2.5"/>`;
+      }
+      case 'beker': return `<path d="M-30,-44 H30 C30,-6 14,4 5,8 V30 H20 V42 H-20 V30 H-5 V8 C-14,4 -30,-6 -30,-44 Z" ${st}/>`;
+      default: return '';
+    }
+  }
+  // rough = met eigen "handgetekend"-filter (ook nodig in de losse PNG-export, waar #inky niet bestaat)
+  function shieldMarkup(s, uid, withBanner, title, rough) {
+    const t1 = TINCT[s.t1][1], t2 = TINCT[s.t2][1], c = TINCT[s.c][1];
+    const div = {
+      plain: '',
+      pale: `<rect x="100" y="0" width="100" height="240" fill="${t2}"/>`,
+      fess: `<rect x="0" y="112" width="200" height="130" fill="${t2}"/>`,
+      bend: `<polygon points="0,0 0,240 200,240 200,226" fill="${t2}"/>`,
+      quarterly: `<rect x="100" y="0" width="100" height="112" fill="${t2}"/><rect x="0" y="112" width="100" height="130" fill="${t2}"/>`,
+      chevron: `<polygon points="0,182 100,78 200,182 200,228 100,124 0,228" fill="${t2}"/>`,
+    }[s.div];
+    const fil = rough ? `filter="url(#rf-${uid})"` : '';
+    let out = `<defs><clipPath id="cp-${uid}"><path d="${SHIELD}"/></clipPath>
+      <linearGradient id="sh-${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#3a2410" stop-opacity=".22"/></linearGradient>
+      ${rough ? `<filter id="rf-${uid}" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="5"/><feDisplacementMap in="SourceGraphic" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>` : ''}</defs>
+      <g ${fil}><g clip-path="url(#cp-${uid})"><rect width="200" height="240" fill="${t1}"/>${div}
+      <g transform="translate(100,112)">${chargeMarkup(s.ch, c)}</g>
+      <rect width="200" height="240" fill="url(#sh-${uid})"/></g>
+      <path d="${SHIELD}" fill="none" stroke="#2a1f16" stroke-width="5" stroke-linejoin="round"/></g>`;
+    if (withBanner) {
+      const size = title.length > 26 ? 10 : title.length > 20 ? 12 : 14;
+      out += `<g ${fil}><path d="M4,254 H196 L186,268 L196,282 H4 L14,268 Z" fill="#f1e3c2" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round"/></g>
+        <text x="100" y="269" text-anchor="middle" dominant-baseline="central" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="${size}" fill="#2a1f16">${title.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]))}</text>`;
+    }
+    return out;
+  }
+
+  (function herald() {
+    const s = Object.assign({ stand: 'ridder', t1: 'azure', t2: 'or', div: 'plain', ch: 'ster', c: 'or', name: '', placeShift: 0 }, store.get('feestje.wapen', {}));
+    const hash = str => [...str.toLowerCase()].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
+    const place = () => PLACES[(hash(s.name || 'gast') + s.placeShift) % PLACES.length];
+    const nameOr = () => s.name.trim() || 'Gast';
+    const title = () => `${nameOr()} van ${place()}`;
+
+    const box = $('#stands');
+    for (const [id, name, short] of STANDS) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'stand'; b.dataset.id = id;
+      b.innerHTML = `<b>${name}</b><span>${short}</span>`;
+      b.addEventListener('click', () => { s.stand = id; update(); });
+      box.appendChild(b);
+    }
+    function swatches(el, key) {
+      el.textContent = '';
+      for (const [k, [name, hex, metal]] of Object.entries(TINCT)) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'sw'; b.style.background = hex; b.title = name;
+        b.setAttribute('aria-label', name + (metal ? ' (metaal)' : ''));
+        b.setAttribute('aria-pressed', s[key] === k);
+        b.addEventListener('click', () => { s[key] = k; update(); });
+        el.appendChild(b);
+      }
+    }
+    function minis(el, key, entries) {
+      el.textContent = '';
+      for (const [k, name] of Object.entries(entries)) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'mini'; b.title = name;
+        b.setAttribute('aria-label', name);
+        b.setAttribute('aria-pressed', s[key] === k);
+        b.innerHTML = `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(Object.assign({}, s, { [key]: k }), 'm' + key + k, false)}</svg>`;
+        b.addEventListener('click', () => { s[key] = k; update(); });
+        el.appendChild(b);
+      }
+    }
+    function update() {
+      store.set('feestje.wapen', s);
+      const st = STANDS.find(x => x[0] === s.stand) || STANDS[0];
+      for (const b of box.children) b.setAttribute('aria-pressed', b.dataset.id === s.stand);
+      $('#dracht').innerHTML = `<b>${st[1]}.</b> ${st[3]}`;
+      $('#shield').innerHTML = shieldMarkup(s, 'big', true, title(), true);
+      $('#herald-title').innerHTML = `${title()}<small>${st[1].toLowerCase()}, ten jare MMXXVI</small>`;
+      swatches($('#opt-t1'), 't1'); swatches($('#opt-t2'), 't2'); swatches($('#opt-c'), 'c');
+      minis($('#opt-div'), 'div', DIVS); minis($('#opt-ch'), 'ch', CHARGES);
+      $('#fs-t2').hidden = s.div === 'plain';
+      $('#fs-c').hidden = s.ch === 'none';
+    }
+    // dobbelen, met respect voor de tinctuurregel: geen metaal op metaal, geen kleur op kleur
+    function roll() {
+      const pick = a => a[Math.floor(Math.random() * a.length)];
+      const keys = Object.keys(TINCT);
+      const metals = keys.filter(k => TINCT[k][2]), colours = keys.filter(k => !TINCT[k][2]);
+      s.t1 = pick(keys);
+      const t1metal = TINCT[s.t1][2];
+      s.div = pick(Object.keys(DIVS));
+      s.t2 = pick(t1metal ? colours : metals);
+      s.ch = pick(Object.keys(CHARGES).filter(k => k !== 'none'));
+      s.c = s.div === 'plain' ? pick(t1metal ? colours : metals) : pick(keys.filter(k => k !== s.t1 && k !== s.t2));
+      update();
+    }
+    const input = $('#naam');
+    input.value = s.name;
+    input.addEventListener('input', () => { s.name = input.value; update(); });
+    $('#reroll-place').addEventListener('click', () => { s.placeShift++; update(); });
+    $('#dice').addEventListener('click', roll);
+
+    // als afbeelding bewaren (deelbaar in de groepsapp)
+    $('#save-arms').addEventListener('click', async () => {
+      const W = 600, H = 876;
+      const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 240 332" width="${W}" height="${H}"><rect x="-20" y="-20" width="240" height="332" fill="#ead9b4"/>${shieldMarkup(s, 'x', true, title(), true)}</svg>`;
+      const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+      try {
+        const img = new Image();
+        await new Promise((ok, fail) => { img.onload = ok; img.onerror = fail; img.src = url; });
+        const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        cv.getContext('2d').drawImage(img, 0, 0, W, H);
+        const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+        const fname = 'wapen-' + (nameOr().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'gast') + '.png';
+        const file = new File([blob], fname, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: title() }).catch(() => {});
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob); a.download = fname; a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        }
+      } catch (err) {
+        console.warn('Wapen bewaren mislukt', err);
+      } finally { URL.revokeObjectURL(url); }
+    });
+    update();
+  })();
+
+  /* =========================================================
+     BOOGSCHIETEN — zonder vizier, zoals het hoort (bijna)
+     ========================================================= */
+  (function archery() {
+    const cv = $('#boog'), ctx = cv.getContext('2d');
+    const W = 640, H = 360, TX = 430, TY = 168, TR = 100, SHOTS = 5, BOW = [78, 300];
+    const INK = '#2a1f16';
+    let wind = [0, 0], drawing = false, drawT0 = 0, curAmp = 70, arrows = [], flying = null, pops = [];
+    let score = 0, shots = 0, best = store.get('feestje.boog', 0), visible = false, raf = null;
+    const msg = html => { $('#range-msg').innerHTML = html; };
+    const newWind = () => { wind = [(Math.random() * 2 - 1) * 42, (Math.random() * 2 - 1) * 28]; };
+    newWind();
+
+    function size() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const w = cv.clientWidth || W;
+      cv.width = Math.round(w * dpr); cv.height = Math.round(w * H / W * dpr);
+      ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+    }
+    function targetAmp(t) {
+      if (!drawing) return 72;
+      const s = (t - drawT0) / 1000;
+      if (s < 1) return 72 - 36 * s;     // inspannen: steeds rustiger
+      if (s < 2.3) return 36;            // het moment
+      return Math.min(120, 36 + (s - 2.3) * 48); // en dan gaan de armen trillen
+    }
+    function aim(t) {
+      const k = t / 1000, a = curAmp;
+      return [
+        TX + wind[0] + a * (.8 * Math.sin(k * 1.1) + .45 * Math.sin(k * 2.7 + 1) + .2 * Math.sin(k * 6.3 + 2)) / 1.45,
+        TY + wind[1] + a * (.7 * Math.sin(k * 1.5 + .5) + .4 * Math.sin(k * 3.3) + .2 * Math.sin(k * 7.1 + 1)) / 1.3,
+      ];
+    }
+    const RINGS = ['#efe6cf', '#efe6cf', '#2a2420', '#2a2420', '#3b5a87', '#3b5a87', '#a2302a', '#a2302a', '#c99a3a', '#c99a3a'];
+    // vaste "handgetekende" heuvels en grassprietjes
+    const rnd = seeded(77);
+    const grass = Array.from({ length: 70 }, () => [rnd() * W, 230 + rnd() * 125, 4 + rnd() * 6, rnd() - .5]);
+    const hill = (y0, a, f, ph) => { const p = []; for (let x = 0; x <= W; x += 10) p.push([x, y0 + a * Math.sin(x / f + ph) + a * .4 * Math.sin(x / (f * .37) + ph * 2)]); return p; };
+    const far = hill(196, 9, 90, 1), near = hill(222, 6, 70, 3);
+
+    function poly(pts, fill) {
+      ctx.beginPath(); ctx.moveTo(0, H); for (const [x, y] of pts) ctx.lineTo(x, y); ctx.lineTo(W, H); ctx.closePath();
+      ctx.fillStyle = fill; ctx.fill();
+      ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.stroke();
+    }
+    function scene(t) {
+      ctx.fillStyle = '#ecdcb6'; ctx.fillRect(0, 0, W, H);
+      poly(far, '#bdb88e'); poly(near, '#a6a46f');
+      ctx.strokeStyle = 'rgba(42,31,22,.55)'; ctx.lineWidth = 1;
+      for (const [x, y, h, lean] of grass) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + lean * 4, y - h); ctx.stroke(); }
+      // standaard en strobaal
+      ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.fillStyle = '#7a5634';
+      for (const [x1, x2] of [[-50, -78], [50, 78], [0, 22]]) {
+        ctx.beginPath(); ctx.moveTo(TX + x1 - 3, TY + 70); ctx.lineTo(TX + x2 - 3, TY + 168); ctx.lineTo(TX + x2 + 3, TY + 168); ctx.lineTo(TX + x1 + 3, TY + 70); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(TX, TY, TR + 14, 0, Math.PI * 2); ctx.fillStyle = '#d4b46a'; ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(42,31,22,.45)'; ctx.lineWidth = 1;
+      for (let i = 0; i < 18; i++) { ctx.beginPath(); ctx.arc(TX, TY, TR + 3 + (i % 3) * 4, i * .35, i * .35 + .4); ctx.stroke(); }
+      for (let i = 0; i < 10; i++) {
+        ctx.beginPath(); ctx.arc(TX, TY, TR * (10 - i) / 10, 0, Math.PI * 2);
+        ctx.fillStyle = RINGS[i]; ctx.fill();
+        ctx.strokeStyle = i === 2 || i === 3 ? 'rgba(239,230,207,.5)' : INK; ctx.lineWidth = 1; ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(TX, TY, TR, 0, Math.PI * 2); ctx.strokeStyle = INK; ctx.lineWidth = 1.6; ctx.stroke();
+      for (const a of arrows) drawStuck(a.x, a.y);
+      if (flying) {
+        const k = clamp((t - flying.t) / 240, 0, 1);
+        const pos = k => [BOW[0] + (flying.x - BOW[0]) * k, BOW[1] + (flying.y - BOW[1]) * k - Math.sin(k * Math.PI) * 40];
+        const [x, y] = pos(k), [px, py] = pos(Math.max(0, k - .05));
+        const len = 60 * (1 - k * .75), ang = Math.atan2(y - py, x - px);
+        ctx.strokeStyle = INK; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(ang) * len, y - Math.sin(ang) * len); ctx.stroke();
+        if (k >= 1) land();
+      }
+      ctx.textAlign = 'center'; ctx.font = '700 24px "Grenze Gotisch", Georgia, serif';
+      pops = pops.filter(p => t - p.t < 900);
+      for (const p of pops) {
+        const k = (t - p.t) / 900;
+        ctx.fillStyle = `rgba(162,48,42,${1 - k})`; ctx.strokeStyle = `rgba(243,231,203,${1 - k})`; ctx.lineWidth = 4;
+        ctx.strokeText(p.text, p.x, p.y - 30 - k * 26); ctx.fillText(p.text, p.x, p.y - 30 - k * 26);
+      }
+      // vizier (Hendrik had er geen; wij zijn mild)
+      if (shots < SHOTS && !flying) {
+        const [ax, ay] = aim(t);
+        ctx.strokeStyle = drawing ? 'rgba(42,31,22,.9)' : 'rgba(42,31,22,.38)'; ctx.lineWidth = drawing ? 2 : 1.5;
+        ctx.beginPath(); ctx.arc(ax, ay, 9, 0, Math.PI * 2);
+        ctx.moveTo(ax - 16, ay); ctx.lineTo(ax - 5, ay); ctx.moveTo(ax + 5, ay); ctx.lineTo(ax + 16, ay);
+        ctx.moveTo(ax, ay - 16); ctx.lineTo(ax, ay - 5); ctx.moveTo(ax, ay + 5); ctx.lineTo(ax, ay + 16); ctx.stroke();
+      }
+      // de boog
+      const pull = drawing ? clamp((t - drawT0) / 700, 0, 1) : 0;
+      ctx.save(); ctx.translate(BOW[0], BOW[1]); ctx.rotate(-.35);
+      ctx.strokeStyle = INK; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(-6, -72); ctx.quadraticCurveTo(38, 0, -6, 72); ctx.stroke();
+      ctx.strokeStyle = '#7a5634'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-6, -72); ctx.quadraticCurveTo(38, 0, -6, 72); ctx.stroke();
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(-6, -72); ctx.lineTo(-6 - pull * 34, 0); ctx.lineTo(-6, 72); ctx.stroke();
+      if (shots < SHOTS && !flying) {
+        ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(-6 - pull * 34, 0); ctx.lineTo(70 - pull * 34, 0); ctx.stroke();
+        ctx.fillStyle = '#a2302a'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(-6 - pull * 34, 0); ctx.lineTo(4 - pull * 34, -6); ctx.lineTo(10 - pull * 34, 0); ctx.lineTo(4 - pull * 34, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = '700 20px "Alegreya SC", Georgia, serif';
+      ctx.fillText(`Pijl ${Math.min(shots + 1, SHOTS)}/${SHOTS}   ·   ${score} punten`, 18, 32);
+      ctx.font = '700 15px "Alegreya SC", Georgia, serif'; ctx.fillStyle = '#a2302a';
+      ctx.fillText(`Beste ronde: ${best}`, 18, 54);
+    }
+    function drawStuck(x, y) {
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = INK; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 18, y + 10); ctx.stroke();
+      ctx.fillStyle = '#a2302a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 14, y + 8); ctx.lineTo(x - 26, y + 4); ctx.lineTo(x - 22, y + 13); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    function land() {
+      const { x, y } = flying; flying = null;
+      const dist = Math.hypot(x - TX, y - TY);
+      const pts = dist <= TR ? 10 - Math.floor(dist / (TR / 10)) : 0;
+      score += pts; shots++; newWind();
+      if (dist <= TR + 14) arrows.push({ x, y });
+      pops.push({ x, y, t: performance.now(), text: pts ? '+' + pts : 'mis!' });
+      if (shots >= SHOTS) finish();
+      else msg(pts >= 9 ? '<b>Raak!</b> Daar zou een hoofdman van de wacht trots op zijn.' : pts ? `${pts} punten. Nog ${SHOTS - shots} pijl${SHOTS - shots > 1 ? 'en' : ''}.` : 'In het hooi. De kippen schrikken op.');
+    }
+    function finish() {
+      if (score > best) { best = score; store.set('feestje.boog', best); }
+      const rank = score >= 50 ? 'Volmaakt. Zelfs de kapitein van Rataje buigt het hoofd.'
+        : score >= 40 ? 'Meesterschutter. Dat is een extra worst waard.'
+        : score >= 28 ? 'Degelijk. Goed genoeg voor de wacht van Talmberk.'
+        : score >= 15 ? 'U raakte het doel. Meestal.'
+        : score > 0 ? 'De kippen zijn gewaarschuwd.'
+        : 'Alle pijlen in het hooi. Misschien liever zwaardvechten?';
+      msg(`<b>${score} punten.</b> ${rank}`);
+    }
+    function start(t) {
+      if (shots >= SHOTS || flying || drawing) return;
+      drawing = true; drawT0 = t;
+      msg('Spannen… en <b>los</b> als het vizier op de roos hangt.');
+    }
+    function release(t) {
+      if (!drawing) return;
+      drawing = false;
+      if (t - drawT0 < 300) { msg('Te vlug! Houd vast om de boog te spannen.'); return; }
+      const [ax, ay] = aim(t);
+      const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) * 4;
+      flying = { x: ax + gauss(), y: ay + gauss(), t };
+    }
+    function reset() { newWind(); arrows = []; pops = []; score = 0; shots = 0; flying = null; drawing = false; msg('Houd ingedrukt om te spannen, laat los om te schieten. Vijf pijlen.'); }
+
+    cv.addEventListener('pointerdown', e => { e.preventDefault(); cv.focus({ preventScroll: true }); start(performance.now()); });
+    cv.addEventListener('pointerup', () => release(performance.now()));
+    cv.addEventListener('pointerleave', () => release(performance.now()));
+    cv.addEventListener('pointercancel', () => { drawing = false; });
+    cv.addEventListener('contextmenu', e => e.preventDefault());
+    cv.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) start(performance.now()); } });
+    cv.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); release(performance.now()); } });
+    $('#range-reset').addEventListener('click', reset);
+
+    function loop(t) {
+      curAmp += (targetAmp(t) - curAmp) * .08;
+      scene(t);
+      raf = visible && !document.hidden ? requestAnimationFrame(loop) : null;
+    }
+    const kick = () => { if (!raf && visible && !document.hidden) raf = requestAnimationFrame(loop); };
+    new IntersectionObserver(es => { visible = es[0].isIntersecting; kick(); }).observe(cv);
+    document.addEventListener('visibilitychange', kick);
+    new ResizeObserver(() => { size(); scene(performance.now()); }).observe(cv);
+    document.fonts?.ready.then(() => scene(performance.now()));
+    size(); scene(performance.now());
+  })();
+
+  /* =========================================================
+     DE DIS
+     ========================================================= */
+  (function menu() {
+    const DISHES = [
+      ['Kip van het spit', 'Gebraden pootjes, met de hand gegeten en vet tot aan de ellebogen.'],
+      ['Worst uit Rataje', 'Worstjes van de slager, met grove mosterd. Een schildknaap zou er zijn paard voor ruilen.'],
+      ['Brood, reuzel &amp; ui', 'Boerenbrood. Reuzel voor de dapperen, kruidenboter voor de verstandigen.'],
+      ['Kaas uit de kloosterkelder', 'Harde kazen, appels en noten. De monniken zwijgen erover.'],
+      ['De grote ketel', 'Een stoofpot die de hele avond pruttelt. Wie het laatst komt, eet de bodem.'],
+      ['Smoutebollen', 'Of oliebollen, voor de Hollanders. Over weinig zijn Vlamingen en Hollanders het eens, maar hierover wel: om middernacht.'],
+      ['Mede, bier &amp; kruidenwijn', 'En kruidenthee en appelsap voor bodes, schildknapen en wie nog moet rijden.'],
+      ['Heilands&shy;brandewijn', 'Eén glaasje om middernacht, en het jaar is opgeslagen. Kenners noemen het Spasitel.'],
+    ];
+    const box = $('#menu');
+    DISHES.forEach(([name, desc], i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'dish'; b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = `<div class="dish-in">
+        <div class="face front"><span class="roman">${toRoman(i + 1)}</span><span class="name">${name}</span><span class="tap" aria-hidden="true">draai om</span></div>
+        <div class="face back"><b>${name}</b>${desc}</div></div>`;
+      b.setAttribute('aria-label', b.querySelector('.back').textContent.replace(/­/g, ''));
+      b.addEventListener('click', () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'));
+      box.appendChild(b);
+    });
+  })();
+
+  /* =========================================================
+     PRAKTISCH: gastgevers, locatie, kinderen, aanmelden, agenda
+     ========================================================= */
+  (function practical() {
+    document.querySelectorAll('.hosts-or').forEach(el => { el.textContent = CONFIG.hostsOr; });
+    $('#where').textContent = CONFIG.location + (CONFIG.locationNote ? '. ' + CONFIG.locationNote : '');
+    if (CONFIG.kids) $('#kids-dd').textContent = CONFIG.kids;
+    else { $('#kids-dt').hidden = true; $('#kids-dd').hidden = true; }
+    if (CONFIG.rsvp) {
+      const a = $('#rsvp-btn'); a.href = CONFIG.rsvp; a.hidden = false;
+      $('#rsvp-text').textContent = 'Laat even weten of u komt, liefst ruim voor oudejaarsdag.';
+    }
+    $('#ics').addEventListener('click', () => {
+      const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      const esc = s => s.replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+      const lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//resonantxp//feestje//NL', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        'UID:oudejaarsgastmaal-2026@resonantxp.com',
+        'DTSTAMP:' + z(new Date()),
+        'DTSTART:' + z(CONFIG.start),
+        'DTEND:' + z(new Date(CONFIG.midnight.getTime() + 2 * 3600e3)),
+        'SUMMARY:' + esc('Oudejaarsgastmaal bij Han en Nele (Kingdom Come)'),
+        'DESCRIPTION:' + esc('Verkleed komen! Ridderspelen en riddersnacks.\nhttps://resonantxp.com/feestje'),
+        'LOCATION:' + esc(CONFIG.location),
+        'URL:https://resonantxp.com/feestje',
+        'END:VEVENT', 'END:VCALENDAR',
+      ];
+      const blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'oudejaarsgastmaal.ics'; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+  })();
+
+  $('#greet').addEventListener('click', () => { $('#reply').textContent = 'In eeuwigheid. Amen.'; });
+
+  /* ---------- start ---------- */
+  Clock.caption();
+  tick();
+  setInterval(tick, 1000);
+  setInterval(Clock.caption, 60000);
+  </script>
+</body>
+</html>
