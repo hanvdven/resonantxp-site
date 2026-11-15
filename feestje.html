@@ -386,6 +386,22 @@
     .sleep .btn { justify-self: center; background: #b98a2e; color: #1a140d; border-color: #1a140d; box-shadow: 2px 2px 0 #000; }
     .sleep .btn:hover { background: #d4a347; }
 
+    /* ---------- de droom ---------- */
+    .dream { position: fixed; inset: 0; z-index: 60; background: #070504; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity 1s ease; }
+    .dream.on { opacity: 1; }
+    .dream .frame { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; overflow: hidden; }
+    .dream .frame.on { opacity: 1; }
+    .dream .frame img { width: 100%; height: 100%; object-fit: cover; filter: blur(2.5px) sepia(.45) saturate(.85) brightness(.62); transform: scale(1.06); animation: drift 7s ease-out both; }
+    @keyframes drift { to { transform: scale(1.2) translate(-1.5%, -1%); } }
+    .dream::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 30%, rgba(7,5,4,.92) 78%); }
+    .dream p {
+      position: relative; z-index: 2; margin: 0 24px; max-width: 22em; text-align: center;
+      font-family: var(--goth); font-weight: 600; font-size: clamp(1.7rem, 4.5vw, 3rem); line-height: 1.15; color: #f1e2bd;
+      text-shadow: 0 2px 24px rgba(0,0,0,.9); opacity: 0; transform: translateY(8px); transition: opacity 1s ease, transform 1.4s ease;
+    }
+    .dream p.on { opacity: 1; transform: none; }
+    .dream small { position: absolute; z-index: 2; bottom: 22px; left: 0; right: 0; text-align: center; font-family: var(--sc); letter-spacing: .1em; font-size: .8rem; color: rgba(241,226,189,.5); }
+
     /* ---------- laadscherm-tips ---------- */
     .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
     .tip b { font-style: normal; font-family: var(--sc); color: var(--rubric); }
@@ -1403,6 +1419,7 @@
     }
     function update() {
       store.set('feestje.wapen', s);
+      store.set('feestje.titel', s.name.trim() ? title() : '');
       const st = STANDS.find(x => x[0] === s.stand) || STANDS[0];
       for (const b of box.children) b.setAttribute('aria-pressed', b.dataset.id === s.stand);
       $('#dracht').innerHTML = `<b>${st[1]}.</b> ${st[3]}`;
@@ -1746,12 +1763,59 @@
     $('#sl-go').addEventListener('click', () => {
       if (busy) return;
       busy = true; $('#sl-go').disabled = true;
-      Clock.fastForward(h, () => {
-        busy = false; $('#sl-go').disabled = false; open(false);
+      let slept = false, dreamt = false;
+      const wake = () => {
+        if (!slept || !dreamt) return;
+        busy = false; $('#sl-go').disabled = false; open(false); toggle.focus({ preventScroll: true });
         Toast('U hebt ' + h + ' uur geslapen', 'Energie +' + Math.min(100 - ENERGY, h * 9) + ' · Voeding −' + Math.min(FOOD, h * 5), { icon: '☾' });
-        setTimeout(() => Toast('Helaas', 'Buiten de game loopt de tijd gewoon door. Het feest is nog even ver weg.', { icon: '⌛', ms: 4200 }), 1300);
-      });
+        const days = Math.ceil((CONFIG.start - now()) / 864e5);
+        const msg = days > 1 ? `U droomde van het feest. Nog ${days} dagen, dan is het echt.`
+          : days === 1 ? 'U droomde van het feest. Morgen is het echt.'
+          : 'U droomde van het feest. Wakker worden: het is echt!';
+        setTimeout(() => Toast('Het was maar een droom', msg, { icon: '✶', ms: 4600 }), 1200);
+      };
+      Clock.fastForward(h, () => { slept = true; wake(); });
+      dream(h, () => { dreamt = true; wake(); });
     });
+    // de droom: wazige miniaturen van de pagina met losse zinnen, zoals een droomscène
+    function dream(hours, done) {
+      const who = store.get('feestje.titel', '');
+      const SCENES = [
+        ['janvier.jpg', 'U droomt van een lange tafel, vol kip en worst…'],
+        ['luttrell-maaltijd.jpg', '…van bekers mede die nooit leeg raken…'],
+        ['velislav-ruiters.jpg', '…van ruiters, zwaarden van schuim en eeuwige roem…'],
+        ['luttrell-boogschutters.jpg', '…van een pijl, precies in de roos…'],
+        ['manesse-wolfram.jpg', who ? `…van uzelf, ${who}, in vol ornaat…` : '…van uzelf, in vol ornaat…'],
+        [null, '…en van klokken die om middernacht het nieuwe jaar inluiden.'],
+      ];
+      const n = clamp(Math.ceil(hours / 2) + 1, 3, SCENES.length);
+      const scenes = SCENES.slice(0, n - 1).concat([SCENES.at(-1)]);
+      const ov = document.createElement('div');
+      ov.className = 'dream'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Een droom'); ov.tabIndex = -1;
+      ov.innerHTML = scenes.map(([img]) => `<div class="frame">${img ? `<img src="feestje-img/${img}" alt="">` : ''}</div>`).join('') +
+        '<p aria-live="polite"></p><small>Klik of druk op Esc om wakker te worden</small>';
+      document.body.appendChild(ov);
+      const frames = ov.querySelectorAll('.frame'), line = ov.querySelector('p');
+      let i = -1, timer = null, ended = false;
+      const step = reduceMotion ? 2600 : 2400;
+      const next = () => {
+        if (i >= 0) { frames[i].classList.remove('on'); line.classList.remove('on'); }
+        i++;
+        if (i >= scenes.length) return finish();
+        setTimeout(() => { frames[i].classList.add('on'); line.textContent = scenes[i][1]; line.classList.add('on'); }, i ? 500 : 0);
+        timer = setTimeout(next, step);
+      };
+      const finish = () => {
+        if (ended) return; ended = true; clearTimeout(timer);
+        ov.classList.remove('on'); document.removeEventListener('keydown', esc, true);
+        setTimeout(() => { ov.remove(); done(); }, 900);
+      };
+      const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); finish(); } };
+      ov.addEventListener('click', finish);
+      document.addEventListener('keydown', esc, true);
+      requestAnimationFrame(() => { ov.classList.add('on'); ov.focus(); setTimeout(next, 700); });
+    }
+
     // T, zoals in de game
     document.addEventListener('keydown', e => {
       if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
