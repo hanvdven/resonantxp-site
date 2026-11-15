@@ -358,7 +358,33 @@
       background: var(--vellum-hi) var(--grain); border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; padding: 10px 18px; }
     .toast.discover b { color: var(--ink-soft); text-transform: none; font-size: .95rem; letter-spacing: .04em; }
     .toast.discover span { font-family: var(--sc); font-weight: 700; font-size: 1.35rem; color: var(--rubric); letter-spacing: .06em; text-transform: uppercase; }
-    @media (max-width: 560px) { .toasts { left: 50%; transform: translateX(-50%); bottom: 12px; } }
+    @media (max-width: 560px) { .toasts { left: 12px; right: 12px; bottom: 12px; max-width: none; } }
+
+    /* ---------- slapen & wachten (naar het slaapscherm in de game) ---------- */
+    .sleep-toggle { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-weight: 700; font-size: .92rem; letter-spacing: .06em; color: var(--ink); padding: 4px 8px; }
+    .sleep-toggle kbd { display: inline-block; min-width: 1.6em; padding: 0 .3em; margin-left: .3em; border: 1px solid var(--ink); border-radius: 3px; background: #f3e7cb; font-family: var(--body); font-size: .8rem; box-shadow: 0 2px 0 var(--ink); }
+    .sleep {
+      width: min(380px, 100%); display: grid; gap: 10px; text-align: center; padding: 14px 18px 16px;
+      color: #f2ead8; background: linear-gradient(rgba(22,17,11,.97), rgba(14,11,8,.95));
+      border: 1px solid #7a6038; box-shadow: inset 0 0 0 3px #1a140d, inset 0 0 0 4px rgba(185,138,46,.55), 0 10px 26px rgba(40,20,5,.35);
+    }
+    .sleep h3 { margin: 0; color: #e3b84f; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; }
+    .sleep .sub { margin: -4px 0 0; font-size: .95rem; color: #cfc3a6; font-style: italic; }
+    .sleep-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+    .sleep-row button { width: 38px; height: 38px; border-radius: 50%; cursor: pointer; background: #2a2016; color: #e3b84f; border: 1px solid #b98a2e; font-size: 1.3rem; line-height: 1; }
+    .sleep-row button:disabled { opacity: .35; cursor: default; }
+    .sleep-row output { font-size: 1.7rem; font-weight: 500; min-width: 4.5ch; font-variant-numeric: lining-nums tabular-nums; }
+    .fx { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; text-align: left; font-size: .9rem; }
+    .fx .bar { height: 8px; background: #3a2e22; border: 1px solid #5a4630; position: relative; overflow: hidden; }
+    .fx .bar i { position: absolute; inset: 0 auto 0 0; transition: width .4s; }
+    .fx .bar i.now { background: #8a7a5a; }
+    .fx .bar i.after { opacity: .9; }
+    .fx .energy i.after { background: #e3b84f; }
+    .fx .food i.after { background: #b33a2a; }
+    .fx .d { font-variant-numeric: tabular-nums; color: #e3b84f; min-width: 3.5ch; text-align: right; }
+    .sleep .wake { margin: 0; font-size: .95rem; color: #cfc3a6; }
+    .sleep .btn { justify-self: center; background: #b98a2e; color: #1a140d; border-color: #1a140d; box-shadow: 2px 2px 0 #000; }
+    .sleep .btn:hover { background: #d4a347; }
 
     /* ---------- laadscherm-tips ---------- */
     .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
@@ -434,6 +460,7 @@
           <g id="ticks" filter="url(#inky)"></g>
           <circle r="150" fill="none" stroke="#2a1f16" stroke-width="1.6" filter="url(#inky)" />
           <g id="marks"></g>
+          <path id="sleep-arc" fill="rgba(243,231,203,.32)" stroke="#e3b84f" stroke-width="2" stroke-dasharray="5 4" display="none" />
           <g id="numerals" font-family="Alegreya SC, Georgia, serif" font-weight="700" font-size="14" fill="#2a1f16" text-anchor="middle" dominant-baseline="central"></g>
           <g id="pennant"></g>
           <g id="cartouche" transform="translate(0,66)">
@@ -465,6 +492,22 @@
         <p class="clock-cap" id="clock-cap">&nbsp;</p>
         <div id="cd" aria-live="off"><p class="cd-label">Donderdag 31 december 2026, 16:00</p></div>
         <button class="roman-toggle" id="roman" type="button" aria-pressed="false">Romeinse cijfers</button>
+        <button class="sleep-toggle" id="sleep-toggle" type="button" aria-expanded="false" aria-controls="sleep">Slapen of wachten<kbd>T</kbd></button>
+        <div class="sleep" id="sleep" hidden>
+          <h3>Slapen</h3>
+          <p class="sub">Hoe lang wilt u slapen?</p>
+          <div class="sleep-row">
+            <button id="sl-minus" type="button" aria-label="Een uur korter">−</button>
+            <output id="sl-hours" aria-live="polite">8 uur</output>
+            <button id="sl-plus" type="button" aria-label="Een uur langer">+</button>
+          </div>
+          <div class="fx">
+            <span>Energie</span><span class="bar energy"><i class="after" id="fx-e-after"></i><i class="now" id="fx-e-now"></i></span><span class="d" id="fx-e-d"></span>
+            <span>Voeding</span><span class="bar food"><i class="after" id="fx-f-after"></i><i class="now" id="fx-f-now"></i></span><span class="d" id="fx-f-d"></span>
+          </div>
+          <p class="wake" id="sl-wake"></p>
+          <button class="btn" id="sl-go" type="button">Slaap</button>
+        </div>
         <p class="tip" id="tip" title="Volgende tip"></p>
       </div>
     </div>
@@ -1095,7 +1138,29 @@
       parts.push(`maan ${pct}% ${p < .5 ? 'wassend' : 'afnemend'}`);
       $('#clock-cap').textContent = parts.join(' · ') + '. Sleep de zon langs de wijzerplaat.';
     }
-    return { render, caption, isPreview: () => preview != null };
+    // slaapboog: van nu tot het moment van wakker worden, zoals op het slaapscherm in de game
+    function showArc(hours) {
+      const el = $('#sleep-arc');
+      if (!hours) { el.setAttribute('display', 'none'); return; }
+      const h1 = preview ?? localHours(now()), h2 = h1 + hours;
+      const [a, b] = pt(150, h1), [c, d] = pt(150, h2);
+      el.setAttribute('d', `M0,0 L${f(a)},${f(b)} A150,150 0 ${hours > 12 ? 1 : 0} 1 ${f(c)},${f(d)} Z`);
+      el.setAttribute('display', '');
+    }
+    // de zon versneld door de nacht laten lopen
+    function fastForward(hours, done) {
+      cancelAnimationFrame(back); clearTimeout(returnToNow.t);
+      const from = localHours(now()), t0 = performance.now(), dur = reduceMotion ? 1 : 900 + hours * 260;
+      const step = ts => {
+        const k = clamp((ts - t0) / dur, 0, 1), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        preview = (from + hours * e) % 24;
+        render(); showArc(hours * (1 - e));
+        $('#dial-note').textContent = k < 1 ? 'Zzz…' : 'Goedemorgen';
+        if (k < 1) back = requestAnimationFrame(step); else { showArc(0); done(); returnToNow(2600); }
+      };
+      back = requestAnimationFrame(step);
+    }
+    return { render, caption, showArc, fastForward, isPreview: () => preview != null };
   })();
 
   /* =========================================================
@@ -1650,6 +1715,52 @@
       }
     }, { threshold: .35 });
     Object.keys(map).forEach(id => io.observe(document.getElementById(id)));
+  })();
+
+  /* ---------- slapen & wachten ---------- */
+  (function sleep() {
+    const panel = $('#sleep'), toggle = $('#sleep-toggle');
+    let h = 8, busy = false;
+    const ENERGY = 34, FOOD = 72; // Hendrik na een lange dag op het erf
+    const fx = () => {
+      const e = Math.min(100, ENERGY + h * 9), fo = Math.max(0, FOOD - h * 5);
+      $('#sl-hours').textContent = h + (h === 1 ? ' uur' : ' uur');
+      $('#fx-e-now').style.width = ENERGY + '%'; $('#fx-e-after').style.width = e + '%'; $('#fx-e-d').textContent = '+' + (e - ENERGY);
+      $('#fx-f-now').style.width = fo + '%'; $('#fx-f-after').style.width = FOOD + '%'; $('#fx-f-d').textContent = '−' + (FOOD - fo);
+      $('#sl-minus').disabled = h <= 1; $('#sl-plus').disabled = h >= 12;
+      $('#sl-wake').textContent = 'Wakker om ' + fmtH(localHours(now()) + h);
+      Clock.showArc(h);
+    };
+    const open = state => {
+      if (busy) return;
+      panel.hidden = !state; toggle.setAttribute('aria-expanded', state);
+      if (state) fx(); else Clock.showArc(0);
+    };
+    toggle.addEventListener('click', () => open(panel.hidden));
+    $('#sl-minus').addEventListener('click', () => { h = Math.max(1, h - 1); fx(); });
+    $('#sl-plus').addEventListener('click', () => {
+      if (h >= 12) return;
+      h++; fx();
+      if (h === 12) Toast('Tip', 'U kunt hooguit 12 uur aan één stuk slapen. Ook op oudejaar.', { icon: '☾' });
+    });
+    $('#sl-go').addEventListener('click', () => {
+      if (busy) return;
+      busy = true; $('#sl-go').disabled = true;
+      Clock.fastForward(h, () => {
+        busy = false; $('#sl-go').disabled = false; open(false);
+        Toast('U hebt ' + h + ' uur geslapen', 'Energie +' + Math.min(100 - ENERGY, h * 9) + ' · Voeding −' + Math.min(FOOD, h * 5), { icon: '☾' });
+        setTimeout(() => Toast('Helaas', 'Buiten de game loopt de tijd gewoon door. Het feest is nog even ver weg.', { icon: '⌛', ms: 4200 }), 1300);
+      });
+    });
+    // T, zoals in de game
+    document.addEventListener('keydown', e => {
+      if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+        open(panel.hidden);
+        if (!panel.hidden) toggle.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
+      if (e.key === 'Escape' && !panel.hidden) open(false);
+    });
+    setInterval(() => { if (!panel.hidden && !busy) fx(); }, 30000);
   })();
 
   /* ---------- laadscherm-tips, zoals in de game ---------- */
