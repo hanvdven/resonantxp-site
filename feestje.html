@@ -91,9 +91,10 @@
     .miniature-wrap { margin: 34px 0 0; }
     .miniature {
       position: relative; height: clamp(150px, 24vw, 280px); overflow: hidden;
-      border: 2px solid var(--ink);
-      box-shadow: 0 0 0 5px var(--vellum), 0 0 0 7px var(--azure), 0 0 0 10px var(--vellum), 0 0 0 11.5px var(--rubric);
-      margin: 12px;
+      /* groene gedraaide koordlijst, zoals de codexplaten in KCD 2 */
+      border: 11px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 11;
+      outline: 1.5px solid var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink), inset 0 0 0 3.5px #c2473b;
+      margin: 4px;
     }
     .miniature .sky { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-top) 15%, var(--sky-bot) 100%); }
     .miniature .stars { position: absolute; inset: 0; width: 100%; height: 100%; opacity: var(--stars); }
@@ -108,7 +109,8 @@
 
     /* ---------- verluchtingen (afbeeldingen uit handschriften) ---------- */
     .minia { margin: 0; }
-    .minia .fr { background: #d8c08e; padding: 5px; border: 1.5px solid var(--ink); box-shadow: 2px 3px 0 rgba(42,31,22,.3); }
+    .minia .fr { border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; outline: 1.5px solid var(--ink); box-shadow: 3px 4px 0 rgba(42,31,22,.28); background: var(--ink); }
+    .minia .fr img { border: 0; box-shadow: 0 0 0 2px #c2473b; }
     .minia img { display: block; width: 100%; height: auto; border: 1px solid var(--ink); }
     .minia figcaption { font-size: .86rem; font-style: italic; color: var(--ink-soft); margin-top: 7px; line-height: 1.35; }
     .minia figcaption cite { font-style: normal; font-family: var(--sc); }
@@ -335,6 +337,34 @@
     .greet { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; color: var(--on-dark); padding: 6px; }
     .reply { display: block; font-family: var(--goth); font-weight: 600; font-size: 1.8rem; color: #d9b46a; min-height: 1.5em; }
 
+    /* ---------- meldingen in de stijl van de game ---------- */
+    .toasts { position: fixed; left: 18px; bottom: 18px; z-index: 50; display: grid; gap: 10px; max-width: min(380px, calc(100vw - 36px)); pointer-events: none; }
+    .toast {
+      display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center;
+      padding: 10px 16px 10px 12px; color: #f2ead8;
+      background: linear-gradient(90deg, rgba(14,11,8,.94), rgba(14,11,8,.84) 70%, rgba(14,11,8,.55));
+      border-left: 2px solid #e3b84f;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+      animation: toast-in .35s ease-out both;
+    }
+    .toast.out { animation: toast-out .4s ease-in both; }
+    @keyframes toast-in { from { opacity: 0; transform: translateX(-16px); } }
+    @keyframes toast-out { to { opacity: 0; transform: translateX(-16px); } }
+    .toast .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 1.25rem;
+      background: radial-gradient(circle at 35% 30%, #6c5a3e, #2a2016); border: 1.5px solid #b98a2e; box-shadow: inset 0 0 0 2px #1a140d; }
+    .toast b { display: block; font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: .82rem; color: #e3b84f; text-transform: uppercase; }
+    .toast span { font-size: 1.02rem; line-height: 1.25; }
+    .toast.discover { grid-template-columns: 1fr; text-align: center; color: var(--ink);
+      background: var(--vellum-hi) var(--grain); border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; padding: 10px 18px; }
+    .toast.discover b { color: var(--ink-soft); text-transform: none; font-size: .95rem; letter-spacing: .04em; }
+    .toast.discover span { font-family: var(--sc); font-weight: 700; font-size: 1.35rem; color: var(--rubric); letter-spacing: .06em; text-transform: uppercase; }
+    @media (max-width: 560px) { .toasts { left: 50%; transform: translateX(-50%); bottom: 12px; } }
+
+    /* ---------- laadscherm-tips ---------- */
+    .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
+    .tip b { font-style: normal; font-family: var(--sc); color: var(--rubric); }
+    .tip.fade { opacity: 0; }
+
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
@@ -435,6 +465,7 @@
         <p class="clock-cap" id="clock-cap">&nbsp;</p>
         <div id="cd" aria-live="off"><p class="cd-label">Donderdag 31 december 2026, 16:00</p></div>
         <button class="roman-toggle" id="roman" type="button" aria-pressed="false">Romeinse cijfers</button>
+        <p class="tip" id="tip" title="Volgende tip"></p>
       </div>
     </div>
     <figure class="miniature-wrap">
@@ -585,9 +616,9 @@
         <div>
           <p>Op het erf wordt om eer gestreden, bij het laatste daglicht. Geen echte zwaarden en geen echte paarden, maar wel echte roem.</p>
           <ul class="disciplines">
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Het zwaardgevecht.</b> Zacht van schuim, hard van wil.</li>
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Het zwaardgevecht.</b> Zacht van schuim, hard van wil. Meesteraanvallen toegestaan. Wie verliest, ligt erbij als Hendrik na zijn eerste gevecht met Runt.</li>
             <li><span class="pilcrow" aria-hidden="true">¶</span><b>Boogschieten.</b> Zonder vizier, zoals het hoort. Oefen hiernaast.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade.</li>
+            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade. Verzwaarde stenen van de Duivel worden in beslag genomen.</li>
             <li><span class="pilcrow" aria-hidden="true">¶</span><b>Kennis van het rijk.</b> Wie weet het meest over Bohemen, bier en boerenwijsheid?</li>
           </ul>
           <figure class="minia side"><div class="fr"><img src="feestje-img/luttrell-boogschutters.jpg" width="720" height="489" alt="Middeleeuwse miniatuur: boogschutters in kleurige kappen schieten op een schietschijf." loading="lazy" decoding="async" /></div><figcaption>Oefenen op de schijf, zoals elke zondag verplicht was. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
@@ -647,6 +678,8 @@
         <dt>Waar</dt><dd id="where">Kessel-Lo</dd>
         <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
         <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
+        <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
+        <dt>Opslaan</dt><dd>Er is geen autosave. Wie wil opslaan, drinkt om middernacht een Heilandsbrandewijn.</dd>
         <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin en eventueel iets voor de dis</dd>
         <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
       </dl>
@@ -719,6 +752,23 @@
     return isNaN(t) ? 0 : t - Date.now();
   })();
   const now = () => new Date(Date.now() + OFFSET);
+
+  /* ---------- meldingen zoals in de game ("TAAK GESTART", "JE KREEG …") ---------- */
+  const Toast = (() => {
+    const box = document.createElement('div');
+    box.className = 'toasts'; box.setAttribute('role', 'status'); box.setAttribute('aria-live', 'polite');
+    document.body.appendChild(box);
+    const once = new Set();
+    return function toast(label, text, { icon = '❦', kind = '', key = null, ms = 3400 } = {}) {
+      if (key) { if (once.has(key)) return; once.add(key); }
+      const el = document.createElement('div');
+      el.className = 'toast ' + kind;
+      el.innerHTML = kind === 'discover' ? `<div><b>${label}</b><span>${text}</span></div>` : `<div class="ic" aria-hidden="true">${icon}</div><div><b>${label}</b><span>${text}</span></div>`;
+      box.appendChild(el);
+      while (box.children.length > 2) box.firstChild.remove();
+      setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 450); }, ms);
+    };
+  })();
 
   function toRoman(n) {
     if (n === 0) return 'N'; // nulla — zo schreven middeleeuwse rekenmeesters nul
@@ -1134,7 +1184,32 @@
     };
     $('#proc .proc').tabIndex = -1;
     setOpen(store.get('feestje.zegel', false), false);
-    seal.addEventListener('click', () => setOpen(true, true));
+    seal.addEventListener('click', () => {
+      setOpen(true, true);
+      Toast('Taak gestart', 'Overleef oudejaar.', { icon: '!' });
+      decipher();
+    });
+    // Hendrik kon in het begin niet lezen: in de game zie je dan door elkaar gehusselde letters.
+    function decipher() {
+      if (reduceMotion) return;
+      const nodes = [];
+      const walk = el => { for (const n of el.childNodes) n.nodeType === 3 ? nodes.push([n, n.textContent]) : n.nodeName !== 'FIGURE' && walk(n); };
+      document.querySelectorAll('#proc .proc p').forEach(walk);
+      const order = nodes.map(([, t]) => Array.from(t, () => Math.random())); // elke letter lost op zijn eigen moment op
+      const glyphs = 'abcdefghiklmnopqrstuvxyzþðæꝛſ';
+      const t0 = performance.now() + 900, dur = 1800;
+      const step = now => {
+        const k = clamp((now - t0) / dur, 0, 1);
+        nodes.forEach(([n, orig], j) => {
+          let out = '', i = 0;
+          for (const ch of orig) { out += order[j][i++] < k || !/[a-zà-ÿ]/i.test(ch) ? ch : glyphs[(Math.random() * glyphs.length) | 0]; }
+          n.textContent = out;
+        });
+        if (k < 1) requestAnimationFrame(step);
+        else Toast('Vaardigheid geleerd', 'Lezen. Godzijdank, de schrijver van Rataje heeft u les gegeven.', { icon: '✒', ms: 4600 });
+      };
+      requestAnimationFrame(step);
+    }
     $('#reseal').addEventListener('click', () => setOpen(false, true));
   })();
 
@@ -1151,6 +1226,12 @@
     ['speelman', 'Speelman', 'Bellen en luit', 'Bont en gestreept, belletjes, een luit (of ukelele). Elk lied over de gastgevers moet lovend zijn.'],
     ['smid', 'Smid', 'Schort en roet', 'Een leren schort, opgerolde mouwen, roet op de wangen. Een hamer van schuim is welkom, een aambeeld niet.'],
   ];
+  // In de game bepalen je kleren je charisma (en vieze of bebloede kleren verlagen het). Hier ook.
+  const CHARISMA = {
+    ridder: ['+3', 'Dreiging +2'], edel: ['+4', 'Prijzen bij handelaars −10%'], boer: ['+1', 'Niemand let op u'],
+    kruid: ['+2', 'Alchemie +1'], monnik: ['+2', 'Vrijstelling van de preek'], rover: ['−1', 'Wacht: verdacht'],
+    speelman: ['+3', 'Elk lied wordt meegezongen'], smid: ['+2', 'Uw zwaard is altijd geslepen'],
+  };
   const TINCT = {
     or:      ['Goud',   '#c99a3a', 1],
     argent:  ['Zilver', '#efe8d8', 1],
@@ -1225,7 +1306,11 @@
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'stand'; b.dataset.id = id;
       b.innerHTML = `<b>${name}</b><span>${short}</span>`;
-      b.addEventListener('click', () => { s.stand = id; update(); });
+      b.addEventListener('click', () => {
+        s.stand = id; update();
+        const [ch, extra] = CHARISMA[id];
+        Toast('Uitrusting aangetrokken', `${name}: Charisma ${ch}${extra ? ' · ' + extra : ''}`, { icon: '♞' });
+      });
       box.appendChild(b);
     }
     function swatches(el, key) {
@@ -1280,7 +1365,11 @@
     input.value = s.name;
     input.addEventListener('input', () => { s.name = input.value; update(); });
     $('#reroll-place').addEventListener('click', () => { s.placeShift++; update(); });
-    $('#dice').addEventListener('click', roll);
+    let rolls = 0;
+    $('#dice').addEventListener('click', () => {
+      roll();
+      if (++rolls === 5) Toast('Tip', 'U kunt blijven dobbelen, maar de Duivel wint altijd.', { icon: '⚄' });
+    });
 
     // als afbeelding bewaren (deelbaar in de groepsapp)
     $('#save-arms').addEventListener('click', async () => {
@@ -1293,6 +1382,7 @@
         const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
         cv.getContext('2d').drawImage(img, 0, 0, W, H);
         const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+        Toast('Je kreeg', '1 × Wapenschild (eigen ontwerp)', { icon: '⛨' });
         const fname = 'wapen-' + (nameOr().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'gast') + '.png';
         const file = new File([blob], fname, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1435,6 +1525,8 @@
     }
     function finish() {
       if (score > best) { best = score; store.set('feestje.boog', best); }
+      if (score >= 28) Toast('U bent een niveau gestegen in', 'Boogschieten', { icon: '➶' });
+      else if (score === 0) Toast('Tip', 'Probeer eens op de schijf te mikken.', { icon: '?' });
       const rank = score >= 50 ? 'Volmaakt. Zelfs de kapitein van Rataje buigt het hoofd.'
         : score >= 40 ? 'Meesterschutter. Dat is een extra worst waard.'
         : score >= 28 ? 'Degelijk. Goed genoeg voor de wacht van Talmberk.'
@@ -1492,7 +1584,8 @@
       ['De grote ketel', 'Een stoofpot die de hele avond pruttelt. Wie het laatst komt, eet de bodem.'],
       ['Smoutebollen', 'Of oliebollen, voor de Hollanders. Over weinig zijn Vlamingen en Hollanders het eens, maar hierover wel: om middernacht.'],
       ['Mede, bier &amp; kruidenwijn', 'En kruidenthee en appelsap voor bodes, schildknapen en wie nog moet rijden.'],
-      ['Heilands&shy;brandewijn', 'Eén glaasje om middernacht, en het jaar is opgeslagen. Kenners noemen het Spasitel.'],
+      ['Heilands&shy;brandewijn', 'Eén glaasje om middernacht, en het jaar is opgeslagen. Kenners noemen het Spasitel. Twee glaasjes: ook opgeslagen, maar met hoofdpijn.'],
+      ['Honingkoek', 'Op aanraden van Hans Capon, die nog een goed plekje weet voor een picknick. Bijen niet inbegrepen.'],
     ];
     const box = $('#menu');
     DISHES.forEach(([name, desc], i) => {
@@ -1502,7 +1595,12 @@
         <div class="face front"><span class="roman">${toRoman(i + 1)}</span><span class="name">${name}</span><span class="tap" aria-hidden="true">draai om</span></div>
         <div class="face back"><b>${name}</b>${desc}</div></div>`;
       b.setAttribute('aria-label', b.querySelector('.back').textContent.replace(/­/g, ''));
-      b.addEventListener('click', () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true'));
+      b.addEventListener('click', () => {
+        const open = b.getAttribute('aria-pressed') !== 'true';
+        b.setAttribute('aria-pressed', open);
+        if (open && name.startsWith('Heilands')) Toast('Spel opgeslagen', 'U bent lichtjes beschonken.', { icon: '⚱', key: 'save' });
+        if (open && name.startsWith('Mede')) Toast('Je kreeg', '1 × Mede · Zichtvermogen −1', { icon: '🍺', key: 'mede' });
+      });
       box.appendChild(b);
     });
   })();
@@ -1520,6 +1618,7 @@
       $('#rsvp-text').textContent = 'Laat even weten of u komt, liefst ruim voor oudejaarsdag.';
     }
     $('#ics').addEventListener('click', () => {
+      Toast('Taak bijgewerkt', 'Sta om 16:00 voor de poort in Kessel-Lo.', { icon: '!' });
       const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
       const esc = s => s.replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
       const lines = [
@@ -1540,6 +1639,45 @@
       a.href = URL.createObjectURL(blob); a.download = 'oudejaarsgastmaal.ics'; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
+  })();
+
+  (function discoveries() {
+    const map = { praktisch: 'Kessel-Lo', toernooi: 'Het toernooiveld', gastmaal: 'De herberg', getijden: 'Het getijdenboek' };
+    const io = new IntersectionObserver(es => {
+      for (const e of es) if (e.isIntersecting) {
+        Toast('U ontdekte', map[e.target.id], { kind: 'discover', key: 'd-' + e.target.id, ms: 3000 });
+        io.unobserve(e.target);
+      }
+    }, { threshold: .35 });
+    Object.keys(map).forEach(id => io.observe(document.getElementById(id)));
+  })();
+
+  /* ---------- laadscherm-tips, zoals in de game ---------- */
+  (function tips() {
+    const TIPS = [
+      'Vieze of bebloede kleren verlagen uw charisma. Een gewassen tuniek opent deuren, en monden.',
+      'Heilandsbrandewijn slaat het spel op. Hij maakt u ook dronken. Kies verstandig.',
+      'Hendrik kon in het begin niet lezen. U wel, dus lees het adres goed.',
+      'Fluit naar uw paard, en het komt eraan. Ooit. Waarschijnlijk.',
+      'Wie honger heeft, vecht slechter. Eet dus vóór het toernooi, niet erna.',
+      'Niet alle dobbelstenen zijn eerlijk. Sommige zijn van de Duivel.',
+      'U kunt de klok niet versnellen door te slapen. Wij hebben het geprobeerd.',
+      'Slotenkraken is niet nodig: om 16:00 staat de poort gewoon open.',
+      'Een overtuigend gesprek begint met goede kleren en een glimlach. Een zwaard helpt ook.',
+      'Wie na middernacht nog door wil feesten, krijgt de status ‘Kater’. Duur: één werkdag.',
+      'Geloofd zij Jezus Christus! Antwoord: in eeuwigheid, amen. Oefen het alvast.',
+    ];
+    const el = $('#tip');
+    let i = Math.floor(Math.random() * TIPS.length);
+    const show = () => { el.innerHTML = `<b>Tip:</b> ${TIPS[i % TIPS.length]}`; };
+    const next = () => {
+      i++;
+      if (reduceMotion) return show();
+      el.classList.add('fade'); setTimeout(() => { show(); el.classList.remove('fade'); }, 400);
+    };
+    show();
+    el.addEventListener('click', next);
+    setInterval(next, 11000);
   })();
 
   $('#greet').addEventListener('click', () => { $('#reply').textContent = 'In eeuwigheid. Amen.'; });
