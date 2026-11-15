@@ -16,9 +16,9 @@
   <meta property="og:locale" content="nl_NL" />
   <meta name="theme-color" content="#1b1510" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=UnifrakturMaguntia&display=swap" />
+  <!-- lettertypes zelf gehost (feestje-fonts/, SIL OFL): werkt overal, ook offline op een tv-scherm, en zonder verzoeken naar Google -->
+  <link rel="preload" href="feestje-fonts/unifraktur-maguntia.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="feestje-fonts/im-fell-english.woff2" as="font" type="font/woff2" crossorigin />
   <!--
     feestje.html — interactieve uitnodiging, oud & nieuw 2026 (Kingdom Come-thema).
     Eén zelfstandig bestand, geen build, geen afhankelijkheden behalve Google Fonts.
@@ -39,6 +39,10 @@
     TESTEN: ?nu=2026-12-31T17:30 laat de pagina doen alsof het dat tijdstip is.
   -->
   <style>
+    @font-face { font-family: "IM Fell English"; src: url(feestje-fonts/im-fell-english.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
+    @font-face { font-family: "IM Fell English"; src: url(feestje-fonts/im-fell-english-italic.woff2) format("woff2"); font-style: italic; font-weight: 400; font-display: swap; }
+    @font-face { font-family: "IM Fell English SC"; src: url(feestje-fonts/im-fell-english-sc.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
+    @font-face { font-family: "UnifrakturMaguntia"; src: url(feestje-fonts/unifraktur-maguntia.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
     :root {
       --vellum: #ead9b4;
       --vellum-hi: #f3e7cb;
@@ -162,7 +166,7 @@
     .clock-cap { font-size: .92rem; text-align: center; color: var(--ink-soft); margin: 0; min-height: 1.4em; max-width: 30em; }
     .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
-    .cd-num { font-size: 2.4rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
+    .cd-num { font-family: var(--goth); font-size: 2.5rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
     .cd-num.roman { font-family: var(--sc); font-size: 1.6rem; padding: 6px 0 4px; }
     .cd-lab { font-family: var(--sc); font-weight: 700; font-size: .8rem; letter-spacing: .12em; color: var(--rubric); }
     .cd-label { margin: 0; text-align: center; font-size: 1.05rem; }
@@ -380,6 +384,9 @@
       color: #f2ead8; background: linear-gradient(rgba(22,17,11,.97), rgba(14,11,8,.95));
       border: 1px solid #7a6038; box-shadow: inset 0 0 0 3px #1a140d, inset 0 0 0 4px rgba(185,138,46,.55), 0 10px 26px rgba(40,20,5,.35);
     }
+    .sl-tabs { display: flex; justify-content: center; gap: 4px; }
+    .sl-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: #a99b7c; cursor: pointer; font-family: var(--sc); letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; padding: 2px 12px 4px; }
+    .sl-tabs button[aria-selected="true"] { color: #e3b84f; border-bottom-color: #e3b84f; }
     .sleep h3 { margin: 0; color: #e3b84f; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; }
     .sleep .sub { margin: -4px 0 0; font-size: .95rem; color: #cfc3a6; font-style: italic; }
     .sleep-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
@@ -439,6 +446,39 @@
     .kaart .place:hover image, .kaart .place:focus-visible image { filter: drop-shadow(0 0 6px #fff3c4); }
     .kaart .place:focus { outline: none; }
     .kaart figcaption { font-style: italic; color: var(--ink-soft); font-size: .9rem; margin-top: 8px; }
+
+    /* ---------- dobbelen (Farkle, naar KCD) ---------- */
+    .fk { margin-top: 18px; padding: 18px; color: #f2ead8; border: 1px solid #7a6038;
+      background: radial-gradient(ellipse at 50% 35%, #4a3523, #2a1d12 70%), #2a1d12;
+      box-shadow: inset 0 0 0 3px #1a140d, inset 0 0 0 4px rgba(185,138,46,.5), inset 0 0 60px rgba(0,0,0,.6);
+      display: grid; gap: 14px; grid-template-columns: 1fr; }
+    @media (min-width: 760px) { .fk { grid-template-columns: 1fr 260px; } .fk-msg, .fk-actions { grid-column: 1 / -1; } }
+    .fk-board { display: grid; gap: 12px; align-content: start; min-height: 150px; }
+    .fk-held { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding-bottom: 10px; border-bottom: 1px dashed rgba(227,184,79,.35); }
+    .fk-held img { width: 36px; height: 36px; opacity: .85; }
+    .fk-dice { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .fk-die { width: 64px; height: 64px; padding: 4px; border: 0; background: none; cursor: pointer; border-radius: 10px; transition: transform .15s; }
+    .fk-die img { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 3px rgba(0,0,0,.6)); }
+    .fk-die[aria-pressed="true"] { transform: translateY(-6px); box-shadow: 0 0 0 2px #e3b84f, 0 0 16px rgba(227,184,79,.5); }
+    .fk-die:disabled { cursor: default; }
+    .fk-die.rolling img { animation: shake .12s linear infinite; }
+    @keyframes shake { 50% { transform: rotate(12deg) translateY(-2px); } }
+    .fk-score { display: grid; gap: 2px; align-content: start; font-variant-numeric: lining-nums tabular-nums; }
+    .fk-score [role="row"] { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; padding: 3px 0; }
+    .fk-score [role="row"]:first-child { font-family: var(--sc); color: #e3b84f; letter-spacing: .1em; border-bottom: 1px solid rgba(227,184,79,.4); }
+    .fk-score .tot, .fk-score [role="row"]:nth-child(n+3) span:not(.lab) { font-family: var(--goth); }
+    .fk-score .tot { font-size: 1.8rem; }
+    .fk-score .me { color: #6fa8e0; } .fk-score .op { color: #e0574a; }
+    .fk-score .lab { font-size: .85rem; color: #a99b7c; }
+    .fk-msg { margin: 0; min-height: 1.5em; text-align: center; font-size: 1.05rem; }
+    .fk-msg b { color: #e3b84f; font-family: var(--sc); }
+    .fk-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
+    .fk .btn { background: #b98a2e; color: #1a140d; border-color: #1a140d; box-shadow: 2px 2px 0 #000; }
+    .fk .btn.ghost { background: transparent; color: #f2ead8; border-color: #b98a2e; }
+    .fk .btn:disabled { opacity: .4; cursor: default; }
+    .fk-new { background: none; border: 0; color: #a99b7c; text-decoration: underline; cursor: pointer; }
+    .fk-rules { margin-top: 12px; }
+    .fk-rules summary { cursor: pointer; font-family: var(--sc); color: var(--rubric); }
 
     /* ---------- laadscherm-tips ---------- */
     .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
@@ -547,10 +587,13 @@
         <p class="clock-cap" id="clock-cap">&nbsp;</p>
         <div id="cd" aria-live="off"><p class="cd-label">Donderdag 31 december 2026, 16:00</p></div>
         <button class="roman-toggle" id="roman" type="button" aria-pressed="false">Romeinse cijfers</button>
-        <button class="sleep-toggle" id="sleep-toggle" type="button" aria-expanded="false" aria-controls="sleep">Slapen of wachten<kbd>T</kbd></button>
+        <button class="sleep-toggle" id="sleep-toggle" type="button" aria-expanded="false" aria-controls="sleep">Wachten of slapen<kbd>T</kbd></button>
         <div class="sleep" id="sleep" hidden>
-          <h3>Slapen</h3>
-          <p class="sub">Hoe lang wilt u slapen?</p>
+          <div class="sl-tabs" role="tablist" aria-label="Wachten of slapen">
+            <button role="tab" type="button" data-m="wacht" aria-selected="true">Wachten</button>
+            <button role="tab" type="button" data-m="slaap" aria-selected="false">Slapen</button>
+          </div>
+          <p class="sub" id="sl-sub">Hoe lang wilt u wachten?</p>
           <div class="sleep-row">
             <button id="sl-minus" type="button" aria-label="Een uur korter">−</button>
             <output id="sl-hours" aria-live="polite">8 uur</output>
@@ -561,7 +604,7 @@
             <span>Voeding</span><span class="bar food"><i class="after" id="fx-f-after"></i><i class="now" id="fx-f-now"></i></span><span class="d" id="fx-f-d"></span>
           </div>
           <p class="wake" id="sl-wake"></p>
-          <button class="btn" id="sl-go" type="button">Slaap</button>
+          <button class="btn" id="sl-go" type="button">Wacht</button>
         </div>
         <p class="tip" id="tip" title="Volgende tip"></p>
       </div>
@@ -618,7 +661,7 @@
           <figure class="minia right"><div class="fr"><img src="feestje-img/janvier.jpg" width="640" height="990" alt="Middeleeuwse miniatuur: een hertog aan een feestmaal met gasten, bedienden en een hondje; bovenin een halve hemelschijf met sterrenbeelden." loading="lazy" decoding="async" /></div><figcaption>Nieuwjaar bij de hertog van Berry: geschenken, een feestdis en een toernooi op het wandtapijt. <cite>Très Riches Heures</cite>, ca. 1412–1416.</figcaption></figure>
           <p>Wij, Han en Nele van Kessel-Lo, groeten allen die dit lezen. Het jaar onzes Heren tweeduizend zesentwintig
             loopt ten einde, en dat zal niet ongemerkt gebeuren. Op oudejaarsdag openen wij onze poort voor een gastmaal
-            in de geest van het koninkrijk Bohemen, anno 1403: met worst en mede, met zwaard en boog, en met dobbelstenen
+            in de geest van het koninkrijk Bohemen, anno 1403: met stoofpot en bier, met zwaard en boog, en met dobbelstenen
             die vermoedelijk verzwaard zijn.</p>
           <p><span class="pilcrow" aria-hidden="true">¶</span>Kom gekleed naar uw stand. Ridder of rover, monnik of molenaarsdochter, kruidenvrouw
             of kroegbaas: alles mag, behalve een spijkerbroek zonder schaamte. Wie geen harnas heeft, redt het met een cape,
@@ -695,7 +738,7 @@
         </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met worst. De uren staan ook als
+      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met oliebollen. De uren staan ook als
         ruitjes op de klok bovenaan.</p>
       <ol class="hours" id="hours"></ol>
     </section>
@@ -732,20 +775,57 @@
       </div>
     </section>
 
+    <!-- ===================== DE DOBBELTAFEL ===================== -->
+    <section class="panel" id="dobbel" aria-labelledby="dobbel-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">In elke fatsoenlijke herberg</p>
+          <h2 id="dobbel-h">Dobbelen met Hans</h2>
+        </div>
+        <img class="vignet" src="feestje-img/kcd/dobbel.png" alt="" width="64" height="64" style="width:72px" />
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <p>Zes stenen, wie eerst 2000 punten heeft, wint. Kies na elke worp de stenen die punten opleveren en gooi de rest opnieuw.
+        Gooit u niets wat punten oplevert, dan bent u alles van die beurt kwijt. Stop dus op tijd. Hans Capon speelt mee, en Hans verliest niet graag.</p>
+      <div class="fk" id="fk">
+        <div class="fk-board">
+          <div class="fk-held" id="fk-held" aria-label="Opzijgelegde stenen"></div>
+          <div class="fk-dice" id="fk-dice" role="group" aria-label="Geworpen stenen: tik om te kiezen"></div>
+        </div>
+        <div class="fk-score" role="table" aria-label="Stand">
+          <div role="row"><span role="columnheader">U</span><span role="columnheader">Doel</span><span role="columnheader">Hans</span></div>
+          <div role="row" class="tot"><span class="me" id="fk-me">0</span><span id="fk-goal">2000</span><span class="op" id="fk-op">0</span></div>
+          <div role="row"><span id="fk-round">0</span><span class="lab">Ronde</span><span id="fk-oround">0</span></div>
+          <div role="row"><span id="fk-sel">0</span><span class="lab">Gekozen</span><span>&nbsp;</span></div>
+        </div>
+        <p class="fk-msg" id="fk-msg" aria-live="polite"></p>
+        <div class="fk-actions">
+          <button class="btn" id="fk-roll" type="button">Gooi</button>
+          <button class="btn ghost" id="fk-bank" type="button">Neem punten</button>
+          <button class="fk-new" id="fk-new" type="button">Nieuw spel</button>
+        </div>
+      </div>
+      <details class="fk-rules">
+        <summary>Puntentelling</summary>
+        <p>Een <b>1</b> is 100, een <b>5</b> is 50. Drie gelijke: 100 × de waarde (drie enen: 1000). Elke extra gelijke steen verdubbelt dat.
+          1-2-3-4-5 is 500, 2-3-4-5-6 is 750, 1 tot en met 6 is 1500. Liggen alle zes stenen opzij, dan gooit u opnieuw met zes.</p>
+      </details>
+    </section>
+
     <!-- ===================== DE DIS ===================== -->
     <section class="panel" id="gastmaal" aria-labelledby="gastmaal-h">
       <div class="head">
         <div>
-          <p class="eyebrow">Riddersnacks · een voorproefje</p>
+          <p class="eyebrow">Riddersnacks · samen gedekt</p>
           <h2 id="gastmaal-h">De dis</h2>
         </div>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
       <figure class="minia wide"><div class="fr"><img src="feestje-img/luttrell-maaltijd.jpg" width="960" height="549" alt="Middeleeuwse miniatuur: een heer en zijn gezelschap aan een lange gedekte tafel, met bedienden die eten aandragen." loading="lazy" decoding="async" /></div><figcaption>Sir Geoffrey Luttrell aan tafel, met familie, monniken en een knielende bediende. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
-      <p>De herbergier houdt de kaart nog geheim, maar uit de keuken lekte het volgende. Draai een kaart om.</p>
+      <p>Een gastmaal zoals in de herberg van Kuttenberg: de waard zorgt voor de ketel, de gasten voor de rest van de dis. Draai een kaart om.</p>
       <div class="menu" id="menu"></div>
-      <p class="muted" style="margin-top:22px">Brengt u iets mee voor de dis? Graag! Meld het even bij <span class="hosts-or">Han of Nele</span>,
-        dan staan er straks geen zeven ketels stoofpot.</p>
+      <p class="muted" style="margin-top:22px"><span class="hosts-or">Han of Nele</span> zorgen voor de grote ketel en de oliebollen.
+        De rest komt van u: neem iets te eten of te drinken mee, en laat even weten wat. Dan staan er straks geen zeven potten linzen.</p>
     </section>
 
     <!-- ===================== PRAKTISCH ===================== -->
@@ -782,7 +862,7 @@
         <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
         <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
         <dt>Opslaan</dt><dd>Er is geen autosave. Wie wil opslaan, drinkt om middernacht een Heilandsbrandewijn.</dd>
-        <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin en eventueel iets voor de dis</dd>
+        <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin, en iets te eten of te drinken voor de gedeelde dis. Vastenspijs is welkom: dan kan iedereen ervan eten.</dd>
         <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
       </dl>
       <div class="actions">
@@ -824,13 +904,13 @@
     partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
     // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
     program: [
-      [16,    'De poort gaat open', 'Welkomstmede, de kostuumkeuring en het ophangen van de wapenschilden.', 'herberg'],
+      [16,    'De poort gaat open', 'Welkomstdronk, de kostuumkeuring en het ophangen van de wapenschilden.', 'herberg'],
       [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf, zoals op het toernooi van Kuttenberg. Jonge schildknapen doen mee.', 'arena'],
-      [18,    'Het gastmaal', 'De ketel gaat open, de kip gaat rond. Kinderen worden rond deze tijd opgehaald.', 'eten'],
+      [18,    'Het gastmaal', 'De grote ketel gaat open en uw meegebrachte schotels komen erbij op de dis. Kinderen worden rond deze tijd opgehaald.', 'eten'],
       [20,    'Dobbelen om groschen', 'Zes stenen, één kans, insignes toegestaan. Valsspelers belanden in de schandpaal.', 'dobbel'],
-      [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een worst.', 'lezen'],
+      [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
       [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.', 'brandewijn'],
-      [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Smoutebollen en oliebollen.', 'ster'],
+      [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Oliebollen voor iedereen.', 'ster'],
     ],
   };
 
@@ -1035,8 +1115,8 @@
       if (!running) return;
       running = false; cancelAnimationFrame(raf); hare.setAttribute('display', 'none');
       Hare.set('report');
-      Toast('Je kreeg', '1 × Hazenvlees', { icon: 'hazenvlees' });
-      setTimeout(() => { Hare.set('confront', 4500); Toast('Misdaad: stroperij', 'Het wild is van de heer. Boete: één smoutebol, of een uur in de schandpaal.', { icon: 'gezocht', ms: 4800 }); }, 1500);
+      Toast('Je ving', 'Een haas. U laat hem weer gaan; hij kijkt u verwijtend aan.', { icon: 'jager' });
+      setTimeout(() => { Hare.set('confront', 4500); Toast('Misdaad: stroperij', 'De jachtopziener zag het toch. Boete: één oliebol, of een uur in de schandpaal.', { icon: 'gezocht', ms: 4800 }); }, 1500);
     }
     hare.addEventListener('click', poach);
     hare.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); poach(); } });
@@ -1246,18 +1326,19 @@
       if (!hours) { el.setAttribute('display', 'none'); return; }
       const h1 = preview ?? localHours(now()), h2 = h1 + hours;
       const [a, b] = pt(150, h1), [c, d] = pt(150, h2);
-      el.setAttribute('d', `M0,0 L${f(a)},${f(b)} A150,150 0 ${hours > 12 ? 1 : 0} 1 ${f(c)},${f(d)} Z`);
+      el.setAttribute('d', hours >= 23.99 ? 'M0,-150 A150,150 0 1 1 0,150 A150,150 0 1 1 0,-150 Z' // een volle dag: de hele schijf
+        : `M0,0 L${f(a)},${f(b)} A150,150 0 ${hours > 12 ? 1 : 0} 1 ${f(c)},${f(d)} Z`);
       el.setAttribute('display', '');
     }
     // de zon versneld door de nacht laten lopen
-    function fastForward(hours, done) {
+    function fastForward(hours, done, sleeping = true) {
       cancelAnimationFrame(back); clearTimeout(returnToNow.t);
-      const from = localHours(now()), t0 = performance.now(), dur = reduceMotion ? 1 : 900 + hours * 260;
+      const from = localHours(now()), t0 = performance.now(), dur = reduceMotion ? 1 : 900 + Math.min(hours, 12) * 260 + Math.max(0, hours - 12) * 120;
       const step = ts => {
         const k = clamp((ts - t0) / dur, 0, 1), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
         preview = (from + hours * e) % 24;
         render(); showArc(hours * (1 - e));
-        $('#dial-note').textContent = k < 1 ? 'Zzz…' : 'Goedemorgen';
+        $('#dial-note').textContent = k < 1 ? (sleeping ? 'Zzz…' : 'Wachten…') : (sleeping ? 'Goedemorgen' : '');
         if (k < 1) back = requestAnimationFrame(step); else { showArc(0); done(); returnToNow(2600); }
       };
       back = requestAnimationFrame(step);
@@ -1697,7 +1778,7 @@
       if (score >= 28) Toast('U bent een niveau gestegen in', 'Boogschieten', { icon: 'boog' });
       else if (score === 0) Toast('Tip', 'Probeer eens op de schijf te mikken.', { icon: 'boog' });
       const rank = score >= 50 ? 'Volmaakt. Zelfs de kapitein van Rataje buigt het hoofd.'
-        : score >= 40 ? 'Meesterschutter. Dat is een extra worst waard.'
+        : score >= 40 ? 'Meesterschutter. Dat is een extra oliebol waard.'
         : score >= 28 ? 'Degelijk. Goed genoeg voor de wacht van Talmberk.'
         : score >= 15 ? 'U raakte het doel. Meestal.'
         : score > 0 ? 'De kippen zijn gewaarschuwd.'
@@ -1745,30 +1826,31 @@
      DE DIS
      ========================================================= */
   (function menu() {
+    // [naam, beschrijving, wie zorgt ervoor: 'waard' = Han en Nele, 'gast' = meebrengen]
     const DISHES = [
-      ['Kip van het spit', 'Gebraden pootjes, met de hand gegeten en vet tot aan de ellebogen.'],
-      ['Worst uit Rataje', 'Worstjes van de slager, met grove mosterd. Een schildknaap zou er zijn paard voor ruilen.'],
-      ['Brood, reuzel &amp; ui', 'Boerenbrood. Reuzel voor de dapperen, kruidenboter voor de verstandigen.'],
-      ['Kaas uit de kloosterkelder', 'Harde kazen, appels en noten. De monniken zwijgen erover.'],
-      ['De grote ketel', 'Een stoofpot die de hele avond pruttelt. Wie het laatst komt, eet de bodem.'],
-      ['Smoutebollen', 'Of oliebollen, voor de Hollanders. Over weinig zijn Vlamingen en Hollanders het eens, maar hierover wel: om middernacht.'],
-      ['Mede, bier &amp; kruidenwijn', 'En kruidenthee en appelsap voor bodes, schildknapen en wie nog moet rijden.'],
-      ['Heilands&shy;brandewijn', 'Eén glaasje om middernacht, en het jaar is opgeslagen. Kenners noemen het Spasitel. Twee glaasjes: ook opgeslagen, maar met hoofdpijn.'],
-      ['Honingkoek', 'Op aanraden van Hans Capon, die nog een goed plekje weet voor een picknick. Bijen niet inbegrepen.'],
+      ['De grote ketel', 'Stoofpot uit de keuken van Kuttenberg, de hele avond warm. Bereid volgens de regels van de vasten, zodat zelfs de abt van Sedletz mag aanschuiven.', 'waard'],
+      ['Oliebollen', 'Om middernacht, zoals het hoort. In Vlaanderen heten ze smoutebollen, maar de onze zijn in olie gebakken.', 'waard'],
+      ['Brood van de bakker', 'Een vers brood, een pot mosterd of een schaal olijven. Hendrik zou er zijn laatste groschen voor geven.', 'gast'],
+      ['Uit de moestuin', 'Linzen, bonen, gepofte kastanjes of geroosterde knollen. Bohemen at meer groente dan de films doen geloven.', 'gast'],
+      ['Fruit &amp; noten', 'Appels, peren, druiven en een handvol noten. Eenvoudig, en precies goed bij kruidenwijn.', 'gast'],
+      ['Bier, wijn &amp; most', 'Voor de dis en de dorst. Voor bodes, schildknapen en wie nog moet rijden: kruidenthee of appelsap.', 'gast'],
+      ['Heilands&shy;brandewijn', 'Wie een fles meebrengt, mag om middernacht het jaar opslaan. Twee glaasjes: ook opgeslagen, maar met hoofdpijn.', 'gast'],
+      ['Iets van uzelf', 'Het recept van uw grootmoeder, of wat u in een herberg in Kuttenberg zou bestellen. Liefst vastenspijs, dan kan iedereen ervan eten.', 'gast'],
     ];
     const box = $('#menu');
-    DISHES.forEach(([name, desc], i) => {
+    DISHES.forEach(([name, desc, who], i) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'dish'; b.setAttribute('aria-pressed', 'false');
       b.innerHTML = `<div class="dish-in">
-        <div class="face front"><span class="roman">${toRoman(i + 1)}</span><span class="name">${name}</span><span class="tap" aria-hidden="true">draai om</span></div>
+        <div class="face front"><span class="roman">${toRoman(i + 1)} · ${who === 'waard' ? 'van de waard' : 'van u'}</span><span class="name">${name}</span><span class="tap" aria-hidden="true">draai om</span></div>
         <div class="face back"><b>${name}</b>${desc}</div></div>`;
       b.setAttribute('aria-label', b.querySelector('.back').textContent.replace(/­/g, ''));
       b.addEventListener('click', () => {
         const open = b.getAttribute('aria-pressed') !== 'true';
         b.setAttribute('aria-pressed', open);
         if (open && name.startsWith('Heilands')) Toast('Spel opgeslagen', 'U bent lichtjes beschonken.', { icon: 'brandewijn', key: 'save' });
-        if (open && name.startsWith('Mede')) Toast('Je kreeg', '1 × Mede · Zichtvermogen −1', { icon: 'dronken', key: 'mede' });
+        if (open && name.startsWith('Bier')) Toast('Je kreeg', '1 × Bier · Zichtvermogen −1', { icon: 'dronken', key: 'bier' });
+        if (open && name.startsWith('De grote ketel')) Toast('Voeding', '+40 · Zelfs de abt is tevreden.', { icon: 'eten', key: 'ketel' });
       });
       box.appendChild(b);
     });
@@ -1811,7 +1893,7 @@
   })();
 
   (function discoveries() {
-    const map = { praktisch: ['Kessel-Lo', 'dorp'], toernooi: ['Het toernooiveld', 'arena'], gastmaal: ['De herberg', 'herberg'], getijden: ['Het getijdenboek', 'klooster'] };
+    const map = { dobbel: ['De dobbeltafel', 'dobbel'], praktisch: ['Kessel-Lo', 'dorp'], toernooi: ['Het toernooiveld', 'arena'], gastmaal: ['De herberg', 'herberg'], getijden: ['Het getijdenboek', 'klooster'] };
     const io = new IntersectionObserver(es => {
       for (const e of es) if (e.isIntersecting) {
         Toast('U ontdekte', map[e.target.id][0], { kind: 'discover', icon: map[e.target.id][1], key: 'd-' + e.target.id, ms: 3000 });
@@ -1823,18 +1905,35 @@
 
   /* ---------- slapen & wachten ---------- */
   (function sleep() {
+    // Zoals in KCD2: wachten (T) kan tot 24 uur en kost energie en voeding; slapen tot 12 uur en geeft energie.
     const panel = $('#sleep'), toggle = $('#sleep-toggle');
-    let h = 8, busy = false;
+    const MODES = {
+      wacht: { max: 24, start: 3, energy: -3, food: -4, sub: 'Hoe lang wilt u wachten?', go: 'Wacht', icon: 'reizen' },
+      slaap: { max: 12, start: 8, energy: 9, food: -5, sub: 'Hoe lang wilt u slapen?', go: 'Slaap', icon: 'slaap' },
+    };
+    let mode = 'wacht', h = MODES.wacht.start, busy = false;
     const ENERGY = 34, FOOD = 72; // Hendrik na een lange dag op het erf
+    const bar = (id, before, after, gain) => {
+      $('#fx-' + id + '-now').style.width = Math.min(before, after) + '%';
+      const tail = $('#fx-' + id + '-after'); tail.style.width = Math.max(before, after) + '%'; tail.style.background = gain ? '#e3b84f' : '#b33a2a';
+      const d = after - before; $('#fx-' + id + '-d').textContent = (d >= 0 ? '+' : '−') + Math.abs(d);
+    };
     const fx = () => {
-      const e = Math.min(100, ENERGY + h * 9), fo = Math.max(0, FOOD - h * 5);
-      $('#sl-hours').textContent = h + (h === 1 ? ' uur' : ' uur');
-      $('#fx-e-now').style.width = ENERGY + '%'; $('#fx-e-after').style.width = e + '%'; $('#fx-e-d').textContent = '+' + (e - ENERGY);
-      $('#fx-f-now').style.width = fo + '%'; $('#fx-f-after').style.width = FOOD + '%'; $('#fx-f-d').textContent = '−' + (FOOD - fo);
-      $('#sl-minus').disabled = h <= 1; $('#sl-plus').disabled = h >= 12;
-      $('#sl-wake').textContent = 'Wakker om ' + fmtH(localHours(now()) + h);
+      const M = MODES[mode];
+      const e = clamp(ENERGY + h * M.energy, 0, 100), fo = clamp(FOOD + h * M.food, 0, 100);
+      $('#sl-hours').textContent = h + ' uur';
+      bar('e', ENERGY, e, e >= ENERGY); bar('f', FOOD, fo, false);
+      $('#sl-minus').disabled = h <= 1; $('#sl-plus').disabled = h >= M.max;
+      $('#sl-wake').textContent = (mode === 'slaap' ? 'Wakker om ' : 'Tot ') + fmtH(localHours(now()) + h) + (h >= 24 ? ' (morgen)' : '');
+      $('#sl-sub').textContent = M.sub; $('#sl-go').textContent = M.go;
       Clock.showArc(h);
     };
+    const setMode = m => {
+      mode = m; h = Math.min(h, MODES[m].max);
+      panel.querySelectorAll('.sl-tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.m === m));
+      fx();
+    };
+    panel.querySelectorAll('.sl-tabs button').forEach(b => b.addEventListener('click', () => !busy && setMode(b.dataset.m)));
     const open = state => {
       if (busy) return;
       panel.hidden = !state; toggle.setAttribute('aria-expanded', state);
@@ -1843,33 +1942,37 @@
     toggle.addEventListener('click', () => open(panel.hidden));
     $('#sl-minus').addEventListener('click', () => { h = Math.max(1, h - 1); fx(); });
     $('#sl-plus').addEventListener('click', () => {
-      if (h >= 12) return;
+      const max = MODES[mode].max;
+      if (h >= max) return;
       h++; fx();
-      if (h === 12) Toast('Tip', 'U kunt hooguit 12 uur aan één stuk slapen. Ook op oudejaar.', { icon: 'slaap' });
+      if (h === max) Toast('Tip', mode === 'slaap' ? 'U kunt hooguit 12 uur aan één stuk slapen. Ook op oudejaar.' : 'Langer dan een etmaal wachten kan niet. Ook niet als u erg naar het feest uitkijkt.', { icon: MODES[mode].icon });
     });
     $('#sl-go').addEventListener('click', () => {
       if (busy) return;
       busy = true; $('#sl-go').disabled = true;
-      let slept = false, dreamt = false;
+      const M = MODES[mode], hrs = h, sleeping = mode === 'slaap';
+      const eD = clamp(ENERGY + hrs * M.energy, 0, 100) - ENERGY, fD = clamp(FOOD + hrs * M.food, 0, 100) - FOOD;
+      const sign = n => (n >= 0 ? '+' : '−') + Math.abs(n);
+      let slept = false, dreamt = !sleeping;
       const wake = () => {
         if (!slept || !dreamt) return;
         busy = false; $('#sl-go').disabled = false; open(false); toggle.focus({ preventScroll: true });
-        Toast('U hebt ' + h + ' uur geslapen', 'Energie +' + Math.min(100 - ENERGY, h * 9) + ' · Voeding −' + Math.min(FOOD, h * 5), { icon: 'slaap' });
+        Toast(`U hebt ${hrs} uur ${sleeping ? 'geslapen' : 'gewacht'}`, `Energie ${sign(eD)} · Voeding ${sign(fD)}`, { icon: M.icon });
         const days = Math.ceil((CONFIG.start - now()) / 864e5);
-        const msg = days > 1 ? `U droomde van het feest. Nog ${days} dagen, dan is het echt.`
-          : days === 1 ? 'U droomde van het feest. Morgen is het echt.'
-          : 'U droomde van het feest. Wakker worden: het is echt!';
-        setTimeout(() => Toast('Het was maar een droom', msg, { icon: 'ster', ms: 4600 }), 1200);
+        const msg = sleeping
+          ? (days > 1 ? `U droomde van het feest. Nog ${days} dagen, dan is het echt.` : days === 1 ? 'U droomde van het feest. Morgen is het echt.' : 'U droomde van het feest. Wakker worden: het is echt!')
+          : 'Buiten de game loopt de tijd gewoon door. Het feest komt er toch wel aan.';
+        setTimeout(() => Toast(sleeping ? 'Het was maar een droom' : 'Helaas', msg, { icon: sleeping ? 'ster' : 'reizen', ms: 4600 }), 1200);
       };
-      Clock.fastForward(h, () => { slept = true; wake(); });
-      dream(h, () => { dreamt = true; wake(); });
+      Clock.fastForward(hrs, () => { slept = true; wake(); }, sleeping);
+      if (sleeping) dream(hrs, () => { dreamt = true; wake(); });
     });
     // de droom: wazige miniaturen van de pagina met losse zinnen, zoals een droomscène
     function dream(hours, done) {
       const who = store.get('feestje.titel', '');
       const SCENES = [
-        ['janvier.jpg', 'U droomt van een lange tafel, vol kip en worst…'],
-        ['luttrell-maaltijd.jpg', '…van bekers mede die nooit leeg raken…'],
+        ['janvier.jpg', 'U droomt van een lange tafel, vol stoofpot en oliebollen…'],
+        ['luttrell-maaltijd.jpg', '…van bekers die nooit leeg raken…'],
         ['velislav-ruiters.jpg', '…van ruiters, zwaarden van schuim en eeuwige roem…'],
         ['luttrell-boogschutters.jpg', '…van een pijl, precies in de roos…'],
         ['manesse-wolfram.jpg', who ? `…van uzelf, ${who}, in vol ornaat…` : '…van uzelf, in vol ornaat…'],
@@ -1964,6 +2067,152 @@
     }
   })();
 
+  /* ---------- dobbelen met Hans: Farkle met de regels uit KCD ---------- */
+  (function farkle() {
+    const GOAL = 2000, $d = $('#fk-dice'), $h = $('#fk-held');
+    const memo = new Map();
+    // Hoogste score waarbij ÁLLE stenen meetellen (anders ongeldig: -Infinity)
+    function best(c) {
+      const key = c.join('');
+      if (memo.has(key)) return memo.get(key);
+      if (c.every(n => n === 0)) return 0;
+      let b = -Infinity;
+      const minus = idx => { const d = c.slice(); for (const [i, k] of idx) d[i] -= k; return d; };
+      if ([1, 2, 3, 4, 5, 6].every(f => c[f] >= 1)) b = Math.max(b, 1500 + best(minus([[1,1],[2,1],[3,1],[4,1],[5,1],[6,1]])));
+      if ([1, 2, 3, 4, 5].every(f => c[f] >= 1)) b = Math.max(b, 500 + best(minus([[1,1],[2,1],[3,1],[4,1],[5,1]])));
+      if ([2, 3, 4, 5, 6].every(f => c[f] >= 1)) b = Math.max(b, 750 + best(minus([[2,1],[3,1],[4,1],[5,1],[6,1]])));
+      for (let f = 1; f <= 6; f++) for (let k = 3; k <= c[f]; k++) b = Math.max(b, (f === 1 ? 1000 : f * 100) * 2 ** (k - 3) + best(minus([[f, k]])));
+      if (c[1] >= 1) b = Math.max(b, 100 + best(minus([[1, 1]])));
+      if (c[5] >= 1) b = Math.max(b, 50 + best(minus([[5, 1]])));
+      memo.set(key, b); return b;
+    }
+    const score = vals => { const c = [0, 0, 0, 0, 0, 0, 0]; vals.forEach(v => c[v]++); const s = best(c); return s > 0 ? s : 0; };
+    function bestPick(vals) { // beste geldige keuze uit een worp (voor Hans, en om 'niets' te herkennen)
+      let top = { s: 0, idx: [] };
+      for (let m = 1; m < 1 << vals.length; m++) {
+        const idx = vals.map((_, i) => i).filter(i => m >> i & 1), s = score(idx.map(i => vals[i]));
+        if (s > top.s || (s === top.s && s > 0 && idx.length < top.idx.length)) top = { s, idx };
+      }
+      return top;
+    }
+
+    let tot = { me: 0, op: 0 }, turn = 'me', round = 0, dice = [], sel = new Set(), held = [], busy = false, over = false;
+    let game = 0; // elk potje een eigen nummer: lopende timers/beurten van een vorig potje stoppen dan vanzelf
+    const msg = h => { $('#fk-msg').innerHTML = h; };
+    const selVals = () => [...sel].map(i => dice[i]);
+    function render() {
+      $d.innerHTML = dice.map((v, i) => `<button class="fk-die" type="button" data-i="${i}" aria-pressed="${sel.has(i)}" aria-label="Steen ${v}${sel.has(i) ? ', gekozen' : ''}" ${turn !== 'me' || busy ? 'disabled' : ''}><img src="feestje-img/kcd/steen-${v}${sel.has(i) ? 'g' : ''}.png" alt=""></button>`).join('');
+      $h.innerHTML = held.map(v => `<img src="feestje-img/kcd/steen-${v}g.png" alt="${v}">`).join('');
+      const sv = score(selVals());
+      $('#fk-me').textContent = tot.me; $('#fk-op').textContent = tot.op;
+      $('#fk-round').textContent = turn === 'me' ? round : 0; $('#fk-oround').textContent = turn === 'op' ? round : 0;
+      $('#fk-sel').textContent = sv;
+      const mine = turn === 'me' && !busy && !over;
+      $('#fk-roll').disabled = !mine || (dice.length > 0 && sv === 0);
+      $('#fk-bank').disabled = !mine || dice.length === 0 || (sel.size ? sv === 0 : round === 0) || (round + sv === 0);
+      $('#fk-roll').textContent = dice.length === 0 ? 'Gooi' : 'Opzij en gooi opnieuw';
+    }
+    $d.addEventListener('click', e => {
+      const b = e.target.closest('.fk-die'); if (!b || b.disabled) return;
+      const i = +b.dataset.i; sel.has(i) ? sel.delete(i) : sel.add(i); render();
+    });
+    const wait = ms => new Promise(r => setTimeout(r, reduceMotion ? Math.min(ms, 150) : ms));
+    async function throwDice(n) {
+      busy = true; sel.clear();
+      dice = Array.from({ length: n }, () => 1 + (Math.random() * 6 | 0)); render();
+      if (!reduceMotion) {
+        $d.querySelectorAll('.fk-die').forEach(b => b.classList.add('rolling'));
+        for (let t = 0; t < 7; t++) { await wait(60); $d.querySelectorAll('.fk-die img').forEach(im => { im.src = `feestje-img/kcd/steen-${1 + (Math.random() * 6 | 0)}.png`; }); }
+      }
+      dice = Array.from({ length: n }, () => 1 + (Math.random() * 6 | 0));
+      busy = false; render();
+      return bestPick(dice);
+    }
+    // stenen opzij leggen; geeft het aantal overgebleven stenen (6 bij "alles gescoord")
+    function setAside(idx) {
+      idx = idx.filter(i => i < dice.length);
+      round += score(idx.map(i => dice[i]));
+      held.push(...idx.map(i => dice[i]));
+      const left = dice.length - idx.length;
+      dice = []; sel.clear();
+      if (left === 0) { held = []; return 6; }
+      return left;
+    }
+    async function bust(who) {
+      const g = game;
+      msg(who === 'me' ? '<b>Niets!</b> Geen enkele steen levert punten op. Deze beurt bent u kwijt.' : '<b>Hans gooit niets.</b> Hij vloekt binnensmonds.');
+      round = 0; busy = true; render(); await wait(1600);
+      if (g !== game) return;
+      busy = false; nextTurn();
+    }
+    function win(who) {
+      over = true; render();
+      if (who === 'me') {
+        const w = store.get('feestje.dobbelwinst', 0) + 1; store.set('feestje.dobbelwinst', w);
+        msg(`<b>Gewonnen!</b> Hans Capon schuift u de groschen toe. "Dat was geluk, Hendrik." (${w}× gewonnen)`);
+        Toast('U won van Hans Capon', `${tot.me} tegen ${tot.op}. Hij wil meteen revanche.`, { icon: 'dobbel', ms: 4600 });
+      } else {
+        msg('<b>Hans wint.</b> Hij zal het u nog jaren inwrijven. Nieuw spel?');
+        Toast('Hans Capon wint', 'Fortuna audentes iuvat, zegt hij. Hij was niet eens zo moedig.', { icon: 'duivelsdobbel', ms: 4600 });
+      }
+    }
+    function nextTurn() {
+      if (over) return;
+      round = 0; held = []; dice = []; sel.clear();
+      turn = turn === 'me' ? 'op' : 'me'; render();
+      if (turn === 'op') hansTurn(); else msg('Uw beurt. <b>Gooi</b> de stenen.');
+    }
+    async function hansTurn() {
+      const g = game;
+      msg('Hans gooit…'); await wait(700);
+      let n = 6;
+      for (;;) {
+        if (g !== game) return;
+        const pick = await throwDice(n);
+        if (g !== game) return;
+        if (!pick.s) return bust('op');
+        await wait(600); if (g !== game) return;
+        pick.idx.forEach(i => sel.add(i)); render(); await wait(800); if (g !== game) return;
+        n = setAside(pick.idx); render();
+        const need = GOAL - tot.op;
+        const stop = round >= need || round >= 700 || (round >= 350 && n <= 3) || (round >= 250 && n <= 2);
+        if (stop && n !== 6) {
+          tot.op += round; msg(`Hans neemt <b>${round}</b> punten.`); round = 0; held = []; render();
+          if (tot.op >= GOAL) return win('op');
+          await wait(1300); if (g !== game) return; return nextTurn();
+        }
+        msg(n === 6 ? 'Hans heeft alle stenen gescoord en gooit opnieuw met zes!' : `Hans gooit door met ${n} ${n === 1 ? 'steen' : 'stenen'}…`);
+        await wait(900);
+      }
+    }
+    $('#fk-roll').addEventListener('click', async () => {
+      if (busy || turn !== 'me' || over) return;
+      let n = 6;
+      if (dice.length) n = setAside([...sel]);
+      if (n === 6 && round > 0) Toast('Alle stenen gescoord', 'U gooit opnieuw met zes. Fortuna audentes iuvat!', { icon: 'dobbel' });
+      const pick = await throwDice(n);
+      if (!pick.s) return bust('me');
+      msg(`Kies de stenen die u opzij legt. Nog ${n} ${n === 1 ? 'steen' : 'stenen'} op tafel.`);
+    });
+    $('#fk-bank').addEventListener('click', () => {
+      if (busy || turn !== 'me' || over) return;
+      if (sel.size) setAside([...sel]);
+      tot.me += round; msg(`U neemt <b>${round}</b> punten.`); round = 0; held = []; dice = [];
+      if (tot.me >= GOAL) return win('me');
+      busy = true; render(); // geen dubbele beurt in de pauze voor Hans
+      const g = game;
+      setTimeout(() => { if (g !== game) return; busy = false; nextTurn(); }, 900);
+    });
+    $('#fk-new').addEventListener('click', () => {
+      if (busy && turn === 'me') return;
+      game++; busy = false;
+      tot = { me: 0, op: 0 }; turn = 'me'; round = 0; dice = []; held = []; sel.clear(); over = false;
+      render(); msg('Nieuw spel. <b>Gooi</b> de stenen.');
+    });
+    render(); msg('U begint. <b>Gooi</b> de stenen.');
+    window.__farkleScore = score; // voor tests
+  })();
+
   /* ---------- de haas (gedragsindicator) ---------- */
   const Hare = (() => {
     const btn = $('#hare'), img = btn.querySelector('img');
@@ -2004,7 +2253,7 @@
       'Een overtuigend gesprek begint met goede kleren en een glimlach. Een zwaard helpt ook.',
       'Wie na middernacht nog door wil feesten, krijgt de status ‘Kater’. Duur: één werkdag.',
       'Geloofd zij Jezus Christus! Antwoord: in eeuwigheid, amen. Oefen het alvast.',
-      'Fortuna audentes iuvat. Wie verkleed komt, krijgt de eerste worst.',
+      'Fortuna audentes iuvat. Wie verkleed komt, krijgt de eerste oliebol.',
       'Hans Capon heeft beloofd zich te gedragen. Niemand gelooft het.',
       'Trosky staat op twee rotsen. Ons feest gewoon op de begane grond.',
       'Ziet u een haas? Niet stropen. De jachtopziener kijkt mee, en de haas rechtsboven ook.',
