@@ -441,7 +441,7 @@
     /* ---------- de kaart, naar de KCD2-kaarten ---------- */
     .kaart { margin: 10px 0 6px; }
     .kaart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; outline: 1.5px solid var(--ink); }
-    .kaart svg { width: 100%; min-width: 640px; height: auto; display: block; }
+    .kaart svg { width: 100%; min-width: 720px; height: auto; display: block; background: #d6cf9c; }
     .kaart .place { cursor: pointer; }
     .kaart .place:hover image, .kaart .place:focus-visible image { filter: drop-shadow(0 0 6px #fff3c4); }
     .kaart .place:focus { outline: none; }
@@ -853,11 +853,7 @@
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
       <dl class="facts">
         <dt>Wanneer</dt><dd>Donderdag 31 december 2026, vanaf <b>16:00</b> tot ver na middernacht</dd>
-        <dt>Waar</dt><dd><span id="where">Kessel-Lo</span>
-          <figure class="kaart">
-            <div class="kaart-scroll"><svg id="kaart" viewBox="0 0 900 520" role="group" aria-label="Kaart van Kessel-Lo en omstreken, in de stijl van de KCD2-kaarten"></svg></div>
-            <figcaption>Niet op schaal, en ook niet helemaal op de juiste plek. Tik op een icoon, of veeg om de kaart te verschuiven.</figcaption>
-          </figure></dd>
+        <dt>Waar</dt><dd><span id="where">Kessel-Lo</span></dd>
         <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
         <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
         <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
@@ -865,6 +861,10 @@
         <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin, en iets te eten of te drinken voor de gedeelde dis. Vastenspijs is welkom: dan kan iedereen ervan eten.</dd>
         <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
       </dl>
+      <figure class="kaart">
+        <div class="kaart-scroll"><svg id="kaart" viewBox="0 0 1000 640" role="group" aria-label="Kaart van Leuven en Kessel-Lo, in de stijl van de regiokaarten uit KCD2"></svg></div>
+        <figcaption>Niet op schaal, en ook niet helemaal op de juiste plek. Tik op een icoon, of veeg om de kaart te verschuiven.</figcaption>
+      </figure>
       <div class="actions">
         <button class="btn" id="ics" type="button">Zet in uw agenda</button>
         <a class="btn ghost" id="rsvp-btn" hidden>Ik kom!</a>
@@ -1588,6 +1588,7 @@
     function update() {
       store.set('feestje.wapen', s);
       store.set('feestje.titel', s.name.trim() ? title() : '');
+      document.dispatchEvent(new CustomEvent('wapen')); // de kaart tekent het wapen mee
       const st = STANDS.find(x => x[0] === s.stand) || STANDS[0];
       for (const b of box.children) b.setAttribute('aria-pressed', b.dataset.id === s.stand);
       $('#dracht').innerHTML = `<b>${st[1]}.</b> ${st[3]}`;
@@ -2017,200 +2018,152 @@
     setInterval(() => { if (!panel.hidden && !busy) fx(); }, 30000);
   })();
 
-  /* ---------- de kaart van Kessel-Lo, naar de KCD2-kaarten ---------- */
+  /* ---------- de kaart van Leuven, naar de regiokaarten van KCD2 (Trosky, Kuttenberg) ---------- */
   (function kaart() {
-    const svg = $('#kaart'), rnd = seeded(1866);
-    const g = (attrs, html) => { const el = svgEl('g', attrs, svg); if (html) el.innerHTML = html; return el; };
-    g({}, `<defs><marker id="pijl" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#2a1f16"/></marker></defs>
-      <rect width="900" height="520" fill="#d9cf9a"/>
-      <rect width="900" height="520" fill="#bfc28a" opacity=".55"/>
-      <path d="M318,0 C300,60 340,110 318,170 C296,230 330,280 304,350 C286,400 310,460 296,520" fill="none" stroke="#5f8aa6" stroke-width="9" stroke-linecap="round"/>
-      <path d="M40,250 C160,230 260,240 380,215 C470,196 560,214 660,205 C740,198 800,205 830,205" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
-      <path d="M380,215 C420,280 450,340 470,410" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
-      <path d="M300,330 C280,380 262,410 250,440" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6"/>
-      <text x="326" y="300" font-family="IM Fell English, serif" font-style="italic" font-size="16" fill="#3d5f78" transform="rotate(80 326 300)">Dijle</text>`);
-    // bosjes: boompjes zoals op de kaart in de game
+    const svg = $('#kaart'), W = 1000, H = 640, rnd = seeded(1425); // 1425: stichting van de universiteit
+    const INK = '#2a1f16';
+    const g = (attrs, html = '') => { const el = svgEl('g', attrs, svg); el.innerHTML = html; return el; };
+    const f1 = n => n.toFixed(1);
+    // geografie (vrij, noorden boven): Leuven binnen de ring, de Dijle van zuid naar noord, Kessel-Lo oostelijk
+    const C = [400, 300], R = 140;                       // de stadsring (oude tweede stadsomwalling)
+    const dijle = [[330, 660], [345, 560], [318, 500], [352, 430], [372, 360], [392, 300], [368, 240], [380, 170], [352, 100], [366, 20], [350, -20]];
+    const pathOf = pts => pts.reduce((d, [x, y], i) => d + (i ? (() => { const [px, py] = pts[i - 1]; return ` Q${px},${py} ${f1((px + x) / 2)},${f1((py + y) / 2)}`; })() : `M${x},${y}`), '') + ` T${pts.at(-1)[0]},${pts.at(-1)[1]}`;
+    const inCity = (x, y) => Math.hypot(x - C[0], y - C[1]) < R - 8;
+    const nearRiver = (x, y, d) => dijle.some(([rx, ry]) => Math.hypot(x - rx, y - ry) < d);
+
+    // 1. ondergrond en akkers (lappendeken, zoals rond Trosky)
+    let fields = `<rect width="${W}" height="${H}" fill="#d6cf9c"/>`;
+    const tints = ['#c9c98c', '#d9c98a', '#bfc489', '#ccb87c', '#c5cf96', '#d4c286'];
+    for (let y = -20; y < H; y += 46) for (let x = -30; x < W; x += 64 + rnd() * 30) {
+      const w = 60 + rnd() * 50, h = 40 + rnd() * 22, a = (rnd() - .5) * 30;
+      if (Math.hypot(x + w / 2 - C[0], y + h / 2 - C[1]) < R + 30) continue;
+      fields += `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" fill="${tints[(rnd() * tints.length) | 0]}" stroke="${INK}" stroke-opacity=".18" transform="rotate(${f1(a)} ${f1(x + w / 2)} ${f1(y + h / 2)})"/>`;
+      if (rnd() < .5) for (let k = 1; k < 4; k++) fields += `<line x1="${f1(x + 4)}" y1="${f1(y + k * h / 4)}" x2="${f1(x + w - 4)}" y2="${f1(y + k * h / 4)}" stroke="${INK}" stroke-opacity=".12" transform="rotate(${f1(a)} ${f1(x + w / 2)} ${f1(y + h / 2)})"/>`;
+    }
+    g({}, fields);
+
+    // 2. heuvels met arcering (Keizersberg, Kesselberg)
+    const hill = (x, y, w) => { let h = ''; for (let i = 0; i < 9; i++) { const xx = x - w / 2 + i * w / 8; h += `<path d="M${f1(xx)},${f1(y)} q${f1(w / 16)},-${f1(14 - Math.abs(i - 4) * 2.5)} ${f1(w / 8)},0" fill="none" stroke="${INK}" stroke-opacity=".55"/>`; } return h; };
+    g({}, hill(330, 168, 90) + hill(720, 150, 140) + hill(560, 560, 120));
+
+    // 3. bossen: getekende boompjes
     let trees = '';
     const forest = (cx, cy, rx, ry, n) => { for (let i = 0; i < n; i++) {
-      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()), x = (cx + Math.cos(a) * rx * r).toFixed(1), y = (cy + Math.sin(a) * ry * r).toFixed(1), z = (7 + rnd() * 5).toFixed(1);
-      trees += rnd() < .5
-        ? `<path d="M${x},${y} l${-z * .6},${z * 1.3} h${z * 1.2} Z" fill="#5d7a45"/>`
-        : `<circle cx="${x}" cy="${(+y + z * .5).toFixed(1)}" r="${(z * .7).toFixed(1)}" fill="#6f8b4f"/>`;
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()), x = cx + Math.cos(a) * rx * r, y = cy + Math.sin(a) * ry * r, z = 6 + rnd() * 5;
+      if (inCity(x, y) || nearRiver(x, y, 18)) continue;
+      trees += rnd() < .45 ? `<path d="M${f1(x)},${f1(y)} l${f1(-z * .6)},${f1(z * 1.4)} h${f1(z * 1.2)} Z" fill="#5d7a45"/>`
+        : `<line x1="${f1(x)}" y1="${f1(y + z * .6)}" x2="${f1(x)}" y2="${f1(y + z * 1.4)}"/><circle cx="${f1(x)}" cy="${f1(y + z * .3)}" r="${f1(z * .72)}" fill="#6f8b4f"/>`;
     } };
-    forest(700, 360, 120, 60, 70); forest(130, 130, 90, 45, 40); forest(590, 470, 110, 35, 40); forest(820, 440, 60, 55, 26); forest(130, 480, 90, 30, 26);
-    g({ stroke: '#2a1f16', 'stroke-width': 1 }, trees);
-    // titelcartouche met rode initiaal, zoals "Trosky" op de kaart
-    g({}, `<rect x="24" y="20" width="244" height="64" rx="4" fill="#efe6cf" stroke="#2a1f16" stroke-width="1.5"/>
-      <text x="40" y="70" font-family="UnifrakturMaguntia, serif" font-size="48" fill="#a2302a">K</text>
-      <text x="74" y="68" font-family="UnifrakturMaguntia, serif" font-size="38" fill="#2a1f16">essel-Lo</text>`);
-    // windroos
-    g({ transform: 'translate(840,470)' }, `<circle r="30" fill="#efe6cf" stroke="#2a1f16"/><path d="M0,-28 L6,0 L0,28 L-6,0 Z" fill="#a2302a" stroke="#2a1f16"/><path d="M-28,0 L0,6 L28,0 L0,-6 Z" fill="#2a1f16" opacity=".75"/><text y="-34" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="14">N</text>`);
-    g({}, `<path d="M772,205 L808,205" stroke="#2a1f16" stroke-width="2.5" marker-end="url(#pijl)"/>`);
+    forest(330, 600, 170, 50, 120);   // Heverleebos
+    forest(860, 120, 120, 70, 70);    // richting Kesselberg
+    forest(800, 360, 70, 55, 45);     // provinciedomein
+    forest(120, 120, 110, 60, 55);
+    forest(100, 470, 90, 90, 60);
+    forest(640, 560, 80, 40, 35);
+    g({ stroke: INK, 'stroke-width': .9 }, trees);
+
+    // 4. wegen (gestippeld) vanuit de stadspoorten
+    const road = d => `<path d="${d}" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6" stroke-linecap="round"/>`;
+    g({}, road(`M${C[0] + R},${C[1] + 10} C620,330 700,300 980,320`) +       // Tiensesteenweg
+      road(`M${C[0] + 100},${C[1] - 100} C600,150 760,90 980,60`) +           // Diestsesteenweg
+      road(`M${C[0] + 30},${C[1] + R} C440,520 470,560 470,660`) +            // Naamsesteenweg
+      road(`M${C[0] - R},${C[1]} C200,300 90,280 -20,300`) +                  // Brusselsesteenweg
+      road(`M${C[0] - 90},${C[1] - 110} C250,120 200,40 160,-20`));           // Aarschotsesteenweg
+
+    // 5. de Dijle
+    const river = pathOf(dijle);
+    g({}, `<path d="${river}" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round" opacity=".55"/>
+      <path d="${river}" fill="none" stroke="#6f97b3" stroke-width="10" stroke-linecap="round"/>
+      <path d="${river}" fill="none" stroke="#a9c6d6" stroke-width="2.5" stroke-dasharray="14 20" stroke-linecap="round"/>
+      <text x="300" y="520" font-family="IM Fell English, serif" font-style="italic" font-size="18" fill="#3d5f78" transform="rotate(-72 300 520)">Dijle</text>`);
+
+    // 6. de ijzeren weg (spoor) langs het station naar Kessel-Lo
+    let rail = `<path d="M-20,180 C200,190 380,170 545,212 C640,236 760,250 1020,240" fill="none" stroke="${INK}" stroke-width="2.4"/>`;
+    for (let t = 0; t <= 1; t += .018) { // dwarsliggers
+      const x = (1 - t) ** 3 * -20 + 3 * (1 - t) ** 2 * t * 200 + 3 * (1 - t) * t * t * 380 + t ** 3 * 545, y = (1 - t) ** 3 * 180 + 3 * (1 - t) ** 2 * t * 190 + 3 * (1 - t) * t * t * 170 + t ** 3 * 212;
+      rail += `<line x1="${f1(x)}" y1="${f1(y - 4)}" x2="${f1(x)}" y2="${f1(y + 4)}" stroke="${INK}" stroke-width="1.2"/>`;
+    }
+    g({}, rail);
+
+    // 7. de stad: ringmuur met torens en poorten, daarbinnen dicht opeen rode daken
+    let city = `<circle cx="${C[0]}" cy="${C[1]}" r="${R}" fill="#e2d4a8" stroke="${INK}" stroke-width="7" opacity=".95"/>
+      <circle cx="${C[0]}" cy="${C[1]}" r="${R}" fill="none" stroke="#b9a77a" stroke-width="3.5"/>`;
+    for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2, x = C[0] + Math.cos(a) * R, y = C[1] + Math.sin(a) * R; city += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5.5" fill="#cdbb94" stroke="${INK}" stroke-width="1.4"/>`; }
+    for (let i = 0; i < 260; i++) {
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * (R - 16), x = C[0] + Math.cos(a) * r, y = C[1] + Math.sin(a) * r;
+      if (nearRiver(x, y, 16) || Math.hypot(x - C[0] + 10, y - C[1] + 8) < 34) continue;
+      const w = 8 + rnd() * 6, h = 6 + rnd() * 4;
+      city += `<g transform="translate(${f1(x)},${f1(y)})"><rect x="${f1(-w / 2)}" y="0" width="${f1(w)}" height="${f1(h)}" fill="#efe2c2" stroke="${INK}" stroke-width=".7"/><path d="M${f1(-w / 2 - 1)},0 L0,${f1(-h * .9)} L${f1(w / 2 + 1)},0 Z" fill="${rnd() < .8 ? '#b5523c' : '#7a6a5a'}" stroke="${INK}" stroke-width=".7"/></g>`;
+    }
+    g({}, city);
+    // Stadhuis (gotisch, met torentjes) en Sint-Pieterskerk
+    const stadhuis = `<g transform="translate(${C[0] - 4},${C[1] - 2})" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round">
+      <rect x="-22" y="-12" width="44" height="22" fill="#efe2c2"/><path d="M-22,-12 L0,-30 L22,-12 Z" fill="#6a7a8a"/>
+      ${[-22, -11, 0, 11, 22].map(x => `<path d="M${x - 2.5},-12 v-10 l2.5,-8 l2.5,8 v10 Z" fill="#efe2c2"/>`).join('')}
+      ${[-16, -8, 0, 8, 16].map(x => `<path d="M${x - 2},6 v-8 q2,-3 4,0 v8 Z" fill="${INK}"/>`).join('')}</g>
+      <g transform="translate(${C[0] - 34},${C[1] + 6})" stroke="${INK}" stroke-width="1.2"><rect x="-14" y="-8" width="30" height="16" fill="#e8dcbc"/><path d="M-14,-8 L1,-18 L16,-8 Z" fill="#6a7a8a"/><rect x="-22" y="-20" width="10" height="28" fill="#e8dcbc"/></g>`;
+    g({}, stadhuis);
+
+    // 8. bezienswaardigheden als tekeningetjes
+    const castle = (x, y) => `<g transform="translate(${x},${y})" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round">
+      <rect x="-18" y="-10" width="36" height="20" fill="#e8dcbc"/><circle cx="-18" cy="-4" r="8" fill="#e8dcbc"/><circle cx="18" cy="-4" r="8" fill="#e8dcbc"/>
+      <path d="M-26,-6 L-18,-22 L-10,-6 Z M10,-6 L18,-22 L26,-6 Z" fill="#6a7a8a"/><path d="M-4,10 v-8 q4,-5 8,0 v8 Z" fill="${INK}"/></g>`;
+    const abbey = (x, y, pond) => `<g transform="translate(${x},${y})" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round">
+      ${pond ? `<ellipse cx="40" cy="22" rx="26" ry="10" fill="#7fa3bb"/><ellipse cx="-38" cy="26" rx="18" ry="7" fill="#7fa3bb"/>` : ''}
+      <rect x="-24" y="-6" width="40" height="18" fill="#e8dcbc"/><path d="M-24,-6 L-4,-18 L16,-6 Z" fill="#b5523c"/>
+      <rect x="16" y="-26" width="10" height="38" fill="#e8dcbc"/><path d="M16,-26 L21,-38 L26,-26 Z" fill="#6a7a8a"/>
+      <path d="M-24,12 h40 v12 h-40 Z" fill="none" stroke-dasharray="3 2"/></g>`;
+    const village = (x, y, n) => { let v = ''; for (let i = 0; i < n; i++) { const xx = x + (rnd() - .5) * 90, yy = y + (rnd() - .5) * 46;
+      v += `<g transform="translate(${f1(xx)},${f1(yy)})"><rect x="-6" y="0" width="12" height="8" fill="#efe2c2" stroke="${INK}" stroke-width=".8"/><path d="M-7,0 L0,-7 L7,0 Z" fill="#b5523c" stroke="${INK}" stroke-width=".8"/></g>`; } return v; };
+    g({}, castle(372, 505) + abbey(560, 470, true) + abbey(335, 155, false) + village(640, 285, 22) + village(690, 190, 10) + village(250, 520, 8)
+      + `<ellipse cx="800" cy="372" rx="34" ry="18" fill="#7fa3bb" stroke="${INK}"/>`
+      + `<g transform="translate(548,200)" stroke="${INK}" stroke-width="1.2"><rect x="-22" y="-8" width="44" height="16" fill="#e8dcbc"/><path d="M-22,-8 L0,-20 L22,-8 Z" fill="#6a7a8a"/></g>`);
+
+    // 9. dieren en vogels, zoals in de marges van de KCD-kaarten
+    g({ fill: 'none', stroke: INK, 'stroke-width': 1.2, 'stroke-linecap': 'round' },
+      [[860, 520], [880, 505], [600, 90], [620, 80], [180, 360]].map(([x, y]) => `<path d="M${x},${y} q5,-5 10,0 q5,-5 10,0"/>`).join(''));
+    g({ transform: 'translate(740,440) scale(.9)' }, `<g fill="#8a6a46" stroke="${INK}" stroke-width="1.2"><path d="M-14,0 C-20,-2 -22,-12 -14,-18 C-6,-24 8,-22 12,-14 C14,-10 13,-4 10,0 Z"/><path d="M8,-15 C10,-22 18,-24 22,-19 C25,-15 22,-10 16,-10 C13,-10 10,-12 8,-15 Z"/><path d="M15,-21 C13,-30 13,-38 17,-41 C19,-36 19,-28 18,-21 Z"/><path d="M18,-21 C19,-30 22,-36 25,-37 C25,-31 22,-25 20,-20 Z"/></g>`);
+
+    // 10. titelcartouche, schaal en windroos
+    g({}, `<path d="M24,22 H330 V96 H24 Z" fill="#efe6cf" stroke="${INK}" stroke-width="1.6"/><path d="M30,28 H324 V90 H30 Z" fill="none" stroke="#a2302a" stroke-width="1"/>
+      <text x="44" y="80" font-family="UnifrakturMaguntia, serif" font-size="56" fill="#a2302a">L</text>
+      <text x="82" y="76" font-family="UnifrakturMaguntia, serif" font-size="42" fill="${INK}">euven</text>
+      <text x="212" y="76" font-family="IM Fell English SC, serif" font-size="17" fill="${INK}">&amp; Kessel-Lo</text>`);
+    g({ transform: 'translate(930,580)' }, `<circle r="34" fill="#efe6cf" stroke="${INK}"/><path d="M0,-32 L7,0 L0,32 L-7,0 Z" fill="#a2302a" stroke="${INK}"/><path d="M-32,0 L0,7 L32,0 L0,-7 Z" fill="${INK}" opacity=".75"/><text y="-40" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="15">N</text>`);
+    g({ transform: 'translate(40,610)' }, `<path d="M0,0 h120" stroke="${INK}" stroke-width="3"/><path d="M0,0 h30 M60,0 h30" stroke="#efe6cf" stroke-width="1.6"/><text y="-8" font-family="IM Fell English, serif" font-style="italic" font-size="14">één mijl, ongeveer</text>`);
+
+    // 11. het wapen van de bezoeker, zoals de ridder met zijn schild op de kaart van Trosky
+    const arms = g({ transform: 'translate(870,140)' });
+    const drawArms = () => {
+      const st = store.get('feestje.wapen', null);
+      const who = store.get('feestje.titel', '');
+      arms.innerHTML = st ? `<g transform="scale(.42) translate(-100,-120)">${shieldMarkup(st, 'kaartwapen', false, '', true)}</g>
+        <text y="70" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="15" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${who ? who.replace(/[&<>]/g, '') : 'Uw wapen'}</text>
+        <text y="88" text-anchor="middle" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">welkom op het gastmaal</text>` : '';
+    };
+    drawArms();
+    document.addEventListener('wapen', drawArms);
+
+    // 12. aanklikbare plaatsen met de iconen uit de game
     const PLACES = [
-      [520, 205, 'herberg', 'Het Oudejaarsgastmaal', 'Hoofdtaak. Vanaf 16:00 op 31 december. Het precieze adres volgt per bode.', true],
-      [230, 232, 'stad', 'Leuven', 'Een stad met meer studenten dan Kuttenberg zilver had. En een stadhuis waar Hans Capon jaloers op zou zijn.'],
-      [380, 150, 'reizen', 'Station', 'Snel reizen mogelijk. Kans op struikrovers: laag. Kans op vertraging: aanzienlijk.'],
-      [230, 430, 'kasteel', 'Kasteel van Arenberg', 'Een echt kasteel. Heer Otto von Bergow woont er niet. Studenten wel.'],
-      [470, 412, 'klooster', 'Abdij van Park', 'Monniken, vijvers en een stilte waar Hendrik nooit aan went.'],
-      [690, 318, 'jager', 'Provinciedomein', 'Hier hupt het haasje. Niet stropen: het wild is van de heer.'],
-      [848, 205, 'kasteel', 'Trosky', 'Trosky en Kuttenberg: ruim 900 km oostwaarts. Een paard wordt aanbevolen. Pebbles is niet beschikbaar.'],
+      [640, 268, 'herberg', 'Het Oudejaarsgastmaal', 'Hoofdtaak, in Kessel-Lo. Vanaf 16:00 op 31 december. Het precieze adres volgt per bode.', true],
+      [400, 252, 'stad', 'Leuven', 'Een stad met meer studenten dan Kuttenberg zilver had, en een stadhuis met meer torentjes dan Trosky.'],
+      [548, 172, 'reizen', 'Station', 'Snel reizen mogelijk. Kans op struikrovers: laag. Kans op vertraging: aanzienlijk.'],
+      [372, 470, 'kasteel', 'Kasteel van Arenberg', 'Een echt kasteel aan de Dijle. Heer Otto von Bergow woont er niet. Studenten wel.'],
+      [560, 432, 'klooster', 'Abdij van Park', 'Witte heren, vijvers en een stilte waar Hendrik nooit aan went.'],
+      [335, 118, 'klooster', 'Keizersberg', 'Een abdij op de heuvel. Ooit stond hier een burcht; nu bidden er monniken.'],
+      [800, 336, 'jager', 'Provinciedomein', 'Hier hupt het haasje. Niet stropen: de jachtopziener kijkt mee.'],
+      [925, 300, 'kasteel', 'Trosky', 'Trosky en Kuttenberg: ruim 900 km oostwaarts, langs de Tiensesteenweg. Pebbles is niet beschikbaar.'],
     ];
     for (const [x, y, icon, name, text, main] of PLACES) {
-      const pl = g({ class: 'place', role: 'button', tabindex: 0, 'aria-label': name + ': ' + text, transform: `translate(${x},${y})` });
-      pl.innerHTML = `${main ? '<circle r="40" fill="#a2302a" opacity=".14"/><circle r="40" fill="none" stroke="#a2302a" stroke-width="2" stroke-dasharray="4 4"/>' : ''}
-        <image href="feestje-img/kcd/${icon}.png" x="-24" y="-30" width="48" height="48"/>
-        ${main ? '<image href="feestje-img/kcd/taak.png" x="14" y="-50" width="30" height="30"/>' : ''}
-        <text y="38" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="18" fill="#2a1f16" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`;
+      const pl = g({ class: 'place', role: 'button', tabindex: 0, 'aria-label': name + ': ' + text, transform: `translate(${x},${y})` },
+        `${main ? `<circle r="44" fill="#a2302a" opacity=".14"/><circle r="44" fill="none" stroke="#a2302a" stroke-width="2.4" stroke-dasharray="5 4"/><image href="feestje-img/kcd/taak.png" x="16" y="-56" width="32" height="32"/>` : ''}
+        <image href="feestje-img/kcd/${icon}.png" x="-20" y="-24" width="40" height="40"/>
+        <text y="${main ? 34 : 30}" text-anchor="middle" font-family="${name === 'Leuven' ? 'UnifrakturMaguntia' : 'IM Fell English SC'}, serif" font-size="${name === 'Leuven' ? 26 : 17}" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`);
       const go = () => Toast(name, text, { icon, ms: 4400 });
       pl.addEventListener('click', go);
       pl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     }
-  })();
-
-  /* ---------- dobbelen met Hans: Farkle met de regels uit KCD ---------- */
-  (function farkle() {
-    const GOAL = 2000, $d = $('#fk-dice'), $h = $('#fk-held');
-    const memo = new Map();
-    // Hoogste score waarbij ÁLLE stenen meetellen (anders ongeldig: -Infinity)
-    function best(c) {
-      const key = c.join('');
-      if (memo.has(key)) return memo.get(key);
-      if (c.every(n => n === 0)) return 0;
-      let b = -Infinity;
-      const minus = idx => { const d = c.slice(); for (const [i, k] of idx) d[i] -= k; return d; };
-      if ([1, 2, 3, 4, 5, 6].every(f => c[f] >= 1)) b = Math.max(b, 1500 + best(minus([[1,1],[2,1],[3,1],[4,1],[5,1],[6,1]])));
-      if ([1, 2, 3, 4, 5].every(f => c[f] >= 1)) b = Math.max(b, 500 + best(minus([[1,1],[2,1],[3,1],[4,1],[5,1]])));
-      if ([2, 3, 4, 5, 6].every(f => c[f] >= 1)) b = Math.max(b, 750 + best(minus([[2,1],[3,1],[4,1],[5,1],[6,1]])));
-      for (let f = 1; f <= 6; f++) for (let k = 3; k <= c[f]; k++) b = Math.max(b, (f === 1 ? 1000 : f * 100) * 2 ** (k - 3) + best(minus([[f, k]])));
-      if (c[1] >= 1) b = Math.max(b, 100 + best(minus([[1, 1]])));
-      if (c[5] >= 1) b = Math.max(b, 50 + best(minus([[5, 1]])));
-      memo.set(key, b); return b;
-    }
-    const score = vals => { const c = [0, 0, 0, 0, 0, 0, 0]; vals.forEach(v => c[v]++); const s = best(c); return s > 0 ? s : 0; };
-    function bestPick(vals) { // beste geldige keuze uit een worp (voor Hans, en om 'niets' te herkennen)
-      let top = { s: 0, idx: [] };
-      for (let m = 1; m < 1 << vals.length; m++) {
-        const idx = vals.map((_, i) => i).filter(i => m >> i & 1), s = score(idx.map(i => vals[i]));
-        if (s > top.s || (s === top.s && s > 0 && idx.length < top.idx.length)) top = { s, idx };
-      }
-      return top;
-    }
-
-    let tot = { me: 0, op: 0 }, turn = 'me', round = 0, dice = [], sel = new Set(), held = [], busy = false, over = false;
-    let game = 0; // elk potje een eigen nummer: lopende timers/beurten van een vorig potje stoppen dan vanzelf
-    const msg = h => { $('#fk-msg').innerHTML = h; };
-    const selVals = () => [...sel].map(i => dice[i]);
-    function render() {
-      $d.innerHTML = dice.map((v, i) => `<button class="fk-die" type="button" data-i="${i}" aria-pressed="${sel.has(i)}" aria-label="Steen ${v}${sel.has(i) ? ', gekozen' : ''}" ${turn !== 'me' || busy ? 'disabled' : ''}><img src="feestje-img/kcd/steen-${v}${sel.has(i) ? 'g' : ''}.png" alt=""></button>`).join('');
-      $h.innerHTML = held.map(v => `<img src="feestje-img/kcd/steen-${v}g.png" alt="${v}">`).join('');
-      const sv = score(selVals());
-      $('#fk-me').textContent = tot.me; $('#fk-op').textContent = tot.op;
-      $('#fk-round').textContent = turn === 'me' ? round : 0; $('#fk-oround').textContent = turn === 'op' ? round : 0;
-      $('#fk-sel').textContent = sv;
-      const mine = turn === 'me' && !busy && !over;
-      $('#fk-roll').disabled = !mine || (dice.length > 0 && sv === 0);
-      $('#fk-bank').disabled = !mine || dice.length === 0 || (sel.size ? sv === 0 : round === 0) || (round + sv === 0);
-      $('#fk-roll').textContent = dice.length === 0 ? 'Gooi' : 'Opzij en gooi opnieuw';
-    }
-    $d.addEventListener('click', e => {
-      const b = e.target.closest('.fk-die'); if (!b || b.disabled) return;
-      const i = +b.dataset.i; sel.has(i) ? sel.delete(i) : sel.add(i); render();
-    });
-    const wait = ms => new Promise(r => setTimeout(r, reduceMotion ? Math.min(ms, 150) : ms));
-    async function throwDice(n) {
-      busy = true; sel.clear();
-      dice = Array.from({ length: n }, () => 1 + (Math.random() * 6 | 0)); render();
-      if (!reduceMotion) {
-        $d.querySelectorAll('.fk-die').forEach(b => b.classList.add('rolling'));
-        for (let t = 0; t < 7; t++) { await wait(60); $d.querySelectorAll('.fk-die img').forEach(im => { im.src = `feestje-img/kcd/steen-${1 + (Math.random() * 6 | 0)}.png`; }); }
-      }
-      dice = Array.from({ length: n }, () => 1 + (Math.random() * 6 | 0));
-      busy = false; render();
-      return bestPick(dice);
-    }
-    // stenen opzij leggen; geeft het aantal overgebleven stenen (6 bij "alles gescoord")
-    function setAside(idx) {
-      idx = idx.filter(i => i < dice.length);
-      round += score(idx.map(i => dice[i]));
-      held.push(...idx.map(i => dice[i]));
-      const left = dice.length - idx.length;
-      dice = []; sel.clear();
-      if (left === 0) { held = []; return 6; }
-      return left;
-    }
-    async function bust(who) {
-      const g = game;
-      msg(who === 'me' ? '<b>Niets!</b> Geen enkele steen levert punten op. Deze beurt bent u kwijt.' : '<b>Hans gooit niets.</b> Hij vloekt binnensmonds.');
-      round = 0; busy = true; render(); await wait(1600);
-      if (g !== game) return;
-      busy = false; nextTurn();
-    }
-    function win(who) {
-      over = true; render();
-      if (who === 'me') {
-        const w = store.get('feestje.dobbelwinst', 0) + 1; store.set('feestje.dobbelwinst', w);
-        msg(`<b>Gewonnen!</b> Hans Capon schuift u de groschen toe. "Dat was geluk, Hendrik." (${w}× gewonnen)`);
-        Toast('U won van Hans Capon', `${tot.me} tegen ${tot.op}. Hij wil meteen revanche.`, { icon: 'dobbel', ms: 4600 });
-      } else {
-        msg('<b>Hans wint.</b> Hij zal het u nog jaren inwrijven. Nieuw spel?');
-        Toast('Hans Capon wint', 'Fortuna audentes iuvat, zegt hij. Hij was niet eens zo moedig.', { icon: 'duivelsdobbel', ms: 4600 });
-      }
-    }
-    function nextTurn() {
-      if (over) return;
-      round = 0; held = []; dice = []; sel.clear();
-      turn = turn === 'me' ? 'op' : 'me'; render();
-      if (turn === 'op') hansTurn(); else msg('Uw beurt. <b>Gooi</b> de stenen.');
-    }
-    async function hansTurn() {
-      const g = game;
-      msg('Hans gooit…'); await wait(700);
-      let n = 6;
-      for (;;) {
-        if (g !== game) return;
-        const pick = await throwDice(n);
-        if (g !== game) return;
-        if (!pick.s) return bust('op');
-        await wait(600); if (g !== game) return;
-        pick.idx.forEach(i => sel.add(i)); render(); await wait(800); if (g !== game) return;
-        n = setAside(pick.idx); render();
-        const need = GOAL - tot.op;
-        const stop = round >= need || round >= 700 || (round >= 350 && n <= 3) || (round >= 250 && n <= 2);
-        if (stop && n !== 6) {
-          tot.op += round; msg(`Hans neemt <b>${round}</b> punten.`); round = 0; held = []; render();
-          if (tot.op >= GOAL) return win('op');
-          await wait(1300); if (g !== game) return; return nextTurn();
-        }
-        msg(n === 6 ? 'Hans heeft alle stenen gescoord en gooit opnieuw met zes!' : `Hans gooit door met ${n} ${n === 1 ? 'steen' : 'stenen'}…`);
-        await wait(900);
-      }
-    }
-    $('#fk-roll').addEventListener('click', async () => {
-      if (busy || turn !== 'me' || over) return;
-      let n = 6;
-      if (dice.length) n = setAside([...sel]);
-      if (n === 6 && round > 0) Toast('Alle stenen gescoord', 'U gooit opnieuw met zes. Fortuna audentes iuvat!', { icon: 'dobbel' });
-      const pick = await throwDice(n);
-      if (!pick.s) return bust('me');
-      msg(`Kies de stenen die u opzij legt. Nog ${n} ${n === 1 ? 'steen' : 'stenen'} op tafel.`);
-    });
-    $('#fk-bank').addEventListener('click', () => {
-      if (busy || turn !== 'me' || over) return;
-      if (sel.size) setAside([...sel]);
-      tot.me += round; msg(`U neemt <b>${round}</b> punten.`); round = 0; held = []; dice = [];
-      if (tot.me >= GOAL) return win('me');
-      busy = true; render(); // geen dubbele beurt in de pauze voor Hans
-      const g = game;
-      setTimeout(() => { if (g !== game) return; busy = false; nextTurn(); }, 900);
-    });
-    $('#fk-new').addEventListener('click', () => {
-      if (busy && turn === 'me') return;
-      game++; busy = false;
-      tot = { me: 0, op: 0 }; turn = 'me'; round = 0; dice = []; held = []; sel.clear(); over = false;
-      render(); msg('Nieuw spel. <b>Gooi</b> de stenen.');
-    });
-    render(); msg('U begint. <b>Gooi</b> de stenen.');
-    window.__farkleScore = score; // voor tests
   })();
 
   /* ---------- de haas (gedragsindicator) ---------- */
