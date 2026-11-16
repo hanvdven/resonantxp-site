@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1a130b" />
+  <title>Heraut · tussenstand bijhouden</title>
+  <!-- De gsm-kant van /feestje-tv: ridders inschrijven en punten geven per spel. Beveiligd met de pincode (zie feestje-supabase.sql). -->
+  <style>
+    @font-face { font-family: "Maximilian"; src: url(feestje-fonts/maximilian.ttf) format("truetype"); }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin.woff2) format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin-ext.woff2) format("woff2"); font-weight: 100 900; unicode-range: U+0100-024F, U+1E00-1EFF; }
+    :root { --ink: #2a1f16; --perk: #f1e3c2; --rood: #a2302a; --goud: #c99a3a; --nacht: #101c45; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Grenze", Georgia, serif; font-size: 19px; color: var(--ink); background: var(--perk); line-height: 1.35;
+      padding: 0 0 calc(24px + env(safe-area-inset-bottom)); }
+    header { background: var(--nacht); color: #f1e6cf; padding: 14px 16px 12px; }
+    h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 30px; margin: 0; color: #e9be52; line-height: 1.1; }
+    header p { margin: 2px 0 0; font-size: 15px; color: #cfc3a6; }
+    .demo { background: #7c2d1a; color: #fff3df; padding: 8px 16px; font-size: 15px; }
+    main { padding: 12px 16px; max-width: 640px; margin: 0 auto; }
+    button, input, select { font: inherit; color: inherit; }
+    .knop { background: var(--rood); color: #fff3df; border: 0; border-radius: 6px; padding: 10px 16px; min-height: 44px; cursor: pointer; }
+    .knop.licht { background: #e3cf9f; color: var(--ink); }
+    .knop:disabled { opacity: .5; }
+    input[type=text], input[type=password], input[inputmode], select { border: 1px solid #b59a64; border-radius: 6px; padding: 10px 12px; min-height: 44px; background: #fffaf0; width: 100%; }
+    .pin { display: grid; gap: 10px; margin-top: 30px; }
+    .fout { color: var(--rood); min-height: 1.3em; font-size: 16px; }
+    .spelen { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; margin: 0 -16px; position: sticky; top: 0; background: var(--perk); z-index: 2; border-bottom: 1px solid #d6c08f; scrollbar-width: none; }
+    .spelen button { flex: none; border: 1px solid #b59a64; background: #fffaf0; border-radius: 20px; padding: 8px 14px; min-height: 40px; cursor: pointer; }
+    .spelen button[aria-pressed=true] { background: var(--ink); color: #f1e3c2; border-color: var(--ink); }
+    .rij { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #dcc79a; }
+    .rij svg { width: 32px; height: 39px; display: block; }
+    .rij .naam { font-size: 19px; line-height: 1.15; }
+    .rij .naam small { display: block; color: #7a5a30; font-size: 14px; }
+    .stepper { display: flex; align-items: center; gap: 4px; }
+    .stepper button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #b59a64; background: #fffaf0; font-size: 24px; line-height: 1; cursor: pointer; }
+    .stepper input { width: 64px; text-align: center; font-size: 22px; padding: 6px 4px; font-variant-numeric: tabular-nums; }
+    .stepper .ok { width: 18px; font-size: 15px; color: #4a6b3c; }
+    .stepper .ok.bezig { color: #b59a64; }
+    .stepper .ok.mis { color: var(--rood); }
+    details { margin-top: 22px; background: #ead7ab; border-radius: 8px; padding: 10px 14px; }
+    summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+    .form { display: grid; gap: 10px; margin-top: 10px; }
+    .form .w { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .form .voorbeeld { display: flex; gap: 12px; align-items: center; }
+    .form .voorbeeld svg { width: 60px; height: 72px; }
+    .verwijder { background: none; border: 0; color: var(--rood); text-decoration: underline; cursor: pointer; padding: 10px 0; }
+    .leeg { color: #7a5a30; padding: 20px 0; }
+    .voet { font-size: 14px; color: #7a5a30; margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <header><h1>De heraut</h1><p>Tussenstand voor het scherm in de zaal</p></header>
+  <div class="demo" id="demo" hidden>Demomodus: nog geen database gekoppeld. Wijzigingen blijven op dit toestel (pincode 1403). Open <a href="feestje-tv" style="color:#fff3df">/feestje-tv</a> in een ander tabblad om mee te kijken.</div>
+  <main id="app"></main>
+
+  <script src="feestje-config.js"></script>
+  <script src="feestje-wapen.js"></script>
+  <script src="feestje-db.js"></script>
+  <script>
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const app = $('#app');
+  if (!Db.live) $('#demo').hidden = false;
+
+  let pin = sessionStorage.getItem('feestje.pin') || localStorage.getItem('feestje.pin') || '';
+  let stand = null, spel = null;
+  const wapenSvg = (w, uid) => {
+    const ok = w && TINCT[w.t1] && TINCT[w.t2] && TINCT[w.c] && w.div in DIVS && w.ch in CHARGES;
+    return `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(ok ? w : { t1: 'argent', t2: 'argent', div: 'plain', ch: 'none', c: 'or' }, uid, false, '', false)}</svg>`;
+  };
+  const willekeurigWapen = () => {
+    const p = a => a[Math.floor(Math.random() * a.length)];
+    const metaal = ['or', 'argent'], kleur = Object.keys(TINCT).filter(k => !metaal.includes(k));
+    // heraldische regel: geen kleur op kleur, geen metaal op metaal
+    const t1 = p(kleur), t2 = p(metaal);
+    return { t1, t2, div: p(Object.keys(DIVS)), ch: p(Object.keys(CHARGES).filter(k => k !== 'none')), c: p(metaal) };
+  };
+
+  /* ---------- 1. pincode ---------- */
+  async function inloggen() {
+    if (pin && await Db.pinOk(pin).catch(() => false)) return start();
+    app.innerHTML = `<form class="pin" id="pinform"><label for="pinin">Pincode van de heraut</label>
+      <input id="pinin" type="password" autocomplete="current-password" ${Db.live ? '' : 'value="1403"'} required>
+      <label style="font-size:16px"><input type="checkbox" id="onthoud" checked style="width:auto;min-height:0"> Onthoud op deze gsm</label>
+      <button class="knop">Open het register</button><div class="fout" id="pinfout" role="alert"></div></form>`;
+    $('#pinform').addEventListener('submit', async e => {
+      e.preventDefault(); const p = $('#pinin').value.trim(); $('#pinfout').textContent = 'Even controleren…';
+      let ok = false; try { ok = await Db.pinOk(p); } catch (err) { $('#pinfout').textContent = 'Geen verbinding: ' + err.message; return; }
+      if (!ok) { $('#pinfout').textContent = 'Dat is niet de juiste pincode.'; return; }
+      pin = p; sessionStorage.setItem('feestje.pin', p); if ($('#onthoud').checked) localStorage.setItem('feestje.pin', p);
+      start();
+    });
+  }
+
+  /* ---------- 2. het register ---------- */
+  function start() {
+    app.innerHTML = `<nav class="spelen" id="spelen" aria-label="Spel"></nav><div id="ridders"></div>
+      <details id="nieuw"><summary>Ridder inschrijven</summary><form class="form" id="rform">
+        <input type="text" id="rnaam" placeholder="Riddernaam, bv. Heer Han van Kessel" maxlength="60" required autocomplete="off">
+        <div class="voorbeeld"><span id="rvoorbeeld"></span><button type="button" class="knop licht" id="rlot">⚄ Ander wapen</button></div>
+        <div class="w">
+          <select id="r-t1" aria-label="Veld">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">Veld: ${v[0]}</option>`).join('')}</select>
+          <select id="r-div" aria-label="Deling">${Object.entries(DIVS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
+          <select id="r-t2" aria-label="Tweede kleur">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">2e kleur: ${v[0]}</option>`).join('')}</select>
+          <select id="r-ch" aria-label="Stuk">${Object.entries(CHARGES).map(([k, v]) => `<option value="${k}">Stuk: ${v}</option>`).join('')}</select>
+          <select id="r-c" aria-label="Kleur van het stuk">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">Stuk in ${v[0].toLowerCase()}</option>`).join('')}</select>
+        </div>
+        <button class="knop">Inschrijven</button><div class="fout" id="rfout" role="alert"></div></form></details>
+      <details><summary>Spel toevoegen</summary><form class="form" id="sform"><input type="text" id="snaam" placeholder="bv. Armworstelen" maxlength="30" required autocomplete="off">
+        <button class="knop">Toevoegen</button><div class="fout" id="sfout" role="alert"></div></form></details>
+      <p class="voet">Punten worden bewaard zodra u stopt met tikken. Het scherm in de zaal ververst binnen enkele seconden.
+        ${Db.live ? '' : '<br><button type="button" class="verwijder" id="reset">Demo terugzetten</button>'}
+        <br><button type="button" class="verwijder" id="uit">Afmelden op deze gsm</button></p>`;
+    // wapenkiezer
+    const W = ['t1', 'div', 't2', 'ch', 'c'];
+    const leesWapen = () => Object.fromEntries(W.map(k => [k, $('#r-' + k).value]));
+    const zetWapen = w => { W.forEach(k => $('#r-' + k).value = w[k]); $('#rvoorbeeld').innerHTML = wapenSvg(w, 'voorbeeld'); };
+    zetWapen(willekeurigWapen());
+    W.forEach(k => $('#r-' + k).addEventListener('change', () => zetWapen(leesWapen())));
+    $('#rlot').addEventListener('click', () => zetWapen(willekeurigWapen()));
+    $('#rform').addEventListener('submit', async e => {
+      e.preventDefault(); const naam = $('#rnaam').value.trim(); if (!naam) return;
+      try { await Db.voegRidder(pin, naam, leesWapen()); $('#rnaam').value = ''; zetWapen(willekeurigWapen()); $('#rfout').textContent = ''; ververs(); }
+      catch (err) { $('#rfout').textContent = err.message; }
+    });
+    $('#sform').addEventListener('submit', async e => {
+      e.preventDefault(); const naam = $('#snaam').value.trim(); if (!naam) return;
+      try { const id = await Db.voegSpel(pin, naam); $('#snaam').value = ''; spel = id; $('#sfout').textContent = ''; ververs(); }
+      catch (err) { $('#sfout').textContent = err.message; }
+    });
+    $('#reset')?.addEventListener('click', () => { if (confirm('De demo-stand terugzetten?')) { Db.demoReset(); ververs(); } });
+    $('#uit').addEventListener('click', () => { localStorage.removeItem('feestje.pin'); sessionStorage.removeItem('feestje.pin'); pin = ''; location.reload(); });
+    Db.volg((s, fout) => { if (s) { stand = s; teken(); } }, 5000);
+  }
+  const ververs = async () => { try { stand = await Db.stand(); teken(); } catch {} };
+
+  /* ---------- 3. tekenen (zonder het veld waarin u typt te overschrijven) ---------- */
+  function teken() {
+    if (!stand) return;
+    if (!stand.spelen.some(s => s.id === spel)) spel = stand.spelen[0]?.id ?? null;
+    $('#spelen').innerHTML = stand.spelen.map(s => `<button type="button" data-id="${s.id}" aria-pressed="${s.id === spel}">${esc(s.naam)}</button>`).join('');
+    $('#spelen').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { spel = +b.dataset.id; teken(); }));
+    const actief = document.activeElement?.dataset?.r;
+    const rows = ranglijst(stand).sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+    const box = $('#ridders');
+    if (!rows.length) { box.innerHTML = '<p class="leeg">Nog geen ridders. Schrijf ze hieronder in.</p>'; return; }
+    // bestaande rijen bijwerken in plaats van alles opnieuw te bouwen (zo blijft het toetsenbord open)
+    const sleutel = rows.map(r => r.id).join(',') + '|' + spel;
+    if (box.dataset.k !== sleutel) {
+      box.dataset.k = sleutel;
+      box.innerHTML = rows.map(r => `<div class="rij" data-r="${r.id}">${wapenSvg(r.wapen, 'b' + r.id)}
+        <div class="naam">${esc(r.naam)}<small></small></div>
+        <div class="stepper"><button type="button" data-d="-1" aria-label="Eén punt minder voor ${esc(r.naam)}">−</button>
+          <input inputmode="numeric" pattern="-?[0-9]*" data-r="${r.id}" aria-label="Punten voor ${esc(r.naam)}">
+          <button type="button" data-d="1" aria-label="Eén punt meer voor ${esc(r.naam)}">+</button><span class="ok" aria-hidden="true"></span></div></div>`).join('');
+      box.querySelectorAll('.rij').forEach(rij => {
+        const id = +rij.dataset.r, inp = rij.querySelector('input');
+        rij.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { inp.value = String((parseInt(inp.value, 10) || 0) + +b.dataset.d); bewaar(id, inp); }));
+        inp.addEventListener('input', () => bewaar(id, inp));
+        rij.querySelector('.naam').addEventListener('dblclick', () => beheerRidder(id));
+      });
+    }
+    for (const r of rows) {
+      const rij = box.querySelector(`.rij[data-r="${r.id}"]`); if (!rij) continue;
+      const inp = rij.querySelector('input'), v = r.per(spel);
+      if (String(actief) !== String(r.id) && !inp.dataset.wacht) inp.value = v == null ? '' : v;
+      rij.querySelector('small').textContent = `totaal ${r.totaal} · plaats ${r.plaats}`;
+    }
+  }
+
+  // bewaren met een korte pauze (debounce): pas na 700 ms zonder tikken gaat het naar de database
+  const timers = new Map();
+  function bewaar(id, inp) {
+    const ok = inp.parentElement.querySelector('.ok');
+    inp.dataset.wacht = 1; ok.textContent = '…'; ok.className = 'ok bezig';
+    clearTimeout(timers.get(id));
+    timers.set(id, setTimeout(async () => {
+      const v = parseInt(inp.value, 10);
+      try {
+        await Db.zetPunten(pin, id, spel, isNaN(v) ? 0 : v);
+        ok.textContent = '✓'; ok.className = 'ok';
+        delete inp.dataset.wacht; ververs();
+      } catch (err) { ok.textContent = '!'; ok.className = 'ok mis'; ok.title = err.message; delete inp.dataset.wacht; }
+    }, 700));
+  }
+
+  // dubbeltikken op een naam: hernoemen of uitschrijven
+  async function beheerRidder(id) {
+    const r = stand.ridders.find(x => x.id === id); if (!r) return;
+    const naam = prompt('Naam van de ridder (leeg laten = uitschrijven):', r.naam);
+    if (naam === null) return;
+    try {
+      if (naam.trim()) await Db.wijzigRidder(pin, id, naam.trim(), r.wapen);
+      else if (confirm(`${r.naam} uitschrijven, met al zijn punten?`)) await Db.verwijderRidder(pin, id);
+      ververs();
+    } catch (err) { alert(err.message); }
+  }
+
+  inloggen();
+  </script>
+</body>
+</html>
