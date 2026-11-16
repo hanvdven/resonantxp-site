@@ -93,6 +93,7 @@
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     :focus-visible { outline: 3px solid var(--ochre); outline-offset: 3px; }
     .defs { position: absolute; width: 0; height: 0; }
+    .hemel { position: fixed; inset: 0; z-index: -1; pointer-events: none; will-change: background-position; }
 
     /* ---------- de miniatuur: de hemel boven Kessel-Lo, nu ---------- */
     .miniature-wrap { margin: 34px 0 0; }
@@ -2101,8 +2102,17 @@
     const pts = [[45, 50, 16], [200, 30, 11], [310, 110, 15], [120, 160, 12], [250, 220, 17], [40, 270, 11], [170, 320, 14], [330, 300, 10], [95, 95, 6], [280, 30, 6], [20, 170, 6], [225, 140, 5], [140, 250, 6], [320, 200, 5], [60, 350, 5]];
     for (const [x, y, r] of pts) paths += `<path d="${ster(x, y, r)}" fill="url(#z)" stroke="#5b6478" stroke-width=".6"/><circle cx="${x}" cy="${y}" r="${(r * .18).toFixed(1)}" fill="#f4f6fa"/>`;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs><radialGradient id="z"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#cfd5df"/><stop offset="1" stop-color="#9aa3b4"/></radialGradient></defs>${paths}</svg>`;
-    document.body.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-    document.body.style.backgroundSize = `${W}px ${H}px`;
+    // eigen vaste laag (niet background-attachment: fixed, dat negeert iOS Safari)
+    const hemel = document.createElement('div'); hemel.className = 'hemel'; hemel.setAttribute('aria-hidden', 'true');
+    hemel.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    hemel.style.backgroundSize = `${W}px ${H}px`;
+    document.body.prepend(hemel);
+    // parallax: de hemel schuift met 35% van de snelheid van de pagina (bij 'minder beweging' staat hij stil)
+    if (reduceMotion) return;
+    let queued = false;
+    const move = () => { queued = false; hemel.style.backgroundPositionY = `${(-(scrollY * .35) % H).toFixed(1)}px`; };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(move); } }, { passive: true });
+    move();
   })();
 
   /* ---------- de kaart van Leuven, naar de regiokaarten van KCD2 (Trosky, Kuttenberg) ---------- */
