@@ -127,9 +127,12 @@
     @media (max-width: 640px) { .minia.right { float: none; width: auto; max-width: 320px; margin: 6px auto 22px; } }
 
     /* ---------- Malešov: fries met herten ---------- */
-    .fries { height: 74px; border-top: 6px solid #7c2d1a; border-bottom: 6px solid #7c2d1a; box-shadow: 0 0 0 2px #d4a23a inset, 0 6px 18px rgba(0,0,0,.4); position: relative; }
+    .fries { height: 80px; border-top: 6px solid #7c2d1a; border-bottom: 6px solid #7c2d1a; box-shadow: 0 0 0 2px #d4a23a inset, 0 6px 18px rgba(0,0,0,.4); position: relative; }
     .fries::after { content: ""; position: absolute; inset: 0; background: var(--grain); background-size: 220px; mix-blend-mode: multiply; opacity: .6; pointer-events: none; }
     .fries svg { display: block; }
+    .fries.voet { height: auto; }
+    .fries.voet svg { height: 80px; }
+    .fries.voet svg + svg { border-top: 3px solid #7c2d1a; }
     footer { margin-top: 20px; }
 
     /* ---------- opening: het titelblad ---------- */
@@ -523,23 +526,20 @@
         <feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="3" seed="3" result="n" />
         <feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G" />
       </filter>
-      <!-- Malešov: okergele muur met een sjabloon van herten -->
-      <pattern id="fries-p" width="150" height="74" patternUnits="userSpaceOnUse">
-        <rect width="150" height="74" fill="#d4a23a" />
-        <g fill="#7c2d1a">
-          <path d="M22,40 C26,32 48,30 60,34 C66,36 68,40 66,44 C62,48 38,50 26,48 C22,47 20,44 22,40 Z" />
-          <path d="M58,35 C62,28 64,22 68,19 L74,18 C76,19 76,21 74,22 L70,23 C68,26 66,32 64,37 Z" />
-          <path d="M70,19 l2,-4 l2,4 Z" />
-          <path d="M26,46 L20,62 L23,62 L30,48 Z M33,48 L35,62 L38,62 L37,48 Z M56,46 L54,62 L57,62 L60,46 Z M62,43 L70,58 L73,57 L66,42 Z" />
-          <path d="M22,40 l-5,-4 l1,5 Z" />
-        </g>
-        <g fill="none" stroke="#7c2d1a" stroke-width="2" stroke-linecap="round">
-          <path d="M69,18 C67,11 63,7 58,5 M66,12 L61,13 M64,8 L60,7" />
-          <path d="M71,18 C73,11 77,7 82,6 M74,11 L79,13 M76,8 L80,8" />
-        </g>
-        <g transform="translate(115,37)" fill="#7c2d1a">
-          <circle r="4" /><circle cx="0" cy="-9" r="3.2" /><circle cx="0" cy="9" r="3.2" /><circle cx="-9" cy="0" r="3.2" /><circle cx="9" cy="0" r="3.2" />
-        </g>
+      <!-- Malešov: okergele muur met de echte sjablonen (feestje-sjablonen/, dikte "exact") -->
+      <pattern id="fries-herten" width="107" height="80" patternUnits="userSpaceOnUse">
+        <rect width="107" height="80" fill="#d4a23a" />
+        <image href="feestje-sjablonen/fries-herten-boom-3.svg" x="2" y="4" width="103" height="72" />
+      </pattern>
+      <pattern id="fries-rozet" width="168" height="80" patternUnits="userSpaceOnUse">
+        <rect width="168" height="80" fill="#d4a23a" />
+        <image href="feestje-sjablonen/rozet-bladen-3.svg" x="12" y="10" width="60" height="60" />
+        <image href="feestje-sjablonen/rozet-kant-3.svg" x="91" y="5" width="70" height="70" />
+      </pattern>
+      <!-- de drakenfries is precies één periode breed: naadloos -->
+      <pattern id="fries-draken" width="103.7" height="80" patternUnits="userSpaceOnUse">
+        <rect width="103.7" height="80" fill="#d4a23a" />
+        <image href="feestje-sjablonen/fries-onder-3.svg" x="0" y="2" width="103.7" height="76" />
       </pattern>
       <symbol id="flourish" viewBox="0 0 320 18">
         <path d="M2,9 C40,9 60,2 92,9 S150,16 180,9 S250,2 300,9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -551,7 +551,7 @@
   </svg>
 
   <!-- ===================== HERO ===================== -->
-  <div class="fries" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-p)" /></svg></div>
+  <div class="fries" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-herten)" /></svg></div>
   <header class="hero">
    <div class="panel hero-page">
     <div class="hero-inner">
@@ -923,7 +923,7 @@
     <img src="feestje-img/kcd/haas-zoekt.png" alt="" width="128" height="128" />
   </button>
 
-  <div class="fries" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-p)" /></svg></div>
+  <div class="fries voet" aria-hidden="true"><svg width="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg><svg width="100%"><rect width="100%" height="100%" fill="url(#fries-draken)" /></svg></div>
   <footer>
     <button class="greet" id="greet" type="button">„Geloofd zij Jezus Christus.”</button>
     <span class="reply" id="reply" aria-live="polite"></span>
