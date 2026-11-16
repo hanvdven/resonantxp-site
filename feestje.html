@@ -17,8 +17,6 @@
   <meta name="theme-color" content="#101c45" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <!-- lettertypes zelf gehost (feestje-fonts/, SIL OFL): werkt overal, ook offline op een tv-scherm, en zonder verzoeken naar Google -->
-  <link rel="preload" href="feestje-fonts/unifraktur-maguntia.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="feestje-fonts/im-fell-english.woff2" as="font" type="font/woff2" crossorigin />
   <!--
     feestje.html — interactieve uitnodiging, oud & nieuw 2026 (Kingdom Come-thema).
     Eén zelfstandig bestand, geen build, geen afhankelijkheden behalve Google Fonts.
@@ -27,8 +25,9 @@
     (rode koppen), spaarzame azuur- en okertinten, pentekeningen met een waterverflaagje.
     Alles staat op perkamentbladen; de dag/nacht-hemel is een ingelijste miniatuur op het titelblad.
     Verluchtingen: echte miniaturen uit handschriften (publiek domein, Wikimedia Commons) in feestje-img/.
-      - UnifrakturMaguntia (titels: textura, zoals op de KCD2-kaarten)
-      - IM Fell English / SC (lopende tekst: drukletter uit de 17e eeuw)
+      - Maximilian (titels en cijfers: de letter van het KCD-logo en de KCD-klok; Rudolf Koch 1914,
+        digitalisering Dieter Steffmann 2002, freeware, ongewijzigd meegeleverd)
+      - Grenze (lopende tekst: hybrida, de gotisch-romeinse mengletter van de 15e eeuw)
       - "Handgetekend": SVG-filters (#inky, #deckle) vervormen strakke lijnen en randen
         subtiel met ruis (feTurbulence + feDisplacementMap). Geen afbeeldingen nodig.
 
@@ -38,12 +37,14 @@
 
     TESTEN: ?nu=2026-12-31T17:30 laat de pagina doen alsof het dat tijdstip is.
   -->
+  <link rel="preload" href="feestje-fonts/maximilian.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="preload" href="feestje-fonts/grenze-latin.woff2" as="font" type="font/woff2" crossorigin />
   <style>
-    @font-face { font-family: "IM Fell English"; src: url(feestje-fonts/im-fell-english.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
-    @font-face { font-family: "IM Fell English"; src: url(feestje-fonts/im-fell-english-italic.woff2) format("woff2"); font-style: italic; font-weight: 400; font-display: swap; }
-    @font-face { font-family: "IM Fell English SC"; src: url(feestje-fonts/im-fell-english-sc.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
-    @font-face { font-family: "EB Garamond"; src: url(feestje-fonts/eb-garamond.woff2) format("woff2"); font-style: normal; font-weight: 400 800; font-display: swap; }
-    @font-face { font-family: "UnifrakturMaguntia"; src: url(feestje-fonts/unifraktur-maguntia.woff2) format("woff2"); font-style: normal; font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Maximilian"; src: url(feestje-fonts/maximilian.ttf) format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin-ext.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-italic-latin.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-italic-latin-ext.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+1E00-1E9F; }
     :root {
       --vellum: #ead9b4;
       --vellum-hi: #f3e7cb;
@@ -65,9 +66,9 @@
       --hill-near: #0b0c0c;
       --stars: 1;
 
-      --body: "IM Fell English", Georgia, "Times New Roman", serif;
-      --sc: "IM Fell English SC", "IM Fell English", Georgia, serif;
-      --goth: "UnifrakturMaguntia", "IM Fell English SC", Georgia, serif;
+      --body: "Grenze", Georgia, "Times New Roman", serif;
+      --sc: "Grenze", Georgia, serif;
+      --goth: "Maximilian", "Grenze", Georgia, serif;
 
       --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .5 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
       --stain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900' preserveAspectRatio='none'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .15 1.4 0 0 0 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
@@ -119,7 +120,7 @@
     .minia .fr img { border: 0; box-shadow: 0 0 0 2px #c2473b; }
     .minia img { display: block; width: 100%; height: auto; border: 1px solid var(--ink); }
     .minia figcaption { font-size: .86rem; font-style: italic; color: var(--ink-soft); margin-top: 7px; line-height: 1.35; }
-    .minia figcaption cite { font-style: normal; font-family: var(--sc); }
+    .minia figcaption cite { font-style: normal; font-family: var(--sc); font-variant-caps: small-caps; }
     .minia.right { float: right; width: min(290px, 40%); margin: 6px 0 14px 26px; }
     .minia.wide { margin: 4px 0 28px; }
     .minia.side { max-width: 300px; margin-top: 22px; }
@@ -139,7 +140,7 @@
       display: grid; gap: 30px; align-items: center; grid-template-columns: 1fr; text-align: center;
     }
     @media (min-width: 920px) { .hero-inner { grid-template-columns: 1.05fr 1fr; text-align: left; gap: 56px; } }
-    .kicker { font-family: var(--sc); letter-spacing: .14em; font-size: .9rem; margin: 0; color: var(--rubric); }
+    .kicker { font-family: var(--sc); font-variant-caps: small-caps; letter-spacing: .14em; font-size: .9rem; margin: 0; color: var(--rubric); }
     h1 {
       font-family: var(--goth); font-weight: 800;
       font-size: clamp(3rem, 9vw, 6rem); line-height: .92; margin: .15em 0 .25em;
@@ -158,7 +159,7 @@
     .lede b { font-weight: 700; color: var(--rubric); }
     .hero-cta {
       display: inline-flex; align-items: center; gap: 10px; margin-top: 24px;
-      font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: 1rem; color: var(--ink); text-decoration: none;
+      font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; letter-spacing: .08em; font-size: 1rem; color: var(--ink); text-decoration: none;
       border-top: 1px solid var(--rubric); border-bottom: 1px solid var(--rubric); padding: 8px 6px;
     }
     .hero-cta:hover { color: var(--rubric); }
@@ -174,14 +175,17 @@
     .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
     .cd-num { font-family: var(--goth); font-size: 2.5rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
-    .cd-num.roman { font-family: var(--sc); font-size: 1.6rem; padding: 6px 0 4px; }
-    .cd-lab { font-family: var(--sc); font-weight: 700; font-size: .8rem; letter-spacing: .12em; color: var(--rubric); }
+    .cd-num .dg { display: inline-block; width: .62em; text-align: center; }
+    .cd-unit { width: 82px; min-width: 0; }
+    .cd-num.roman { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+    .cd-num.roman { font-family: var(--sc); font-variant-caps: small-caps; font-size: 1.6rem; padding: 6px 0 4px; }
+    .cd-lab { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: .8rem; letter-spacing: .12em; color: var(--rubric); }
     .cd-label { margin: 0; text-align: center; font-size: 1.05rem; }
-    .cd-label strong { font-family: var(--sc); font-weight: 700; color: var(--rubric); letter-spacing: .04em; }
+    .cd-label strong { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; color: var(--rubric); letter-spacing: .04em; }
     .cd-msg { font-family: var(--goth); font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; color: var(--rubric); text-align: center; margin: 0 0 6px; }
     .roman-toggle {
       background: none; border: 0; padding: 4px 8px; cursor: pointer;
-      font-family: var(--sc); font-size: .85rem; letter-spacing: .06em; color: var(--ink); opacity: .75;
+      font-family: var(--sc); font-variant-caps: small-caps; font-size: .85rem; letter-spacing: .06em; color: var(--ink); opacity: .75;
       text-decoration: underline dotted; text-underline-offset: 4px;
     }
     .roman-toggle:hover { opacity: 1; }
@@ -203,20 +207,20 @@
     }
     .head { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end; margin-bottom: 8px; }
     .vignet { width: clamp(82px, 14vw, 128px); height: auto; display: block; }
-    .eyebrow { font-family: var(--sc); letter-spacing: .14em; font-size: .88rem; color: var(--rubric); margin: 0; }
+    .eyebrow { font-family: var(--sc); font-variant-caps: small-caps; letter-spacing: .14em; font-size: .88rem; color: var(--rubric); margin: 0; }
     h2 {
       font-family: var(--goth); font-weight: 800;
       font-size: clamp(2.3rem, 6vw, 3.5rem); line-height: 1; color: var(--ink); margin: .1em 0 .1em;
     }
     h2::first-letter { color: var(--rubric); }
-    h3 { font-family: var(--sc); font-weight: 700; font-size: 1.15rem; margin: 0 0 .3em; letter-spacing: .03em; }
+    h3 { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.15rem; margin: 0 0 .3em; letter-spacing: .03em; }
     .flourish { display: block; width: min(320px, 70%); height: 18px; margin: 4px 0 22px; color: var(--rubric); overflow: visible; }
     .panel p { max-width: 40em; }
     .muted { color: var(--ink-soft); font-size: .95rem; }
     .pilcrow { color: var(--rubric); font-weight: 700; margin-right: .2em; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      font-family: var(--sc); font-weight: 700; letter-spacing: .06em; font-size: 1rem;
+      font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; letter-spacing: .06em; font-size: 1rem;
       padding: 9px 18px; border-radius: 2px; cursor: pointer;
       background: var(--rubric); color: var(--vellum-hi); border: 1.5px solid var(--ink);
       box-shadow: 2px 2px 0 var(--ink); text-decoration: none;
@@ -231,7 +235,7 @@
     .letter-closed { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .6s ease .5s, opacity .4s ease .4s; }
     .letter-closed > div { overflow: hidden; display: grid; justify-items: center; gap: 6px; text-align: center; padding-bottom: 6px; }
     .letter.open .letter-closed { grid-template-rows: 0fr; opacity: 0; }
-    .addr { font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; margin: 0; }
+    .addr { font-family: var(--sc); font-variant-caps: small-caps; font-size: 1.2rem; letter-spacing: .05em; margin: 0; }
     .addr small { display: block; font-family: var(--body); font-style: italic; letter-spacing: 0; color: var(--ink-soft); font-size: 1rem; }
     .seal { width: 136px; height: 136px; padding: 0; border: 0; background: none; cursor: pointer; margin: 12px 0 4px; border-radius: 50%; }
     .seal svg { width: 100%; height: 100%; overflow: visible; display: block; }
@@ -239,7 +243,7 @@
     .seal .half { transform-box: fill-box; transform-origin: center; transition: transform .8s cubic-bezier(.2,.8,.2,1), opacity .6s ease .25s; }
     .letter.open .seal .l { transform: translate(-46px, 30px) rotate(-38deg); opacity: 0; }
     .letter.open .seal .r { transform: translate(48px, 36px) rotate(32deg); opacity: 0; }
-    .seal-hint { font-family: var(--sc); color: var(--rubric); letter-spacing: .1em; font-size: 1rem; margin: 0; animation: nudge 2.4s ease-in-out infinite; }
+    .seal-hint { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); letter-spacing: .1em; font-size: 1rem; margin: 0; animation: nudge 2.4s ease-in-out infinite; }
     @keyframes nudge { 50% { transform: translateY(-3px); } }
     .letter-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 1s ease .45s; }
     .letter.open .letter-body { grid-template-rows: 1fr; }
@@ -265,15 +269,15 @@
       transition: background .15s;
     }
     .stand:hover { background: rgba(255,248,230,.7); }
-    .stand b { display: block; font-family: var(--sc); font-weight: 700; font-size: 1.05rem; }
+    .stand b { display: block; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.05rem; }
     .stand span { font-size: .88rem; color: var(--ink-soft); line-height: 1.3; display: block; }
     .stand[aria-pressed="true"] { background: #f6ecd2; border-color: var(--rubric); box-shadow: inset 0 0 0 2px #f6ecd2, inset 0 0 0 3px var(--rubric); }
     .stand[aria-pressed="true"] b { color: var(--rubric); }
     .dracht { border-left: 3px double var(--rubric); padding: 6px 0 6px 16px; margin: 6px 0 0; font-size: 1.04rem; min-height: 3.2em; }
-    .dracht b { font-family: var(--sc); color: var(--rubric); }
+    .dracht b { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); }
     .herald { display: grid; gap: 16px; justify-items: center; }
     .shield-big { width: min(260px, 70vw); height: auto; display: block; filter: drop-shadow(2px 6px 6px rgba(60,30,10,.3)); }
-    .herald-title { font-family: var(--sc); font-weight: 700; font-size: 1.3rem; text-align: center; margin: 0; line-height: 1.25; }
+    .herald-title { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.3rem; text-align: center; margin: 0; line-height: 1.25; }
     .herald-title small { display: block; font-family: var(--body); font-weight: 400; font-style: italic; font-size: 1rem; color: var(--ink-soft); }
     .name-row { display: flex; gap: 8px; width: 100%; max-width: 360px; }
     .name-row input {
@@ -283,7 +287,7 @@
     .icon-btn { flex: none; width: 44px; border-radius: 1px; cursor: pointer; background: rgba(255,250,236,.5); border: 1px solid var(--ink); font-size: 1.15rem; }
     .controls { width: 100%; display: grid; gap: 12px; }
     .controls fieldset { border: 0; margin: 0; padding: 0; }
-    .controls legend { font-family: var(--sc); font-size: .92rem; letter-spacing: .1em; color: var(--rubric); margin-bottom: 6px; padding: 0; }
+    .controls legend { font-family: var(--sc); font-variant-caps: small-caps; font-size: .92rem; letter-spacing: .1em; color: var(--rubric); margin-bottom: 6px; padding: 0; }
     .opts { display: flex; flex-wrap: wrap; gap: 6px; }
     .sw { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; padding: 0; border: 1.5px solid var(--ink); }
     .sw[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 3px; }
@@ -297,8 +301,8 @@
     .hours li { display: grid; grid-template-columns: 74px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(42,31,22,.22); align-items: baseline; }
     .hours li:last-child { border-bottom: 0; }
     .hours .when { text-align: right; line-height: 1.1; }
-    .hours .when b { display: block; font-family: var(--sc); font-weight: 700; font-size: 1.35rem; letter-spacing: .04em; color: var(--rubric); }
-    .hours .when small { font-family: var(--sc); color: var(--ink-soft); font-size: .85rem; letter-spacing: .05em; }
+    .hours .when b { display: block; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.35rem; letter-spacing: .04em; color: var(--rubric); }
+    .hours .when small { font-family: var(--sc); font-variant-caps: small-caps; color: var(--ink-soft); font-size: .85rem; letter-spacing: .05em; }
     .hours h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
     .hours .pi { width: 34px; height: 34px; object-fit: contain; margin: -6px 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
     .hours p { margin: .1em 0 0; }
@@ -310,7 +314,7 @@
     @media (min-width: 900px) { .tourney { grid-template-columns: 1fr 1.5fr; align-items: start; } }
     .disciplines { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
     .disciplines li { padding-left: 1.3em; text-indent: -1.3em; }
-    .disciplines b { font-family: var(--sc); }
+    .disciplines b { font-family: var(--sc); font-variant-caps: small-caps; }
     .range { display: grid; gap: 10px; }
     .range canvas {
       width: 100%; aspect-ratio: 16 / 9; display: block; cursor: crosshair; border-radius: 1px;
@@ -319,7 +323,7 @@
       background: #e8d6ad;
     }
     .range-msg { min-height: 1.5em; margin: 0; font-size: 1.02rem; }
-    .range-msg b { font-family: var(--sc); color: var(--rubric); }
+    .range-msg b { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); }
     .range-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 
     /* ---------- de dis ---------- */
@@ -333,7 +337,7 @@
       border: 1.5px solid var(--ink); box-shadow: inset 0 0 0 4px #dcc596, inset 0 0 0 5px var(--rubric), 2px 3px 0 rgba(42,31,22,.35);
       justify-content: space-between;
     }
-    .front .roman { font-family: var(--sc); font-weight: 700; color: var(--rubric); font-size: .95rem; letter-spacing: .15em; }
+    .front .roman { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; color: var(--rubric); font-size: .95rem; letter-spacing: .15em; }
     .front .name { font-family: var(--goth); font-weight: 800; font-size: 1.7rem; line-height: 1.02; color: var(--ink); }
     .front .tap { font-size: .85rem; font-style: italic; color: var(--ink-soft); }
     .back {
@@ -341,12 +345,12 @@
       border: 1.5px solid var(--ink); box-shadow: 2px 3px 0 rgba(42,31,22,.35);
       font-size: 1.02rem; line-height: 1.4; justify-content: center;
     }
-    .back b { font-family: var(--sc); color: var(--rubric); display: block; margin-bottom: 4px; }
+    .back b { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); display: block; margin-bottom: 4px; }
 
     /* ---------- praktisch ---------- */
     .facts { display: grid; grid-template-columns: 1fr; gap: 0; margin: 10px 0 24px; }
     @media (min-width: 700px) { .facts { grid-template-columns: 170px 1fr; } }
-    .facts dt { font-family: var(--sc); font-weight: 700; letter-spacing: .06em; color: var(--rubric); padding-top: 12px; }
+    .facts dt { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; letter-spacing: .06em; color: var(--rubric); padding-top: 12px; }
     .facts dd { margin: 0; padding: 2px 0 12px; border-bottom: 1px solid rgba(42,31,22,.22); min-width: 0; } /* grid-cel mag smaller dan de kaart */
     @media (min-width: 700px) { .facts dd { padding-top: 12px; } }
     .actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
@@ -354,7 +358,7 @@
     footer { text-align: center; color: var(--on-dark); padding: 10px 16px 70px; }
     .credits { font-size: .82rem; color: rgba(239,226,196,.75); margin: 28px auto 0; max-width: 46em; background: rgba(16,28,69,.92); padding: 10px 16px; border-radius: 6px; }
     .credits a { color: inherit; }
-    .greet { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-size: 1.2rem; letter-spacing: .05em; color: var(--on-dark); padding: 6px; }
+    .greet { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-variant-caps: small-caps; font-size: 1.2rem; letter-spacing: .05em; color: var(--on-dark); padding: 6px; }
     .reply { display: block; font-family: var(--goth); font-weight: 600; font-size: 1.8rem; color: #d9b46a; min-height: 1.5em; }
 
     /* ---------- meldingen in de stijl van de game ---------- */
@@ -375,16 +379,16 @@
     .toast .ic.img { background: none; border: 0; box-shadow: none; }
     .toast .ic img { width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
     .toast .dic { display: block; width: 44px; height: 44px; margin: 0 auto 2px; }
-    .toast b { display: block; font-family: var(--sc); font-weight: 700; letter-spacing: .08em; font-size: .82rem; color: #e3b84f; text-transform: uppercase; }
+    .toast b { display: block; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; letter-spacing: .08em; font-size: .82rem; color: #e3b84f; text-transform: uppercase; }
     .toast span { font-size: 1.02rem; line-height: 1.25; }
     .toast.discover { grid-template-columns: 1fr; text-align: center; color: var(--ink);
       background: var(--vellum-hi) var(--grain); border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; padding: 10px 18px; }
     .toast.discover b { color: var(--ink-soft); text-transform: none; font-size: .95rem; letter-spacing: .04em; }
-    .toast.discover span { font-family: var(--sc); font-weight: 700; font-size: 1.35rem; color: var(--rubric); letter-spacing: .06em; text-transform: uppercase; }
+    .toast.discover span { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.35rem; color: var(--rubric); letter-spacing: .06em; text-transform: uppercase; }
     @media (max-width: 560px) { .toasts { left: 12px; right: 12px; bottom: 12px; max-width: none; } }
 
     /* ---------- slapen & wachten (naar het slaapscherm in de game) ---------- */
-    .sleep-toggle { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-weight: 700; font-size: .92rem; letter-spacing: .06em; color: var(--ink); padding: 4px 8px; }
+    .sleep-toggle { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: .92rem; letter-spacing: .06em; color: var(--ink); padding: 4px 8px; }
     .sleep-toggle kbd { display: inline-block; min-width: 1.6em; padding: 0 .3em; margin-left: .3em; border: 1px solid var(--ink); border-radius: 3px; background: #f3e7cb; font-family: var(--body); font-size: .8rem; box-shadow: 0 2px 0 var(--ink); }
     .sleep {
       width: min(380px, 100%); display: grid; gap: 10px; text-align: center; padding: 14px 18px 16px;
@@ -392,7 +396,7 @@
       border: 1px solid #7a6038; box-shadow: inset 0 0 0 3px #1a140d, inset 0 0 0 4px rgba(185,138,46,.55), 0 10px 26px rgba(40,20,5,.35);
     }
     .sl-tabs { display: flex; justify-content: center; gap: 4px; }
-    .sl-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: #a99b7c; cursor: pointer; font-family: var(--sc); letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; padding: 2px 12px 4px; }
+    .sl-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: #a99b7c; cursor: pointer; font-family: var(--sc); font-variant-caps: small-caps; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; padding: 2px 12px 4px; }
     .sl-tabs button[aria-selected="true"] { color: #e3b84f; border-bottom-color: #e3b84f; }
     .sleep h3 { margin: 0; color: #e3b84f; letter-spacing: .12em; text-transform: uppercase; font-size: 1rem; }
     .sleep .sub { margin: -4px 0 0; font-size: .95rem; color: #cfc3a6; font-style: italic; }
@@ -427,7 +431,7 @@
       text-shadow: 0 2px 24px rgba(0,0,0,.9); opacity: 0; transform: translateY(8px); transition: opacity 1s ease, transform 1.4s ease;
     }
     .dream p.on { opacity: 1; transform: none; }
-    .dream small { position: absolute; z-index: 2; bottom: 22px; left: 0; right: 0; text-align: center; font-family: var(--sc); letter-spacing: .1em; font-size: .8rem; color: rgba(241,226,189,.5); }
+    .dream small { position: absolute; z-index: 2; bottom: 22px; left: 0; right: 0; text-align: center; font-family: var(--sc); font-variant-caps: small-caps; letter-spacing: .1em; font-size: .8rem; color: rgba(241,226,189,.5); }
 
     /* ---------- de haas: gedragsindicator zoals in KCD 2 ---------- */
     .hare-ind {
@@ -473,24 +477,24 @@
     @keyframes shake { 50% { transform: rotate(12deg) translateY(-2px); } }
     .fk-score { display: grid; gap: 2px; align-content: start; font-variant-numeric: lining-nums tabular-nums; }
     .fk-score [role="row"] { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; padding: 3px 0; }
-    .fk-score [role="row"]:first-child { font-family: var(--sc); color: #e3b84f; letter-spacing: .1em; border-bottom: 1px solid rgba(227,184,79,.4); }
+    .fk-score [role="row"]:first-child { font-family: var(--sc); font-variant-caps: small-caps; color: #e3b84f; letter-spacing: .1em; border-bottom: 1px solid rgba(227,184,79,.4); }
     .fk-score .tot, .fk-score [role="row"]:nth-child(n+3) span:not(.lab) { font-family: var(--goth); }
     .fk-score .tot { font-size: 1.8rem; }
     .fk-score .me { color: #6fa8e0; } .fk-score .op { color: #e0574a; }
     .fk-score .lab { font-size: .85rem; color: #a99b7c; }
     .fk-msg { margin: 0; min-height: 1.5em; text-align: center; font-size: 1.05rem; }
-    .fk-msg b { color: #e3b84f; font-family: var(--sc); }
+    .fk-msg b { color: #e3b84f; font-family: var(--sc); font-variant-caps: small-caps; }
     .fk-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
     .fk .btn { background: #b98a2e; color: #1a140d; border-color: #1a140d; box-shadow: 2px 2px 0 #000; }
     .fk .btn.ghost { background: transparent; color: #f2ead8; border-color: #b98a2e; }
     .fk .btn:disabled { opacity: .4; cursor: default; }
     .fk-new { background: none; border: 0; color: #a99b7c; text-decoration: underline; cursor: pointer; }
     .fk-rules { margin-top: 12px; }
-    .fk-rules summary { cursor: pointer; font-family: var(--sc); color: var(--rubric); }
+    .fk-rules summary { cursor: pointer; font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); }
 
     /* ---------- laadscherm-tips ---------- */
-    .tip { margin: 2px 0 0; max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
-    .tip b { font-style: normal; font-family: var(--sc); color: var(--rubric); }
+    .tip { margin: 2px 0 0; width: min(30em, 100%); max-width: 30em; text-align: center; font-size: .95rem; color: var(--ink-soft); font-style: italic; min-height: 3em; cursor: pointer; transition: opacity .4s; }
+    .tip b { font-style: normal; font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); }
     .tip.fade { opacity: 0; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -590,7 +594,7 @@
               <g id="w-stars"></g>
             </g>
           </g>
-          <g id="w-nums" font-family="EB Garamond, Georgia, serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="central"></g>
+          <g id="w-nums" font-family="Maximilian, Georgia, serif" font-size="20" text-anchor="middle" dominant-baseline="central"></g>
           <circle r="190.5" fill="none" stroke="#c9a24a" stroke-width="3" />
           <circle r="146" fill="#1b140d" stroke="#c9a24a" stroke-width="2" />
           <g id="w-ticks"></g>
@@ -602,18 +606,18 @@
           </g>
           <circle r="134" fill="#000" filter="url(#w-nerf)" />
           <g id="w-center-klok">
-            <text id="dial-date" y="-60" text-anchor="middle" font-family="IM Fell English, Georgia, serif" font-size="19" fill="#f1e6cf"></text>
-            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="EB Garamond, Georgia, serif" font-weight="700" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums; paint-order:stroke" stroke="rgba(0,0,0,.4)" stroke-width="3"></text>
+            <text id="dial-date" y="-60" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="19" fill="#f1e6cf"></text>
+            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums; paint-order:stroke" stroke="rgba(0,0,0,.4)" stroke-width="3"></text>
             <line x1="-70" y1="28" x2="70" y2="28" stroke="#c9a24a" stroke-width="1" opacity=".7" />
-            <g id="w-stats" font-family="EB Garamond, Georgia, serif" font-weight="700" font-size="19" fill="#f1e6cf" text-anchor="middle"></g>
+            <g id="w-stats" font-family="Maximilian, Georgia, serif" font-size="19" fill="#f1e6cf" text-anchor="middle"></g>
           </g>
           <g id="w-center-wacht" display="none" text-anchor="middle">
-            <text y="-74" font-family="IM Fell English, Georgia, serif" font-size="17" fill="#f1e6cf">Hoeveel tijd wilt u</text>
-            <text id="w-vraag2" y="-54" font-family="IM Fell English, Georgia, serif" font-size="17" fill="#f1e6cf">overslaan?</text>
-            <text id="w-uren" y="-8" dominant-baseline="central" font-family="EB Garamond, Georgia, serif" font-weight="700" font-size="46" fill="#e9be52" style="font-variant-numeric: lining-nums"></text>
+            <text y="-74" font-family="Grenze, Georgia, serif" font-size="17" fill="#f1e6cf">Hoeveel tijd wilt u</text>
+            <text id="w-vraag2" y="-54" font-family="Grenze, Georgia, serif" font-size="17" fill="#f1e6cf">overslaan?</text>
+            <text id="w-uren" y="-8" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="46" fill="#e9be52" style="font-variant-numeric: lining-nums"></text>
             <line x1="-80" y1="20" x2="80" y2="20" stroke="#c9a24a" stroke-width="1" opacity=".7" />
-            <text y="40" font-family="IM Fell English, Georgia, serif" font-size="16" fill="#f1e6cf">Effecten</text>
-            <g font-family="EB Garamond, Georgia, serif" font-weight="700" font-size="17" fill="#f1e6cf" style="font-variant-numeric: lining-nums">
+            <text y="40" font-family="Grenze, Georgia, serif" font-size="16" fill="#f1e6cf">Effecten</text>
+            <g font-family="Maximilian, Georgia, serif" font-size="17" fill="#f1e6cf" style="font-variant-numeric: lining-nums">
               <g transform="translate(-58,52)" fill="#e2b544"><path transform="scale(1.05) translate(-12,0)" d="M2,12 H22 C22,18 17,22 12,22 C7,22 2,18 2,12 Z M7,9 q-2,-3 0,-6 q2,-3 0,-6 M12,9 q-2,-3 0,-6 M17,9 q-2,-3 0,-6" stroke="#e2b544" stroke-width="1.6" stroke-linecap="round"/></g>
               <text id="w-eff-f" x="-58" y="94"></text>
               <g transform="translate(58,52)" fill="#e2b544"><path transform="translate(-13,2)" d="M1,20 V6 h2.5 V13 h21.5 V20 h-2.5 v-3.5 H3.5 V20 Z M5,9.5 a2.6,2.6 0 1 0 5.2,0 a2.6,2.6 0 1 0 -5.2,0 Z M11.5,8 h10 c2,0 3,1.5 3,3 v1.5 h-13 Z"/></g>
@@ -622,7 +626,7 @@
               <text id="w-eff-h" x="0" y="112">100</text>
             </g>
           </g>
-          <text id="dial-note" y="118" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-size="14" fill="#e9be52"></text>
+          <text id="dial-note" y="118" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="14" fill="#e9be52"></text>
           <circle class="handle" id="handle" r="190" fill="transparent"
                   role="slider" tabindex="0" aria-label="Wachtwiel: sleep het wiel of gebruik de pijltjestoetsen om door de dag te reizen"
                   aria-valuemin="0" aria-valuemax="1439" aria-valuenow="0" />
@@ -687,9 +691,9 @@
                   <path id="wax-blob" fill="url(#g-wax)" />
                   <circle r="40" fill="none" stroke="#55100c" stroke-width="2.5" opacity=".7" />
                   <circle r="35" fill="none" stroke="#e0705f" stroke-width="1" opacity=".35" />
-                  <text y="2" text-anchor="middle" dominant-baseline="central" font-family="UnifrakturMaguntia, Georgia, serif" font-weight="800" font-size="34" fill="#64130f" stroke="#d9665a" stroke-opacity=".45" stroke-width=".8">H·N</text>
-                  <text y="-25" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="8" fill="#64130f" letter-spacing="1.5">KESSEL·LO</text>
-                  <text y="31" text-anchor="middle" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="8.5" fill="#64130f" letter-spacing="1.5">MMXXVI</text>
+                  <text y="2" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="34" fill="#64130f" stroke="#d9665a" stroke-opacity=".45" stroke-width=".8">H·N</text>
+                  <text y="-25" text-anchor="middle" font-family="Grenze, Georgia, serif" font-weight="700" font-size="8" fill="#64130f" letter-spacing="1.5">KESSEL·LO</text>
+                  <text y="31" text-anchor="middle" font-family="Grenze, Georgia, serif" font-weight="700" font-size="8.5" fill="#64130f" letter-spacing="1.5">MMXXVI</text>
                 </g>
               </defs>
               <g class="half l" clip-path="url(#c-l)"><use href="#wax" /></g>
@@ -1403,7 +1407,9 @@
       const d = Math.floor(s / 86400); s -= d * 86400;
       const h = Math.floor(s / 3600); s -= h * 3600;
       const m = Math.floor(s / 60); s -= m * 60;
-      const cell = (n, lab, plain) => `<div class="cd-unit"><div class="cd-num${roman ? ' roman' : ''}">${roman ? toRoman(n) : plain ? n : pad(n)}</div><div class="cd-lab">${lab}</div></div>`;
+      // elk cijfer in een eigen vakje van vaste breedte: Maximilian heeft cijfers van ongelijke breedte, zo verspringt er niets
+      const digits = str => [...String(str)].map(ch => `<span class="dg">${ch}</span>`).join('');
+      const cell = (n, lab, plain) => `<div class="cd-unit"><div class="cd-num${roman ? ' roman' : ''}">${roman ? toRoman(n) : digits(plain ? n : pad(n))}</div><div class="cd-lab">${lab}</div></div>`;
       return `<div class="countdown">${withDays && d > 0 ? cell(d, d === 1 ? 'dag' : 'dagen', true) : ''}${cell(h, 'uur')}${cell(m, 'min')}${cell(s, 'sec')}</div>`;
     };
     let html;
@@ -1584,7 +1590,7 @@
     if (withBanner) {
       const size = title.length > 26 ? 10 : title.length > 20 ? 12 : 14;
       out += `<g ${fil}><path d="M4,254 H196 L186,268 L196,282 H4 L14,268 Z" fill="#f1e3c2" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round"/></g>
-        <text x="100" y="269" text-anchor="middle" dominant-baseline="central" font-family="IM Fell English SC, Georgia, serif" font-weight="700" font-size="${size}" fill="#2a1f16">${title.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]))}</text>`;
+        <text x="100" y="269" text-anchor="middle" dominant-baseline="central" font-family="Grenze, Georgia, serif" font-weight="700" font-size="${size}" fill="#2a1f16">${title.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]))}</text>`;
     }
     return out;
   }
@@ -1772,7 +1778,7 @@
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(ang) * len, y - Math.sin(ang) * len); ctx.stroke();
         if (k >= 1) land();
       }
-      ctx.textAlign = 'center'; ctx.font = '700 24px "UnifrakturMaguntia", Georgia, serif';
+      ctx.textAlign = 'center'; ctx.font = '700 24px Maximilian, Georgia, serif';
       pops = pops.filter(p => t - p.t < 900);
       for (const p of pops) {
         const k = (t - p.t) / 900;
@@ -1800,9 +1806,9 @@
         ctx.beginPath(); ctx.moveTo(-6 - pull * 34, 0); ctx.lineTo(4 - pull * 34, -6); ctx.lineTo(10 - pull * 34, 0); ctx.lineTo(4 - pull * 34, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
       }
       ctx.restore();
-      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = '700 20px "IM Fell English SC", Georgia, serif';
+      ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = '700 20px Grenze, Georgia, serif';
       ctx.fillText(`Pijl ${Math.min(shots + 1, SHOTS)}/${SHOTS}   ·   ${score} punten`, 18, 32);
-      ctx.font = '700 15px "IM Fell English SC", Georgia, serif'; ctx.fillStyle = '#a2302a';
+      ctx.font = '700 15px Grenze, Georgia, serif'; ctx.fillStyle = '#a2302a';
       ctx.fillText(`Beste ronde: ${best}`, 18, 54);
     }
     function drawStuck(x, y) {
@@ -2133,7 +2139,7 @@
     g({}, `<path d="${river}" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round" opacity=".55"/>
       <path d="${river}" fill="none" stroke="#6f97b3" stroke-width="10" stroke-linecap="round"/>
       <path d="${river}" fill="none" stroke="#a9c6d6" stroke-width="2.5" stroke-dasharray="14 20" stroke-linecap="round"/>
-      <text x="300" y="520" font-family="IM Fell English, serif" font-style="italic" font-size="18" fill="#3d5f78" transform="rotate(-72 300 520)">Dijle</text>`);
+      <text x="300" y="520" font-family="Grenze, serif" font-style="italic" font-size="18" fill="#3d5f78" transform="rotate(-72 300 520)">Dijle</text>`);
 
     // 6. de ijzeren weg (spoor) langs het station naar Kessel-Lo
     let rail = `<path d="M-20,180 C200,190 380,170 545,212 C640,236 760,250 1020,240" fill="none" stroke="${INK}" stroke-width="2.4"/>`;
@@ -2184,11 +2190,11 @@
 
     // 10. titelcartouche, schaal en windroos
     g({}, `<path d="M24,22 H330 V96 H24 Z" fill="#efe6cf" stroke="${INK}" stroke-width="1.6"/><path d="M30,28 H324 V90 H30 Z" fill="none" stroke="#a2302a" stroke-width="1"/>
-      <text x="44" y="80" font-family="UnifrakturMaguntia, serif" font-size="56" fill="#a2302a">L</text>
-      <text x="82" y="76" font-family="UnifrakturMaguntia, serif" font-size="42" fill="${INK}">euven</text>
-      <text x="212" y="76" font-family="IM Fell English SC, serif" font-size="17" fill="${INK}">&amp; Kessel-Lo</text>`);
-    g({ transform: 'translate(930,580)' }, `<circle r="34" fill="#efe6cf" stroke="${INK}"/><path d="M0,-32 L7,0 L0,32 L-7,0 Z" fill="#a2302a" stroke="${INK}"/><path d="M-32,0 L0,7 L32,0 L0,-7 Z" fill="${INK}" opacity=".75"/><text y="-40" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="15">N</text>`);
-    g({ transform: 'translate(40,610)' }, `<path d="M0,0 h120" stroke="${INK}" stroke-width="3"/><path d="M0,0 h30 M60,0 h30" stroke="#efe6cf" stroke-width="1.6"/><text y="-8" font-family="IM Fell English, serif" font-style="italic" font-size="14">één mijl, ongeveer</text>`);
+      <text x="44" y="80" font-family="Maximilian, serif" font-size="56" fill="#a2302a">L</text>
+      <text x="82" y="76" font-family="Maximilian, serif" font-size="42" fill="${INK}">euven</text>
+      <text x="212" y="76" font-family="Grenze, serif" font-size="17" fill="${INK}">&amp; Kessel-Lo</text>`);
+    g({ transform: 'translate(930,580)' }, `<circle r="34" fill="#efe6cf" stroke="${INK}"/><path d="M0,-32 L7,0 L0,32 L-7,0 Z" fill="#a2302a" stroke="${INK}"/><path d="M-32,0 L0,7 L32,0 L0,-7 Z" fill="${INK}" opacity=".75"/><text y="-40" text-anchor="middle" font-family="Grenze, serif" font-size="15">N</text>`);
+    g({ transform: 'translate(40,610)' }, `<path d="M0,0 h120" stroke="${INK}" stroke-width="3"/><path d="M0,0 h30 M60,0 h30" stroke="#efe6cf" stroke-width="1.6"/><text y="-8" font-family="Grenze, serif" font-style="italic" font-size="14">één mijl, ongeveer</text>`);
 
     // 11. het wapen van de bezoeker, zoals de ridder met zijn schild op de kaart van Trosky
     const arms = g({ transform: 'translate(870,140)' });
@@ -2196,8 +2202,8 @@
       const st = store.get('feestje.wapen', null);
       const who = store.get('feestje.titel', '');
       arms.innerHTML = st ? `<g transform="scale(.42) translate(-100,-120)">${shieldMarkup(st, 'kaartwapen', false, '', true)}</g>
-        <text y="70" text-anchor="middle" font-family="IM Fell English SC, serif" font-size="15" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${who ? who.replace(/[&<>]/g, '') : 'Uw wapen'}</text>
-        <text y="88" text-anchor="middle" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">welkom op het gastmaal</text>` : '';
+        <text y="70" text-anchor="middle" font-family="Grenze, serif" font-size="15" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${who ? who.replace(/[&<>]/g, '') : 'Uw wapen'}</text>
+        <text y="88" text-anchor="middle" font-family="Grenze, serif" font-style="italic" font-size="13" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">welkom op het gastmaal</text>` : '';
     };
     drawArms();
     document.addEventListener('wapen', drawArms);
@@ -2217,7 +2223,7 @@
       const pl = g({ class: 'place', role: 'button', tabindex: 0, 'aria-label': name + ': ' + text, transform: `translate(${x},${y})` },
         `${main ? `<circle r="44" fill="#a2302a" opacity=".14"/><circle r="44" fill="none" stroke="#a2302a" stroke-width="2.4" stroke-dasharray="5 4"/><image href="feestje-img/kcd/taak.png" x="16" y="-56" width="32" height="32"/>` : ''}
         <image href="feestje-img/kcd/${icon}.png" x="-20" y="-24" width="40" height="40"/>
-        <text y="${main ? 34 : 30}" text-anchor="middle" font-family="${name === 'Leuven' ? 'UnifrakturMaguntia' : 'IM Fell English SC'}, serif" font-size="${name === 'Leuven' ? 26 : 17}" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`);
+        <text y="${main ? 34 : 30}" text-anchor="middle" font-family="${name === 'Leuven' ? 'Maximilian' : 'Grenze'}, serif" font-size="${name === 'Leuven' ? 26 : 17}" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`);
       const go = () => Toast(name, text, { icon, ms: 4400 });
       pl.addEventListener('click', go);
       pl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });

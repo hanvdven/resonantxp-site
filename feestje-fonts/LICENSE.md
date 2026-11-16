@@ -1,13 +1,10 @@
 # Lettertypes
 
-Deze lettertypes worden zelf gehost voor `/feestje` (geen verzoeken naar Google).
-Alle vier vallen onder de **SIL Open Font License 1.1** (https://openfontlicense.org), die
-gebruik, aanpassen en meeleveren met een website toestaat.
+Zelf gehost voor `/feestje` en `/feestje-sjablonen` (geen verzoeken naar Google).
 
-| Bestand | Lettertype | Ontwerp / copyright |
-|---|---|---|
-| `im-fell-english*.woff2`, `im-fell-english-sc.woff2` | IM Fell English, IM Fell English SC | Igino Marini (www.iginomarini.com), naar de Fell Types |
-| `unifraktur-maguntia.woff2` | UnifrakturMaguntia | J. "Mach" Wust |
-| `eb-garamond.woff2` | EB Garamond (variabel gewicht) | Georg Duffner en Octavio Pardo |
+| Bestand | Lettertype | Ontwerp | Licentie |
+|---|---|---|---|
+| `maximilian.ttf` | Maximilian | Rudolf Koch (1914); digitalisering Dieter Steffmann (2002), steffmann.de | Freeware ("have fun and enjoy"), inbedden toegestaan (fsType 0). Het bestand is **ongewijzigd** meegeleverd, want aanpassen mag niet. Dit is de letter waarop het logo en de klok van *Kingdom Come: Deliverance* gebaseerd zijn. |
+| `grenze-*.woff2` | Grenze | Omnibus-Type | SIL Open Font License 1.1 |
 
-Bron van de bestanden: Google Fonts (Latijnse subset).
+Grenze is een *hybrida*: de mengvorm van gotisch en romein uit de 15e eeuw, voor de lopende tekst.
