@@ -141,6 +141,9 @@
     /* ---------- de laatste minuut en nieuwjaar: de klok in het midden, het aftellen in de klok ---------- */
     #klok { transition: left .9s ease, top .9s ease, width .9s ease, height .9s ease, opacity .8s ease; }
     #stage.nacht #klok { left: 580px; top: 36px; width: 760px; height: 760px; z-index: 3; }
+    #stage.nieuwjaar #klok { opacity: 0; pointer-events: none; }        /* na middernacht: alleen hemel, stad en vuurwerk */
+    #stage.nieuwjaar #aftel { place-items: center; padding-bottom: 120px; }
+    #stage.nieuwjaar #aftel .z { font-size: 170px; }
     #aftel { position: absolute; inset: 0; display: none; place-items: end center; text-align: center; padding-bottom: 96px; z-index: 9; pointer-events: none; }
     #aftel.aan { display: grid; }
     #vuurwerk { position: absolute; inset: 0; width: 1920px; height: 1080px; }
@@ -787,6 +790,7 @@ function aftellen() {
   const t = now(), s = (CONFIG.midnight - t) / 1000, box = $('#aftel');
   // de laatste minuut tot vier minuten na middernacht: alleen de klok (in het midden), de hemel en de stad
   $('#stage').classList.toggle('nacht', s <= 60 && s > -240);
+  $('#stage').classList.toggle('nieuwjaar', s <= 0 && s > -240);
   if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = ''; $('#aftel-p').textContent = 'Heft de bekers'; }
   else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${t.getFullYear()}`; }
   else box.classList.remove('aan');
