@@ -22,7 +22,7 @@
     html, body { margin: 0; height: 100%; background: #070b1c; overflow: hidden; }
     body.stil { cursor: none; }   /* de muis verdwijnt na 3 s stilstand (zie muis()) */
     #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden;
-      background-color: var(--nacht); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
+      background: var(--nacht) url(feestje-img/tv/plafond.webp); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
     .fries { position: absolute; left: 0; width: 1920px; height: 92px; border-top: 6px solid var(--rood); border-bottom: 6px solid var(--rood); }
     .fries svg { display: block; }
     /* geschilderd op kalk: korrel en vlekken over de band (vooraf berekend, zie feestje-img/textuur) */
@@ -88,15 +88,13 @@
     /* getijden (het programma) */
     /* Wunderzeichen: een plaat uit het Augsburger Wunderzeichenbuch (ca. 1552) met een Nederlands bijschrift */
     .wonder { margin: 0; height: 100%; display: flex; flex-direction: column; gap: 18px; }
-    .wonder img { display: block; width: 100%; height: 430px; object-fit: cover; border-radius: 2px;
+    .wonder img { display: block; width: 100%; height: 400px; object-fit: cover; border-radius: 2px;
       box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40, 24, 8, .45); transition: opacity .6s ease; }
     .wonder img.laadt { opacity: 0; }
-    .wonder .plaat { position: relative; }
-    .wonder .blader { position: absolute; top: 50%; transform: translateY(-50%); width: 64px; height: 96px; border: 0; border-radius: 4px; cursor: pointer;
-      font-family: "Grenze", serif; font-weight: 600; font-size: 76px; line-height: 1; color: #f3e6c4; background: rgba(20, 12, 4, .45); opacity: .55; transition: opacity .2s; }
-    .wonder .blader:hover, .wonder .blader:focus-visible { opacity: 1; }
-    #wonder-vorige { left: 10px; } #wonder-volgende { right: 10px; }
-    #wonder-nr { position: absolute; right: 14px; bottom: 10px; font-size: 24px; font-weight: 700; letter-spacing: .06em; color: #f3e6c4; text-shadow: 0 1px 4px #000; }
+    .wonder .nav { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin: -6px 0 -10px; }
+    .wonder .blader { width: 48px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+      font-family: "Grenze", serif; font-weight: 600; font-size: 52px; line-height: 40px; color: var(--rubriek); }
+    #wonder-nr { font-size: 26px; font-weight: 700; letter-spacing: .06em; color: var(--inkt-zacht); min-width: 110px; text-align: center; }
     .wonder figcaption { display: grid; grid-template-columns: auto 1fr; gap: 4px 22px; align-items: baseline; }
     .wonder figcaption b { font-family: "Maximilian", serif; font-weight: 400; font-size: 64px; line-height: 1; color: var(--rubriek); grid-row: span 2; }
     .wonder figcaption span { font-size: 30px; line-height: 1.2; }
@@ -133,15 +131,22 @@
     @keyframes in { from { opacity: 0; transform: translateX(40px); } }
     @keyframes uit { to { opacity: 0; transform: translateX(40px); } }
 
-    /* ---------- de laatste minuut ---------- */
-    #aftel { position: absolute; inset: 0; display: none; place-items: center; text-align: center; background: rgba(7, 11, 28, .86); z-index: 9; }
+    /* ---------- de hemel boven Leuven: echte sterren (altijd), en rond middernacht de nacht met de stad ---------- */
+    #hemel { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
+    #hemel .nacht { opacity: 0; transition: opacity 1.2s ease; }
+    #stage.nacht #hemel .nacht { opacity: 1; }
+    .fries { transition: opacity .8s ease; }
+    #stage.nacht .fries, #stage.nacht #paneel, #stage.nacht #nu, #stage.nacht #wapenkunde { opacity: 0; pointer-events: none; }
+
+    /* ---------- de laatste minuut en nieuwjaar: de klok in het midden, het aftellen in de klok ---------- */
+    #klok { transition: left .9s ease, top .9s ease, width .9s ease, height .9s ease, opacity .8s ease; }
+    #stage.nacht #klok { left: 580px; top: 36px; width: 760px; height: 760px; z-index: 3; }
+    #aftel { position: absolute; inset: 0; display: none; place-items: end center; text-align: center; padding-bottom: 96px; z-index: 9; pointer-events: none; }
     #aftel.aan { display: grid; }
     #vuurwerk { position: absolute; inset: 0; width: 1920px; height: 1080px; }
-    #aftel .tekst { position: relative; text-shadow: 0 0 30px rgba(7,11,28,.9), 0 4px 12px rgba(0,0,0,.8); }
-    #aftel.feest { background: rgba(7, 11, 28, .62); }
-    #aftel .n { font-family: "Maximilian", serif; font-size: 440px; line-height: 1; color: var(--goud); }
-    #aftel .z { font-family: "Maximilian", serif; font-size: 150px; line-height: 1.1; color: var(--goud); }
-    #aftel p { font-size: 46px; margin: 10px 0 0; color: #f1e6cf; }
+    #aftel .tekst { position: relative; text-shadow: 0 0 24px rgba(7,11,28,.95), 0 4px 12px rgba(0,0,0,.8); }
+    #aftel .z { font-family: "Maximilian", serif; font-size: 120px; line-height: 1; color: var(--goud); }
+    #aftel p { font-size: 46px; margin: 8px 0 0; color: #f1e6cf; }
 
     /* ---------- wapenschilderen (16:00–18:00): een volledige pagina wapenkunde, de klok klein rechtsboven ---------- */
     #klok, #nu, #paneel, #wapenkunde { transition: opacity .8s ease; }
@@ -190,6 +195,12 @@
       <pattern id="p-herten" width="130" height="80" patternUnits="userSpaceOnUse"><rect width="130" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/herten-rood.svg" x="11.5" y="4" width="107" height="72" /></pattern>
       <pattern id="p-draken" width="124" height="80" patternUnits="userSpaceOnUse"><rect width="124" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/draken.svg" x="9.15" y="2" width="105.7" height="76" /></pattern>
     </defs>
+  </svg>
+  <svg id="hemel" viewBox="0 0 1920 1080" aria-hidden="true">
+    <defs><linearGradient id="h-lucht" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070c22"/><stop offset=".65" stop-color="#101c44"/><stop offset="1" stop-color="#22355f"/></linearGradient></defs>
+    <rect class="nacht" width="1920" height="1080" fill="url(#h-lucht)"/>
+    <g id="h-sterren"></g>
+    <g class="nacht" id="h-stad"></g>
   </svg>
   <div class="fries" id="f-boven"><svg width="1920" height="80"><rect width="1920" height="80" fill="url(#p-herten)" /></svg></div>
   <div class="fries" id="f-onder"><svg width="1920" height="80"><rect width="1920" height="80" fill="url(#p-draken)" /></svg></div>
@@ -245,9 +256,9 @@
     <div class="blad" id="blad-stand" role="tabpanel"></div>
     <div class="blad" id="blad-getijden" role="tabpanel" hidden></div>
     <div class="blad" id="blad-spelen" role="tabpanel" hidden></div>
-    <div class="blad" id="blad-wunder" role="tabpanel" hidden><figure class="wonder"><div class="plaat"><img alt="">
-      <button type="button" id="wonder-vorige" class="blader" aria-label="Vorige plaat">‹</button><button type="button" id="wonder-volgende" class="blader" aria-label="Volgende plaat">›</button>
-      <span id="wonder-nr"></span></div><figcaption><b></b><span></span><small></small></figcaption></figure></div>
+    <div class="blad" id="blad-wunder" role="tabpanel" hidden><figure class="wonder"><img alt="">
+      <div class="nav"><button type="button" id="wonder-vorige" class="blader" aria-label="Vorige plaat">‹</button><span id="wonder-nr"></span><button type="button" id="wonder-volgende" class="blader" aria-label="Volgende plaat">›</button></div>
+      <figcaption><b></b><span></span><small></small></figcaption></figure></div>
     <div id="status"></div>
   </section>
 
@@ -274,6 +285,7 @@
 
 <script src="feestje-config.js"></script>
 <script src="feestje-hemel.js"></script>
+<script src="feestje-sterren.js"></script>
 <script src="feestje-wapen.js"></script>
 <script src="feestje-db.js"></script>
 <script>
@@ -376,14 +388,65 @@ function schaal() {
 }
 addEventListener('resize', schaal); schaal();
 
-/* ---------- achtpuntige zilveren sterren op de geschilderde nachthemel (eenmalig, als achtergrond) ---------- */
-(() => {
-  const W = 360, H = 360;
-  const ster = (x, y, r) => { let d = ''; for (let i = 0; i < 16; i++) { const rr = i % 2 ? r * .41 : r, a = i * Math.PI / 8; d += (i ? 'L' : 'M') + (x + rr * Math.sin(a)).toFixed(1) + ',' + (y - rr * Math.cos(a)).toFixed(1); } return d + 'Z'; };
-  const pts = [[45, 50, 16], [200, 30, 11], [310, 110, 15], [120, 160, 12], [250, 220, 17], [40, 270, 11], [170, 320, 14], [330, 300, 10], [95, 95, 6], [280, 30, 6], [20, 170, 6], [225, 140, 5], [140, 250, 6], [320, 200, 5], [60, 350, 5]];
-  const paths = pts.map(([x, y, r]) => `<path d="${ster(x, y, r * .8)}" fill="#cfd5df" opacity=".75"/>`).join('');
-  $('#stage').style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${paths}</svg>`)}"), url(feestje-img/tv/plafond.webp)`;
+/* ---------- de hemel boven Leuven: de echte sterren van dit ogenblik (feestje-sterren.js), geschilderd als in Malešov:
+   achtpuntig, effen, zonder gloed of rand. We kijken naar het zuiden, 120° breed, 16 px per graad (dus niet vertekend);
+   de horizon ligt achter de stad. Rond middernacht: de nachtlucht en het silhouet van Leuven, zoals de steden in het
+   Wunderzeichenbuch (folio 65). ---------- */
+const Hemel = (() => {
+  const W = 1920, HOR = 965, PX = 16;
+  const ster = (x, y, r) => { let d = ''; for (let i = 0; i < 16; i++) { const rr = i % 2 ? r * .38 : r, a = i * Math.PI / 8 + .2; d += (i ? 'L' : 'M') + (x + rr * Math.sin(a)).toFixed(1) + ',' + (y - rr * Math.cos(a)).toFixed(1); } return d + 'Z'; };
+  function sterren() {
+    const lagen = { '#efe4c4': '', '#f6dc8e': '' };
+    for (const { alt, az, mag } of sterrenBoven(now(), CONFIG.lat, CONFIG.lon)) {
+      const dx = ((az - 180 + 540) % 360) - 180, x = W / 2 + dx * PX, y = HOR - alt * PX;
+      if (x < -20 || x > W + 20 || y < -20) continue;
+      const r = Math.max(4.5, Math.min(22, 18 - 3 * mag));
+      lagen[mag < 1.2 ? '#f6dc8e' : '#efe4c4'] += ster(x, y, r);     // de helderste een tikje goud
+    }
+    $('#h-sterren').innerHTML = Object.entries(lagen).map(([k, d]) => `<path d="${d}" fill="${k}"/>`).join('');
+  }
+  /* het silhouet van Leuven, vrij naar de stad: Keizersberg op de heuvel, de Sint-Geertruitoren, het stadhuis met zijn
+     torentjes, de afgeknotte toren en het koor van Sint-Pieter, trapgevels en een stadsmuur */
+  function stad() {
+    let rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(1425);
+    const Y = 1080, voet = 1000;
+      let d = `M0,${Y} L0,${voet - 46} C90,${voet - 120} 200,${voet - 118} 320,${voet - 30} L320,${Y} Z`;
+    // de abdij van Keizersberg bovenop de heuvel, in de verte
+    d += ` M110,${voet - 100} L110,${voet - 128} L128,${voet - 128} L128,${voet - 150} L134,${voet - 172} L140,${voet - 150} L140,${voet - 128} L200,${voet - 128} L212,${voet - 112} L212,${voet - 96} Z`;
+    let p = `M180,${Y} L180,${voet - 14} L230,${voet - 16} L236,${voet - 38} L262,${voet - 38} L268,${voet - 22} L300,${voet - 24}`;
+    const huis = (x, w, h) => {                                      // trapgevel
+      const t = voet - h, st = w / 6;
+      return ` L${x},${t + 18} L${x + st},${t + 18} L${x + st},${t + 9} L${x + 2 * st},${t + 9} L${x + 2 * st},${t} L${x + 4 * st},${t} L${x + 4 * st},${t + 9} L${x + 5 * st},${t + 9} L${x + 5 * st},${t + 18} L${x + w},${t + 18}`;
+    };
+    const huizen = (x0, x1) => { let x = x0, o = ''; while (x < x1 - 30) { const w = 34 + rnd() * 30; o += huis(x, w, 70 + rnd() * 45); x += w; } return o; };
+    p += huizen(300, 380);
+    // Sint-Geertrui: slanke opengewerkte spits
+    p += ` L380,${voet - 60} L392,${voet - 150} L392,${voet - 210} L398,${voet - 210} L408,${voet - 320} L418,${voet - 210} L424,${voet - 210} L424,${voet - 150} L436,${voet - 60}`;
+    p += huizen(436, 700);
+    // het stadhuis: rijk gotisch blok met steil dak, zes torentjes en twee hoektorens
+    const sx = 720, sw = 260, sh = 150;
+    p += ` L${sx},${voet - sh} L${sx - 4},${voet - sh - 40} L${sx + 8},${voet - sh - 120} L${sx + 20},${voet - sh - 40} L${sx + 16},${voet - sh}`;
+    p += ` L${sx + 30},${voet - sh - 70}`;
+    for (let i = 1; i <= 6; i++) { const x = sx + i * sw / 7; p += ` L${x - 6},${voet - sh - 70 + 0} L${x - 4},${voet - sh - 112} L${x},${voet - sh - 140} L${x + 4},${voet - sh - 112} L${x + 6},${voet - sh - 70}`; }
+    p += ` L${sx + sw - 30},${voet - sh - 70} L${sx + sw - 16},${voet - sh} L${sx + sw - 20},${voet - sh - 40} L${sx + sw - 8},${voet - sh - 120} L${sx + sw + 4},${voet - sh - 40} L${sx + sw},${voet - sh}`;
+    p += ` L${sx + sw},${voet - 90}`;
+    p += huizen(sx + sw, 1040);
+    // Sint-Pieter: brede westtoren (afgeknot, met een klein spitsje), schip met dak, transept, koor
+    p += ` L1040,${voet - 120} L1040,${voet - 250} L1056,${voet - 250} L1056,${voet - 262} L1124,${voet - 262} L1124,${voet - 250} L1140,${voet - 250}`;
+    p += ` L1140,${voet - 165} L1180,${voet - 225} L1300,${voet - 225} L1300,${voet - 240} L1310,${voet - 280} L1320,${voet - 240} L1320,${voet - 225} L1420,${voet - 225} L1460,${voet - 165} L1470,${voet - 120}`;
+    p += huizen(1470, 1700);
+    // nog een kerktoren en de stadsmuur met een poort
+    p += ` L1700,${voet - 110} L1710,${voet - 190} L1730,${voet - 270} L1750,${voet - 190} L1760,${voet - 110}`;
+    p += huizen(1760, 1880);
+    p += ` L1880,${voet - 60} L1880,${voet - 100} L1890,${voet - 100} L1890,${voet - 92} L1900,${voet - 92} L1900,${voet - 100} L1910,${voet - 100} L1910,${voet - 92} L1920,${voet - 92} L1920,${Y} Z`;
+    // een paar verlichte vensters, want het is feest
+    let licht = ''; for (let i = 0; i < 26; i++) { const x = 320 + rnd() * 1520, y = voet - 20 - rnd() * 60; licht += `<rect x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="5" height="8" fill="#e8b85a" opacity="${(.5 + rnd() * .5).toFixed(2)}"/>`; }
+    $('#h-stad').innerHTML = `<path d="M0,${Y} L0,${voet - 10} C300,${voet - 60} 700,${voet - 30} 1000,${voet - 50} C1300,${voet - 70} 1650,${voet - 30} 1920,${voet - 55} L1920,${Y} Z" fill="#1d3346"/>`
+      + `<path d="${d}" fill="#17283a"/><path d="${p}" fill="#0d1522"/>${licht}`;
+  }
+  return { start() { sterren(); stad(); setInterval(sterren, 120000); }, opnieuw: sterren };
 })();
+Hemel.start();
 
 /* =========================================================
    DE KLOK — het wachtwiel van KCD2, zonder interactie
@@ -722,7 +785,9 @@ Db.volg((s, fout) => {
    ========================================================= */
 function aftellen() {
   const t = now(), s = (CONFIG.midnight - t) / 1000, box = $('#aftel');
-  if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'n'; $('#aftel-n').textContent = Math.ceil(s); $('#aftel-p').textContent = 'Heft de bekers'; }
+  // de laatste minuut tot vier minuten na middernacht: alleen de klok (in het midden), de hemel en de stad
+  $('#stage').classList.toggle('nacht', s <= 60 && s > -240);
+  if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = ''; $('#aftel-p').textContent = 'Heft de bekers'; }
   else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${t.getFullYear()}`; }
   else box.classList.remove('aan');
   const feest = s <= 0 && s > -240; box.classList.toggle('feest', feest); feest ? Vuurwerk.start() : Vuurwerk.stop();
@@ -738,7 +803,7 @@ function aftellen() {
   function zet(t) {
     OFFSET = t == null ? 0 : t - Date.now();
     const u = new URL(location); OFFSET ? u.searchParams.set('nu', lokaal(now())) : u.searchParams.delete('nu'); history.replaceState(null, '', u);
-    Klok.opnieuw(); elkeMinuut(); aftellen(); toon();
+    Klok.opnieuw(); Hemel.opnieuw(); elkeMinuut(); aftellen(); toon();
   }
   knop.addEventListener('click', () => { paneel.hidden = !paneel.hidden; knop.setAttribute('aria-expanded', !paneel.hidden); toon(); knop.blur(); });
   paneel.addEventListener('click', e => {
@@ -955,14 +1020,13 @@ function nuSpeelt(titel, artiest, hoes) {
 const Vuurwerk = (() => {
   const cv = $('#vuurwerk'), g = cv.getContext('2d'), W = 1920, H = 1080;
   const KLEUR = ['#f3c84a', '#f7dc8a', '#d8463a', '#5f86d6', '#f2eee4', '#e9a23b'];
-  const ster = (kleur, r) => {                               // achtpuntige ster met gloed, één keer getekend
-    const c = document.createElement('canvas'), n = Math.ceil(r * 4); c.width = c.height = n; const x = c.getContext('2d'), m = n / 2;
-    const gl = x.createRadialGradient(m, m, 0, m, m, m); gl.addColorStop(0, kleur + 'aa'); gl.addColorStop(1, kleur + '00'); x.fillStyle = gl; x.fillRect(0, 0, n, n);
-    x.beginPath(); for (let i = 0; i < 16; i++) { const rr = i % 2 ? r * .42 : r, a = i * Math.PI / 8; x.lineTo(m + rr * Math.sin(a), m - rr * Math.cos(a)); } x.closePath();
-    x.fillStyle = kleur; x.fill(); x.strokeStyle = '#2a1f16'; x.lineWidth = Math.max(1, r / 7); x.stroke();
+  const ster = (kleur, r) => {                               // achtpuntige ster zoals in Malešov: effen verf, geen gloed, geen rand
+    const c = document.createElement('canvas'), n = Math.ceil(r * 2 + 4); c.width = c.height = n; const x = c.getContext('2d'), m = n / 2;
+    x.beginPath(); for (let i = 0; i < 16; i++) { const rr = i % 2 ? r * .38 : r, a = i * Math.PI / 8; x.lineTo(m + rr * Math.sin(a), m - rr * Math.cos(a)); } x.closePath();
+    x.fillStyle = kleur; x.fill();
     return c;
   };
-  const STERREN = KLEUR.map(k => [ster(k, 7), ster(k, 11)]);
+  const STERREN = KLEUR.map(k => [ster(k, 10), ster(k, 15)]);
   let deeltjes = [], pijlen = [], kometen = [], draken = [], vlam = [], loopt = false, raf = null, vorige = 0, volgendePijl = 0, volgendeKomeet = 0, volgendeDraak = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -979,7 +1043,27 @@ const Vuurwerk = (() => {
   /* De komeet van 1401 (folio 65): groot en traag, de kop vooraan, de pauwenstaart schuin omhoog erachter.
      kop = waar in het knipsel de kern zit. Eén tegelijk; zodra hij weg is, komt de volgende. */
   const KOMEET = { img: laad('komeet-1401'), kop: [75, 150], schaal: 1.45 };
-  function komeet() { kometen.push({ x: W + 60, y: rnd(150, 300), vx: -55, vy: 7 }); }
+  /* bewegende strepen over de staart, in de kleuren, richting en dikte van de geschilderde strepen: ze vertrekken bij
+     de kop en schuiven langs een straal naar buiten (in de coördinaten van het knipsel: kop links, staart rechts omhoog) */
+  const STREEPKLEUR = ['#f6e3a8', '#efc77a', '#e6a24e', '#d9823a', '#fff1cc', '#c8743a'];
+  const nieuweStreep = (r = rnd(10, 60)) => {
+    const doelY = rnd(15, 285), dx = 690 - 75, dy = doelY - 150, l = Math.hypot(dx, dy);
+    return { ux: dx / l, uy: dy / l, r, max: l * rnd(.7, 1), len: rnd(40, 130), v: rnd(50, 110), dik: rnd(.8, 2.4),
+      kleur: STREEPKLEUR[(Math.random() * STREEPKLEUR.length) | 0], buig: rnd(-.12, .12) };
+  };
+  function komeet() { kometen.push({ x: W + 60, y: rnd(150, 300), vx: -55, vy: 7, strepen: Array.from({ length: 60 }, () => nieuweStreep(rnd(10, 520))) }); }
+  function strepen(k, dt) {
+    const { kop, schaal } = KOMEET;
+    g.save(); g.translate(k.x, k.y); g.scale(schaal, schaal); g.lineCap = 'round';
+    for (const st of k.strepen) {
+      st.r += st.v * dt; if (st.r > st.max) Object.assign(st, nieuweStreep());
+      const a = Math.min(1, st.r / 60, (st.max - st.r) / 80);           // in- en uitfaden
+      const x1 = st.ux * st.r, y1 = st.uy * st.r, x2 = st.ux * (st.r + st.len), y2 = st.uy * (st.r + st.len);
+      g.globalAlpha = Math.max(0, a) * .75; g.strokeStyle = st.kleur; g.lineWidth = st.dik;
+      g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 - st.uy * st.buig * st.len, (y1 + y2) / 2 + st.ux * st.buig * st.len, x2, y2); g.stroke();
+    }
+    g.globalAlpha = 1; g.restore();
+  }
 
   /* De draken van folio 127 ("vliegende draken boven Bohemen", 1533). kop: aan welke kant van het knipsel de kop zit,
      zodat elke draak met de kop vooruit vliegt. Een zwerm van ~40, zoals op de plaat de meeste naar links. */
@@ -1015,12 +1099,13 @@ const Vuurwerk = (() => {
       k.x += k.vx * dt; k.y += k.vy * dt;
       const { img, kop, schaal } = KOMEET; if (!img.naturalWidth) return true;
       g.drawImage(img, k.x - kop[0] * schaal, k.y - kop[1] * schaal, img.width * schaal, img.height * schaal);
+      strepen(k, dt);
       return k.x + (img.width - kop[0]) * schaal > 0;
     });
     // pijlen met een spoor van vonkjes
     pijlen = pijlen.filter(p => {
       p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 260 * dt;
-      g.drawImage(STERREN[p.k][0], p.x - 14, p.y - 14);
+      g.drawImage(STERREN[p.k][0], p.x - STERREN[p.k][0].width / 2, p.y - STERREN[p.k][0].height / 2);
       if (Math.random() < .7) deeltjes.push({ x: p.x, y: p.y + 6, vx: rnd(-20, 20), vy: rnd(20, 60), t: 0, duur: .5, k: 5, groot: false, rot: 0, klein: true });
       if (p.y < p.hoog || p.vy > -80) { spat(p.x, p.y, p.k); return false; } return true;
     });
