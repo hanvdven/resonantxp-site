@@ -17,24 +17,22 @@ const CONFIG = {
   partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
   // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
   program: [
-    [16,    'Wapenschilderen', 'De poort gaat open. Aan de lange tafel schildert u uw wapen op schild of tuniek: verf en karton liggen klaar. Tot 18:00, en het mooiste wapen wint.', 'schild'],
-    [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf, zoals op het toernooi van Kuttenberg. Jonge schildknapen doen mee.', 'arena'],
-    [18,    'Dobbelen om groschen', 'De wapens worden gekeurd en opgehangen. Daarna rollen de stenen: wie wint, verdient groschen. Kinderen worden rond deze tijd opgehaald.', 'dobbel'],
-    [20,    'Het riddermaal', 'De grote ketel gaat open en uw meegebrachte schotels komen op de dis. Aan tafel: de prijs voor het beste kostuum.', 'eten'],
+    [16,    'Wapenschilderen', 'De poort gaat open. Aan de lange tafel schildert u uw wapen op schild of tuniek: verf en karton liggen klaar. Daarna worden de wapens gekeurd, en het mooiste wint.', 'schild'],
+    [16.5,  'Het riddertoernooi', 'Zwaardgevecht en boogschieten op het erf, bij het laatste licht, zoals op het toernooi van Kuttenberg. Jonge schildknapen doen mee.', 'arena'],
+    [19,    'Het riddermaal', 'De grote ketel gaat open en uw meegebrachte schotels komen op de dis. Aan tafel: de prijs voor het beste kostuum.', 'eten'],
     [21,    'De proeverij', 'Een wedstrijd van de tong. Wat er geproefd wordt, blijft tot dan een verrassing.', 'honing'],
-    [22.25, 'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
-    [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.', 'brandewijn'],
-    [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Oliebollen voor iedereen.', 'ster'],
+    [23,    'Kennis van het rijk', 'De grote Bohemen-quiz, op uw gsm: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
+    [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Een heilandsbrandewijn om het jaar op te slaan, en oliebollen voor iedereen.', 'ster'],
   ],
 };
 
 /* Honger en energie op het tv-scherm volgen het programma (zoals Voeding en Energie in KCD2, 0–100).
    maaltijden: [uur, naam, hoeveel voeding erbij]  ·  oppeppers: [uur, naam, hoeveel energie erbij] */
 const LIJF = {
-  voeding:  { start: 60, perUur: -7 },   // om 16:00 goed gevuld, daarna zakt het (het riddermaal is pas om 20:00)
+  voeding:  { start: 60, perUur: -7 },   // om 16:00 goed gevuld, daarna zakt het (het riddermaal is pas om 19:00)
   energie:  { start: 100, perUur: -8.5 },
-  maaltijden: [[20, 'Het riddermaal', 75], [21, 'De proeverij', 12], [24, 'Oliebollen', 35]],
-  oppeppers:  [[23.75, 'Heilandsbrandewijn', 15], [24, 'Middernacht', 25]],
+  maaltijden: [[19, 'Het riddermaal', 75], [21, 'De proeverij', 12], [24, 'Oliebollen', 35]],
+  oppeppers:  [[24, 'Middernacht en heilandsbrandewijn', 40]],
 };
 
 /* Uitleg per spel, voor het tabblad "Spelen" op het tv-scherm. De naam moet gelijk zijn aan die in de database (fj_spelen).

@@ -327,7 +327,7 @@
 
     /* ---------- de getijden ---------- */
     .hours { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 0; }
-    .hours li { display: grid; grid-template-columns: 74px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(42,31,22,.22); align-items: baseline; }
+    .hours li { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(42,31,22,.22); align-items: baseline; }
     .hours li:last-child { border-bottom: 0; }
     .hours .when { text-align: right; line-height: 1.1; }
     .hours .when b { display: block; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.35rem; letter-spacing: .04em; color: var(--rubric); }
@@ -820,44 +820,10 @@
         </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met oliebollen. De uren staan ook als
-        ruitjes op de klok bovenaan.</p>
+      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met oliebollen.</p>
       <ol class="hours" id="hours"></ol>
     </section>
 
-    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
-
-    <!-- ===================== TOERNOOI ===================== -->
-    <section class="panel" id="toernooi" aria-labelledby="toernooi-h">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Ridderspelen · voor jong en oud</p>
-          <h2 id="toernooi-h">Het toernooi</h2>
-        </div>
-      </div>
-      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <figure class="minia wide"><div class="fr"><img src="feestje-img/velislav-ruiters.jpg" width="960" height="520" alt="Middeleeuwse pentekening met waterverf: twee groepen geharnaste ruiters stormen met zwaarden op elkaar af." loading="lazy" decoding="async" /></div><figcaption>Boheemse ruiters in het gevecht, getekend in Praag rond 1340. <cite>Velislav-bijbel</cite>, Nationale Bibliotheek van Tsjechië.</figcaption></figure>
-      <div class="tourney">
-        <div>
-          <p>Op het erf wordt om eer gestreden, bij het laatste daglicht. Geen echte zwaarden en geen echte paarden, maar wel echte roem.</p>
-          <ul class="disciplines">
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Het zwaardgevecht.</b> Zacht van schuim, hard van wil. Meesteraanvallen toegestaan. Wie verliest, ligt erbij als Hendrik na zijn eerste gevecht met Runt.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Boogschieten.</b> Zonder vizier, zoals het hoort. Oefen hiernaast.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade. Verzwaarde stenen van de Duivel worden in beslag genomen.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Kennis van het rijk.</b> Wie weet het meest over Bohemen, bier en boerenwijsheid?</li>
-          </ul>
-          <figure class="minia side"><div class="fr"><img src="feestje-img/luttrell-boogschutters.jpg" width="720" height="489" alt="Middeleeuwse miniatuur: boogschutters in kleurige kappen schieten op een schietschijf." loading="lazy" decoding="async" /></div><figcaption>Oefenen op de schijf, zoals elke zondag verplicht was. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
-        </div>
-        <div class="range">
-          <canvas id="boog" width="640" height="360" tabindex="0"
-                  aria-label="Boogschietbaan. Houd ingedrukt (of houd de spatiebalk vast) om de boog te spannen, laat los om te schieten."></canvas>
-          <div class="range-row">
-            <p class="range-msg" id="range-msg" aria-live="polite">Houd ingedrukt om te spannen, laat los om te schieten. Vijf pijlen.</p>
-            <button class="btn ghost" id="range-reset" type="button">Nieuwe ronde</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
 
@@ -898,23 +864,6 @@
       </details>
     </section>
 
-    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
-
-    <!-- ===================== DE DIS ===================== -->
-    <section class="panel" id="gastmaal" aria-labelledby="gastmaal-h">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Riddersnacks · samen gedekt</p>
-          <h2 id="gastmaal-h">De dis</h2>
-        </div>
-      </div>
-      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <figure class="minia wide"><div class="fr"><img src="feestje-img/luttrell-maaltijd.jpg" width="960" height="549" alt="Middeleeuwse miniatuur: een heer en zijn gezelschap aan een lange gedekte tafel, met bedienden die eten aandragen." loading="lazy" decoding="async" /></div><figcaption>Sir Geoffrey Luttrell aan tafel, met familie, monniken en een knielende bediende. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
-      <p>Een gastmaal zoals in de herberg van Kuttenberg: de waard zorgt voor de ketel, de gasten voor de rest van de dis. Draai een kaart om.</p>
-      <div class="menu" id="menu"></div>
-      <p class="muted" style="margin-top:22px"><span class="hosts-or">Han of Nele</span> zorgen voor de grote ketel en de oliebollen.
-        De rest komt van u: neem iets te eten of te drinken mee, en laat even weten wat. Dan staan er straks geen zeven potten linzen.</p>
-    </section>
 
     <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
 
@@ -1426,7 +1375,7 @@
     for (const [h, title, desc, icon] of CONFIG.program) {
       const li = document.createElement('li');
       li.dataset.h = h;
-      li.innerHTML = `<div class="when"><b>${toRoman(Math.floor(h))}</b><small>${fmtH(h)}</small></div><div><h3>${icon ? `<img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">` : ''}${title}</h3><p>${desc}</p></div>`;
+      li.innerHTML = `<div><h3>${icon ? `<img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">` : ''}${title}</h3><p>${desc}</p></div>`;
       ol.appendChild(li);
     }
   })();
@@ -1622,6 +1571,7 @@
      BOOGSCHIETEN — zonder vizier, zoals het hoort (bijna)
      ========================================================= */
   (function archery() {
+    if (!$('#boog')) return;                       // het hoofdstuk "Het toernooi" staat niet (meer) op de pagina
     const cv = $('#boog'), ctx = cv.getContext('2d');
     const W = 640, H = 360, TX = 430, TY = 168, TR = 100, SHOTS = 5, BOW = [78, 300];
     const INK = '#2a1f16';
@@ -1954,6 +1904,7 @@
       ['Iets van uzelf', 'Het recept van uw grootmoeder, of wat u in een herberg in Kuttenberg zou bestellen. Liefst vastenspijs, dan kan iedereen ervan eten.', 'gast'],
     ];
     const box = $('#menu');
+    if (!box) return;                              // het hoofdstuk "De dis" staat niet (meer) op de pagina
     DISHES.forEach(([name, desc, who], i) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'dish'; b.setAttribute('aria-pressed', 'false');
@@ -2016,7 +1967,7 @@
         io.unobserve(e.target);
       }
     }, { threshold: .35 });
-    Object.keys(map).forEach(id => io.observe(document.getElementById(id)));
+    Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
   })();
 
   /* ---------- slapen & wachten ---------- */
