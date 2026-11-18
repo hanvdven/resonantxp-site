@@ -1160,7 +1160,7 @@
     const f = n => n.toFixed(2);
     const pos = (r, a) => { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; }; // a: graden met de klok mee vanaf boven
     // ringkleur naar zonshoogte: ijswit overdag, lichtblauw in de schemering, diepblauw in de nacht
-    const RING = [[-16, '#0c1a46'], [-10, '#13245c'], [-6, '#2c4588'], [-3, '#7c97c8'], [-.5, '#c9d7e8'], [3, '#eef2f4'], [90, '#f4f5f3']];
+    const RING = [[-18, '#0c1a46'], [-13, '#14286a'], [-8, '#2e4c92'], [-3.5, '#6f8fc6'], [0, '#b4c8e4'], [5, '#e2eaf2'], [90, '#f4f5f3']]   /* over de hele schemering (tot −18°), zoals het lange verloop in het spel */;
     const ringColor = el => {
       if (el <= RING[0][0]) return RING[0][1];
       for (let i = 1; i < RING.length; i++) if (el <= RING[i][0]) { const [e0, c0] = RING[i - 1], [e1, c1] = RING[i]; return mix(c0, c1, (el - e0) / (e1 - e0)); }
@@ -1176,9 +1176,20 @@
       wheelDay = key;
       const segs = $('#w-segs'), stars = $('#w-stars'), glow = $('#w-glow');
       segs.textContent = ''; stars.textContent = ''; glow.textContent = '';
-      for (let i = 0; i < 144; i++) {
-        const h = i / 6, [x1, y1] = pos(192, h * 15 - .15), [x2, y2] = pos(192, (h + 1 / 6) * 15 + .15);
-        svgEl('path', { d: `M0,0 L${f(x1)},${f(y1)} A192,192 0 0 1 ${f(x2)},${f(y2)} Z`, fill: ringColor(sunElevation(atHours(day, h + 1 / 12))) }, segs);
+      // De ring als één afbeelding: per minuut een taartpuntje op een canvas, licht uitgevlakt, zodat dag en nacht
+      // zacht in elkaar overvloeien (zoals in het spel). Eén keer per dag; daarna draait alleen het plaatje mee.
+      {
+        const N = 800, c = document.createElement('canvas'); c.width = c.height = N;
+        const g = c.getContext('2d'), R = N / 2;
+        g.translate(R, R);
+        for (let m = 0; m < 1440; m++) {
+          const a0 = (m / 1440) * 2 * Math.PI - Math.PI / 2, a1 = ((m + 1.6) / 1440) * 2 * Math.PI - Math.PI / 2;   // 1,6 min breed: geen naadjes
+          g.fillStyle = ringColor(sunElevation(atHours(day, (m + .5) / 60)));
+          g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R, a0, a1); g.closePath(); g.fill();
+        }
+        const zacht = document.createElement('canvas'); zacht.width = zacht.height = N;
+        const z = zacht.getContext('2d'); z.filter = 'blur(3px)'; z.drawImage(c, 0, 0);   // bij oude browsers zonder filter: gewoon scherp
+        svgEl('image', { href: zacht.toDataURL('image/jpeg', .9), x: -192, y: -192, width: 384, height: 384 }, segs);
       }
       let top = -90;
       for (let m = 0; m < 1440; m += 5) { const el = sunElevation(atHours(day, m / 60)); if (el > top) { top = el; noon = m / 60; } }
