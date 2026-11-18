@@ -14,7 +14,7 @@
    ========================================================= */
 const SUPABASE = {
   url: '',   // bv. 'https://abcdefghijkl.supabase.co'
-  key: '',   // de publishable key (sb_publishable_…) of de oude anon key (eyJ…)
+  key: 'sb_publishable_tgCJqsC9_uWBXfnNpvGWQA_VPAWqOHA',   // publishable key: hoort publiek te zijn, de bescherming zit in RLS + pincode
 };
 
 const Db = (() => {
