@@ -597,7 +597,7 @@ const Klok = (() => {
       a1 = 'NOG TOT DE POORT'; a2 = m >= 2880 ? Math.ceil(m / 1440) + ' dagen' : Math.floor(m / 60) + ' u ' + String(m % 60).padStart(2, '0');
       if (opDeDag) { b1 = 'TOT MIDDERNACHT'; b2 = hms; }   // op de dag zelf: ook al aftellen tot middernacht, in seconden
     } else if (t < CONFIG.midnight) { a1 = 'TOT MIDDERNACHT'; a2 = hms; }
-    else { a1 = 'ANNO DOMINI'; a2 = roman(CONFIG.midnight.getFullYear()); b1 = 'ZALIG NIEUWJAAR'; }
+    else { a1 = 'ANNO DOMINI'; a2 = roman(CONFIG.annoDomini); b1 = 'ZALIG NIEUWJAAR'; }
     $('#k-a1').textContent = a1; $('#k-b1').textContent = b1;
     zet($('#k-a2'), $('#k-a2r'), a2, 234); zet($('#k-b2'), $('#k-b2r'), b2, 214);    const min = Math.floor(t / 60000);
     if (min === lastMin) return; lastMin = min;           // het wiel maar één keer per minuut
@@ -848,7 +848,7 @@ function aftellen() {
   $('#stage').classList.toggle('nacht', s <= 60 && s > -240);
   $('#stage').classList.toggle('nieuwjaar', s <= 0 && s > -240);
   if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = ''; $('#aftel-p').textContent = 'Heft de bekers'; }
-  else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${t.getFullYear()}`; }
+  else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${CONFIG.annoDomini}`; }
   else box.classList.remove('aan');
   const feest = s <= 0 && s > -240; box.classList.toggle('feest', feest); feest ? Vuurwerk.start() : Vuurwerk.stop();
 }

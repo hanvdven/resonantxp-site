@@ -13,6 +13,7 @@ const CONFIG = {
   rsvp: '',   // bv. 'https://wa.me/32...' of 'mailto:...' (leeg = geen knop)
   kids: 'Jonge schildknapen en jonkvrouwen zijn welkom van 16:00 tot 18:00, voor het wapenschilderen en het toernooi. Daarna is het feest voor volwassenen.', // leeg = regel verbergen
   lat: 50.885, lon: 4.725, // Kessel-Lo, voor de zonnestand op de klok
+  annoDomini: 1404,   // het nieuwe jaar zoals op de tv en de uitnodiging: Kingdom Come speelt in 1403, dus om middernacht wordt het 1404
   partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
   // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
   program: [
