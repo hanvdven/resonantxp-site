@@ -1,6 +1,7 @@
 # Texturen voor de klok en de letters op het tv-scherm (vooraf berekend; de Chromecast hoeft niets te filteren).
 #   hout.webp       planken voor de schijf in het midden (5 planken, nerf, kwasten, donkere naden)
 #   barst.webp      craquelé over de geschilderde ring (doorzichtig, draait mee met het wiel)
+#   goud.webp       gehamerd goud met slijtplekken, voor de randen van de klok
 #   sleet-perk.webp spikkels in perkamentkleur: over de inkt gelegd lijkt die versleten
 #   sleet-hout.webp dezelfde spikkels in houtkleur, voor de gouden letters op de schijf
 # Draaien: python3 feestje-img/tv/klok.py
@@ -47,21 +48,35 @@ r = np.sqrt((xx - N / 2) ** 2 + (yy - N / 2) ** 2) / (N / 2)
 img *= (1 - .45 * np.clip(r - .45, 0, 1) ** 1.4)[..., None]
 webp(img, 'hout.webp', 'RGB')
 
-# ---------- craquelé: netwerk van haarscheurtjes (voronoi-randen, verstoord) ----------
+# ---------- craquelé: duidelijk zichtbare haarscheuren met afgebladderde randjes (zoals de ring in KCD2) ----------
 N = 800; yy, xx = np.mgrid[0:N, 0:N].astype(float)
-w1 = (ruis(N, N, 1.6, 31) - .5) * 26; w2 = (ruis(N, N, 1.6, 32) - .5) * 26
+w1 = (ruis(N, N, 1.6, 31) - .5) * 30; w2 = (ruis(N, N, 1.6, 32) - .5) * 30
 px, py = xx + w1, yy + w2
-pts = rng.uniform(0, N, (420, 2))
-d1 = np.full((N, N), 1e9); d2 = np.full((N, N), 1e9)
-for (ax, ay) in pts:
+pts = rng.uniform(0, N, (360, 2))
+d1 = np.full((N, N), 1e9); d2 = np.full((N, N), 1e9); wie = np.zeros((N, N), int)
+for k, (ax, ay) in enumerate(pts):
     d = np.hypot(px - ax, py - ay)
-    m = d < d1; d2 = np.where(m, d1, np.minimum(d2, d)); d1 = np.where(m, d, d1)
-rand = np.exp(-((d2 - d1) / .9) ** 2)
-sterkte = ruis(N, N, 1.4, 33)                                            # niet overal even gebarsten
-a = rand * np.clip(sterkte * 1.6 - .3, 0, 1) * .45
-slijt = np.clip((ruis(N, N, 1.6, 34) - .6) * 1.5, 0, 1) * .14               # zachte plekjes waar de verf dunner is
-rgba = np.zeros((N, N, 4)); rgba[..., :3] = [40, 28, 16]; rgba[..., 3] = np.clip(a + slijt, 0, 1) * 255
+    m = d < d1; d2 = np.where(m, d1, np.minimum(d2, d)); wie = np.where(m, k, wie); d1 = np.where(m, d, d1)
+gap = d2 - d1
+lijn = np.exp(-(gap / 1.1) ** 2)                                         # de scheur zelf: donker
+licht = np.exp(-((gap - 2.6) / 1.2) ** 2) * .6                            # lichte opstaande rand naast de scheur
+schol = (np.random.default_rng(5).uniform(0, 1, len(pts))[wie] - .5) * .16  # elke schol een tikje anders van toon
+sterkte = np.clip(ruis(N, N, 1.3, 33) * 1.5 - .15, .35, 1)
+bladder = np.clip((ruis(N, N, 1.0, 35) - .74) * 6, 0, 1)                  # plekjes waar de verf eraf is
+rgba = np.zeros((N, N, 4))
+donker = np.clip(lijn * sterkte * .85 + np.clip(-schol, 0, 1) + bladder * .55, 0, 1)
+helder = np.clip(licht * sterkte + np.clip(schol, 0, 1), 0, 1) * (1 - donker)
+rgba[..., :3] = (np.array([46, 32, 18]) * donker[..., None] + np.array([255, 250, 238]) * helder[..., None]) / np.maximum(donker + helder, 1e-6)[..., None]
+rgba[..., 3] = np.clip(donker + helder * .5, 0, 1) * 255
 webp(rgba, 'barst.webp')
+
+# ---------- goud voor de rand: gehamerd, met slijtplekken (tegel, voor een SVG-pattern als lijnkleur) ----------
+N = 128
+g = .55 * ruis(N, N, 1.2, 51) + .3 * ruis(N, N, .5, 52) + .15 * ruis(N, N, 1.8, 53)
+kleur = np.array([120, 84, 26]) + (np.array([250, 222, 140]) - np.array([120, 84, 26])) * g[..., None] ** 1.2
+sl = np.clip((ruis(N, N, 1.0, 54) - .78) * 5, 0, 1)
+kleur = kleur * (1 - .55 * sl[..., None]) + np.array([60, 40, 18]) * .55 * sl[..., None]
+webp(kleur, 'goud.webp', 'RGB')
 
 # ---------- sleet: spikkels die de inkt laten "slijten" ----------
 N = 256

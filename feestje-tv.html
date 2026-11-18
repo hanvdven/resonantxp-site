@@ -25,6 +25,9 @@
       background-color: var(--nacht); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
     .fries { position: absolute; left: 0; width: 1920px; height: 92px; border-top: 6px solid var(--rood); border-bottom: 6px solid var(--rood); }
     .fries svg { display: block; }
+    /* geschilderd op kalk: korrel en vlekken over de band (vooraf berekend, zie feestje-img/textuur) */
+    .fries::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: url(feestje-img/textuur/vlekken.webp) 0 0 / 600px 600px, url(feestje-img/textuur/korrel.webp) 0 0 / 220px 220px, url(feestje-img/tv/sleet-perk.webp) 0 0 / 256px 256px; opacity: .85; }
     #f-boven { top: 0; } #f-onder { bottom: 0; }
     .label { font-variant-caps: small-caps; letter-spacing: .1em; font-size: 26px; color: #c9a24a; }
 
@@ -106,6 +109,9 @@
     .melding b { display: block; font-variant-caps: small-caps; letter-spacing: .1em; color: var(--rubriek); font-size: 26px; font-weight: 600; }
     .melding span { font-size: 30px; line-height: 1.2; }
     .melding.weg { animation: uit .5s ease-in both; }
+    .melding.muziek img { width: 64px; height: 64px; object-fit: cover; box-shadow: 0 0 0 2px #6e4a24; }
+    .melding.muziek .noot { font-size: 48px; text-align: center; color: var(--rubriek); }
+    .melding.muziek i { font-style: normal; font-size: 26px; color: var(--inkt-zacht); }
     @keyframes in { from { opacity: 0; transform: translateX(40px); } }
     @keyframes uit { to { opacity: 0; transform: translateX(40px); } }
 
@@ -115,6 +121,37 @@
     #aftel .n { font-family: "Maximilian", serif; font-size: 440px; line-height: 1; color: var(--goud); }
     #aftel .z { font-family: "Maximilian", serif; font-size: 150px; line-height: 1.1; color: var(--goud); }
     #aftel p { font-size: 46px; margin: 10px 0 0; color: #f1e6cf; }
+
+    /* ---------- wapenschilderen (16:00–18:00): een volledige pagina wapenkunde, de klok klein rechtsboven ---------- */
+    #klok, #nu, #paneel, #wapenkunde { transition: opacity .8s ease; }
+    #wapenkunde { position: absolute; left: 34px; top: 112px; width: 1852px; height: 860px; padding: 40px 70px 30px 70px; color: var(--inkt); z-index: 2;
+      background: url(feestje-img/tv/perkament.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 18px 26px rgba(0,0,0,.6)); opacity: 0; pointer-events: none; }
+    #stage.wapens #wapenkunde { opacity: 1; }
+    #stage.wapens #paneel, #stage.wapens #nu { opacity: 0; pointer-events: none; }
+    /* 4× zo klein (800 → 200 px), rechtsboven op het perkament; alleen het uur blijft leesbaar */
+    #stage.wapens #klok { left: 1650px; top: 128px; width: 210px; height: 210px; z-index: 3; }
+    #stage.wapens #klok .klein-weg { display: none; }
+    #stage.wapens #k-tijd { font-size: 74px; transform: translateY(60px); }
+    #wapenkunde h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 70px; line-height: 1; margin: 0; display: flex; align-items: flex-end; }
+    #wapenkunde h1 svg { width: 96px; height: 96px; margin-right: 4px; }
+    #wapenkunde .sub { font-size: 28px; color: var(--inkt-zacht); margin: 6px 260px 14px 0; }
+    #wapenkunde .sub b { color: var(--rubriek); font-weight: 600; }
+    .wk { display: grid; grid-template-columns: 500px 1fr; gap: 0 60px; }
+    .wk h2 { font-family: "Maximilian", serif; font-weight: 400; font-size: 38px; margin: 0 0 4px; color: var(--rubriek); }
+    .wk p { font-size: 26px; line-height: 1.25; margin: 0 0 12px; }
+    .tincturen { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+    .tinct { display: grid; grid-template-columns: 46px 1fr; gap: 0 12px; align-items: center; height: 54px; }
+    .tinct svg { width: 42px; height: 50px; }
+    .tinct b { font-family: "Maximilian", serif; font-weight: 400; font-size: 34px; line-height: 1; }
+    .tinct small { font-size: 24px; color: var(--inkt-zacht); margin-left: 8px; }
+    .groep { font-variant-caps: small-caps; letter-spacing: .08em; font-size: 24px; color: #7a5a30; margin: 4px 0 0; grid-column: 1 / -1; }
+    .rijtje { display: flex; gap: 22px; margin: 4px 0 16px; }
+    .rijtje figure { margin: 0; text-align: center; width: 120px; }
+    .rijtje svg { width: 96px; height: 116px; display: block; margin: 0 auto 4px; }
+    .rijtje figcaption { font-size: 25px; line-height: 1.1; }
+    .rijtje .goed figcaption b { color: #3f6b2f; } .rijtje .fout figcaption b { color: var(--rubriek); }
+    .rijtje .fout svg { opacity: .9; }
+    .rijtje.klein figure { width: 108px; } .rijtje.klein svg { width: 74px; height: 89px; }
 
     /* ---------- het testknopje rechtsonder: de tijd verzetten ---------- */
     #test-knop { position: absolute; right: 18px; bottom: 18px; z-index: 20; width: 58px; height: 58px; border-radius: 50%; border: 2px solid #c9a24a;
@@ -134,8 +171,8 @@
 <div id="stage">
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <pattern id="p-herten" width="111" height="80" patternUnits="userSpaceOnUse"><rect width="111" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/herten.svg" x="2" y="4" width="107" height="72" /></pattern>
-      <pattern id="p-draken" width="105.7" height="80" patternUnits="userSpaceOnUse"><rect width="105.7" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/draken.svg" x="0" y="2" width="105.7" height="76" /></pattern>
+      <pattern id="p-herten" width="130" height="80" patternUnits="userSpaceOnUse"><rect width="130" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/herten-rood.svg" x="11.5" y="4" width="107" height="72" /></pattern>
+      <pattern id="p-draken" width="124" height="80" patternUnits="userSpaceOnUse"><rect width="124" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/draken.svg" x="9.15" y="2" width="105.7" height="76" /></pattern>
     </defs>
   </svg>
   <div class="fries" id="f-boven"><svg width="1920" height="80"><rect width="1920" height="80" fill="url(#p-herten)" /></svg></div>
@@ -150,27 +187,30 @@
       <clipPath id="w-ring"><path d="M0,-190 A190,190 0 1 1 0,190 A190,190 0 1 1 0,-190 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z" clip-rule="evenodd"/></clipPath>
       <clipPath id="w-schijf"><circle r="134"/></clipPath>
       <pattern id="w-sleet" width="64" height="64" patternUnits="userSpaceOnUse"><image href="feestje-img/tv/sleet-hout.webp" width="64" height="64"/></pattern>
+      <pattern id="w-goudrand" width="40" height="40" patternUnits="userSpaceOnUse"><image href="feestje-img/tv/goud.webp" width="40" height="40"/></pattern>
     </defs>
     <circle r="190" fill="#1a130b" />   <!-- zoals in het spel: de gouden rand grenst meteen aan de achtergrond -->
-    <g id="w-dial"><g clip-path="url(#w-ring)"><g id="w-segs"></g><image href="feestje-img/tv/barst.webp" x="-192" y="-192" width="384" height="384"/><g id="w-glow"></g><g id="w-stars"></g></g></g>
+    <g id="w-dial"><g clip-path="url(#w-ring)"><g id="w-segs"></g><g id="w-glow"></g><image href="feestje-img/tv/barst.webp" x="-192" y="-192" width="384" height="384"/><g id="w-stars"></g></g></g>
     <g id="w-nums" font-family="Maximilian, Georgia, serif" font-size="20" text-anchor="middle" dominant-baseline="central"></g>
-    <circle r="190.5" fill="none" stroke="#c9a24a" stroke-width="3" />
-    <circle r="146" fill="#1b140d" stroke="#c9a24a" stroke-width="2" />
+    <circle r="191" fill="none" stroke="#3a2810" stroke-width="7" /><circle r="191" fill="none" stroke="url(#w-goudrand)" stroke-width="5" />
+    <circle r="146" fill="#1b140d" stroke="#3a2810" stroke-width="5" /><circle r="146" fill="none" stroke="url(#w-goudrand)" stroke-width="3.5" />
     <g id="w-ticks"></g>
     <path d="M0,-150 L-7,-134 L7,-134 Z" fill="url(#w-goud)" stroke="#4a330c" stroke-width="1" stroke-linejoin="round" />
     <image href="feestje-img/tv/hout.webp" x="-134" y="-134" width="268" height="268" clip-path="url(#w-schijf)"/>
     <circle r="134" fill="none" stroke="#120b05" stroke-width="2" />
     <g text-anchor="middle">
-      <text id="k-datum" y="-98" font-family="Grenze, Georgia, serif" font-size="16" fill="#f1e6cf"></text>
+      <text id="k-datum" class="klein-weg" y="-98" font-family="Grenze, Georgia, serif" font-size="16" fill="#f1e6cf"></text>
       <text id="k-tijd" y="-60" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52"></text>
-      <line x1="-84" y1="-22" x2="84" y2="-22" stroke="#c9a24a" stroke-width="1" opacity=".7" />
-      <text id="k-a1" y="0" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
-      <text id="k-a2" y="26" font-family="Maximilian, Georgia, serif" font-size="24" fill="#f1e6cf"></text>
-      <text id="k-b1" y="50" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
-      <text id="k-b2" y="74" font-family="Maximilian, Georgia, serif" font-size="20" fill="#e9be52"></text>
+      <line class="klein-weg" x1="-84" y1="-22" x2="84" y2="-22" stroke="#c9a24a" stroke-width="1" opacity=".7" />
+      <text class="klein-weg" id="k-a1" y="0" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
+      <text class="klein-weg" id="k-a2" y="26" font-family="Maximilian, Georgia, serif" font-size="24" fill="#f1e6cf"></text>
+      <g class="klein-weg rom" id="k-a2r" font-family="Grenze, Georgia, serif" font-weight="700" font-size="23" fill="#f1e6cf" transform="translate(0,26)"></g>
+      <text class="klein-weg" id="k-b1" y="50" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
+      <text class="klein-weg" id="k-b2" y="74" font-family="Maximilian, Georgia, serif" font-size="20" fill="#e9be52"></text>
+      <g class="klein-weg rom" id="k-b2r" font-family="Grenze, Georgia, serif" font-weight="700" font-size="20" fill="#e9be52" transform="translate(0,74)"></g>
     </g>
     <!-- honger en energie, met de icoontjes uit de game (zoals in het wachtmenu) -->
-    <g id="k-lijf" font-family="Maximilian, Georgia, serif" font-size="21" fill="#f1e6cf">
+    <g id="k-lijf" class="klein-weg" font-family="Maximilian, Georgia, serif" font-size="21" fill="#f1e6cf">
       <image href="feestje-img/kcd/eten.png" x="-70" y="88" width="28" height="28"/><text id="k-eten" x="-38" y="110"></text>
       <image href="feestje-img/kcd/slaap.png" x="6" y="88" width="28" height="28"/><text id="k-slaap" x="38" y="110"></text>
     </g>
@@ -192,6 +232,8 @@
     <div id="status"></div>
   </section>
 
+  <section id="wapenkunde" class="sleet" aria-label="Wapenkunde"></section>
+
   <div id="meldingen" aria-live="polite"></div>
   <div id="aftel"><div><div class="n" id="aftel-n"></div><p id="aftel-p"></p></div></div>
 
@@ -200,9 +242,10 @@
     <h2>Testtijd</h2>
     <div>Het scherm doet alsof het nu <span class="tijd" id="test-nu"></span> is.</div>
     <div class="rij"><button data-d="-60">− 1 uur</button><button data-d="-10">− 10 min</button><button data-d="10">+ 10 min</button><button data-d="60">+ 1 uur</button></div>
-    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T20:05:00">riddermaal</button>
+    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button>
       <button data-t="2026-12-31T23:59:35">vlak voor middernacht</button><button data-t="2027-01-01T00:02:00">nieuwjaar</button></div>
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
+    <div class="rij"><button id="sp-koppel">Spotify koppelen</button><span id="sp-staat" style="align-self:center"></span></div>
   </div>
 </div>
 
@@ -381,13 +424,28 @@ const Klok = (() => {
   const DAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'], MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
   const roman = n => n === 0 ? 'N' : romeins(n).toUpperCase();   // N = nulla, zo schreven middeleeuwse rekenmeesters nul
   const pas = (el, max) => { el.removeAttribute('textLength'); if (el.getComputedTextLength() > max) { el.setAttribute('textLength', max); el.setAttribute('lengthAdjust', 'spacingAndGlyphs'); } };
+  // Het aftellen in drie vaste vakjes (uur · min · sec): elk vakje heeft een vaste plek en wordt in zijn eigen
+  // breedte gecentreerd. Zo verspringt er niets als een getal langer of korter wordt (VIII → IX).
+  function zet(tekst, groep, waarde, breed) {
+    if (Array.isArray(waarde)) {
+      tekst.textContent = '';
+      const vak = breed / 3.3, xs = [-vak * 1.15, 0, vak * 1.15];
+      if (groep.childElementCount !== 5) groep.innerHTML = xs.map(x => `<text x="${f(x)}" text-anchor="middle"></text>`).join('') + [-vak * .575, vak * .575].map(x => `<text x="${f(x)}" text-anchor="middle">·</text>`).join('');
+      waarde.forEach((w, i) => { const el = groep.children[i]; if (el.textContent !== w) { el.textContent = w; pas(el, vak - 6); } });
+    } else {
+      groep.innerHTML = ''; tekst.textContent = waarde;
+      const rom = /^[IVXLCDMN]+$/.test(waarde);   // het jaartal in Romeinse cijfers: Grenze
+      tekst.setAttribute('font-family', rom ? 'Grenze, Georgia, serif' : 'Maximilian, Georgia, serif'); tekst.setAttribute('font-weight', rom ? 700 : 400);
+      pas(tekst, breed);
+    }
+  }
   let lastMin = -1;
   function render() {
     const t = now(), h = localHours(t);
     $('#k-tijd').textContent = fmtH(h);
     // het blok onder de streep: aftellen
     const ms = d => Math.max(0, d - t), s = Math.floor(ms(CONFIG.midnight) / 1000);
-    const hms = `${roman(Math.floor(s / 3600))} · ${roman(Math.floor(s / 60) % 60)} · ${roman(s % 60)}`;
+    const hms = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(roman);
     const opDeDag = dayStart(t).getTime() === dayStart(new Date(CONFIG.start)).getTime();
     let a1 = '', a2 = '', b1 = '', b2 = '';
     if (t < CONFIG.start) {
@@ -396,15 +454,8 @@ const Klok = (() => {
       if (opDeDag) { b1 = 'TOT MIDDERNACHT'; b2 = hms; }   // op de dag zelf: ook al aftellen tot middernacht, in seconden
     } else if (t < CONFIG.midnight) { a1 = 'TOT MIDDERNACHT'; a2 = hms; }
     else { a1 = 'ANNO DOMINI'; a2 = roman(CONFIG.midnight.getFullYear()); b1 = 'ZALIG NIEUWJAAR'; }
-    $('#k-a1').textContent = a1; $('#k-a2').textContent = a2; $('#k-b1').textContent = b1; $('#k-b2').textContent = b2;
-    // Romeinse cijfers in Grenze (vet): in de gotische Maximilian lijken X, I en V op E, J en D
-    for (const [el, w] of [[$('#k-a2'), 230], [$('#k-b2'), 210]]) {
-      const rom = /^[IVXLCDMN ·]+$/.test(el.textContent) && el.textContent.trim();
-      el.setAttribute('font-family', rom ? 'Grenze, Georgia, serif' : 'Maximilian, Georgia, serif');
-      el.setAttribute('font-weight', rom ? 700 : 400); el.setAttribute('letter-spacing', rom ? 1 : 0);
-      pas(el, w);
-    }
-    const min = Math.floor(t / 60000);
+    $('#k-a1').textContent = a1; $('#k-b1').textContent = b1;
+    zet($('#k-a2'), $('#k-a2r'), a2, 234); zet($('#k-b2'), $('#k-b2r'), b2, 214);    const min = Math.floor(t / 60000);
     if (min === lastMin) return; lastMin = min;           // het wiel maar één keer per minuut
     paintWheel(t);
     const rot = -Math.floor(h * 60) / 60 * 15;
@@ -582,6 +633,9 @@ function aftellen() {
     else if (b.dataset.t) zet(new Date(b.dataset.t));
     else if (b.id === 'test-echt') zet(null);
   });
+  const spStaat = () => { $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID' : Spotify.gekoppeld() ? 'gekoppeld ✓' : 'niet gekoppeld'; $('#sp-koppel').textContent = Spotify.gekoppeld() ? 'Spotify ontkoppelen' : 'Spotify koppelen'; };
+  $('#sp-koppel').addEventListener('click', () => { if (Spotify.gekoppeld()) { Spotify.ontkoppel(); spStaat(); } else Spotify.koppel(); });
+  knop.addEventListener('click', spStaat);
   $('#test-in').addEventListener('change', e => { const t = new Date(e.target.value); if (!isNaN(t)) zet(t); });
   setInterval(() => { if (!paneel.hidden) toon(); }, 1000);
 })();
@@ -592,10 +646,142 @@ function aftellen() {
   addEventListener('pointermove', toon); toon();
 })();
 
+
+/* =========================================================
+   WAPENSCHILDEREN (16:00–18:00): een volledige pagina wapenkunde, de klok klein rechtsboven
+   ========================================================= */
+// groot: de heraldische naam; klein: de verf die u ervoor neemt (goud schildert men geel, zilver wit)
+const HERALDISCH = { or: ['Goud', 'geel'], argent: ['Zilver', 'wit'], gules: ['Keel', 'rood'], azure: ['Azuur', 'blauw'], vert: ['Sinopel', 'groen'], sable: ['Sabel', 'zwart'], purpure: ['Purper', 'paars'] };
+const schild = (w, uid) => `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(Object.assign({ t2: w.t1, div: 'plain', ch: 'none', c: 'or' }, w), uid, false, '', true)}</svg>`;
+(function wapenkunde() {
+  const tinct = k => `<div class="tinct">${schild({ t1: k }, 'wt-' + k)}<div><b>${HERALDISCH[k][0]}</b><small>${HERALDISCH[k][1]}</small></div></div>`;   // naam en betekenis op één regel
+  const fig = (w, uid, tekst, cls = '') => `<figure class="${cls}">${schild(w, uid)}<figcaption>${tekst}</figcaption></figure>`;
+  $('#wapenkunde').innerHTML = `
+    <svg id="rand-wk" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
+    <h1><svg id="initiaal-wk" viewBox="0 0 92 92" aria-hidden="true"></svg>apenkunde</h1>
+    <p class="sub" id="wk-sub"></p>
+    <div class="wk">
+      <div>
+        <h2>De kleuren</h2>
+        <div class="tincturen">
+          <div class="groep">Twee metalen</div>${tinct('or')}${tinct('argent')}
+          <div class="groep">Vijf kleuren</div>${tinct('gules')}${tinct('azure')}${tinct('vert')}${tinct('sable')}${tinct('purpure')}
+        </div>
+        <h2 style="margin-top:6px">De gouden regel</h2>
+        <p>Nooit metaal op metaal, nooit kleur op kleur.</p>
+        <div class="rijtje klein" style="gap:14px">
+          ${fig({ t1: 'azure', ch: 'ster', c: 'or' }, 'wg1', '<b>✓ goed</b>', 'goed')}
+          ${fig({ t1: 'argent', ch: 'kruis', c: 'gules' }, 'wg2', '<b>✓ goed</b>', 'goed')}
+          ${fig({ t1: 'sable', ch: 'ster', c: 'gules' }, 'wg3', '<b>✗ fout</b>', 'fout')}
+          ${fig({ t1: 'or', ch: 'maan', c: 'argent' }, 'wg4', '<b>✗ fout</b>', 'fout')}
+        </div>
+      </div>
+      <div>
+        <h2>Het veld delen</h2>
+        <div class="rijtje">${['pale', 'fess', 'bend', 'quarterly', 'chevron'].map((d, i) => fig({ t1: ['gules', 'azure', 'vert', 'sable', 'purpure'][i], t2: i % 2 ? 'argent' : 'or', div: d }, 'wd' + i, DIVS[d])).join('')}</div>
+        <h2>Een stuk erop</h2>
+        <div class="rijtje" style="gap:12px">${['ster', 'kruis', 'maan', 'zwaard', 'kroon', 'roos', 'beker'].map((c, i) => fig({ t1: ['azure', 'gules', 'sable', 'vert', 'purpure', 'gules', 'azure'][i], ch: c, c: i % 2 ? 'argent' : 'or' }, 'ws' + i, CHARGES[c])).join('')}</div>
+        <h2>Zo leest u een wapen</h2>
+        <p>Eerst het veld, dan de deling, dan het stuk: <i>"In azuur een ster van goud."</i> Rechts en links zijn die van de drager achter het schild, niet van u.</p>
+        <p>Houd het eenvoudig: een goed wapen herkent men op vijftig passen.</p>
+      </div>
+    </div>`;
+  // dezelfde rand met ranken als het perkament, maar breder
+  const W = 1852, H = 860, { rechthoek, dubbel, rank, goudstip } = Hand;
+  let o = GOUD;
+  o += dubbel(rechthoek(18, 18, W - 36, H - 36, 1.6, 81), rechthoek(19, 19.5, W - 38, H - 39, 1.6, 82), '#a2302a', 2.6);
+  o += dubbel(rechthoek(27, 27, W - 54, H - 54, 1.4, 83), rechthoek(27.5, 28, W - 55, H - 56, 1.4, 84), '#2f4f86', 1.8);
+  o += rank(30, 30, 0, 1, 220, 86) + rank(W - 30, H - 30, -1, 0, 260, 87) + rank(W - 30, H - 30, 0, -1, 160, 88) + rank(30, H - 30, 1, 0, 160, 90);
+  for (const [x, y] of [[22.5, 22.5], [W - 22.5, 22.5], [22.5, H - 22.5], [W - 22.5, H - 22.5]]) o += goudstip(x, y, 6);
+  $('#rand-wk').setAttribute('viewBox', `0 0 ${W} ${H}`); $('#rand-wk').innerHTML = o;
+})();
+function wapenModus() {
+  const t = now(), h = feestUur(t), aan = h >= CONFIG.partyFrom && h < 18 && t >= CONFIG.start;
+  $('#stage').classList.toggle('wapens', aan);
+  if (!aan) return;
+  if (!$('#initiaal-wk').innerHTML) { tekenInitiaal('W'); $('#initiaal-wk').innerHTML = $('#initiaal').innerHTML; tekenInitiaal(TABS[tab].letter); }
+  const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + 18 * 3600e3 - t) / 60000));
+  $('#wk-sub').innerHTML = `Schilder uw wapen op schild of tuniek. Om <b>18:00</b> keuren de heraut en de waard: tot tien punten voor kleur, vorm en heraldiek. Nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>.`;
+}
+
+
+/* =========================================================
+   SPOTIFY — "Nu speelt" bij elk nieuw nummer. De muziek zelf speelt via de Spotify-app (Spotify Connect);
+   dit scherm vraagt alleen om de 5 s wat er speelt. Inloggen: OAuth "Authorization Code met PKCE"
+   (geen server, geen geheime sleutel). Tokens blijven alleen op dit toestel (localStorage).
+   ========================================================= */
+const Spotify = (() => {
+  const ID = (typeof SPOTIFY !== 'undefined' && SPOTIFY.clientId) || '';
+  const TERUG = location.origin + '/feestje-tv';          // exact zo invullen als Redirect URI bij Spotify
+  const SLEUTEL = 'feestje.spotify';
+  const lees = () => { try { return JSON.parse(localStorage.getItem(SLEUTEL)) || null; } catch { return null; } };
+  const schrijf = v => { try { v ? localStorage.setItem(SLEUTEL, JSON.stringify(v)) : localStorage.removeItem(SLEUTEL); } catch {} };
+  const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  async function koppel() {
+    if (!ID) return alert('Nog geen Spotify Client ID in feestje-config.js');
+    const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+    const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+    try { localStorage.setItem('feestje.spotify.v', verifier); } catch {}
+    location.href = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
+      code_challenge_method: 'S256', code_challenge: challenge, scope: 'user-read-currently-playing user-read-playback-state' });
+  }
+  async function token(body) {
+    const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ client_id: ID, ...body }) });
+    const j = await r.json();
+    if (!r.ok) throw Object.assign(new Error(j.error_description || j.error || r.status), { code: j.error });
+    const oud = lees() || {};
+    const t = { access: j.access_token, refresh: j.refresh_token || oud.refresh, tot: Date.now() + (j.expires_in - 60) * 1000 };
+    schrijf(t); return t;
+  }
+  async function geldig() {
+    let t = lees(); if (!t) return null;
+    if (Date.now() > t.tot) {
+      try { t = await token({ grant_type: 'refresh_token', refresh_token: t.refresh }); }
+      catch (e) { if (e.code === 'invalid_grant') schrijf(null); return null; }   // na 6 maanden: opnieuw koppelen
+    }
+    return t;
+  }
+  let vorige = null;
+  async function kijk() {
+    const t = await geldig(); if (!t) return;
+    try {
+      const r = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers: { Authorization: 'Bearer ' + t.access } });
+      if (r.status === 401) { schrijf({ ...t, tot: 0 }); return; }
+      if (r.status !== 200) return;                       // 204: er speelt niets
+      const j = await r.json(), it = j.item;
+      if (!it || !j.is_playing || it.id === vorige) return;
+      vorige = it.id;
+      const hoes = (it.album?.images || []).slice(-1)[0]?.url || '';
+      nuSpeelt(it.name, (it.artists || []).map(a => a.name).join(', '), hoes);
+    } catch { /* geen verbinding: volgende keer opnieuw */ }
+  }
+  async function start() {
+    if (!ID) return;
+    const q = new URLSearchParams(location.search);
+    if (q.get('code')) {                                   // terug van Spotify na het inloggen
+      let v = ''; try { v = localStorage.getItem('feestje.spotify.v') || ''; localStorage.removeItem('feestje.spotify.v'); } catch {}
+      try { await token({ grant_type: 'authorization_code', code: q.get('code'), redirect_uri: TERUG, code_verifier: v }); }
+      catch (e) { console.warn('Spotify-koppeling mislukt', e); }
+      history.replaceState(null, '', location.pathname);
+    }
+    kijk(); setInterval(kijk, 5000);
+  }
+  return { start, koppel, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID };
+})();
+function nuSpeelt(titel, artiest, hoes) {
+  const el = document.createElement('div'); el.className = 'melding muziek';
+  el.innerHTML = `${hoes ? `<img src="${esc(hoes)}" alt="">` : '<span class="noot">♪</span>'}<div><b>Nu speelt</b><span>${esc(titel)}<br><i>${esc(artiest)}</i></span></div>`;
+  const box = $('#meldingen'); box.appendChild(el);
+  while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 8000);
+}
+
 /* ---------- de hartslag ---------- */
-function tik() { Klok.render(); aftellen(); }
+function tik() { Klok.render(); aftellen(); wapenModus(); }
 function elkeMinuut() { nuStrook(); toonLijf(); if (TABS[tab].id === 'getijden') tekenGetijden(); }
 kiesTab(0, true);
+Spotify.start();
 document.fonts.ready.then(() => { Klok.opnieuw(); elkeMinuut(); });
 tik(); elkeMinuut();
 setInterval(tik, 1000);

@@ -47,3 +47,7 @@ const UITLEG = [
   ['Proeverij', 'honing', 'Proef blind en raad wat het is. Een punt per goed antwoord, en een bonus voor wie het mooist ernaast zit.'],
   ['Quiz', 'lezen', 'Van Trosky tot Kuttenberg, van bier tot boerenwijsheid. Tien vragen per ronde.'],
 ];
+
+/* Spotify: "nu speelt" op het tv-scherm. Leeg = uit. Client ID van uw eigen app op developer.spotify.com
+   (niet geheim). Redirect URI daar: https://resonantxp.com/feestje-tv  (zie feestje-tv.html, Spotify). */
+const SPOTIFY = { clientId: '' };
