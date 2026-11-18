@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Tussenstand · Oudejaar in Bohemen</title>
+  <script>
+    // Terug van Spotify op een gsm die via de QR-code koppelt (state "gsm.…"): meteen naar de lichte gsm-pagina,
+    // voor de rest van het tv-scherm laadt. (Spotify kent alleen /feestje-tv als Redirect URI.)
+    if (/[?&]state=gsm\./.test(location.search)) location.replace('/feestje-spotify' + location.search);
+  </script>
   <!--
     Het scherm voor de dag zelf, voor op de tv (Chromecast).
     Vast canvas van 1920 × 1080 dat zich schaalt naar elk scherm. Bewust zuinig voor een Chromecast:
@@ -226,6 +231,10 @@
     #test h2 { margin: 0 0 6px; font-family: "Maximilian", serif; font-weight: 400; font-size: 36px; color: var(--goud); }
     #test .rij { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     #test a.knop { text-decoration: none; }
+    #sp-qr { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items: center; margin-top: 12px; }
+    #sp-qr[hidden] { display: none; }
+    #sp-qr .qrvak svg { width: 220px; height: 220px; display: block; background: #f3e6c4; }
+    #sp-qr p { margin: 0; font-size: 22px; }
     #test button, #test input, #test a.knop { font: inherit; font-size: 22px; color: #f1e6cf; background: #2a2016; border: 1px solid #b98a2e; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
     #test input { color-scheme: dark; cursor: text; }
     #test .tijd { font-family: "Maximilian", serif; font-size: 30px; color: #f1e6cf; }
@@ -326,13 +335,15 @@
     <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button>
       <button data-t="2026-12-31T23:59:35">vlak voor middernacht</button><button data-t="2027-01-01T00:00:01">vuurwerk</button></div>
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
-    <div class="rij"><a id="sp-koppel" class="knop" href="#">Spotify koppelen</a><span id="sp-staat" style="align-self:center"></span></div>
+    <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
+    <div id="sp-qr" hidden><div class="qrvak"></div><p>Scan met je gsm en log daar in bij Spotify. <span id="sp-qr-staat"></span></p></div>
   </div>
 </div>
 
 <script src="feestje-config.js"></script>
 <script src="feestje-hemel.js"></script>
 <script src="feestje-sterren.js"></script>
+<script src="feestje-qr.js"></script>
 <script src="feestje-wapen.js"></script>
 <script src="feestje-db.js"></script>
 <script>
@@ -874,9 +885,20 @@ function aftellen() {
   const spStaat = () => {
     const a = $('#sp-koppel'), aan = Spotify.gekoppeld();
     $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Spotify.inlog() ? 'niet gekoppeld' : 'even geduld…';
-    a.textContent = aan ? 'Spotify ontkoppelen' : 'Spotify koppelen';
+    a.textContent = aan ? 'Spotify ontkoppelen' : 'Inloggen op de tv';
     a.href = !aan && Spotify.inlog() ? Spotify.inlog() : '#';
   };
+  $('#sp-gsm').addEventListener('click', () => {
+    if (!Spotify.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
+    const url = Spotify.viaGsm(ok => {
+      $('#sp-qr-staat').textContent = ok ? 'Gekoppeld ✓' : 'Verlopen. Druk opnieuw op de knop.';
+      if (ok) { setTimeout(() => { $('#sp-qr').hidden = true; }, 2500); melding('Spotify', 'gekoppeld', null, '', { icoon: 'herberg', ms: 5000 }); }
+      spStaat();
+    });
+    const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    $('#sp-qr .qrvak').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+    $('#sp-qr-staat').textContent = 'Wachten op je gsm…'; $('#sp-qr').hidden = false;
+  });
   $('#sp-koppel').addEventListener('click', async e => {
     if (Spotify.gekoppeld()) { e.preventDefault(); Spotify.ontkoppel(); await Spotify.bereid(); spStaat(); }
     else if (!Spotify.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
@@ -1127,7 +1149,22 @@ const Spotify = (() => {
     if (!lees()) await bereid();
     kijk(); setInterval(kijk, 5000);
   }
-  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID };
+  // koppelen via de gsm: de tv toont een QR-code met een geheime code; de gsm logt in en zet de refresh-token
+  // in de database onder die code (fj_spotify_zet); de tv haalt hem één keer op (fj_spotify_haal)
+  let koppelId = null, koppelTot = 0, koppelTimer = null;
+  function viaGsm(klaar) {
+    koppelId = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join('');
+    koppelTot = Date.now() + 10 * 60e3; clearInterval(koppelTimer);
+    koppelTimer = setInterval(async () => {
+      if (Date.now() > koppelTot) { clearInterval(koppelTimer); klaar(false); return; }
+      try {
+        const r = await Db.spotifyHaal(koppelId);
+        if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); }
+      } catch { /* volgende keer */ }
+    }, 2500);
+    return location.origin + '/feestje-spotify?id=' + koppelId;
+  }
+  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID, viaGsm };
 })();
 function nuSpeelt(titel, artiest, hoes) {
   const el = document.createElement('div'); el.className = 'melding muziek';

@@ -331,3 +331,37 @@ revoke execute on function fj_norm(text), fj_quiz_juist(fj_vragen), fj_quiz_toes
   fj_quiz_meester(text), fj_quiz_laad(text, jsonb) from public, anon, authenticated;
 grant execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_laad(text, jsonb)
   to anon, authenticated;
+
+-- =====================================================================
+--  Spotify koppelen via de gsm (zonder typen op de tv)
+--  De tv maakt een geheime code van 128 bits en toont ze als QR-code. De gsm logt in bij Spotify en zet de
+--  refresh-token hier onder die code; de tv haalt hem één keer op (en dan is de rij weg). Na 15 minuten verdwijnt
+--  een rij sowieso. Niemand kan de tabel lezen: alleen wie de code kent, krijgt de token, en maar één keer.
+-- =====================================================================
+create table if not exists fj_spotify_koppel (
+  id      text primary key check (length(id) between 32 and 64),
+  token   text not null check (length(token) < 2000),
+  gemaakt timestamptz not null default now()
+);
+alter table fj_spotify_koppel enable row level security;   -- geen policies: alleen via de functies hieronder
+
+create or replace function fj_spotify_zet(p_id text, p_token text) returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  delete from fj_spotify_koppel where gemaakt < now() - interval '15 minutes';
+  if p_id !~ '^[0-9a-f]{32,64}$' or coalesce(p_token, '') = '' then return false; end if;
+  insert into fj_spotify_koppel (id, token) values (p_id, p_token)
+  on conflict (id) do update set token = excluded.token, gemaakt = now();
+  return true;
+end $$;
+
+create or replace function fj_spotify_haal(p_id text) returns text
+language plpgsql security definer set search_path = public as $$
+declare t text;
+begin
+  delete from fj_spotify_koppel where id = p_id and gemaakt > now() - interval '15 minutes' returning token into t;
+  return t;
+end $$;
+
+revoke execute on function fj_spotify_zet(text, text), fj_spotify_haal(text) from public, anon, authenticated;
+grant execute on function fj_spotify_zet(text, text), fj_spotify_haal(text) to anon, authenticated;

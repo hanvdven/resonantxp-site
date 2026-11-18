@@ -158,6 +158,15 @@ const Db = (() => {
       : demoDo(pin, d => { const id = nextId(d.spelen); d.spelen.push({ id, naam, volgorde: id }); return id; }),
     demoReset: () => { try { localStorage.removeItem(KEY); } catch {} bc?.postMessage('veranderd'); },
 
+    /* ---------- Spotify koppelen via de gsm (zie fj_spotify_* in feestje-supabase.sql): de gsm zet de token onder een
+       geheime code, de tv haalt hem één keer op. Demo: via localStorage (werkt dan alleen op één toestel). ---------- */
+    spotifyZet: async (id, token) => live ? rpc('fj_spotify_zet', { p_id: id, p_token: token })
+      : (localStorage.setItem('feestje.demo.spotify.' + id, token), true),
+    spotifyHaal: async id => {
+      if (live) return rpc('fj_spotify_haal', { p_id: id });
+      const k = 'feestje.demo.spotify.' + id, t = localStorage.getItem(k); localStorage.removeItem(k); return t;
+    },
+
     /* ---------- de quiz (zie fj_quiz_* in feestje-supabase.sql; de demo doet hetzelfde in localStorage) ---------- */
     quizToestand: async () => live ? rpc('fj_quiz_toestand') : Quiz.toestand(false),
     quizMeester: async pin => live ? rpc('fj_quiz_meester', { p_pin: pin }) : (demoPin(pin), Quiz.toestand(true)),
