@@ -134,7 +134,10 @@ begin
 end $$;
 
 -- wie mag welke functie aanroepen: de website (rol anon) alleen deze
-revoke execute on all functions in schema public from public, anon, authenticated;
+-- alleen onze eigen functies (nooit "all functions": dat raakt ook andere apps in hetzelfde project)
+revoke execute on function pin_juist(text), eis_pin(text), pin_ok(text), stand(), zet_punten(text, bigint, bigint, int),
+  voeg_ridder(text, text, jsonb), wijzig_ridder(text, bigint, text, jsonb), verwijder_ridder(text, bigint), voeg_spel(text, text)
+  from public, anon, authenticated;
 grant execute on function stand(), pin_ok(text), zet_punten(text, bigint, bigint, int),
   voeg_ridder(text, text, jsonb), wijzig_ridder(text, bigint, text, jsonb),
   verwijder_ridder(text, bigint), voeg_spel(text, text) to anon, authenticated;
