@@ -62,6 +62,50 @@ const Db = (() => {
     return out;
   }
   const nextId = list => list.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+  const demoPin = pin => { if (String(pin) !== DEMO_PIN) throw new Error('Verkeerde pincode'); };
+  // de quiz in demomodus: dezelfde regels als de functies in de database
+  const Quiz = (() => {
+    const QK = 'feestje.demo.quiz';
+    const lees = () => { try { return JSON.parse(localStorage.getItem(QK)) || null; } catch { return null; } };
+    const leeg = () => ({ vragen: typeof QUIZ_VRAGEN !== 'undefined' ? QUIZ_VRAGEN : [], nr: 0, fase: 'uit', geopend: null, antwoorden: [] });
+    const get = () => lees() || leeg();
+    const put = q => { try { localStorage.setItem(QK, JSON.stringify(q)); } catch {} bc?.postMessage('quiz'); };
+    function toestand(meester) {
+      const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr);
+      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, vraag: q.fase !== 'uit' ? v?.vraag : null, antwoorden: q.fase !== 'uit' ? v?.antwoorden : null,
+        verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
+        juist: q.fase === 'uitslag' || meester ? v?.juist : null,
+        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, punten }) => ({ ridder_id, keuze, punten })) : null };
+      if (meester) t.antwoorden_van = hier.map(a => a.ridder_id);
+      return t;
+    }
+    function antwoord(ridder, keuze) {
+      const q = get(); if (q.fase !== 'open') return false;
+      if (q.antwoorden.some(a => a.nr === q.nr && a.ridder_id === ridder)) return false;
+      const sec = (Date.now() - q.geopend) / 1000, goed = keuze === q.vragen[q.nr - 1].juist;
+      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze, punten: goed ? 100 + Math.max(0, 30 - Math.floor(sec)) : 0 }); put(q); return true;
+    }
+    function stap(actie) {
+      const q = get();
+      if (actie === 'start') Object.assign(q, { nr: 1, fase: 'wacht', geopend: null });
+      else if (actie === 'open' && q.fase === 'wacht') Object.assign(q, { fase: 'open', geopend: Date.now() });
+      else if (actie === 'sluit' && q.fase === 'open') q.fase = 'dicht';
+      else if (actie === 'toon' && (q.fase === 'open' || q.fase === 'dicht')) {
+        q.fase = 'uitslag';
+        const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
+        if (spel) {
+          const som = new Map(); q.antwoorden.forEach(a => som.set(a.ridder_id, (som.get(a.ridder_id) || 0) + a.punten));
+          d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat([...som].map(([ridder_id, punten]) => ({ ridder_id, spel_id: spel.id, punten })));
+          try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
+        }
+      } else if (actie === 'volgende') { if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit'; }
+      else if (actie === 'stop') q.fase = 'uit';
+      else if (actie === 'reset') Object.assign(q, { nr: 0, fase: 'uit', geopend: null, antwoorden: [] });
+      put(q);
+    }
+    function laad(vragen) { put(Object.assign(leeg(), { vragen })); return vragen.length; }
+    return { toestand, antwoord, stap, laad };
+  })();
 
   /* ---------- publieke API ---------- */
   return {
@@ -93,6 +137,13 @@ const Db = (() => {
       ? rpc('fj_voeg_spel', { p_pin: pin, p_naam: naam })
       : demoDo(pin, d => { const id = nextId(d.spelen); d.spelen.push({ id, naam, volgorde: id }); return id; }),
     demoReset: () => { try { localStorage.removeItem(KEY); } catch {} bc?.postMessage('veranderd'); },
+
+    /* ---------- de quiz (zie fj_quiz_* in feestje-supabase.sql; de demo doet hetzelfde in localStorage) ---------- */
+    quizToestand: async () => live ? rpc('fj_quiz_toestand') : Quiz.toestand(false),
+    quizMeester: async pin => live ? rpc('fj_quiz_meester', { p_pin: pin }) : (demoPin(pin), Quiz.toestand(true)),
+    quizAntwoord: async (ridder, keuze) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze }) : Quiz.antwoord(ridder, keuze),
+    quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
+    quizLaad: async (pin, vragen) => live ? rpc('fj_quiz_laad', { p_pin: pin, p_vragen: vragen }) : (demoPin(pin), Quiz.laad(vragen)),
 
     /* Volg de stand: roept cb(stand) aan bij elke wijziging. Supabase: elke `ms` opvragen
        (eenvoudiger en robuuster op een Chromecast dan een websocket). Demo: direct via BroadcastChannel.

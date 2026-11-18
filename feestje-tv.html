@@ -136,38 +136,15 @@
     #wapenkunde h1 svg { width: 96px; height: 96px; margin-right: 4px; }
     #wapenkunde .sub { font-size: 28px; color: var(--inkt-zacht); margin: 6px 140px 14px 0; }
     #wapenkunde .sub b { color: var(--rubriek); font-weight: 600; }
-    .wk { display: grid; grid-template-columns: 400px 220px 330px 1fr; gap: 0 40px; }
-    .delingen { display: grid; gap: 4px; }
-    .deling { display: grid; grid-template-columns: 66px 1fr; gap: 0 12px; align-items: center; height: 92px; }
-    .deling svg { width: 64px; height: 77px; }
-    .deling span { font-size: 26px; }
-    /* stukken los, zonder schild: twee kolommen */
-    .stukken { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
-    .stuk { display: grid; grid-template-columns: 58px 1fr; gap: 0 10px; align-items: center; height: 80px; }
-    .stuk svg { width: 58px; height: 58px; overflow: visible; }
-    .stuk span { font-size: 26px; }
-    .schik { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 8px; margin: 2px 0 8px; }
-    .schik figure { margin: 0; text-align: center; } .schik svg { width: 64px; height: 77px; display: block; margin: 0 auto 2px; }
-    .schik figcaption { font-size: 24px; line-height: 1.05; height: 30px; }
-    .echt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 8px; align-items: end; }
-    .echt figure { margin: 0; text-align: center; } .echt svg, .echt img { height: 100px; width: auto; display: block; margin: 0 auto 2px; }
-    .echt figure { margin-bottom: 10px; }
-    .echt figcaption { font-size: 24px; line-height: 1.1; } .echt figcaption small { display: block; font-size: 24px; color: var(--inkt-zacht); }
-    .wk h2 { font-family: "Maximilian", serif; font-weight: 400; font-size: 38px; margin: 0 0 4px; color: var(--rubriek); }
-    .wk p { font-size: 26px; line-height: 1.25; margin: 0 0 12px; }
-    .tincturen { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
-    .tinct { display: grid; grid-template-columns: 46px 1fr; gap: 0 12px; align-items: center; height: 54px; }
-    .tinct svg { width: 42px; height: 50px; }
-    .tinct b { font-family: "Maximilian", serif; font-weight: 400; font-size: 34px; line-height: 1; }
-    .tinct small { font-size: 24px; color: var(--inkt-zacht); margin-left: 8px; }
-    .groep { font-variant-caps: small-caps; letter-spacing: .08em; font-size: 24px; color: #7a5a30; margin: 4px 0 0; grid-column: 1 / -1; }
-    .rijtje { display: flex; gap: 22px; margin: 4px 0 16px; }
-    .rijtje figure { margin: 0; text-align: center; width: 120px; }
-    .rijtje svg { width: 96px; height: 116px; display: block; margin: 0 auto 4px; }
-    .rijtje figcaption { font-size: 25px; line-height: 1.1; }
-    .rijtje .goed figcaption b { color: #3f6b2f; } .rijtje .fout figcaption b { color: var(--rubriek); }
-    .rijtje .fout svg { opacity: .9; }
-    .rijtje.klein figure { width: 108px; } .rijtje.klein svg { width: 74px; height: 89px; }
+    .wk { display: grid; grid-template-columns: 1fr 1fr 1.25fr 1fr 1fr; gap: 0 34px; }
+    .wk h2 { font-family: "Maximilian", serif; font-weight: 400; font-size: 38px; margin: 0 0 6px; color: var(--rubriek); }
+    /* acht rijen per kolom, alle schilden even groot */
+    .wr { display: grid; grid-template-columns: 54px 1fr; gap: 0 14px; align-items: center; height: 72px; }
+    .wr .sch, .wr > svg { width: 54px; height: 65px; overflow: visible; }
+    .wr b { font-family: "Maximilian", serif; font-weight: 400; font-size: 30px; line-height: 1; display: block; }
+    .wr small { font-size: 24px; color: var(--inkt-zacht); }
+    .stukken { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .wr.stuk { grid-template-columns: 50px 1fr; } .wr.stuk > svg { width: 50px; height: 50px; }
 
     /* ---------- het testknopje rechtsonder: de tijd verzetten ---------- */
     #test-knop { position: absolute; right: 18px; bottom: 18px; z-index: 20; width: 58px; height: 58px; border-radius: 50%; border: 2px solid #c9a24a;
@@ -666,89 +643,73 @@ function aftellen() {
 /* =========================================================
    WAPENSCHILDEREN (16:00–18:00): een volledige pagina wapenkunde, de klok klein rechtsboven
    ========================================================= */
-// groot: de heraldische naam; klein: de gewone kleur
-const HERALDISCH = { or: ['Or', 'goud'], argent: ['Argent', 'zilver'], gules: ['Keel', 'rood'], azure: ['Azuur', 'blauw'], vert: ['Sinopel', 'groen'], sable: ['Sabel', 'zwart'], purpure: ['Purper', 'paars'] };
-const schild = (w, uid) => `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(Object.assign({ t2: w.t1, div: 'plain', ch: 'none', c: 'or' }, w), uid, false, '', true)}</svg>`;
-const STUK = [['ster', 'Ster'], ['kruis', 'Kruis'], ['maan', 'Maan'], ['zwaard', 'Zwaard'], ['kroon', 'Kroon'], ['roos', 'Roos'], ['beker', 'Beker'],
-  ['lelie', 'Lelie'], ['toren', 'Toren'], ['sleutel', 'Sleutel'], ['hart', 'Hart'], ['ruit', 'Ruit'], ['bol', 'Bezant'], ['pijl', 'Pijl']];
-// een schild met vrije schikking: veld, eventueel een "gewoon stuk" (balk, paal, zoom …) en stukken op eigen plekken
-function schildX({ veld, gewoon = '', kleur = 'or', stukken = [] }, uid) {
-  const T = k => TINCT[k][1], G = {
+const STUK = [['ster', 'Ster'], ['kruis', 'Kruis'], ['maan', 'Maan'], ['zwaard', 'Zwaard'], ['kroon', 'Kroon'], ['roos', 'Roos'], ['beker', 'Beker'], ['lelie', 'Lelie'],
+  ['toren', 'Toren'], ['sleutel', 'Sleutel'], ['hart', 'Hart'], ['ruit', 'Ruit'], ['bol', 'Bezant'], ['pijl', 'Pijl'], ['leeuw', 'Leeuw'], ['adelaar', 'Adelaar']];
+/* één schild voor alles op deze pagina (zelfde maat, zelfde omlijning):
+   veld, eventueel een deling (met tweede kleur), een gewoon stuk (balk, paal, zoom …) en stukken op eigen plekken */
+function schildX({ veld, deling = '', t2 = 'argent', gewoon = '', kleur = 'or', stukken = [], hermelijn = false }, uid) {
+  const T = k => TINCT[k][1], k2 = T(t2);
+  const D = {
+    gedeeld: `<rect x="100" y="0" width="100" height="240" fill="${k2}"/>`,
+    doorsneden: `<rect x="0" y="112" width="200" height="130" fill="${k2}"/>`,
+    geschuind: `<polygon points="0,0 200,240 0,240" fill="${k2}"/>`,
+    linksgeschuind: `<polygon points="200,0 0,240 200,240" fill="${k2}"/>`,
+    gevierendeeld: `<rect x="100" y="0" width="100" height="112" fill="${k2}"/><rect x="0" y="112" width="100" height="130" fill="${k2}"/>`,
+    schuinkruis: `<polygon points="0,0 100,112 0,240" fill="${k2}"/><polygon points="200,0 100,112 200,240" fill="${k2}"/>`,
+    keper: `<polygon points="0,182 100,78 200,182 200,228 100,124 0,228" fill="${k2}"/>`,
+    gepaald: [0, 1, 2].map(i => `<rect x="${33 + i * 67}" y="0" width="33.4" height="240" fill="${k2}"/>`).join(''),
+  }[deling] || '';
+  const G = {
     paal: `<rect x="70" y="0" width="60" height="240" fill="${T(kleur)}"/>`,
     dwarsbalk: `<rect x="0" y="86" width="200" height="56" fill="${T(kleur)}"/>`,
     schuinbalk: `<polygon points="0,0 40,0 200,200 200,240 160,240 0,40" fill="${T(kleur)}"/>`,
     schildhoofd: `<rect x="0" y="0" width="200" height="72" fill="${T(kleur)}"/>`,
     zoom: `<path d="${SHIELD}" fill="none" stroke="${T(kleur)}" stroke-width="40"/>`,
-    schuinkruis: `<path d="M0,0 L200,240 M200,0 L0,240" stroke="${T(kleur)}" stroke-width="38"/>`,
   }[gewoon] || '';
+  // hermelijn: zwarte staartjes op zilver
+  const H = hermelijn ? [[50, 40], [100, 40], [150, 40], [75, 90], [125, 90], [50, 140], [100, 140], [150, 140], [100, 190]].map(([x, y]) =>
+    `<g transform="translate(${x},${y})" fill="#1c1814"><path d="M0,-12 L4,6 L0,12 L-4,6 Z"/><circle cx="-6" cy="-12" r="2.6"/><circle cx="6" cy="-12" r="2.6"/><circle cx="0" cy="-17" r="2.6"/></g>`).join('') : '';
   const st = stukken.map(([ch, c, x, y, sch]) => `<g transform="translate(${x},${y}) scale(${sch})">${chargeMarkup(ch, T(c))}</g>`).join('');
-  return `<svg viewBox="0 0 200 240" aria-hidden="true"><defs><clipPath id="cx-${uid}"><path d="${SHIELD}"/></clipPath></defs>
-    <g clip-path="url(#cx-${uid})"><rect width="200" height="240" fill="${T(veld)}"/>${G}${st}</g><path d="${SHIELD}" fill="none" stroke="#2a1f16" stroke-width="5" stroke-linejoin="round"/></svg>`;
+  return `<svg class="sch" viewBox="0 0 200 240" aria-hidden="true"><defs><clipPath id="cx-${uid}"><path d="${SHIELD}"/></clipPath></defs>
+    <g clip-path="url(#cx-${uid})"><rect width="200" height="240" fill="${T(veld)}"/>${D}${G}${H}${st}</g><path d="${SHIELD}" fill="none" stroke="#2a1f16" stroke-width="6" stroke-linejoin="round"/></svg>`;
 }
-// het wapen van het Brussels Hoofdstedelijk Gewest: een gestileerde gele iris, wit omrand, op azuur (nagetekend)
-const irisWapen = () => {
-  const iris = `M98,104 C86,80 70,46 76,28 C82,22 90,30 94,44 C98,60 100,84 98,104 Z M102,104 C100,76 104,40 116,26 C124,20 130,30 126,46 C122,66 112,88 102,104 Z
-    M106,106 C118,84 134,54 146,46 C154,42 158,52 150,64 C138,82 122,96 106,106 Z M100,108 C80,96 50,92 30,104 C18,112 22,126 34,124 C50,120 70,112 98,116 Z
-    M110,110 C136,98 164,96 182,106 C192,114 186,126 174,122 C156,116 134,114 112,120 Z
-    M104,116 C94,140 86,166 92,190 C96,200 106,196 104,186 C100,168 108,146 120,132 C128,124 140,124 142,134 C144,144 134,146 132,140 C138,152 152,146 150,132 C146,116 122,112 104,116 Z`;
-  return `<svg viewBox="0 0 200 240" aria-hidden="true"><defs><clipPath id="cx-iris"><path d="${SHIELD}"/></clipPath></defs><g clip-path="url(#cx-iris)"><rect width="200" height="240" fill="#1f45a8"/>
-    <path d="${iris}" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round"/><path d="${iris}" fill="#f6c600"/></g><path d="${SHIELD}" fill="none" stroke="#2a1f16" stroke-width="5"/></svg>`;
-};
-// een uitgeknipt wapenbeeld (uit Wikimedia) in onze schildvorm, met dezelfde omlijning
-const beeldWapen = (src, veld, uid) => `<svg viewBox="0 0 200 240" aria-hidden="true"><defs><clipPath id="cx-${uid}"><path d="${SHIELD}"/></clipPath></defs>
-  <g clip-path="url(#cx-${uid})"><rect width="200" height="240" fill="${veld}"/><image href="${src}" x="2" y="2" width="196" height="236" preserveAspectRatio="xMidYMid slice"/></g>
-  <path d="${SHIELD}" fill="none" stroke="#2a1f16" stroke-width="5"/></svg>`;
+const KLEUREN = [['or', 'Or', 'goud'], ['argent', 'Argent', 'zilver'], ['gules', 'Keel', 'rood'], ['azure', 'Azuur', 'blauw'], ['vert', 'Sinopel', 'groen'],
+  ['sable', 'Sabel', 'zwart'], ['purpure', 'Purper', 'paars'], ['argent', 'Hermelijn', 'bont', true]];
+const DELINGEN = [['gedeeld', 'Gedeeld', 'gules', 'or'], ['doorsneden', 'Doorsneden', 'azure', 'argent'], ['geschuind', 'Geschuind', 'vert', 'or'], ['linksgeschuind', 'Linksgeschuind', 'purpure', 'argent'],
+  ['gevierendeeld', 'Gevierendeeld', 'sable', 'argent'], ['schuinkruis', 'Schuinkruisgewijs', 'azure', 'or'], ['keper', 'Keper', 'gules', 'argent'], ['gepaald', 'Gepaald', 'or', 'sable']];
 const SCHIK = [
-  ['één groot', { veld: 'azure', stukken: [['ster', 'or', 100, 112, 1.55]] }],
-  ['twee naast elkaar', { veld: 'gules', stukken: [['roos', 'argent', 58, 105, .62], ['roos', 'argent', 142, 105, .62]] }],
-  ['drie: 2 en 1', { veld: 'vert', stukken: [['bol', 'or', 58, 72, .62], ['bol', 'or', 142, 72, .62], ['bol', 'or', 100, 158, .62]] }],
-  ['twee schuin', { veld: 'argent', stukken: [['hart', 'gules', 58, 64, .6], ['hart', 'gules', 140, 160, .6]] }],
-  ['schildhoofd', { veld: 'argent', gewoon: 'schildhoofd', kleur: 'azure', stukken: [['ster', 'or', 46, 38, .42], ['ster', 'or', 100, 38, .42], ['ster', 'or', 154, 38, .42], ['toren', 'gules', 100, 150, .8]] }],
-  ['zoom', { veld: 'gules', gewoon: 'zoom', kleur: 'or', stukken: [['kroon', 'or', 100, 112, .95]] }],
+  ['Eén groot stuk', { veld: 'azure', stukken: [['ster', 'or', 100, 112, 1.35]] }],
+  ['Twee naast elkaar', { veld: 'gules', stukken: [['roos', 'argent', 58, 105, .6], ['roos', 'argent', 142, 105, .6]] }],
+  ['Drie: 2 en 1', { veld: 'vert', stukken: [['bol', 'or', 58, 72, .6], ['bol', 'or', 142, 72, .6], ['bol', 'or', 100, 158, .6]] }],
+  ['Schildhoofd', { veld: 'argent', gewoon: 'schildhoofd', kleur: 'azure', stukken: [['ster', 'or', 46, 38, .4], ['ster', 'or', 100, 38, .4], ['ster', 'or', 154, 38, .4], ['toren', 'gules', 100, 150, .8]] }],
+  ['Zoom', { veld: 'gules', gewoon: 'zoom', kleur: 'or', stukken: [['kroon', 'or', 100, 112, .9]] }],
+  ['Paal', { veld: 'or', gewoon: 'paal', kleur: 'sable' }],
+  ['Dwarsbalk', { veld: 'azure', gewoon: 'dwarsbalk', kleur: 'argent', stukken: [['lelie', 'or', 100, 50, .5], ['lelie', 'or', 100, 188, .46]] }],
+  ['Schuinbalk', { veld: 'or', gewoon: 'schuinbalk', kleur: 'gules', stukken: [['sleutel', 'azure', 150, 62, .55], ['sleutel', 'azure', 50, 168, .55]] }],
+];
+const ECHT = [
+  ['Leuven', { veld: 'gules', gewoon: 'dwarsbalk', kleur: 'argent' }],
+  ['België', { veld: 'sable', stukken: [['leeuw', 'or', 104, 110, 1.4]] }],
+  ['Vlaanderen', { veld: 'or', stukken: [['leeuw', 'sable', 104, 110, 1.4]] }],
+  ['Bohemen', { veld: 'gules', stukken: [['leeuw', 'argent', 104, 110, 1.4]] }],
+  ['Brussel', { veld: 'gules', stukken: [['michiel', 'or', 100, 116, 1.45]] }],
+  ['Brussels Gewest', { veld: 'azure', stukken: [['iris', 'or', 100, 112, 1]] }],
+  ['Keizer Sigismund', { veld: 'or', stukken: [['dubbeladelaar', 'sable', 100, 108, 1.55]] }],
+  ['Frankrijk', { veld: 'azure', stukken: [['lelie', 'or', 58, 70, .6], ['lelie', 'or', 142, 70, .6], ['lelie', 'or', 100, 160, .6]] }],
 ];
 (function wapenkunde() {
-  const tinct = k => `<div class="tinct">${schild({ t1: k }, 'wt-' + k)}<div><b>${HERALDISCH[k][0]}</b><small>${HERALDISCH[k][1]}</small></div></div>`;   // naam en betekenis op één regel
-  const fig = (w, uid, tekst, cls = '') => `<figure class="${cls}">${schild(w, uid)}<figcaption>${tekst}</figcaption></figure>`;
+  const rij = (svg, naam, klein = '') => `<div class="wr">${svg}<div><b>${naam}</b>${klein ? `<small>${klein}</small>` : ''}</div></div>`;
+  const kolom = (titel, rijen) => `<div><h2>${titel}</h2>${rijen.join('')}</div>`;
   $('#wapenkunde').innerHTML = `
     <svg id="rand-wk" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
     <h1><svg id="initiaal-wk" viewBox="0 0 92 92" aria-hidden="true"></svg>apenkunde</h1>
     <p class="sub" id="wk-sub"></p>
     <div class="wk">
-      <div>
-        <h2>De kleuren</h2>
-        <div class="tincturen">
-          <div class="groep">Twee metalen</div>${tinct('or')}${tinct('argent')}
-          <div class="groep">Vijf kleuren</div>${tinct('gules')}${tinct('azure')}${tinct('vert')}${tinct('sable')}${tinct('purpure')}
-        </div>
-        <h2 style="margin-top:6px">De gouden regel</h2>
-        <p>Nooit metaal op metaal, nooit kleur op kleur.</p>
-        <div class="rijtje klein" style="gap:14px">
-          ${fig({ t1: 'azure', ch: 'ster', c: 'or' }, 'wg1', '<b>✓ goed</b>', 'goed')}
-          ${fig({ t1: 'argent', ch: 'kruis', c: 'gules' }, 'wg2', '<b>✓ goed</b>', 'goed')}
-          ${fig({ t1: 'sable', ch: 'ster', c: 'gules' }, 'wg3', '<b>✗ fout</b>', 'fout')}
-          ${fig({ t1: 'or', ch: 'maan', c: 'argent' }, 'wg4', '<b>✗ fout</b>', 'fout')}
-        </div>
-      </div>
-      <div>
-        <h2>Delingen</h2>
-        <div class="delingen">${['pale', 'fess', 'bend', 'quarterly', 'chevron'].map((d, i) => `<div class="deling">${schild({ t1: ['gules', 'azure', 'vert', 'sable', 'purpure'][i], t2: i % 2 ? 'argent' : 'or', div: d }, 'wd' + i)}<span>${DIVS[d]}</span></div>`).join('')}</div>
-      </div>
-      <div>
-        <h2>Stukken</h2>
-        <div class="stukken">${STUK.map(([c, n], i) => `<div class="stuk"><svg viewBox="-56 -56 112 112" aria-hidden="true">${chargeMarkup(c, TINCT[['gules', 'azure', 'or', 'vert', 'sable', 'purpure', 'argent'][i % 7]][1])}</svg><span>${n}</span></div>`).join('')}</div>
-      </div>
-      <div>
-        <h2>Schikken</h2>
-        <div class="schik">${SCHIK.map(([n, w], i) => `<figure>${schildX(w, 'wx' + i)}<figcaption>${n}</figcaption></figure>`).join('')}</div>
-        <h2>Echte wapens</h2>
-        <div class="echt">
-          <figure>${schildX({ veld: 'gules', gewoon: 'dwarsbalk', kleur: 'argent' }, 'we-leuven')}<figcaption>Leuven</figcaption></figure>
-          <figure>${beeldWapen('feestje-img/wapens/belgie.png', '#1c1814', 'belgie')}<figcaption>België</figcaption></figure>
-          <figure>${irisWapen()}<figcaption>Brussel</figcaption></figure>
-          <figure>${beeldWapen('feestje-img/wapens/sigismund.png', '#f2c623', 'sigismund')}<figcaption>Sigismund</figcaption></figure>
-          <figure>${schildX({ veld: 'azure', stukken: [['lelie', 'or', 58, 70, .62], ['lelie', 'or', 142, 70, .62], ['lelie', 'or', 100, 160, .62]] }, 'we-frankrijk')}<figcaption>Frankrijk</figcaption></figure>
-        </div>
-      </div>
+      ${kolom('Kleuren', KLEUREN.map(([k, n, g, h], i) => rij(schildX({ veld: k, hermelijn: !!h }, 'wk' + i), n, g)))}
+      ${kolom('Delingen', DELINGEN.map(([d, n, a, b], i) => rij(schildX({ veld: a, deling: d, t2: b }, 'wd' + i), n)))}
+      <div><h2>Stukken</h2><div class="stukken">${STUK.map(([c, n], i) => `<div class="wr stuk"><svg viewBox="-56 -56 112 112" aria-hidden="true">${chargeMarkup(c, TINCT[['gules', 'azure', 'or', 'vert', 'sable', 'purpure', 'gules', 'azure'][i % 8]][1])}</svg><div><b>${n}</b></div></div>`).join('')}</div></div>
+      ${kolom('Schikkingen', SCHIK.map(([n, w], i) => rij(schildX(w, 'wx' + i), n)))}
+      ${kolom('Echte wapens', ECHT.map(([n, w], i) => rij(schildX(w, 'we' + i), n)))}
     </div>`;
   // dezelfde rand met ranken als het perkament, maar breder
   const W = 1852, H = 860, { rechthoek, dubbel, rank, goudstip } = Hand;
@@ -765,7 +726,7 @@ function wapenModus() {
   if (!aan) return;
   if (!$('#initiaal-wk').innerHTML) { tekenInitiaal('W'); $('#initiaal-wk').innerHTML = $('#initiaal').innerHTML; tekenInitiaal(TABS[tab].letter); }
   const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + 18 * 3600e3 - t) / 60000));
-  $('#wk-sub').innerHTML = `Schilder uw wapen op schild of tuniek. Om <b>18:00</b> keuren de heraut en de waard: tot tien punten voor kleur, vorm en heraldiek. Nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>.`;
+  $('#wk-sub').innerHTML = `Keuring om <b>18:00</b>, nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>. De gouden regel: <b>nooit metaal op metaal, nooit kleur op kleur</b>.`;
 }
 
 
