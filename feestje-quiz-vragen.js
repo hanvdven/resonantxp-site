@@ -1,27 +1,37 @@
 'use strict';
-/* De quizvragen: een voorstel, pas gerust aan. Laden in de database: /feestje-beheer → Quiz → "Vragen laden".
-   juist = 0, 1, 2 of 3 (het hoeveelste antwoord, vanaf 0).
-   Let op: wie de broncode van de site leest, kan de antwoorden hier zien. Voor een feest aanvaardbaar;
-   wil u dat niet, laad de vragen dan en haal ze daarna uit dit bestand (ze staan dan alleen nog in de database). */
+/* De quizvragen: een voorstel, pas gerust aan. Laden in de database: /feestje-beheer → Quiz leiden → "Vragen laden".
+   soort: 'keuze' (vier antwoorden; juist = 0, 1, 2 of 3), 'woord' (juist = lijst van goede antwoorden; hoofdletters,
+   accenten, spaties en leestekens tellen niet) of 'getal' (een schatting; juist = het getal; wie het dichtst zit wint).
+   afbeelding: verschijnt groot op de tv en klein op de gsm. Bronnen van de foto's staan in de afbeelding zelf.
+   Let op: wie de broncode van de site leest, kan de antwoorden hier zien. Voor een feest aanvaardbaar. */
 const QUIZ_VRAGEN = [
-  { vraag: 'In welk jaar speelt Kingdom Come: Deliverance zich af?', antwoorden: ['1348', '1403', '1415', '1492'], juist: 1 },
-  { vraag: 'Hoe heet de smidszoon die we in Kingdom Come volgen?', antwoorden: ['Hans Capon', 'Radzig Kobyla', 'Hendrik van Skalitz', 'Jan Žižka'], juist: 2 },
-  { vraag: 'Welke stad was in de middeleeuwen de zilverstad van Bohemen?', antwoorden: ['Praag', 'Kuttenberg', 'Brno', 'Pilsen'], juist: 1 },
-  { vraag: 'Welke koning van Bohemen werd in 1402 gevangengenomen door zijn halfbroer Sigismund?', antwoorden: ['Karel IV', 'Ottokar II', 'Wenceslaus IV', 'Jan van Luxemburg'], juist: 2 },
-  { vraag: 'Wat was een Praagse groschen?', antwoorden: ['Een zilveren munt', 'Een bierkroes', 'Een soort brood', 'Een ridderorde'], juist: 0 },
-  { vraag: 'Wat drinkt Hendrik in het spel om op te slaan?', antwoorden: ['Mede', 'Heilandsbrandewijn', 'Kruidenwijn', 'Bronwater'], juist: 1 },
-  { vraag: 'Welke koning liet in 1357 de stenen brug over de Moldau in Praag bouwen?', antwoorden: ['Karel IV', 'Wenceslaus IV', 'Rudolf II', 'Ottokar II'], juist: 0 },
-  { vraag: 'In welk jaar werd de universiteit van Leuven gesticht?', antwoorden: ['1348', '1425', '1517', '1834'], juist: 1 },
-  { vraag: 'Hoeveel ogen staan er in totaal op een gewone dobbelsteen?', antwoorden: ['18', '20', '21', '24'], juist: 2 },
-  { vraag: 'Welke kleur heet in de wapenkunde "keel"?', antwoorden: ['Blauw', 'Groen', 'Zwart', 'Rood'], juist: 3 },
-  { vraag: 'Welk metaal heet in de wapenkunde "argent"?', antwoorden: ['Goud', 'Zilver', 'Brons', 'Tin'], juist: 1 },
-  { vraag: 'Waarvan is een maliënkolder gemaakt?', antwoorden: ['Gekookt leer', 'IJzeren ringetjes', 'Gevlochten wol', 'Bronzen platen'], juist: 1 },
-  { vraag: 'Hoe heet het paard van Hendrik in het eerste Kingdom Come?', antwoorden: ['Pebbles', 'Bucephalus', 'Rocinante', 'Schaduwvacht'], juist: 0 },
-  { vraag: 'Wat is mede?', antwoorden: ['Een soort bier', 'Honingwijn', 'Appelwijn', 'Kruidenthee'], juist: 1 },
-  { vraag: 'Welk getijdenboek maakten de gebroeders Limbourg voor de hertog van Berry?', antwoorden: ['Het Book of Kells', 'De Très Riches Heures', 'De Codex Manesse', 'De Gutenbergbijbel'], juist: 1 },
-  { vraag: 'Welke Boheemse hervormer stierf in 1415 op de brandstapel in Konstanz?', antwoorden: ['Jan Hus', 'Jan Žižka', 'Maarten Luther', 'John Wyclif'], juist: 0 },
-  { vraag: 'In welke streek ligt de burcht Trosky uit Kingdom Come II?', antwoorden: ['Het Ertsgebergte', 'Het Reuzengebergte', 'Het Boheems Paradijs', 'Het Böhmerwald'], juist: 2 },
-  { vraag: 'Wat betekent "Fortuna audentes iuvat"?', antwoorden: ['Het geluk is met de dapperen', 'Wie zwijgt, stemt toe', 'Ik kwam, zag en overwon', 'Pluk de dag'], juist: 0 },
-  { vraag: 'Naar welke heilige is oudejaarsavond in veel landen genoemd?', antwoorden: ['Sint-Maarten', 'Sint-Silvester', 'Sint-Nicolaas', 'Sint-Joris'], juist: 1 },
-  { vraag: 'Wat deed een schildknaap?', antwoorden: ['Hij beschilderde schilden', 'Hij diende een ridder en leerde het vak', 'Hij bewaakte de schatkist', 'Hij zong aan het hof'], juist: 1 },
+  { soort: 'keuze', vraag: 'Deze komeet stond aan de hemel, twee jaar voor het verhaal van Kingdom Come begint. In welk jaar?',
+    afbeelding: 'feestje-img/wonder/f065.webp', antwoorden: ['1348', '1401', '1453', '1492'], juist: 1 },
+  { soort: 'keuze', vraag: 'Hoe heet de smidszoon die we in Kingdom Come volgen?', antwoorden: ['Hans Capon', 'Radzig Kobyla', 'Hendrik van Skalitz', 'Jan Žižka'], juist: 2 },
+  { soort: 'keuze', vraag: 'Met deze zilveren munt betaal je in Kingdom Come. Hoe heet hij?',
+    afbeelding: 'feestje-img/quiz/groschen.webp', antwoorden: ['Florijn', 'Dukaat', 'Praagse groschen', 'Penning'], juist: 2 },
+  { soort: 'woord', vraag: 'Welk dier staat er op het wapen van Bohemen?', juist: ['leeuw', 'leeuwen', 'lion', 'lev', 'löwe', 'loewe'] },
+  { soort: 'keuze', vraag: 'Van welke stad is dit wapen?', afbeelding: 'feestje-img/quiz/wapen-leuven.svg', antwoorden: ['Leuven', 'Brussel', 'Mechelen', 'Gent'], juist: 0 },
+  { soort: 'getal', vraag: 'Hoeveel kilometer is het in vogelvlucht van Leuven naar Praag?', juist: 695 },
+  { soort: 'keuze', vraag: 'Wiens wapen is dit? Hij nam in 1402 zijn halfbroer, de koning van Bohemen, gevangen.',
+    afbeelding: 'feestje-img/quiz/wapen-sigismund.svg', antwoorden: ['Karel IV', 'Wenceslaus IV', 'Sigismund', 'Jan Žižka'], juist: 2 },
+  { soort: 'keuze', vraag: 'Welke stad was in de middeleeuwen de zilverstad van Bohemen?', antwoorden: ['Praag', 'Kuttenberg', 'Brno', 'Pilsen'], juist: 1 },
+  { soort: 'keuze', vraag: 'Welke koning liet deze brug over de Moldau bouwen?',
+    afbeelding: 'feestje-img/quiz/brug.webp', antwoorden: ['Karel IV', 'Wenceslaus IV', 'Rudolf II', 'Ottokar II'], juist: 0 },
+  { soort: 'woord', vraag: 'Hoe heet het paard van Hendrik in het eerste Kingdom Come?', juist: ['Pebbles', 'Oblázek', 'Keitje', 'Kiezel', 'Kiezeltje'] },
+  { soort: 'keuze', vraag: 'Wie wordt hier in 1415 in Konstanz op de brandstapel gezet?',
+    afbeelding: 'feestje-img/quiz/hus.webp', antwoorden: ['Jan Hus', 'Jan Žižka', 'Maarten Luther', 'John Wyclif'], juist: 0 },
+  { soort: 'getal', vraag: 'Volgens het Wunderzeichenbuch vlogen er in 1533 boven Bohemen soms meer dan … draken tegelijk. Hoeveel?',
+    afbeelding: 'feestje-img/wonder/f127.webp', juist: 400 },
+  { soort: 'keuze', vraag: 'Uit welk beroemd getijdenboek komt deze miniatuur?',
+    afbeelding: 'feestje-img/quiz/berry.webp', antwoorden: ['Het Book of Kells', 'De Très Riches Heures', 'De Codex Manesse', 'De Gutenbergbijbel'], juist: 1 },
+  { soort: 'woord', vraag: 'Naar welke heilige is oudejaarsavond in veel landen genoemd?', juist: ['Silvester', 'Sylvester', 'Sint-Silvester', 'Sint-Sylvester', 'Silvestro'] },
+  { soort: 'keuze', vraag: 'Deze burcht met twee torens speelt mee in Kingdom Come II. Hoe heet ze?',
+    afbeelding: 'feestje-img/quiz/trosky.webp', antwoorden: ['Karlštejn', 'Trosky', 'Bouzov', 'Kost'], juist: 1 },
+  { soort: 'keuze', vraag: 'Wat betekent "Fortuna audentes iuvat"?', antwoorden: ['Het geluk is met de dapperen', 'Wie zwijgt, stemt toe', 'Ik kwam, zag en overwon', 'Pluk de dag'], juist: 0 },
+  { soort: 'getal', vraag: 'In welk jaar was het Leuvense stadhuis af?', afbeelding: 'feestje-img/quiz/stadhuis.webp', juist: 1469 },
+  { soort: 'keuze', vraag: 'In welk jaar werd de universiteit van Leuven gesticht?', antwoorden: ['1348', '1425', '1517', '1834'], juist: 1 },
+  { soort: 'woord', vraag: 'Hoe heet in de wapenkunde de kleur rood? (één woord)', juist: ['keel', 'keelen', 'gules', 'gueules'] },
+  { soort: 'keuze', vraag: 'Wat is mede?', antwoorden: ['Een soort bier', 'Honingwijn', 'Appelwijn', 'Kruidenthee'], juist: 1 },
+  { soort: 'keuze', vraag: 'Wat deed een schildknaap?', antwoorden: ['Hij beschilderde schilden', 'Hij diende een ridder en leerde het vak', 'Hij bewaakte de schatkist', 'Hij zong aan het hof'], juist: 1 },
 ];

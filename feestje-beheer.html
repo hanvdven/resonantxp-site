@@ -57,6 +57,15 @@
     .verwijder { background: none; border: 0; color: var(--rood); text-decoration: underline; cursor: pointer; padding: 10px 0; }
     .leeg { color: #7a5a30; padding: 20px 0; }
     .voet { font-size: 14px; color: #7a5a30; margin-top: 18px; }
+    .quiz { display: grid; gap: 10px; margin-top: 10px; }
+    .quiz p { margin: 0; }
+    .quiz .knop { min-height: 56px; font-size: 20px; }
+    .qnr { font-variant-caps: small-caps; letter-spacing: .06em; color: var(--rood); font-weight: 600; }
+    .qvraag { font-size: 20px; line-height: 1.25; }
+    .qjuist { background: #fffaf0; border-radius: 6px; padding: 6px 10px; }
+    .qtijd { font-family: "Maximilian", serif; font-size: 34px; }
+    .qwie { font-size: 16px; color: #7a5a30; }
+    .qklein { display: flex; gap: 18px; }
   </style>
 </head>
 <body>
@@ -66,6 +75,7 @@
 
   <script src="feestje-config.js"></script>
   <script src="feestje-wapen.js"></script>
+  <script src="feestje-quiz-vragen.js"></script>
   <script src="feestje-db.js"></script>
   <script>
   'use strict';
@@ -121,6 +131,7 @@
         <button class="knop">Inschrijven</button><div class="fout" id="rfout" role="alert"></div></form></details>
       <details><summary>Spel toevoegen</summary><form class="form" id="sform"><input type="text" id="snaam" placeholder="bv. Armworstelen" maxlength="30" required autocomplete="off">
         <button class="knop">Toevoegen</button><div class="fout" id="sfout" role="alert"></div></form></details>
+      <details id="quiz"><summary>Quiz leiden</summary><div id="qbox" class="quiz"></div><div class="fout" id="qfout" role="alert"></div></details>
       <p class="voet">Punten worden bewaard zodra u stopt met tikken. Het scherm in de zaal ververst binnen enkele seconden.
         ${Db.live ? '' : '<br><button type="button" class="verwijder" id="reset">Demo terugzetten</button>'}
         <br><button type="button" class="verwijder" id="uit">Afmelden op deze gsm</button></p>
@@ -159,6 +170,49 @@
     });
     $('#uit').addEventListener('click', () => { localStorage.removeItem('feestje.pin'); sessionStorage.removeItem('feestje.pin'); pin = ''; location.reload(); });
     Db.volg((s, fout) => { if (s) { stand = s; teken(); } }, 5000);
+    // de quiz: alleen opvragen zolang dit deel open staat
+    let qt = null;
+    $('#quiz').addEventListener('toggle', () => { clearInterval(qt); if ($('#quiz').open) { quiz(); qt = setInterval(quiz, 1500); } });
+  }
+
+  /* ---------- 4. de quiz leiden ----------
+     uit → (vragen laden) → start → per vraag: wacht (vraag op de tv) → open (antwoorden, 30 s) → sluit → toon (antwoord + punten) → volgende */
+  const LETTERS = ['A', 'B', 'C', 'D'];
+  const romeinsK = n => { let o = ''; for (const [v, r] of [[100, 'c'], [90, 'xc'], [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i']]) while (n >= v) { o += r; n -= v; } return o; };
+  let qStaat = '';
+  async function quiz(actie) {
+    const box = $('#qbox'); if (!box) return;
+    let m;
+    try {
+      if (actie === 'laad') { const n = await Db.quizLaad(pin, Db.quizVoorbereid(QUIZ_VRAGEN)); $('#qfout').textContent = `${n} vragen geladen.`; }
+      m = actie && actie !== 'laad' ? await Db.quizStap(pin, actie) : await Db.quizMeester(pin);
+      if (actie && actie !== 'laad') $('#qfout').textContent = '';
+    } catch (e) { $('#qfout').textContent = e.message; return; }
+    const naamVan = id => esc(stand?.ridders.find(r => r.id === id)?.naam.split(' van ')[0] || '?');
+    const staat = JSON.stringify([m.fase, m.nr, m.totaal, m.antwoorden_van, m.fase === 'open' ? Math.floor(m.verstreken || 0) : 0]);
+    if (staat === qStaat && !actie) return; qStaat = staat;
+    const k = (a, label, extra = '') => `<button type="button" class="knop ${extra}" data-a="${a}">${label}</button>`;
+    const juist = m.soort === 'keuze' ? `${LETTERS[m.juist]}. ${esc(m.antwoorden?.[m.juist])}` : esc(m.juist);
+    const vraag = m.nr ? `<p class="qnr">Vraag ${romeinsK(m.nr)} van ${romeinsK(m.totaal)} · ${m.soort === 'keuze' ? 'meerkeuze' : m.soort === 'woord' ? 'woord' : 'schatting'}</p>
+      <p class="qvraag">${esc(m.vraag)}</p><p class="qjuist">Juist: <b>${juist}</b></p>` : '';
+    const wie = m.antwoorden_van?.length ? `<p class="qwie">${m.antwoorden_van.length} van ${m.ridders} geantwoord: ${m.antwoorden_van.map(naamVan).join(', ')}</p>` : `<p class="qwie">Nog niemand geantwoord (${m.ridders} ridders).</p>`;
+    let knoppen = '';
+    if (m.fase === 'uit' && !m.nr) knoppen = `<p>${m.totaal ? `${m.totaal} vragen klaar.` : 'Nog geen vragen geladen.'} Spelers gaan naar <b>resonantxp.com/feestje-quiz</b> (QR-code op de tv).</p>
+      ${k('laad', `Vragen laden (${QUIZ_VRAGEN.length} uit feestje-quiz-vragen.js)`, 'licht')}${m.totaal ? k('start', 'Start de quiz') : ''}`;
+    else if (m.fase === 'uit') knoppen = `<p>De quiz is gedaan. De punten staan in de tussenstand onder Quiz.</p>${k('reset', 'Alles wissen en opnieuw', 'licht')}`;
+    else if (m.fase === 'wacht') knoppen = `${vraag}<p>De vraag staat op de tv. Open hem als iedereen hem gelezen heeft.</p>${k('open', 'Open de vraag')}`;
+    else if (m.fase === 'open') knoppen = `${vraag}<p class="qtijd">${Math.floor(m.verstreken || 0)} s</p>${wie}${k('sluit', 'Sluit de vraag', 'licht')}${k('toon', 'Toon het antwoord')}`;
+    else if (m.fase === 'dicht') knoppen = `${vraag}${wie}${k('toon', 'Toon het antwoord')}`;
+    else if (m.fase === 'uitslag') knoppen = `${vraag}${wie}${k('volgende', m.nr < m.totaal ? 'Volgende vraag' : 'Einde: eindstand op de tv')}`;
+    if (m.fase !== 'uit') knoppen += `<div class="qklein"><button type="button" class="verwijder" data-a="stop">Quiz stoppen</button> <button type="button" class="verwijder" data-a="reset">Alles wissen</button></div>`;
+    box.innerHTML = knoppen;
+    box.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => {
+      const a = b.dataset.a;
+      if (a === 'reset' && !confirm('Alle antwoorden en quizpunten wissen?')) return;
+      if (a === 'laad' && m.totaal && !confirm('De vragen opnieuw laden? Dit wist ook de antwoorden.')) return;
+      if (a === 'stop' && !confirm('De quiz stoppen? (Antwoorden blijven bewaard.)')) return;
+      box.querySelectorAll('button').forEach(x => x.disabled = true); quiz(a);
+    }));
   }
   const ververs = async () => { try { stand = await Db.stand(); teken(); } catch {} };
 
