@@ -50,4 +50,4 @@ const UITLEG = [
 
 /* Spotify: "nu speelt" op het tv-scherm. Leeg = uit. Client ID van uw eigen app op developer.spotify.com
    (niet geheim). Redirect URI daar: https://resonantxp.com/feestje-tv  (zie feestje-tv.html, Spotify). */
-const SPOTIFY = { clientId: '' };
+const SPOTIFY = { clientId: '92040bfb176b435d93212aa09fa88051' };
