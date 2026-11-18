@@ -84,6 +84,11 @@ const Db = (() => {
     verwijderRidder: async (pin, id) => live
       ? rpc('verwijder_ridder', { p_pin: pin, p_id: id })
       : demoDo(pin, d => { d.ridders = d.ridders.filter(r => r.id !== id); d.punten = d.punten.filter(p => p.ridder_id !== id); }),
+    wijzigPin: async (oud, nieuw) => {
+      if (String(nieuw).length < 6) throw new Error('De nieuwe pincode moet minstens 6 tekens hebben');
+      if (live) return rpc('wijzig_pin', { p_oud: oud, p_nieuw: nieuw });
+      throw new Error('In de demo blijft de pincode 1403');
+    },
     voegSpel: async (pin, naam) => live
       ? rpc('voeg_spel', { p_pin: pin, p_naam: naam })
       : demoDo(pin, d => { const id = nextId(d.spelen); d.spelen.push({ id, naam, volgorde: id }); return id; }),

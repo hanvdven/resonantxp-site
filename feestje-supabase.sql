@@ -3,13 +3,12 @@
 --
 --  Zo gebruik je dit:
 --  1. Maak een gratis project op supabase.com (regio: Frankfurt of Londen).
---  2. Verander hieronder VERANDER-MIJ in je eigen pincode
---     (liever een woord of 6+ tekens dan 4 cijfers: de pincode is het enige slot).
+--  2. De tijdelijke pincode is VERANDER-MIJ: log daarmee in op /feestje-beheer en kies
+--     meteen je eigen (minstens 6 tekens; de pincode is het enige slot).
 --  3. Supabase → SQL Editor → New query → plak dit hele bestand → Run.
 --  4. Project Settings → API: kopieer de Project URL en de publishable key
 --     naar SUPABASE.url en SUPABASE.key bovenaan feestje-db.js.
---  Je kunt dit script gerust opnieuw draaien: het maakt niets dubbel
---  (behalve de pincode, die wordt dan overschreven).
+--  Je kunt dit script gerust opnieuw draaien: het maakt niets dubbel en laat je pincode staan.
 --
 --  Beveiliging: iedereen mag de stand LEZEN (de tv heeft geen login).
 --  SCHRIJVEN kan alleen via de functies onderaan, die eerst de pincode
@@ -133,20 +132,30 @@ begin
   return nieuw;
 end $$;
 
+create or replace function wijzig_pin(p_oud text, p_nieuw text) returns void
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  perform eis_pin(p_oud);
+  if char_length(coalesce(p_nieuw, '')) < 6 then raise exception 'De nieuwe pincode moet minstens 6 tekens hebben'; end if;
+  update geheim set pin_hash = extensions.crypt(p_nieuw, extensions.gen_salt('bf')) where id = 1;
+end $$;
+
 -- wie mag welke functie aanroepen: de website (rol anon) alleen deze
 -- alleen onze eigen functies (nooit "all functions": dat raakt ook andere apps in hetzelfde project)
 revoke execute on function pin_juist(text), eis_pin(text), pin_ok(text), stand(), zet_punten(text, bigint, bigint, int),
-  voeg_ridder(text, text, jsonb), wijzig_ridder(text, bigint, text, jsonb), verwijder_ridder(text, bigint), voeg_spel(text, text)
+  voeg_ridder(text, text, jsonb), wijzig_ridder(text, bigint, text, jsonb), verwijder_ridder(text, bigint), voeg_spel(text, text),
+  wijzig_pin(text, text)
   from public, anon, authenticated;
 grant execute on function stand(), pin_ok(text), zet_punten(text, bigint, bigint, int),
   voeg_ridder(text, text, jsonb), wijzig_ridder(text, bigint, text, jsonb),
-  verwijder_ridder(text, bigint), voeg_spel(text, text) to anon, authenticated;
+  verwijder_ridder(text, bigint), voeg_spel(text, text), wijzig_pin(text, text) to anon, authenticated;
 
 -- de spelen van de avond (aanvullen kan later via /feestje-beheer)
 insert into spelen (naam, volgorde) values
   ('Wapen', 1), ('Kostuum', 2), ('Zwaard', 3), ('Boog', 4), ('Dobbelen', 5), ('Proeverij', 6), ('Quiz', 7)
 on conflict (naam) do update set volgorde = excluded.volgorde;   -- opnieuw draaien zet de volgorde van het programma terug
 
--- de pincode (bcrypt-hash; de pincode zelf wordt nergens bewaard)
+-- de tijdelijke pincode VERANDER-MIJ (bcrypt-hash). Wijzig hem meteen op /feestje-beheer.
+-- Opnieuw draaien laat een gewijzigde pincode staan (do nothing).
 insert into geheim (id, pin_hash) values (1, extensions.crypt('VERANDER-MIJ', extensions.gen_salt('bf')))
-on conflict (id) do update set pin_hash = excluded.pin_hash;
+on conflict (id) do nothing;

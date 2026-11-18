@@ -114,7 +114,12 @@
         <button class="knop">Toevoegen</button><div class="fout" id="sfout" role="alert"></div></form></details>
       <p class="voet">Punten worden bewaard zodra u stopt met tikken. Het scherm in de zaal ververst binnen enkele seconden.
         ${Db.live ? '' : '<br><button type="button" class="verwijder" id="reset">Demo terugzetten</button>'}
-        <br><button type="button" class="verwijder" id="uit">Afmelden op deze gsm</button></p>`;
+        <br><button type="button" class="verwijder" id="uit">Afmelden op deze gsm</button></p>
+      <details id="pinwissel"${pin === 'VERANDER-MIJ' ? ' open' : ''}><summary>Pincode wijzigen</summary>
+        ${pin === 'VERANDER-MIJ' ? '<p class="fout">U gebruikt nog de tijdelijke pincode. Kies nu uw eigen.</p>' : ''}
+        <form class="form" id="pform"><input type="password" id="pn1" placeholder="Nieuwe pincode (minstens 6 tekens)" autocomplete="new-password" minlength="6" required>
+        <input type="password" id="pn2" placeholder="Nogmaals" autocomplete="new-password" minlength="6" required>
+        <button class="knop">Wijzigen</button><div class="fout" id="pfout" role="alert"></div></form></details>`;
     // wapenkiezer
     const W = ['t1', 'div', 't2', 'ch', 'c'];
     const leesWapen = () => Object.fromEntries(W.map(k => [k, $('#r-' + k).value]));
@@ -133,6 +138,15 @@
       catch (err) { $('#sfout').textContent = err.message; }
     });
     $('#reset')?.addEventListener('click', () => { if (confirm('De demo-stand terugzetten?')) { Db.demoReset(); ververs(); } });
+    $('#pform').addEventListener('submit', async e => {
+      e.preventDefault(); const n1 = $('#pn1').value, n2 = $('#pn2').value;
+      if (n1 !== n2) { $('#pfout').textContent = 'De twee pincodes zijn niet gelijk.'; return; }
+      try {
+        await Db.wijzigPin(pin, n1);
+        pin = n1; sessionStorage.setItem('feestje.pin', n1); if (localStorage.getItem('feestje.pin')) localStorage.setItem('feestje.pin', n1);
+        $('#pfout').style.color = '#4a6b3c'; $('#pfout').textContent = 'Gewijzigd. Gebruik voortaan uw nieuwe pincode.'; $('#pform').reset();
+      } catch (err) { $('#pfout').style.color = ''; $('#pfout').textContent = err.message; }
+    });
     $('#uit').addEventListener('click', () => { localStorage.removeItem('feestje.pin'); sessionStorage.removeItem('feestje.pin'); pin = ''; location.reload(); });
     Db.volg((s, fout) => { if (s) { stand = s; teken(); } }, 5000);
   }
