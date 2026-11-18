@@ -11,16 +11,17 @@ const CONFIG = {
   location: 'Kessel-Lo',
   locationNote: 'Het precieze adres volgt per bode.',
   rsvp: '',   // bv. 'https://wa.me/32...' of 'mailto:...' (leeg = geen knop)
-  kids: 'Jonge schildknapen en jonkvrouwen zijn welkom van 16:00 tot 18:00, voor het toernooi. Daarna is het feest voor volwassenen.', // leeg = regel verbergen
+  kids: 'Jonge schildknapen en jonkvrouwen zijn welkom van 16:00 tot 18:00, voor het wapenschilderen en het toernooi. Daarna is het feest voor volwassenen.', // leeg = regel verbergen
   lat: 50.885, lon: 4.725, // Kessel-Lo, voor de zonnestand op de klok
   partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
   // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
   program: [
-    [16,    'De poort gaat open', 'Welkomstdronk, de kostuumkeuring en het ophangen van de wapenschilden.', 'herberg'],
+    [16,    'Wapenschilderen', 'De poort gaat open. Aan de lange tafel schildert u uw wapen op schild of tuniek: verf en karton liggen klaar. Tot 18:00, en het mooiste wapen wint.', 'schild'],
     [16.5,  'Toernooi bij het laatste licht', 'Zwaardgevecht en boogschieten op het erf, zoals op het toernooi van Kuttenberg. Jonge schildknapen doen mee.', 'arena'],
-    [18,    'Het gastmaal', 'De grote ketel gaat open en uw meegebrachte schotels komen erbij op de dis. Kinderen worden rond deze tijd opgehaald.', 'eten'],
-    [20,    'Dobbelen om groschen', 'Zes stenen, één kans, insignes toegestaan. Valsspelers belanden in de schandpaal.', 'dobbel'],
-    [21.5,  'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
+    [18,    'Dobbelen om groschen', 'De wapens worden gekeurd en opgehangen. Daarna rollen de stenen: wie wint, verdient groschen. Kinderen worden rond deze tijd opgehaald.', 'dobbel'],
+    [20,    'Het riddermaal', 'De grote ketel gaat open en uw meegebrachte schotels komen op de dis. Aan tafel: de prijs voor het beste kostuum.', 'eten'],
+    [21,    'De proeverij', 'Een wedstrijd van de tong. Wat er geproefd wordt, blijft tot dan een verrassing.', 'honing'],
+    [22.25, 'Kennis van het rijk', 'De grote Bohemen-quiz: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
     [23.75, 'De heilandsbrandewijn', 'Eén glaasje voor wie wil, om het jaar op te slaan.', 'brandewijn'],
     [24,    'Middernacht', 'De klokken luiden het nieuwe jaar in. Oliebollen voor iedereen.', 'ster'],
   ],
@@ -29,8 +30,8 @@ const CONFIG = {
 /* Honger en energie op het tv-scherm volgen het programma (zoals Voeding en Energie in KCD2, 0–100).
    maaltijden: [uur, naam, hoeveel voeding erbij]  ·  oppeppers: [uur, naam, hoeveel energie erbij] */
 const LIJF = {
-  voeding:  { start: 55, perUur: -9 },   // om 16:00 halfvol, daarna zakt het
+  voeding:  { start: 60, perUur: -7 },   // om 16:00 goed gevuld, daarna zakt het (het riddermaal is pas om 20:00)
   energie:  { start: 100, perUur: -8.5 },
-  maaltijden: [[18, 'Het gastmaal', 75], [24, 'Oliebollen', 35]],
+  maaltijden: [[20, 'Het riddermaal', 75], [21, 'De proeverij', 12], [24, 'Oliebollen', 35]],
   oppeppers:  [[23.75, 'Heilandsbrandewijn', 15], [24, 'Middernacht', 25]],
 };

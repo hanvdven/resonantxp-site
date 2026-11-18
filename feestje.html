@@ -93,7 +93,8 @@
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     :focus-visible { outline: 3px solid var(--ochre); outline-offset: 3px; }
     .defs { position: absolute; width: 0; height: 0; }
-    .hemel { position: fixed; inset: 0; z-index: -1; pointer-events: none; will-change: background-position; }
+    /* eigen GPU-laag; schuift met transform (geen nieuwe tekening per beeld). 360 px extra hoogte = één tegel speling */
+    .hemel { position: fixed; left: 0; right: 0; top: 0; height: calc(100% + 360px); z-index: -1; pointer-events: none; will-change: transform; }
 
     /* ---------- de miniatuur: de hemel boven Kessel-Lo, nu ---------- */
     .miniature-wrap { margin: 34px 0 0; }
@@ -106,8 +107,12 @@
     }
     .miniature .sky { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-top) 15%, var(--sky-bot) 100%); }
     .miniature .stars { position: absolute; inset: 0; width: 100%; height: 100%; opacity: var(--stars); }
-    .miniature .stars .tw { animation: twinkle 4s ease-in-out infinite; }
+    /* twinkelen: twee lagen sterren die als geheel in- en uitfaden (de grafische kaart doet dat zelf, zonder hertekenen) */
+    .miniature .tw-wrap { position: absolute; inset: 0; opacity: var(--stars); }
+    .miniature .stars-tw { position: absolute; inset: 0; width: 100%; height: 100%; animation: twinkle 4s ease-in-out infinite; will-change: opacity; }
+    .miniature .stars-tw.b { animation-delay: -2s; }
     @keyframes twinkle { 50% { opacity: .2; } }
+    .uit-beeld, .uit-beeld * { animation-play-state: paused !important; }   /* niet in beeld: niet animeren (zie pauzeerBuitenBeeld) */
     .miniature .landscape { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; }
     .miniature::after { /* geschilderd op perkament: korrel en vlekken over de verf */
       content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -177,12 +182,15 @@
 
     /* ---------- de volvelle (klok) ---------- */
     .clock-wrap { display: grid; justify-items: center; gap: 14px; }
-    .orloj { width: min(440px, 84vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 10px 14px rgba(40,20,5,.45)); }
-    .orloj .handle { cursor: grab; touch-action: none; outline: none; }
+    .orloj { width: min(440px, 84vw); height: auto; display: block; overflow: visible; filter: drop-shadow(2px 10px 14px rgba(40,20,5,.45));
+      will-change: transform; /* eigen laag: draaien aan het wiel tekent het perkament eronder niet opnieuw */ }
+    /* pan-y: een verticale veeg scrolt de pagina (de browser neemt het over en stuurt pointercancel), een horizontale draait het wiel */
+    .orloj .handle { cursor: grab; touch-action: pan-y; outline: none; }
     .orloj .handle:focus-visible { stroke: var(--ochre); stroke-width: 3; }
     .orloj.dragging .handle { cursor: grabbing; }
     .orloj text { user-select: none; -webkit-user-select: none; }
     .clock-cap { font-size: .92rem; text-align: center; color: var(--ink-soft); margin: 0; min-height: 1.4em; max-width: 30em; }
+    #cd { will-change: transform; } /* de aftelling verandert elke seconde: eigen laag, zodat het perkament eronder niet opnieuw getekend wordt */
     .countdown { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .cd-unit { min-width: 70px; padding: 6px 8px 4px; text-align: center; border-top: 1px solid rgba(162,48,42,.6); border-bottom: 1px solid rgba(162,48,42,.6); }
     .cd-num { font-family: var(--goth); font-size: 2.5rem; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; font-weight: 500; }
@@ -331,6 +339,7 @@
       width: 100%; aspect-ratio: 16 / 9; display: block; cursor: crosshair; border-radius: 1px;
       border: 1.5px solid var(--ink); box-shadow: inset 0 0 0 4px var(--vellum), inset 0 0 0 5px var(--ink);
       touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+      will-change: transform; /* eigen laag: het canvas tekent elk beeld, het perkament met rafelrand niet */
       background: #e8d6ad;
     }
     .range-msg { min-height: 1.5em; margin: 0; font-size: 1.02rem; }
@@ -396,7 +405,8 @@
       background: var(--vellum-hi) var(--grain); border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; padding: 10px 18px; }
     .toast.discover b { color: var(--ink-soft); text-transform: none; font-size: .95rem; letter-spacing: .04em; }
     .toast.discover span { font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: 1.35rem; color: var(--rubric); letter-spacing: .06em; text-transform: uppercase; }
-    @media (max-width: 560px) { .toasts { left: 12px; right: 12px; bottom: 12px; max-width: none; } }
+    /* op een gsm bovenaan: onderaan zitten de knoppen van de spelletjes (waar uw duim is) */
+    @media (max-width: 560px) { .toasts { left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top)); bottom: auto; max-width: none; } }
 
     /* ---------- slapen & wachten (naar het slaapscherm in de game) ---------- */
     .sleep-toggle { background: none; border: 0; cursor: pointer; font-family: var(--sc); font-variant-caps: small-caps; font-weight: 700; font-size: .92rem; letter-spacing: .06em; color: var(--ink); padding: 4px 8px; }
@@ -669,6 +679,7 @@
       <div class="miniature" aria-hidden="true">
         <div class="sky"></div>
         <svg class="stars" id="stars" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"></svg>
+        <div class="tw-wrap"><svg class="stars-tw" id="stars-a" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"></svg><svg class="stars-tw b" id="stars-b" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"></svg></div>
         <svg class="landscape" id="landscape" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice"></svg>
       </div>
       <figcaption>De hemel boven Kessel-Lo, op dit eigenste ogenblik.</figcaption>
@@ -748,7 +759,8 @@
       <div class="stand-grid">
         <div>
           <p>In Bohemen weet iedereen wie u bent aan wat u draagt. Kies uw stand, dan fluisteren wij wat u kunt aantrekken.
-            Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe.</p>
+            Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe. Op de dag zelf schildert u het echt,
+            van 16:00 tot 18:00: het mooiste wapen wint. Het beste kostuum krijgt een prijs bij het riddermaal.</p>
           <div class="stands" id="stands" role="group" aria-label="Stand"></div>
           <p class="dracht" id="dracht" aria-live="polite"></p>
           <figure class="minia side"><div class="fr"><img src="feestje-img/manesse-wolfram.jpg" width="560" height="850" alt="Middeleeuwse miniatuur: een ridder met helm, wapenrok en schild in dezelfde kleuren, met zijn paard en een schildknaap." loading="lazy" decoding="async" /></div><figcaption>Wolfram von Eschenbach in vol ornaat: helm, wapenrok, schild en paard in dezelfde kleuren. Zo doet u het. <cite>Codex Manesse</cite>, ca. 1300–1340.</figcaption></figure>
@@ -960,6 +972,7 @@
   <script src="feestje-config.js"></script>
   <script src="feestje-wapen.js"></script>
   <script src="feestje-hemel.js"></script>
+  <script src="feestje-dobbel.js"></script>
   <script>
   'use strict';
 
@@ -1033,7 +1046,7 @@
     const svg = $('#stars'), rnd = seeded(1403);
     for (let i = 0; i < 150; i++) {
       const c = svgEl('circle', { cx: (rnd() * 1000).toFixed(1), cy: (rnd() * 760).toFixed(1), r: (rnd() * 1.2 + .3).toFixed(2), fill: '#fff3d6', opacity: (rnd() * .6 + .3).toFixed(2) }, svg);
-      if (rnd() < .3) { c.classList.add('tw'); c.style.animationDelay = (rnd() * 4).toFixed(2) + 's'; }
+      if (rnd() < .3) (rnd() < .5 ? $('#stars-a') : $('#stars-b')).appendChild(c);   // deze twinkelen mee met hun laag
     }
   })();
 
@@ -1089,7 +1102,7 @@
       </g><circle cx="-18" cy="-12" r="3.5" fill="#efe6cf" stroke="#2a1f16" stroke-width="1"/><circle cx="19" cy="-16" r="1.2" fill="#2a1f16"/>`;
     let running = false, raf = null;
     function run() {
-      if (running || document.hidden) return;
+      if (running || document.hidden || svg.closest('.miniature').classList.contains('uit-beeld')) return;   // alleen als u het landschap ziet
       running = true; hare.setAttribute('display', '');
       const dir = Math.random() < .5 ? 1 : -1, x0 = dir > 0 ? -40 : W + 40, dist = W + 80, dur = 9000 + Math.random() * 3000, t0 = performance.now();
       const step = now => {
@@ -1113,7 +1126,8 @@
     if (!reduceMotion) { setTimeout(run, 3500); setInterval(run, 26000); }
   })();
 
-  const rootStyle = document.documentElement.style;
+  // de luchtkleuren gelden alleen voor de miniatuur: zet ze daar, niet op :root (anders herberekent de hele pagina zijn stijl)
+  const rootStyle = document.querySelector('.miniature').style;
   function paintSky(date) {
     const el = sunElevation(date);
     const [top, bot] = skyAt(el);
@@ -1276,15 +1290,15 @@
       dragA0 = angleOf(e); dragH0 = preview ?? localHours(now());
       handle.setPointerCapture(e.pointerId); svg.classList.add('dragging');
       $('#clock-cap').textContent = 'Laat los, en het wiel draait terug naar het nu.';
-      e.preventDefault();
+      if (e.pointerType !== 'touch') e.preventDefault();
     });
     handle.addEventListener('pointermove', e => {
       if (!dragging) return;
       let d = angleOf(e) - dragA0; d = ((d + 540) % 360) - 180;
       let h = ((dragH0 - d / 15) % 24 + 24) % 24;
       for (const sn of snaps) if (Math.abs(h - sn) < .12) h = sn;
-      preview = h; render();
-      dragA0 += d; dragH0 = h;
+      preview = h; dragA0 += d; dragH0 = h;
+      if (!render.queued) { render.queued = true; requestAnimationFrame(() => { render.queued = false; render(); }); }   // hooguit één keer per beeld
     });
     const end = () => { if (!dragging) return; dragging = false; svg.classList.remove('dragging'); caption(); returnToNow(500); };
     handle.addEventListener('pointerup', end);
@@ -1335,6 +1349,26 @@
       };
       back = requestAnimationFrame(step);
     }
+    // De twee ruisfilters (barstjes in de ring, nerf in het hout) één keer naar een plaatje omzetten.
+    // Een feTurbulence-filter wordt anders bij elke verandering van het wiel opnieuw berekend; een plaatje draaien kost niets.
+    function bake(el) {
+      try {
+        const f = svg.querySelector(el.getAttribute('filter').slice(4, -1)), r = +el.getAttribute('r'), px = Math.round(4 * r);
+        const src = `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="${-r} ${-r} ${2 * r} ${2 * r}"><defs>${f.outerHTML}</defs><circle r="${r}" fill="${el.getAttribute('fill')}" filter="url(#${f.id})"/></svg>`;
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const c = document.createElement('canvas'); c.width = c.height = px; c.getContext('2d').drawImage(img, 0, 0);
+            const im = svgEl('image', { href: c.toDataURL('image/png'), x: -r, y: -r, width: 2 * r, height: 2 * r });
+            if (el.getAttribute('opacity')) im.setAttribute('opacity', el.getAttribute('opacity'));
+            if (el.getAttribute('style')) im.setAttribute('style', el.getAttribute('style'));
+            el.replaceWith(im);
+          } catch { /* lukt het niet (oude browser), dan blijft het filter gewoon staan */ }
+        };
+        img.src = 'data:image/svg+xml,' + encodeURIComponent(src);
+      } catch {}
+    }
+    svg.querySelectorAll('circle[filter]').forEach(bake);
     return { render, caption, showArc, fastForward, setWait, isPreview: () => preview != null };
   })();
 
@@ -1366,7 +1400,8 @@
     }
     if (cd.dataset.last !== html) { cd.innerHTML = html; cd.dataset.last = html; }
     $('#roman').hidden = t >= CONFIG.midnight;
-    if (!Clock.isPreview()) Clock.render();
+    const min = Math.floor(t / 60000);   // de wijzerplaat verandert maar één keer per minuut
+    if (!Clock.isPreview() && min !== tick.min) { tick.min = min; Clock.render(); }
     markNow(t);
   }
   const setRomanLabel = () => { $('#roman').setAttribute('aria-pressed', roman); $('#roman').textContent = roman ? 'Gewone cijfers' : 'Romeinse cijfers'; };
@@ -1757,6 +1792,128 @@
     size(); scene(performance.now());
   })();
 
+  // Doorlopende animaties pauzeren zolang ze niet in beeld zijn: dan maakt de browser geen nieuwe beelden voor niets.
+  (function pauzeerBuitenBeeld() {
+    const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('uit-beeld', !e.isIntersecting)));
+    document.querySelectorAll('.miniature, .seal-hint').forEach(el => io.observe(el));
+  })();
+
+  /* =========================================================
+     DOBBELEN MET HANS (Farkle) — de regels staan in feestje-dobbel.js
+     ========================================================= */
+  (function dobbelen() {
+    const DOEL = 2000;
+    const el = id => $('#fk-' + id);
+    let me = 0, hans = 0, ronde = 0, worp = [], opzij = [], gekozen = new Set(), beurt = 'u', bezig = false, spel = 0;
+    const steen = (v, goud) => `feestje-img/kcd/steen-${v}${goud ? 'g' : ''}.png`;
+    const wacht = ms => new Promise(r => setTimeout(r, reduceMotion ? Math.min(ms, 150) : ms));
+    const gooi = n => Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 6));
+    const keuze = () => [...gekozen].map(i => worp[i]);
+    const msg = html => { el('msg').innerHTML = html; };
+
+    function teken(rollend = false) {
+      el('me').textContent = me; el('op').textContent = hans; el('goal').textContent = DOEL;
+      el('round').textContent = beurt === 'u' ? ronde : 0; el('oround').textContent = beurt === 'hans' ? ronde : 0;
+      const sc = Dobbel.score(keuze());
+      el('sel').textContent = gekozen.size ? (sc ?? '—') : 0;
+      el('held').innerHTML = opzij.map(v => `<img src="${steen(v, true)}" alt="${v}">`).join('');
+      // de knoppen alleen opnieuw bouwen als het aantal stenen verandert; anders bijwerken (zo blijft de focus staan)
+      const box = el('dice');
+      if (box.children.length !== worp.length) box.innerHTML = worp.map((_, i) => `<button type="button" class="fk-die" data-i="${i}"><img alt=""></button>`).join('');
+      worp.forEach((v, i) => {
+        const b = box.children[i], img = b.firstChild, src = steen(v, gekozen.has(i));
+        b.classList.toggle('rolling', rollend); b.setAttribute('aria-pressed', gekozen.has(i));
+        b.setAttribute('aria-label', `Steen met ${v} ${v === 1 ? 'oog' : 'ogen'}`); b.disabled = beurt !== 'u' || bezig;
+        if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+      });
+      const mijn = beurt === 'u' && !bezig;
+      el('roll').disabled = !mijn || (worp.length > 0 && (sc == null || !gekozen.size));
+      el('bank').disabled = !mijn || !worp.length || sc == null || !gekozen.size;
+      el('roll').textContent = worp.length ? 'Leg opzij en gooi' : 'Gooi';
+    }
+    // één tik op een steen kiest hem (of zet hem terug); event delegation: één luisteraar voor alle stenen
+    el('dice').addEventListener('click', e => {
+      const b = e.target.closest('.fk-die'); if (!b || b.disabled) return;
+      const i = +b.dataset.i; gekozen.has(i) ? gekozen.delete(i) : gekozen.add(i);
+      const sc = Dobbel.score(keuze());
+      msg(!gekozen.size ? 'Tik op de stenen die punten opleveren.' : sc == null ? 'Die keuze levert niets op: elke gekozen steen moet meetellen.' : `Gekozen: <b>${sc}</b>. Gooi verder, of neem uw punten.`);
+      teken();
+    });
+
+    async function werp(n) {
+      const id = spel;
+      worp = gooi(n); gekozen.clear(); bezig = true;
+      for (let k = 0; k < 5; k++) { worp = gooi(n); teken(true); await wacht(90); if (id !== spel) return false; }
+      bezig = false; teken();
+      return id === spel;
+    }
+
+    async function jijGooit() {
+      if (bezig || beurt !== 'u') return;
+      if (worp.length) {                                   // eerst de gekozen stenen opzij leggen
+        const sc = Dobbel.score(keuze()); if (sc == null || !gekozen.size) return;
+        ronde += sc; opzij.push(...keuze());
+        worp = worp.filter((_, i) => !gekozen.has(i));
+      }
+      if (opzij.length >= 6) { opzij = []; msg('<b>Alle zes opzij!</b> U gooit opnieuw met zes stenen.'); }   // "hete stenen"
+      if (!(await werp(6 - opzij.length))) return;
+      if (!Dobbel.scoort(worp)) {
+        msg(`<b>Niets!</b> De ${ronde} punten van deze beurt zijn weg.`); Hare.set('report', 1);
+        ronde = 0; bezig = true; teken(); await wacht(1600); bezig = false; return naarHans();
+      }
+      msg('Tik op de stenen die punten opleveren.');
+    }
+
+    async function neem() {
+      if (bezig || beurt !== 'u') return;
+      const sc = Dobbel.score(keuze()); if (sc == null || !gekozen.size) return;
+      me += ronde + sc; ronde = 0; opzij = []; worp = []; gekozen.clear(); teken();
+      if (me >= DOEL) return einde(true);
+      msg(`U noteert <b>${me}</b>. Hans is aan de beurt.`);
+      await wacht(900); naarHans();
+    }
+
+    async function naarHans() {
+      const id = spel;
+      beurt = 'hans'; ronde = 0; opzij = []; worp = []; gekozen.clear(); bezig = true; teken();
+      while (id === spel) {
+        msg('Hans schudt de stenen…');
+        bezig = false; if (!(await werp(6 - opzij.length))) return; bezig = true;
+        if (!Dobbel.scoort(worp)) { msg(`Hans gooit <b>niets</b> en verliest ${ronde} punten. Hij vloekt in het Duits.`); ronde = 0; teken(); await wacht(1800); break; }
+        const k = Dobbel.besteKeuze(worp);
+        k.idx.forEach(i => gekozen.add(i)); teken(); await wacht(900); if (id !== spel) return;
+        ronde += k.score; opzij.push(...k.idx.map(i => worp[i]));
+        worp = worp.filter((_, i) => !gekozen.has(i)); gekozen.clear();
+        if (opzij.length >= 6) opzij = [];
+        const over = opzij.length ? 6 - opzij.length : 6;
+        teken();
+        if (Dobbel.hansStopt(ronde, opzij.length ? over : 0, hans, DOEL)) {
+          hans += ronde; msg(`Hans neemt <b>${ronde}</b> punten.`); ronde = 0; teken(); await wacht(1400); break;
+        }
+        msg(`Hans heeft ${ronde} in de beurt en gooit verder…`); await wacht(900);
+      }
+      if (id !== spel) return;
+      opzij = []; worp = []; gekozen.clear();
+      if (hans >= DOEL) return einde(false);
+      beurt = 'u'; bezig = false; teken(); msg('Uw beurt. <b>Gooi</b>!');
+    }
+
+    function einde(gewonnen) {
+      bezig = true; beurt = 'klaar'; teken();
+      msg(gewonnen ? `<b>Gewonnen!</b> ${me} tegen ${hans}. Hans betaalt u in groschen, mopperend.` : `<b>Hans wint</b> met ${hans} tegen ${me}. Fortuna audentes iuvat, maar vandaag niet.`);
+      Toast(gewonnen ? 'Je kreeg' : 'Je verloor', gewonnen ? 'Groschen van Hans Capon' : 'Uw inzet, aan Hans', { icon: 'groschen' });
+      el('roll').disabled = true; el('bank').disabled = true;
+    }
+    function nieuw() {
+      spel++; me = hans = ronde = 0; worp = []; opzij = []; gekozen.clear(); beurt = 'u'; bezig = false;
+      teken(); msg('Een nieuw spel. U begint: <b>Gooi</b>.');
+    }
+    el('roll').addEventListener('click', jijGooit);
+    el('bank').addEventListener('click', neem);
+    el('new').addEventListener('click', nieuw);
+    nieuw();
+  })();
+
   /* =========================================================
      DE DIS
      ========================================================= */
@@ -1968,7 +2125,7 @@
     // parallax: de hemel schuift met 35% van de snelheid van de pagina (bij 'minder beweging' staat hij stil)
     if (reduceMotion) return;
     let queued = false;
-    const move = () => { queued = false; hemel.style.backgroundPositionY = `${(-(scrollY * .35) % H).toFixed(1)}px`; };
+    const move = () => { queued = false; hemel.style.transform = `translate3d(0, ${(-(scrollY * .35) % H).toFixed(1)}px, 0)`; };
     addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(move); } }, { passive: true });
     move();
   })();

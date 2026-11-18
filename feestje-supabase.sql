@@ -141,8 +141,8 @@ grant execute on function stand(), pin_ok(text), zet_punten(text, bigint, bigint
 
 -- de spelen van de avond (aanvullen kan later via /feestje-beheer)
 insert into spelen (naam, volgorde) values
-  ('Kostuum', 1), ('Zwaard', 2), ('Boog', 3), ('Dobbelen', 4), ('Quiz', 5)
-on conflict (naam) do nothing;
+  ('Wapen', 1), ('Kostuum', 2), ('Zwaard', 3), ('Boog', 4), ('Dobbelen', 5), ('Proeverij', 6), ('Quiz', 7)
+on conflict (naam) do update set volgorde = excluded.volgorde;   -- opnieuw draaien zet de volgorde van het programma terug
 
 -- de pincode (bcrypt-hash; de pincode zelf wordt nergens bewaard)
 insert into geheim (id, pin_hash) values (1, extensions.crypt('VERANDER-MIJ', extensions.gen_salt('bf')))

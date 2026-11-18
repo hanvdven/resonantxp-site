@@ -49,8 +49,8 @@ const Db = (() => {
       ['Ritmeester Bernard', W('or', 'gules', 'chevron', 'zwaard', 'sable')],
       ['Janosh Pfefferkorn', W('purpure', 'or', 'quarterly', 'maan', 'argent')],
     ].map(([naam, wapen], i) => ({ id: i + 1, naam, wapen }));
-    const spelen = ['Kostuum', 'Zwaard', 'Boog', 'Dobbelen', 'Quiz'].map((naam, i) => ({ id: i + 1, naam, volgorde: i + 1 }));
-    const P = [[1, 1, 8], [1, 2, 5], [1, 3, 9], [2, 1, 6], [2, 2, 9], [2, 4, 12], [3, 1, 9], [3, 3, 7], [4, 1, 4], [4, 5, 10], [5, 2, 10], [5, 3, 6], [6, 1, 7], [6, 4, 8]];
+    const spelen = ['Wapen', 'Kostuum', 'Zwaard', 'Boog', 'Dobbelen', 'Proeverij', 'Quiz'].map((naam, i) => ({ id: i + 1, naam, volgorde: i + 1 }));
+    const P = [[1, 1, 7], [1, 2, 8], [1, 3, 5], [1, 4, 9], [2, 2, 6], [2, 3, 9], [2, 5, 12], [3, 1, 9], [3, 2, 9], [3, 4, 7], [4, 2, 4], [4, 6, 8], [4, 7, 10], [5, 3, 10], [5, 4, 6], [6, 1, 5], [6, 2, 7], [6, 5, 8]];
     return { ridders, spelen, punten: P.map(([ridder_id, spel_id, punten]) => ({ ridder_id, spel_id, punten })) };
   }
   const demoGet = () => { try { return JSON.parse(localStorage.getItem(KEY)) || demoSeed(); } catch { return demoSeed(); } };
