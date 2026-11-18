@@ -13,7 +13,7 @@
    en schrijven kan enkel via de functies met pincode.
    ========================================================= */
 const SUPABASE = {
-  url: '',   // bv. 'https://abcdefghijkl.supabase.co'
+  url: 'https://qwjeqrzvprvldnswlgjp.supabase.co',   // het resonantxp-project (gedeeld met o.a. de boodschappen; alles van het feest heet fj_…)
   key: 'sb_publishable_tgCJqsC9_uWBXfnNpvGWQA_VPAWqOHA',   // publishable key: hoort publiek te zijn, de bescherming zit in RLS + pincode
 };
 
@@ -67,30 +67,30 @@ const Db = (() => {
   return {
     live,
     demoPin: live ? null : DEMO_PIN,
-    stand: async () => live ? rpc('stand') : demoGet(),
-    pinOk: async pin => live ? rpc('pin_ok', { p_pin: pin }) : String(pin) === DEMO_PIN,
+    stand: async () => live ? rpc('fj_stand') : demoGet(),
+    pinOk: async pin => live ? rpc('fj_pin_ok', { p_pin: pin }) : String(pin) === DEMO_PIN,
     zetPunten: async (pin, ridder, spel, punten) => live
-      ? rpc('zet_punten', { p_pin: pin, p_ridder: ridder, p_spel: spel, p_punten: punten })
+      ? rpc('fj_zet_punten', { p_pin: pin, p_ridder: ridder, p_spel: spel, p_punten: punten })
       : demoDo(pin, d => {
           const x = d.punten.find(p => p.ridder_id === ridder && p.spel_id === spel);
           if (x) x.punten = punten; else d.punten.push({ ridder_id: ridder, spel_id: spel, punten });
         }),
     voegRidder: async (pin, naam, wapen) => live
-      ? rpc('voeg_ridder', { p_pin: pin, p_naam: naam, p_wapen: wapen })
+      ? rpc('fj_voeg_ridder', { p_pin: pin, p_naam: naam, p_wapen: wapen })
       : demoDo(pin, d => { const id = nextId(d.ridders); d.ridders.push({ id, naam, wapen }); return id; }),
     wijzigRidder: async (pin, id, naam, wapen) => live
-      ? rpc('wijzig_ridder', { p_pin: pin, p_id: id, p_naam: naam, p_wapen: wapen })
+      ? rpc('fj_wijzig_ridder', { p_pin: pin, p_id: id, p_naam: naam, p_wapen: wapen })
       : demoDo(pin, d => { const r = d.ridders.find(r => r.id === id); if (r) { r.naam = naam; r.wapen = wapen; } }),
     verwijderRidder: async (pin, id) => live
-      ? rpc('verwijder_ridder', { p_pin: pin, p_id: id })
+      ? rpc('fj_verwijder_ridder', { p_pin: pin, p_id: id })
       : demoDo(pin, d => { d.ridders = d.ridders.filter(r => r.id !== id); d.punten = d.punten.filter(p => p.ridder_id !== id); }),
     wijzigPin: async (oud, nieuw) => {
       if (String(nieuw).length < 6) throw new Error('De nieuwe pincode moet minstens 6 tekens hebben');
-      if (live) return rpc('wijzig_pin', { p_oud: oud, p_nieuw: nieuw });
+      if (live) return rpc('fj_wijzig_pin', { p_oud: oud, p_nieuw: nieuw });
       throw new Error('In de demo blijft de pincode 1403');
     },
     voegSpel: async (pin, naam) => live
-      ? rpc('voeg_spel', { p_pin: pin, p_naam: naam })
+      ? rpc('fj_voeg_spel', { p_pin: pin, p_naam: naam })
       : demoDo(pin, d => { const id = nextId(d.spelen); d.spelen.push({ id, naam, volgorde: id }); return id; }),
     demoReset: () => { try { localStorage.removeItem(KEY); } catch {} bc?.postMessage('veranderd'); },
 
