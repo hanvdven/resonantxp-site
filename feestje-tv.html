@@ -151,7 +151,7 @@
       <clipPath id="w-schijf"><circle r="134"/></clipPath>
       <pattern id="w-sleet" width="64" height="64" patternUnits="userSpaceOnUse"><image href="feestje-img/tv/sleet-hout.webp" width="64" height="64"/></pattern>
     </defs>
-    <circle r="194" fill="#1a130b" />
+    <circle r="190" fill="#1a130b" />   <!-- zoals in het spel: de gouden rand grenst meteen aan de achtergrond -->
     <g id="w-dial"><g clip-path="url(#w-ring)"><g id="w-segs"></g><image href="feestje-img/tv/barst.webp" x="-192" y="-192" width="384" height="384"/><g id="w-glow"></g><g id="w-stars"></g></g></g>
     <g id="w-nums" font-family="Maximilian, Georgia, serif" font-size="20" text-anchor="middle" dominant-baseline="central"></g>
     <circle r="190.5" fill="none" stroke="#c9a24a" stroke-width="3" />
@@ -162,7 +162,7 @@
     <circle r="134" fill="none" stroke="#120b05" stroke-width="2" />
     <g text-anchor="middle">
       <text id="k-datum" y="-98" font-family="Grenze, Georgia, serif" font-size="16" fill="#f1e6cf"></text>
-      <text id="k-tijd" y="-60" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" stroke="rgba(0,0,0,.45)" stroke-width="3" paint-order="stroke"></text>
+      <text id="k-tijd" y="-60" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52"></text>
       <line x1="-84" y1="-22" x2="84" y2="-22" stroke="#c9a24a" stroke-width="1" opacity=".7" />
       <text id="k-a1" y="0" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
       <text id="k-a2" y="26" font-family="Maximilian, Georgia, serif" font-size="24" fill="#f1e6cf"></text>
@@ -343,7 +343,7 @@ const Klok = (() => {
     const [mx, my] = pos(168, 0);
     glow.innerHTML = `<circle cx="${f(sx)}" cy="${f(sy)}" r="88" fill="url(#w-zon)"/><path d="${rays}" fill="#f0b02c" opacity=".7"/><circle cx="${f(sx)}" cy="${f(sy)}" r="22" fill="#f7cf52"/>
       <circle cx="${f(mx)}" cy="${f(my)}" r="17" fill="url(#w-maan)" stroke="#7d8190"/><circle cx="${f(mx - 5)}" cy="${f(my - 3)}" r="3.5" fill="#b9bcc6" opacity=".7"/><circle cx="${f(mx + 6)}" cy="${f(my + 5)}" r="2.5" fill="#b9bcc6" opacity=".7"/>`;
-    for (let i = 0; i < 48; i++) { const h = i / 2 + .5; if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue; const [x, y] = pos(167, h * 15); svgEl('path', { d: star8(x, y, 5), fill: '#e2b544' }, stars); }
+    for (let i = 0; i < 24; i++) { const h = i + .5;   /* halve uren: tússen de cijfers */ if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue; const [x, y] = pos(167, h * 15); svgEl('path', { d: star8(x, y, 5), fill: '#e2b544' }, stars); }
     sun = sunTimes(day);
     let t = '';
     for (let q = 0; q < 48; q++) { const a = q * 7.5, [x1, y1] = pos(136.5, a + .9), [x2, y2] = pos(143.5, a + .9), [x3, y3] = pos(143.5, a + 6.6), [x4, y4] = pos(136.5, a + 6.6);
@@ -360,7 +360,7 @@ const Klok = (() => {
       const h = i + 1, a = h * 15 + rot, [x, y] = pos(168, a);
       g.setAttribute('transform', `translate(${f(x)},${f(y)}) rotate(${f(a)})`);
       const bg = hourCol[h] || '#eef2f4'; let ring = 'none', fill = lum(bg) > .55 ? '#1b1712' : '#f1ead8';
-      if (h === 24) fill = '#2a2a33'; else if (h === CONFIG.partyFrom) ring = '#b23a2e'; else if (h === rise || h === set) { ring = '#e2b544'; fill = lum(bg) > .55 ? '#1b1712' : '#f0cf6a'; }
+      if (h === 24) fill = '#2a2a33'; else if (h === rise || h === set) { ring = '#e2b544'; fill = lum(bg) > .55 ? '#1b1712' : '#f0cf6a'; }
       g.firstChild.setAttribute('stroke', ring); g.lastChild.setAttribute('fill', fill);
     });
   }

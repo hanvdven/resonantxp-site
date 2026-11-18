@@ -613,7 +613,7 @@
             <clipPath id="w-ring"><path d="M0,-190 A190,190 0 1 1 0,190 A190,190 0 1 1 0,-190 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z" clip-rule="evenodd"/></clipPath>
             <clipPath id="w-schijf"><circle r="134"/></clipPath>
           </defs>
-          <circle r="194" fill="#1a130b" />
+          <circle r="190" fill="#1a130b" />   <!-- zoals in het spel: de gouden rand grenst meteen aan de achtergrond -->
           <g id="w-dial">
             <g clip-path="url(#w-ring)">
               <g id="w-segs"></g>
@@ -635,7 +635,7 @@
           <circle r="134" fill="#000" filter="url(#w-nerf)" />
           <g id="w-center-klok">
             <text id="dial-date" y="-60" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="19" fill="#f1e6cf"></text>
-            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums; paint-order:stroke" stroke="rgba(0,0,0,.4)" stroke-width="3"></text>
+            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums"></text>
             <line x1="-70" y1="28" x2="70" y2="28" stroke="#c9a24a" stroke-width="1" opacity=".7" />
             <g id="w-stats" font-family="Maximilian, Georgia, serif" font-size="19" fill="#f1e6cf" text-anchor="middle"></g>
           </g>
@@ -1197,12 +1197,14 @@
         <circle cx="${f(mx - 5)}" cy="${f(my - 3)}" r="3.5" fill="#b9bcc6" opacity=".7"/><circle cx="${f(mx + 6)}" cy="${f(my + 5)}" r="2.5" fill="#b9bcc6" opacity=".7"/>`);
       // gouden sterretjes tussen de cijfers in de nacht
       const rnd = seeded(31);
-      for (let i = 0; i < 48; i++) {
-        const h = i / 2 + .5; if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue;
+      for (let i = 0; i < 24; i++) {
+        const h = i + .5;   // halve uren: tússen de cijfers (op hele uren stond er een sterretje áchter het cijfer)
+        if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue;
         const [x, y] = pos(167, h * 15); svgEl('path', { d: star8(x, y, 5), fill: '#e2b544' }, stars);
       }
       for (let i = 0; i < 40; i++) {
         const h = rnd() * 24, r = 152 + rnd() * 34; if (sunElevation(atHours(day, h)) > -8) continue;
+        if (Math.abs(r - 168) < 15 && Math.abs(h - Math.round(h)) < .28) continue;   // niet achter een cijfer
         const [x, y] = pos(r, h * 15); svgEl('path', { d: star8(x, y, 1.5 + rnd() * 1.5), fill: '#e2b544', opacity: (.5 + rnd() * .5).toFixed(2) }, stars);
       }
       sun = sunTimes(day);
@@ -1225,7 +1227,6 @@
         const c = g.firstChild, tx = g.lastChild, bg = hourCol[h] || '#eef2f4';
         let ring = 'none', fill = lum(bg) > .55 ? '#1b1712' : '#f1ead8';
         if (h === 24) fill = '#2a2a33';
-        else if (h === CONFIG.partyFrom) ring = '#b23a2e';
         else if (h === rise || h === set) { ring = '#e2b544'; fill = lum(bg) > .55 ? '#1b1712' : '#f0cf6a'; }
         c.setAttribute('stroke', ring); tx.setAttribute('fill', fill);
       });
