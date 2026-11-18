@@ -91,6 +91,12 @@
     .wonder img { display: block; width: 100%; height: 430px; object-fit: cover; border-radius: 2px;
       box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40, 24, 8, .45); transition: opacity .6s ease; }
     .wonder img.laadt { opacity: 0; }
+    .wonder .plaat { position: relative; }
+    .wonder .blader { position: absolute; top: 50%; transform: translateY(-50%); width: 64px; height: 96px; border: 0; border-radius: 4px; cursor: pointer;
+      font-family: "Grenze", serif; font-weight: 600; font-size: 76px; line-height: 1; color: #f3e6c4; background: rgba(20, 12, 4, .45); opacity: .55; transition: opacity .2s; }
+    .wonder .blader:hover, .wonder .blader:focus-visible { opacity: 1; }
+    #wonder-vorige { left: 10px; } #wonder-volgende { right: 10px; }
+    #wonder-nr { position: absolute; right: 14px; bottom: 10px; font-size: 24px; font-weight: 700; letter-spacing: .06em; color: #f3e6c4; text-shadow: 0 1px 4px #000; }
     .wonder figcaption { display: grid; grid-template-columns: auto 1fr; gap: 4px 22px; align-items: baseline; }
     .wonder figcaption b { font-family: "Maximilian", serif; font-weight: 400; font-size: 64px; line-height: 1; color: var(--rubriek); grid-row: span 2; }
     .wonder figcaption span { font-size: 30px; line-height: 1.2; }
@@ -171,7 +177,8 @@
     #test[hidden] { display: none; }
     #test h2 { margin: 0 0 6px; font-family: "Maximilian", serif; font-weight: 400; font-size: 36px; color: var(--goud); }
     #test .rij { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-    #test button, #test input { font: inherit; font-size: 22px; color: #f1e6cf; background: #2a2016; border: 1px solid #b98a2e; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+    #test a.knop { text-decoration: none; }
+    #test button, #test input, #test a.knop { font: inherit; font-size: 22px; color: #f1e6cf; background: #2a2016; border: 1px solid #b98a2e; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
     #test input { color-scheme: dark; cursor: text; }
     #test .tijd { font-family: "Maximilian", serif; font-size: 30px; color: #f1e6cf; }
   </style>
@@ -238,7 +245,9 @@
     <div class="blad" id="blad-stand" role="tabpanel"></div>
     <div class="blad" id="blad-getijden" role="tabpanel" hidden></div>
     <div class="blad" id="blad-spelen" role="tabpanel" hidden></div>
-    <div class="blad" id="blad-wunder" role="tabpanel" hidden><figure class="wonder"><img alt=""><figcaption><b></b><span></span><small></small></figcaption></figure></div>
+    <div class="blad" id="blad-wunder" role="tabpanel" hidden><figure class="wonder"><div class="plaat"><img alt="">
+      <button type="button" id="wonder-vorige" class="blader" aria-label="Vorige plaat">‹</button><button type="button" id="wonder-volgende" class="blader" aria-label="Volgende plaat">›</button>
+      <span id="wonder-nr"></span></div><figcaption><b></b><span></span><small></small></figcaption></figure></div>
     <div id="status"></div>
   </section>
 
@@ -259,7 +268,7 @@
     <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button>
       <button data-t="2026-12-31T23:59:35">vlak voor middernacht</button><button data-t="2027-01-01T00:00:01">vuurwerk</button></div>
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
-    <div class="rij"><button id="sp-koppel">Spotify koppelen</button><span id="sp-staat" style="align-self:center"></span></div>
+    <div class="rij"><a id="sp-koppel" class="knop" href="#">Spotify koppelen</a><span id="sp-staat" style="align-self:center"></span></div>
   </div>
 </div>
 
@@ -571,20 +580,38 @@ const naamHtml = n => { const i = n.indexOf(' van '); return i > 0 ? `<b>${esc(n
 /* ---------- Wunderzeichen: platen uit het Augsburger Wunderzeichenbuch (Augsburg, ca. 1552; publiek domein).
    [bestand in feestje-img/wonder, jaar, bijschrift (vrij naar het Duitse onderschrift), folio] ---------- */
 const WONDEREN = [
+  ['f052', 1300, 'Een verschrikkelijke komeet stond aan de hemel. Op Sint-Andriesdag beefde de aarde en stortten vele gebouwen in.', 52],
   ['f065', 1401, 'Een grote komeet met een staart als van een pauw verscheen boven Duitsland. Daarna volgde een zware pest in Zwaben.', 65],
+  ['f070', 1456, 'Er verscheen een komeet, en een jaar later een nog grotere, waar heel Duitsland van schrok. In 1456 kwam ook de komeet van Halley langs.', 70],
+  ['f081', 1456, 'In Rome regende het bloed, en in Ligurië regende het vlees.', 81],
+  ['f107', 1520, 'Op 6 januari, drie uur na de middag, zag men boven Wenen ringen rond de zon.', 107],
+  ['f121', 1531, 'Vier kometen stonden tegenover elkaar aan de hemel. Men zag ze in de Nederlanden en elders.', 121],
+  ['f125', 1531, 'Een komeet met een pauwenstaart, vele nachten lang boven Opper-Duitsland: de komeet van Halley, 75 jaar na 1456.', 125],
+  ['f126', 1533, 'In Bohemen zag men in de wolken een wit paard met een ruiter.', 126],
+  ['f127', 1533, 'In oktober vlogen er draken boven Bohemen: met een kroon op de kop, een snuit als een varken en twee vleugels. Soms meer dan vierhonderd tegelijk, groot en klein.', 127],
+  ['f129', 1533, 'Op de vrijdag na Sint-Ursula, om tien uur ’s avonds, trokken bij Hilpoltstein vurige draken door de lucht, wel twee uur lang.', 129],
+  ['f133', 1534, 'Een wonderlijk beest met zeven koppen, zoals men het dat jaar beschreef.', 133],
+  ['f134', 1536, 'In Spanje zag men drie kinderen aan de hemel vechten: één met de keizerlijke adelaar op zijn schild, twee met de halve maan.', 134],
+  ['f144', 1542, 'Boven Augsburg zag men ’s nachts een groot vuur aan de hemel branden, als vlammen in de wolken.', 144],
 ];
 const Wonder = (() => {
   let i = Math.floor(Math.random() * WONDEREN.length) - 1;
   const img = $('#blad-wunder img'), bron = n => `feestje-img/wonder/${WONDEREN[n][0]}.webp`;
-  return { volgende() {
-    i = (i + 1) % WONDEREN.length; const [, jaar, tekst, folio] = WONDEREN[i];
+  const N = WONDEREN.length;
+  function toon(stap) {
+    i = (i + stap + N) % N; const [, jaar, tekst, folio] = WONDEREN[i];
+    $('#wonder-nr').textContent = `${romeins(i + 1)} / ${romeins(N)}`;
     img.classList.add('laadt');
     img.onload = () => img.classList.remove('laadt'); img.src = bron(i);
-    $('#blad-wunder b').textContent = jaar;   // zoals in het handschrift: het jaartal in rode Arabische cijfers
-    $('#blad-wunder span').textContent = tekst;
-    $('#blad-wunder small').textContent = `Augsburger Wunderzeichenbuch (ca. 1552), folio ${folio}`;
-    new Image().src = bron((i + 1) % WONDEREN.length);   // de volgende alvast ophalen
-  } };
+    $('#blad-wunder figcaption b').textContent = jaar;   // zoals in het handschrift: het jaartal in rode Arabische cijfers
+    $('#blad-wunder figcaption span').textContent = tekst;
+    $('#blad-wunder figcaption small').textContent = `Augsburger Wunderzeichenbuch (ca. 1552), folio ${folio}`;
+    new Image().src = bron((i + 1) % N);   // de volgende alvast ophalen
+  }
+  // vorige / volgende: met de hand gekozen, dus de tab blijft staan (klik op de klok = weer vanzelf)
+  $('#wonder-vorige').addEventListener('click', () => { handmatig = true; tabTot = Date.now() + TABS[tab].duur * 1000; toon(-1); });
+  $('#wonder-volgende').addEventListener('click', () => { handmatig = true; tabTot = Date.now() + TABS[tab].duur * 1000; toon(1); });
+  return { volgende: () => toon(1), vorige: () => toon(-1) };
 })();
 
 /* ---------- de getijden ---------- */
@@ -730,8 +757,16 @@ function aftellen() {
   const pgStaat = () => paneel.querySelectorAll('.pg button').forEach(b => b.setAttribute('aria-pressed',
     !handmatig ? b.dataset.p === '' : keuze === 'wapens' ? b.dataset.p === 'wapens' : b.dataset.p === TABS[tab].id));
   knop.addEventListener('click', pgStaat); $('#klok').addEventListener('click', pgStaat);
-  const spStaat = () => { $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID' : Spotify.gekoppeld() ? 'gekoppeld ✓' : 'niet gekoppeld'; $('#sp-koppel').textContent = Spotify.gekoppeld() ? 'Spotify ontkoppelen' : 'Spotify koppelen'; };
-  $('#sp-koppel').addEventListener('click', () => { if (Spotify.gekoppeld()) { Spotify.ontkoppel(); spStaat(); } else Spotify.koppel(); });
+  const spStaat = () => {
+    const a = $('#sp-koppel'), aan = Spotify.gekoppeld();
+    $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Spotify.inlog() ? 'niet gekoppeld' : 'even geduld…';
+    a.textContent = aan ? 'Spotify ontkoppelen' : 'Spotify koppelen';
+    a.href = !aan && Spotify.inlog() ? Spotify.inlog() : '#';
+  };
+  $('#sp-koppel').addEventListener('click', async e => {
+    if (Spotify.gekoppeld()) { e.preventDefault(); Spotify.ontkoppel(); await Spotify.bereid(); spStaat(); }
+    else if (!Spotify.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
+  });
   knop.addEventListener('click', spStaat);
   $('#test-in').addEventListener('change', e => { const t = new Date(e.target.value); if (!isNaN(t)) zet(t); });
   setInterval(() => { if (!paneel.hidden) toon(); }, 1000);
@@ -846,12 +881,15 @@ const Spotify = (() => {
   const lees = () => { try { return JSON.parse(localStorage.getItem(SLEUTEL)) || null; } catch { return null; } };
   const schrijf = v => { try { v ? localStorage.setItem(SLEUTEL, JSON.stringify(v)) : localStorage.removeItem(SLEUTEL); } catch {} };
   const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  async function koppel() {
-    if (!ID) return alert('Nog geen Spotify Client ID in feestje-config.js');
+  /* De inloglink wordt vooraf klaargezet (PKCE-sleutel + hash), zodat de knop een gewone link is. Een doorverwijzing ná een
+     await of een alert() telt in strenge browsers (TV Bro) als pop-up en wordt geblokkeerd; een aangeklikte link nooit. */
+  let inlog = '';
+  async function bereid() {
+    if (!ID || !crypto.subtle) return '';
     const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
     const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
     try { localStorage.setItem('feestje.spotify.v', verifier); } catch {}
-    location.href = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
+    return inlog = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
       code_challenge_method: 'S256', code_challenge: challenge, scope: 'user-read-currently-playing user-read-playback-state' });
   }
   async function token(body) {
@@ -889,14 +927,15 @@ const Spotify = (() => {
     if (!ID) return;
     const q = new URLSearchParams(location.search);
     if (q.get('code')) {                                   // terug van Spotify na het inloggen
-      let v = ''; try { v = localStorage.getItem('feestje.spotify.v') || ''; localStorage.removeItem('feestje.spotify.v'); } catch {}
+      let v = ''; try { v = localStorage.getItem('feestje.spotify.v') || ''; } catch {}
       try { await token({ grant_type: 'authorization_code', code: q.get('code'), redirect_uri: TERUG, code_verifier: v }); }
       catch (e) { console.warn('Spotify-koppeling mislukt', e); }
       history.replaceState(null, '', location.pathname);
     }
+    if (!lees()) await bereid();
     kijk(); setInterval(kijk, 5000);
   }
-  return { start, koppel, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID };
+  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID };
 })();
 function nuSpeelt(titel, artiest, hoes) {
   const el = document.createElement('div'); el.className = 'melding muziek';
@@ -909,8 +948,8 @@ function nuSpeelt(titel, artiest, hoes) {
 
 /* =========================================================
    VUURWERK — om middernacht, vier minuten lang, in middeleeuwse stijl:
-   pijlen die openspatten in achtpuntige sterren (goud, keel, azuur, zilver), vallende sterren met een
-   golvende staart zoals de komeet op het tapijt van Bayeux, en draken die vuur spuwen.
+   pijlen die openspatten in achtpuntige sterren (goud, keel, azuur, zilver), de grote komeet van 1401 en een zwerm
+   van zo'n veertig draken, allebei uitgeknipt uit het Augsburger Wunderzeichenbuch (folio 65 en 127).
    Eén canvas; de sterretjes worden één keer voorgetekend en daarna alleen nog gekopieerd (licht voor een Chromecast).
    ========================================================= */
 const Vuurwerk = (() => {
@@ -935,24 +974,32 @@ const Vuurwerk = (() => {
       deeltjes.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, duur: rnd(1.6, 2.6), k: Math.random() < .25 ? (Math.random() * KLEUR.length) | 0 : k, groot: Math.random() < .3, rot: rnd(0, 6) });
     }
   }
-  function komeet() { const vanLinks = Math.random() < .5; kometen.push({ x: vanLinks ? -100 : W + 100, y: rnd(120, 360), vx: (vanLinks ? 1 : -1) * rnd(900, 1200), vy: rnd(120, 220), t: 0 }); }
-  function draak() {   // een vlucht, boven of onder de tekst
-    const vanLinks = Math.random() < .5, richting = vanLinks ? 1 : -1, y0 = Math.random() < .5 ? rnd(200, 280) : rnd(800, 870);
-    const G = GROOT[(Math.random() * GROOT.length) | 0];
-    draken.push({ ...G, groot: true, x: vanLinks ? -350 : W + 350, y: y0, richting, schaal: .9, v: 210, t: 0, fase: 0, vuur: -rnd(.3, 1.2) });
-    for (let i = 0, n = 2 + (Math.random() * 3 | 0); i < n; i++)
-      draken.push({ img: KLEIN[(Math.random() * KLEIN.length) | 0], x: (vanLinks ? -350 : W + 350) - richting * rnd(180, 700), y: y0 + rnd(-110, 110),
-        richting, schaal: rnd(.6, .9), v: rnd(225, 270), t: 0, fase: rnd(0, 6) });
-  }
+  const laad = n => { const i = new Image(); i.src = `feestje-img/wonder/${n}.webp`; return i; };
 
-  /* de draken van het Augsburger Wunderzeichenbuch (folio 127: "vliegende draken boven Bohemen", 1533): uitgeknipte
-     afbeeldingen, kop naar links. Een vlucht = één gekroonde draak met een paar kleintjes; ze scheren door het beeld. */
-  const laad = n => { const i = new Image(); i.src = `feestje-img/wonder/draak-${n}.webp`; return i; };
-  const GROOT = [{ img: laad('groot1'), bek: [3, 158] }, { img: laad('groot2'), bek: [2, 222] }];
-  const KLEIN = ['klein1', 'klein3', 'klein4', 'klein6'].map(laad);
+  /* De komeet van 1401 (folio 65): groot en traag, de kop vooraan, de pauwenstaart schuin omhoog erachter.
+     kop = waar in het knipsel de kern zit. Eén tegelijk; zodra hij weg is, komt de volgende. */
+  const KOMEET = { img: laad('komeet-1401'), kop: [75, 150], schaal: 1.45 };
+  function komeet() { kometen.push({ x: W + 60, y: rnd(150, 300), vx: -55, vy: 7 }); }
+
+  /* De draken van folio 127 ("vliegende draken boven Bohemen", 1533). kop: aan welke kant van het knipsel de kop zit,
+     zodat elke draak met de kop vooruit vliegt. Een zwerm van ~40, zoals op de plaat de meeste naar links. */
+  const GROOT = [['groot1', 'L', [3, 158]], ['groot2', 'L', [2, 222]]].map(([n, kop, bek]) => ({ img: laad('draak-' + n), kop, bek, groot: true }));
+  const KLEIN = [['klein1', 'L'], ['klein3', 'L'], ['klein6', 'L'], ['klein7', 'L'], ['klein4', 'R'], ['klein5', 'R'], ['klein8', 'R'],
+    ['klein9', 'R'], ['klein10', 'R'], ['klein11', 'R']].map(([n, kop]) => ({ img: laad('draak-' + n), kop }));
+  const ZWERM = 40;
+  function draak(voorsprong = 0) {
+    const groot = Math.random() < .12 && draken.filter(d => d.groot).length < 3;
+    const soort = groot ? GROOT[(Math.random() * GROOT.length) | 0] : KLEIN[(Math.random() * KLEIN.length) | 0];
+    const richting = Math.random() < .72 ? -1 : 1, schaal = groot ? rnd(.55, .85) : rnd(.45, 1);
+    const rand = 300 * schaal + voorsprong;                          // net buiten beeld (of verder, om de zwerm te spreiden)
+    const d = { ...soort, x: richting < 0 ? W + rand : -rand, y: rnd(110, H - 120), richting, schaal,
+      v: groot ? rnd(90, 130) : rnd(110, 190), t: 0, fase: rnd(0, 6), vuur: -rnd(.3, 2) };
+    const i = draken.findIndex(x => x.schaal > schaal); i < 0 ? draken.push(d) : draken.splice(i, 0, d);   // kleine (verre) eerst tekenen
+  }
   function tekenDraak(d) {
     if (!d.img.complete || !d.img.naturalWidth) return;
-    g.save(); g.translate(d.x, d.y); g.rotate(Math.cos(d.t * 1.1 + d.fase) * .035 * d.richting); g.scale(-d.richting * d.schaal, d.schaal);   // de knipsels kijken naar links
+    const spiegel = (d.kop === 'L' ? -1 : 1) * d.richting;          // kop vooruit
+    g.save(); g.translate(d.x, d.y); g.rotate(Math.cos(d.t * 1.1 + d.fase) * .035 * d.richting); g.scale(spiegel * d.schaal, d.schaal);
     g.drawImage(d.img, -d.img.width / 2, -d.img.height / 2); g.restore();
   }
   function stap(nu) {
@@ -960,8 +1007,16 @@ const Vuurwerk = (() => {
     g.clearRect(0, 0, W, H);
     const tijd = nu / 1000;
     if (tijd > volgendePijl) { pijl(); if (Math.random() < .4) pijl(); volgendePijl = tijd + rnd(.35, .9); }
-    if (tijd > volgendeKomeet) { komeet(); volgendeKomeet = tijd + rnd(5, 9); }
-    if (tijd > volgendeDraak && !draken.some(d => d.groot)) { draak(); volgendeDraak = tijd + rnd(10, 16); }
+    if (!kometen.length && tijd > volgendeKomeet) { komeet(); volgendeKomeet = tijd + 4; }
+    if (!volgendeDraak) { for (let i = 0; i < ZWERM; i++) draak(rnd(0, 2200)); volgendeDraak = 1; }   // de zwerm komt binnen
+    else while (draken.length < ZWERM) draak(rnd(0, 150));
+    // de komeet van 1401, achter al de rest
+    kometen = kometen.filter(k => {
+      k.x += k.vx * dt; k.y += k.vy * dt;
+      const { img, kop, schaal } = KOMEET; if (!img.naturalWidth) return true;
+      g.drawImage(img, k.x - kop[0] * schaal, k.y - kop[1] * schaal, img.width * schaal, img.height * schaal);
+      return k.x + (img.width - kop[0]) * schaal > 0;
+    });
     // pijlen met een spoor van vonkjes
     pijlen = pijlen.filter(p => {
       p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 260 * dt;
@@ -969,30 +1024,18 @@ const Vuurwerk = (() => {
       if (Math.random() < .7) deeltjes.push({ x: p.x, y: p.y + 6, vx: rnd(-20, 20), vy: rnd(20, 60), t: 0, duur: .5, k: 5, groot: false, rot: 0, klein: true });
       if (p.y < p.hoog || p.vy > -80) { spat(p.x, p.y, p.k); return false; } return true;
     });
-    // de vallende sterren: een ster met een lange, golvende staart (zoals de komeet van Bayeux)
-    kometen = kometen.filter(k => {
-      k.t += dt; k.x += k.vx * dt; k.y += k.vy * dt;
-      const r = Math.sign(k.vx);
-      for (let i = 0; i < 4; i++) {
-        g.beginPath(); g.moveTo(k.x, k.y);
-        for (let j = 1; j <= 12; j++) { const a = j / 12; g.lineTo(k.x - r * a * 260, k.y - a * 46 + Math.sin(a * 9 + k.t * 12 + i) * (6 + i * 3) + (i - 1.5) * 8 * a); }
-        g.strokeStyle = `rgba(${i % 2 ? '243,200,74' : '242,238,228'},${.55 - i * .1})`; g.lineWidth = 4 - i * .6; g.stroke();
-      }
-      g.drawImage(STERREN[1][1], k.x - 22, k.y - 22);
-      return k.x > -400 && k.x < W + 400;
-    });
     // draken die vuur spuwen
     draken = draken.filter(d => {
       d.t += dt; d.x += d.richting * d.v * dt; d.y += Math.sin(d.t * 1.1 + d.fase) * 14 * dt;   // zweven, geen vleugelslag
       if (d.groot) {
-        d.vuur -= dt; if (d.vuur < -1.8) d.vuur = 1.1;          // stoten vuur uit de bek
-        if (d.vuur > 0 && d.img.naturalWidth) for (let i = 0; i < 4; i++) {
+        d.vuur -= dt; if (d.vuur < -2.2) d.vuur = 1;          // stoten vuur uit de bek
+        if (d.vuur > 0 && d.img.naturalWidth) for (let i = 0; i < 2; i++) {
           const mx = d.x + d.richting * d.schaal * (d.img.width / 2 - d.bek[0]), my = d.y + d.schaal * (d.bek[1] - d.img.height / 2);
-          vlam.push({ x: mx, y: my, vx: d.richting * rnd(300, 480), vy: rnd(-30, 70), t: 0, duur: rnd(.5, .85) });
+          vlam.push({ x: mx, y: my, vx: d.richting * rnd(260, 420) * d.schaal / .8, vy: rnd(-30, 70), t: 0, duur: rnd(.5, .85) });
         }
       }
       tekenDraak(d);
-      return d.richting > 0 ? d.x < W + 1100 : d.x > -1100;
+      return d.richting > 0 ? d.x < W + 400 : d.x > -400;
     });
     vlam = vlam.filter(v => {
       v.t += dt; v.x += v.vx * dt; v.y += v.vy * dt; v.vx *= .97; v.vy -= 30 * dt;
