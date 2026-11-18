@@ -32,6 +32,12 @@
     .spelen button[aria-pressed=true] { background: var(--ink); color: #f1e3c2; border-color: var(--ink); }
     .rij { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #dcc79a; }
     .rij svg { width: 32px; height: 39px; display: block; }
+    .rij .bew { position: relative; padding: 0; border: 0; background: none; cursor: pointer; }
+    .rij .bew span { position: absolute; right: -6px; bottom: -4px; font-size: 13px; background: #fbf3e0; border-radius: 50%; width: 18px; height: 18px; line-height: 18px; color: #7a5a30; box-shadow: 0 0 0 1px #c9a24a; }
+    dialog.bewerk { width: min(440px, calc(100vw - 24px)); border: 0; border-radius: 10px; padding: 18px; background: #f3e6c4; color: #2a1f16; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+    dialog.bewerk::backdrop { background: rgba(10, 6, 2, .6); }
+    dialog.bewerk h2 { margin: 0; font-family: "Maximilian", serif; font-weight: 400; font-size: 26px; }
+    dialog.bewerk .knoppen { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .rij .naam { font-size: 19px; line-height: 1.15; }
     .rij .naam small { display: block; color: #7a5a30; font-size: 14px; }
     .stepper { display: flex; align-items: center; gap: 4px; }
@@ -44,6 +50,8 @@
     summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     .form { display: grid; gap: 10px; margin-top: 10px; }
     .form .w { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .form .naam3 { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; }
+    .form .naamvb { font-family: "Maximilian", serif; font-size: 1.35rem; color: #a2302a; min-height: 1.4em; }
     .form .voorbeeld { display: flex; gap: 12px; align-items: center; }
     .form .voorbeeld svg { width: 60px; height: 72px; }
     .verwijder { background: none; border: 0; color: var(--rood); text-decoration: underline; cursor: pointer; padding: 10px 0; }
@@ -64,12 +72,15 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const app = $('#app');
+  // titels voor de riddernaam (er wordt er één geloot; kies gerust een andere)
+  const TITELS = ['Heer', 'Vrouwe', 'Ridder', 'Jonker', 'Jonkvrouw', 'Broeder', 'Zuster', 'Meester', 'Ritmeester', 'Burggraaf', 'Burggravin',
+    'Baljuw', 'Hofdame', 'Schildknaap', 'Kanselier', 'Pelgrim'];
   if (!Db.live) $('#demo').hidden = false;
 
   let pin = sessionStorage.getItem('feestje.pin') || localStorage.getItem('feestje.pin') || '';
   let stand = null, spel = null;
   const wapenSvg = (w, uid) => {
-    const ok = w && TINCT[w.t1] && TINCT[w.t2] && TINCT[w.c] && w.div in DIVS && w.ch in CHARGES;
+    const ok = w && TINCT[w.t1] && TINCT[w.t2] && TINCT[w.c] && w.div in DIVS && w.ch in ALLE_STUKKEN;
     return `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(ok ? w : { t1: 'argent', t2: 'argent', div: 'plain', ch: 'none', c: 'or' }, uid, false, '', false)}</svg>`;
   };
   const willekeurigWapen = () => {
@@ -100,15 +111,13 @@
   function start() {
     app.innerHTML = `<nav class="spelen" id="spelen" aria-label="Spel"></nav><div id="ridders"></div>
       <details id="nieuw"><summary>Ridder inschrijven</summary><form class="form" id="rform">
-        <input type="text" id="rnaam" placeholder="Riddernaam, bv. Heer Han van Kessel" maxlength="60" required autocomplete="off">
-        <div class="voorbeeld"><span id="rvoorbeeld"></span><button type="button" class="knop licht" id="rlot">⚄ Ander wapen</button></div>
-        <div class="w">
-          <select id="r-t1" aria-label="Veld">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">Veld: ${v[0]}</option>`).join('')}</select>
-          <select id="r-div" aria-label="Deling">${Object.entries(DIVS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select>
-          <select id="r-t2" aria-label="Tweede kleur">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">2e kleur: ${v[0]}</option>`).join('')}</select>
-          <select id="r-ch" aria-label="Stuk">${Object.entries(CHARGES).map(([k, v]) => `<option value="${k}">Stuk: ${v}</option>`).join('')}</select>
-          <select id="r-c" aria-label="Kleur van het stuk">${Object.entries(TINCT).map(([k, v]) => `<option value="${k}">Stuk in ${v[0].toLowerCase()}</option>`).join('')}</select>
+        <div class="naam3">
+          <select id="rtitel" aria-label="Titel">${TITELS.map(t => `<option>${t}</option>`).join('')}</select>
+          <input type="text" id="rvoor" placeholder="Voornaam" maxlength="20" required autocomplete="off" autocapitalize="words">
+          <input type="text" id="rstad" placeholder="Geboortestad" maxlength="26" required autocomplete="off" autocapitalize="words">
         </div>
+        <div class="naamvb" id="rnaam" aria-live="polite"></div>
+        ${kiezerHtml('r')}
         <button class="knop">Inschrijven</button><div class="fout" id="rfout" role="alert"></div></form></details>
       <details><summary>Spel toevoegen</summary><form class="form" id="sform"><input type="text" id="snaam" placeholder="bv. Armworstelen" maxlength="30" required autocomplete="off">
         <button class="knop">Toevoegen</button><div class="fout" id="sfout" role="alert"></div></form></details>
@@ -120,16 +129,17 @@
         <form class="form" id="pform"><input type="password" id="pn1" placeholder="Nieuwe pincode (minstens 6 tekens)" autocomplete="new-password" minlength="6" required>
         <input type="password" id="pn2" placeholder="Nogmaals" autocomplete="new-password" minlength="6" required>
         <button class="knop">Wijzigen</button><div class="fout" id="pfout" role="alert"></div></form></details>`;
-    // wapenkiezer
-    const W = ['t1', 'div', 't2', 'ch', 'c'];
-    const leesWapen = () => Object.fromEntries(W.map(k => [k, $('#r-' + k).value]));
-    const zetWapen = w => { W.forEach(k => $('#r-' + k).value = w[k]); $('#rvoorbeeld').innerHTML = wapenSvg(w, 'voorbeeld'); };
+    const { lees: leesWapen, zet: zetWapen } = kiezer('r');
     zetWapen(willekeurigWapen());
-    W.forEach(k => $('#r-' + k).addEventListener('change', () => zetWapen(leesWapen())));
-    $('#rlot').addEventListener('click', () => zetWapen(willekeurigWapen()));
+    // de naam: titel + voornaam + "van" + geboortestad, bv. "Jonker Han van Leuven"
+    const lotTitel = () => { $('#rtitel').value = TITELS[Math.floor(Math.random() * TITELS.length)]; };
+    const riddernaam = () => { const v = $('#rvoor').value.trim(), st = $('#rstad').value.trim(); return v && st ? `${$('#rtitel').value} ${v} van ${st}` : ''; };
+    const toonNaam = () => { $('#rnaam').textContent = riddernaam() || `${$('#rtitel').value} … van …`; };
+    lotTitel(); toonNaam();
+    ['#rtitel', '#rvoor', '#rstad'].forEach(k => $(k).addEventListener('input', toonNaam));
     $('#rform').addEventListener('submit', async e => {
-      e.preventDefault(); const naam = $('#rnaam').value.trim(); if (!naam) return;
-      try { await Db.voegRidder(pin, naam, leesWapen()); $('#rnaam').value = ''; zetWapen(willekeurigWapen()); $('#rfout').textContent = ''; ververs(); }
+      e.preventDefault(); const naam = riddernaam(); if (!naam) return;
+      try { await Db.voegRidder(pin, naam, leesWapen()); $('#rvoor').value = $('#rstad').value = ''; lotTitel(); toonNaam(); zetWapen(willekeurigWapen()); $('#rfout').textContent = ''; ververs(); }
       catch (err) { $('#rfout').textContent = err.message; }
     });
     $('#sform').addEventListener('submit', async e => {
@@ -166,7 +176,7 @@
     const sleutel = rows.map(r => r.id).join(',') + '|' + spel;
     if (box.dataset.k !== sleutel) {
       box.dataset.k = sleutel;
-      box.innerHTML = rows.map(r => `<div class="rij" data-r="${r.id}">${wapenSvg(r.wapen, 'b' + r.id)}
+      box.innerHTML = rows.map(r => `<div class="rij" data-r="${r.id}"><button type="button" class="bew" aria-label="${esc(r.naam)} bewerken">${wapenSvg(r.wapen, 'b' + r.id)}<span aria-hidden="true">✎</span></button>
         <div class="naam">${esc(r.naam)}<small></small></div>
         <div class="stepper"><button type="button" data-d="-1" aria-label="Eén punt minder voor ${esc(r.naam)}">−</button>
           <input inputmode="numeric" pattern="-?[0-9]*" data-r="${r.id}" aria-label="Punten voor ${esc(r.naam)}">
@@ -175,7 +185,7 @@
         const id = +rij.dataset.r, inp = rij.querySelector('input');
         rij.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { inp.value = String((parseInt(inp.value, 10) || 0) + +b.dataset.d); bewaar(id, inp); }));
         inp.addEventListener('input', () => bewaar(id, inp));
-        rij.querySelector('.naam').addEventListener('dblclick', () => beheerRidder(id));
+        rij.querySelector('.bew').addEventListener('click', () => beheerRidder(id));
       });
     }
     for (const r of rows) {
@@ -202,16 +212,50 @@
     }, 700));
   }
 
-  // dubbeltikken op een naam: hernoemen of uitschrijven
+  /* de wapenkiezer (inschrijven én bewerken): veld, deling, tweede kleur, stuk, kleur van het stuk + voorbeeld */
+  const WK = ['t1', 'div', 't2', 'ch', 'c'];
+  function kiezerHtml(p) {
+    const opt = (o, f) => Object.entries(o).map(([k, v]) => `<option value="${k}">${f(v)}</option>`).join('');
+    return `<div class="voorbeeld"><span id="${p}voorbeeld"></span><button type="button" class="knop licht" id="${p}lot">⚄ Ander wapen</button></div>
+      <div class="w">
+        <select id="${p}-t1" aria-label="Veld">${opt(TINCT, v => 'Veld: ' + v[0])}</select>
+        <select id="${p}-div" aria-label="Deling">${opt(DIVS, v => v)}</select>
+        <select id="${p}-t2" aria-label="Tweede kleur">${opt(TINCT, v => '2e kleur: ' + v[0])}</select>
+        <select id="${p}-ch" aria-label="Stuk">${opt(ALLE_STUKKEN, v => 'Stuk: ' + v)}</select>
+        <select id="${p}-c" aria-label="Kleur van het stuk">${opt(TINCT, v => 'Stuk in ' + v[0].toLowerCase())}</select>
+      </div>`;
+  }
+  function kiezer(p) {
+    const lees = () => Object.fromEntries(WK.map(k => [k, $(`#${p}-${k}`).value]));
+    const zet = w => { WK.forEach(k => { if (w[k] != null) $(`#${p}-${k}`).value = w[k]; }); $(`#${p}voorbeeld`).innerHTML = wapenSvg(lees(), p + 'vb'); };
+    WK.forEach(k => $(`#${p}-${k}`).addEventListener('change', () => zet(lees())));
+    $(`#${p}lot`).addEventListener('click', () => zet(willekeurigWapen()));
+    return { lees, zet };
+  }
+
+  // een ridder bewerken (✎ naast de naam): naam en wapen aanpassen, of uitschrijven
   async function beheerRidder(id) {
     const r = stand.ridders.find(x => x.id === id); if (!r) return;
-    const naam = prompt('Naam van de ridder (leeg laten = uitschrijven):', r.naam);
-    if (naam === null) return;
-    try {
-      if (naam.trim()) await Db.wijzigRidder(pin, id, naam.trim(), r.wapen);
-      else if (confirm(`${r.naam} uitschrijven, met al zijn punten?`)) await Db.verwijderRidder(pin, id);
-      ververs();
-    } catch (err) { alert(err.message); }
+    const dlg = document.createElement('dialog'); dlg.className = 'bewerk';
+    dlg.innerHTML = `<form method="dialog" class="form" id="eform"><h2>Ridder bewerken</h2>
+      <input type="text" id="enaam" maxlength="60" required autocomplete="off" aria-label="Naam">
+      ${kiezerHtml('e')}
+      <div class="knoppen"><button class="knop" value="ok">Bewaren</button><button class="knop licht" value="" formnovalidate>Annuleren</button></div>
+      <button type="button" class="verwijder" id="eweg">Uitschrijven…</button><div class="fout" id="efout" role="alert"></div></form>`;
+    document.body.appendChild(dlg);
+    const k = kiezer('e'); $('#enaam').value = r.naam; k.zet({ ...r.wapen });
+    $('#eweg').addEventListener('click', async () => {
+      if (!confirm(`${r.naam} uitschrijven, met al zijn punten?`)) return;
+      try { await Db.verwijderRidder(pin, id); dlg.close(); ververs(); } catch (err) { $('#efout').textContent = err.message; }
+    });
+    $('#eform').addEventListener('submit', async e => {
+      if (e.submitter?.value !== 'ok') return;
+      e.preventDefault();
+      try { await Db.wijzigRidder(pin, id, $('#enaam').value.trim(), { ...r.wapen, ...k.lees() }); dlg.close(); ververs(); }
+      catch (err) { $('#efout').textContent = err.message; }
+    });
+    dlg.addEventListener('close', () => dlg.remove());
+    dlg.showModal();
   }
 
   inloggen();

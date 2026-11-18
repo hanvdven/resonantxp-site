@@ -613,7 +613,7 @@
             <clipPath id="w-ring"><path d="M0,-190 A190,190 0 1 1 0,190 A190,190 0 1 1 0,-190 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z" clip-rule="evenodd"/></clipPath>
             <clipPath id="w-schijf"><circle r="134"/></clipPath>
           </defs>
-          <circle r="194" fill="#1a130b" />
+          <circle r="190" fill="#1a130b" />   <!-- zoals in het spel: de gouden rand grenst meteen aan de achtergrond -->
           <g id="w-dial">
             <g clip-path="url(#w-ring)">
               <g id="w-segs"></g>
@@ -635,7 +635,7 @@
           <circle r="134" fill="#000" filter="url(#w-nerf)" />
           <g id="w-center-klok">
             <text id="dial-date" y="-60" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="19" fill="#f1e6cf"></text>
-            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums; paint-order:stroke" stroke="rgba(0,0,0,.4)" stroke-width="3"></text>
+            <text id="dial-time" y="-8" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="58" fill="#e9be52" style="font-variant-numeric: lining-nums"></text>
             <line x1="-70" y1="28" x2="70" y2="28" stroke="#c9a24a" stroke-width="1" opacity=".7" />
             <g id="w-stats" font-family="Maximilian, Georgia, serif" font-size="19" fill="#f1e6cf" text-anchor="middle"></g>
           </g>
@@ -980,6 +980,7 @@
   <script src="feestje-config.js"></script>
   <script src="feestje-wapen.js"></script>
   <script src="feestje-hemel.js"></script>
+  <script src="feestje-sterren.js"></script>
   <script src="feestje-dobbel.js"></script>
   <script>
   'use strict';
@@ -1050,12 +1051,24 @@
   /* =========================================================
      STERREN, LANDSCHAP, PAGINAHEMEL
      ========================================================= */
+  /* De echte sterren boven Kessel-Lo, nu (feestje-sterren.js). We kijken naar het zuiden: 150° breed, van de horizon
+     (de top van de verre heuvels) tot 50° hoog; de hoogte is dus zo'n twee keer samengedrukt, zoals een miniaturist
+     zou doen in een lage strook. Elke 4 minuten opnieuw: zo snel draait de hemel één graad. */
   (function makeStars() {
-    const svg = $('#stars'), rnd = seeded(1403);
-    for (let i = 0; i < 150; i++) {
-      const c = svgEl('circle', { cx: (rnd() * 1000).toFixed(1), cy: (rnd() * 760).toFixed(1), r: (rnd() * 1.2 + .3).toFixed(2), fill: '#fff3d6', opacity: (rnd() * .6 + .3).toFixed(2) }, svg);
-      if (rnd() < .3) (rnd() < .5 ? $('#stars-a') : $('#stars-b')).appendChild(c);   // deze twinkelen mee met hun laag
+    const lagen = [$('#stars'), $('#stars-a'), $('#stars-b')], mini = $('.miniature');
+    function teken() {
+      const W = mini.clientWidth, H = mini.clientHeight; if (!W || !H) return;
+      for (const l of lagen) { l.setAttribute('viewBox', `0 0 ${W} ${H}`); l.setAttribute('preserveAspectRatio', 'none'); l.textContent = ''; }
+      const horizon = H * .6, schaal = Math.min(1.4, Math.max(.8, W / 700));
+      sterrenBoven(now(), CONFIG.lat, CONFIG.lon).forEach(({ alt, az, mag }, i) => {
+        const dx = ((az - 180 + 540) % 360) - 180; if (Math.abs(dx) > 75 || alt > 52) return;
+        const c = svgEl('circle', { cx: (W / 2 + dx / 150 * W).toFixed(1), cy: (horizon - alt / 50 * horizon).toFixed(1),
+          r: (clamp(2.6 - .45 * mag, .55, 3.4) * schaal).toFixed(2), fill: '#fff3d6', opacity: clamp(1.05 - .14 * mag, .35, 1).toFixed(2) }, lagen[0]);
+        if (i % 10 < 3) lagen[1 + i % 2].appendChild(c);   // een op drie twinkelt mee met een laag
+      });
     }
+    teken(); setInterval(teken, 240000);
+    let rt = null; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(teken, 300); });
   })();
 
   (function makeLandscape() {
@@ -1160,7 +1173,7 @@
     const f = n => n.toFixed(2);
     const pos = (r, a) => { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; }; // a: graden met de klok mee vanaf boven
     // ringkleur naar zonshoogte: ijswit overdag, lichtblauw in de schemering, diepblauw in de nacht
-    const RING = [[-16, '#0c1a46'], [-10, '#13245c'], [-6, '#2c4588'], [-3, '#7c97c8'], [-.5, '#c9d7e8'], [3, '#eef2f4'], [90, '#f4f5f3']];
+    const RING = [[-18, '#0c1a46'], [-13, '#14286a'], [-8, '#2e4c92'], [-3.5, '#6f8fc6'], [0, '#b4c8e4'], [5, '#e2eaf2'], [90, '#f4f5f3']]   /* over de hele schemering (tot −18°), zoals het lange verloop in het spel */;
     const ringColor = el => {
       if (el <= RING[0][0]) return RING[0][1];
       for (let i = 1; i < RING.length; i++) if (el <= RING[i][0]) { const [e0, c0] = RING[i - 1], [e1, c1] = RING[i]; return mix(c0, c1, (el - e0) / (e1 - e0)); }
@@ -1176,9 +1189,20 @@
       wheelDay = key;
       const segs = $('#w-segs'), stars = $('#w-stars'), glow = $('#w-glow');
       segs.textContent = ''; stars.textContent = ''; glow.textContent = '';
-      for (let i = 0; i < 144; i++) {
-        const h = i / 6, [x1, y1] = pos(192, h * 15 - .15), [x2, y2] = pos(192, (h + 1 / 6) * 15 + .15);
-        svgEl('path', { d: `M0,0 L${f(x1)},${f(y1)} A192,192 0 0 1 ${f(x2)},${f(y2)} Z`, fill: ringColor(sunElevation(atHours(day, h + 1 / 12))) }, segs);
+      // De ring als één afbeelding: per minuut een taartpuntje op een canvas, licht uitgevlakt, zodat dag en nacht
+      // zacht in elkaar overvloeien (zoals in het spel). Eén keer per dag; daarna draait alleen het plaatje mee.
+      {
+        const N = 800, c = document.createElement('canvas'); c.width = c.height = N;
+        const g = c.getContext('2d'), R = N / 2;
+        g.translate(R, R);
+        for (let m = 0; m < 1440; m++) {
+          const a0 = (m / 1440) * 2 * Math.PI - Math.PI / 2, a1 = ((m + 1.6) / 1440) * 2 * Math.PI - Math.PI / 2;   // 1,6 min breed: geen naadjes
+          g.fillStyle = ringColor(sunElevation(atHours(day, (m + .5) / 60)));
+          g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R, a0, a1); g.closePath(); g.fill();
+        }
+        const zacht = document.createElement('canvas'); zacht.width = zacht.height = N;
+        const z = zacht.getContext('2d'); z.filter = 'blur(3px)'; z.drawImage(c, 0, 0);   // bij oude browsers zonder filter: gewoon scherp
+        svgEl('image', { href: zacht.toDataURL('image/jpeg', .9), x: -192, y: -192, width: 384, height: 384 }, segs);
       }
       let top = -90;
       for (let m = 0; m < 1440; m += 5) { const el = sunElevation(atHours(day, m / 60)); if (el > top) { top = el; noon = m / 60; } }
@@ -1197,12 +1221,14 @@
         <circle cx="${f(mx - 5)}" cy="${f(my - 3)}" r="3.5" fill="#b9bcc6" opacity=".7"/><circle cx="${f(mx + 6)}" cy="${f(my + 5)}" r="2.5" fill="#b9bcc6" opacity=".7"/>`);
       // gouden sterretjes tussen de cijfers in de nacht
       const rnd = seeded(31);
-      for (let i = 0; i < 48; i++) {
-        const h = i / 2 + .5; if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue;
+      for (let i = 0; i < 24; i++) {
+        const h = i + .5;   // halve uren: tússen de cijfers (op hele uren stond er een sterretje áchter het cijfer)
+        if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue;
         const [x, y] = pos(167, h * 15); svgEl('path', { d: star8(x, y, 5), fill: '#e2b544' }, stars);
       }
       for (let i = 0; i < 40; i++) {
         const h = rnd() * 24, r = 152 + rnd() * 34; if (sunElevation(atHours(day, h)) > -8) continue;
+        if (Math.abs(r - 168) < 15 && Math.abs(h - Math.round(h)) < .28) continue;   // niet achter een cijfer
         const [x, y] = pos(r, h * 15); svgEl('path', { d: star8(x, y, 1.5 + rnd() * 1.5), fill: '#e2b544', opacity: (.5 + rnd() * .5).toFixed(2) }, stars);
       }
       sun = sunTimes(day);
@@ -1225,7 +1251,6 @@
         const c = g.firstChild, tx = g.lastChild, bg = hourCol[h] || '#eef2f4';
         let ring = 'none', fill = lum(bg) > .55 ? '#1b1712' : '#f1ead8';
         if (h === 24) fill = '#2a2a33';
-        else if (h === CONFIG.partyFrom) ring = '#b23a2e';
         else if (h === rise || h === set) { ring = '#e2b544'; fill = lum(bg) > .55 ? '#1b1712' : '#f0cf6a'; }
         c.setAttribute('stroke', ring); tx.setAttribute('fill', fill);
       });
