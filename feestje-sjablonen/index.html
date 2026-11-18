@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
+  <!-- Vercel (cleanUrls) serveert deze map ook zonder slash op /feestje-sjablonen; zonder base zouden relatieve paden naar / wijzen -->
+  <base href="/feestje-sjablonen/" />
   <title>Sjablonen naar Malešov</title>
   <style>
     @font-face { font-family: "Grenze"; src: url(../feestje-fonts/grenze-latin.woff2) format("woff2"); font-weight: 100 900; }
@@ -62,7 +64,11 @@
       zittende draken met gekruiste halzen en een kroon boven hun koppen. Ze zijn bíjna spiegelsymmetrisch, maar niet helemaal: de halzen
       van de draken kruisen elkaar (de ene ligt over de andere) en het linkerhert is iets groter dan het rechter. Daarom zijn ze níet
       gespiegeld: dit is de mediaan van 8 afdrukken, eerst projectief en daarna plaatselijk (optische stroming) op elkaar gelegd,
-      zodat ook de kleinste vormen samenvallen (overeenkomst 0,98). Het witte deel (het sjabloon) is overal aaneengesloten.</p>
+      zodat ook de kleinste vormen samenvallen (overeenkomst 0,98). De foto van de wand is schuin genomen: de rij herten loopt erop 5,6° omhoog, terwijl de plankennaden recht staan.
+      Daarom is elke fries daarna rechtgetrokken met een scheeftrekking (shear): de rij afdrukken wordt horizontaal en de plankennaden verticaal. Het witte deel (het sjabloon) is overal aaneengesloten.</p>
+      <p>Het hert van het bed komt van twee eigen foto's van het beschilderde bed: het zijpaneel rechtgezet (schuine rij afdrukken horizontaal),
+      de twee volledige afdrukken op elkaar gelegd (overeenkomst 0,91) en gemiddeld; waar de stoel de eerste afdruk bedekt, telt alleen de tweede.
+      De maat is geschat: op de foto staat niets met een bekende lengte.</p>
       <p>Hoe dik moeten de openingen zijn? Dat hangt af van hoe de verf zich gedroeg. Loopt de verf onder het sjabloon uit, dan zijn de
       geschilderde vormen dikker dan de openingen waren (kies <i>meer wit</i>). Komt de kwast juist niet goed in de smalle spleten,
       dan zijn ze dunner (kies <i>meer zwart</i>). Daarom zijn er vijf diktes: <i>exact</i> is de muur zoals hij nu is, elke stap
@@ -89,6 +95,7 @@
       <div class="kaart"><img src="rozet-bladen-3.svg" data-v="rozet-bladen" alt="Rozet met acht bladen en vlinders" /><h2>Bladrozet</h2><p>Ø 20 cm · <a href="rozet-bladen-3.svg" data-v="rozet-bladen" download>SVG</a></p></div>
       <div class="kaart"><img src="rozet-kant-3.svg" data-v="rozet-kant" alt="Kantrozet" /><h2>Kantrozet</h2><p>Ø 23,5 cm · <a href="rozet-kant-3.svg" data-v="rozet-kant" download>SVG</a></p></div>
       <div class="kaart"><img src="fries-onder-3.svg" data-v="fries-onder" alt="Twee draken met gekruiste halzen en een kroon" /><h2>Draken</h2><p>Onderfries, herhaalbaar · 28 × 20 cm per afdruk · <a href="fries-onder-3.svg" data-v="fries-onder" download>SVG</a></p></div>
+      <div class="kaart" style="background:repeating-linear-gradient(-28deg,#e2753a 0 60px,#9db38a 60px 120px)"><img src="hert-bed-3.svg" data-v="hert-bed" alt="Staand hert tussen gevlekte vormen" /><h2>Hert van het bed</h2><p>Op het bed in de slaapkamer · ca. 31 × 22 cm (geschat) · <a href="hert-bed-3.svg" data-v="hert-bed" download>SVG</a></p></div>
       <div class="kaart"><img src="ster-8.svg" alt="Achtpuntige ster" /><h2>Zwarte ster</h2><p>Bedstijlen en zuilen · 8 cm · <a href="ster-8.svg" download>SVG</a></p></div>
       <div class="kaart" style="background:#1d2a4e;color:#eef"><img src="ster-plafond.svg" alt="Plafondster" style="filter:invert(1)" /><h2>Plafondster</h2><p>Wit/zilver op nachtblauw · 8 cm · <a href="ster-plafond.svg" download style="color:#cfd8ff">SVG</a></p></div>
     </div>
@@ -118,6 +125,7 @@
   <div class="print-pagina"><img src="rozet-bladen-3.svg" data-v="rozet-bladen" style="width:180mm" alt="" /><div class="maat"></div><small>Bladrozet · op 86% (ware grootte 20 cm: A3) · maatstreep = 5 cm · dikte <span class="dk"></span></small></div>
   <div class="print-pagina"><img src="rozet-kant-3.svg" data-v="rozet-kant" style="width:180mm" alt="" /><div class="maat"></div><small>Kantrozet · op 74% (ware grootte 23,5 cm: A3) · maatstreep = 5 cm · dikte <span class="dk"></span></small></div>
   <div class="print-pagina"><img src="fries-onder-3.svg" data-v="fries-onder" style="width:180mm" alt="" /><div class="maat"></div><small>Draken (onderfries) · op 64% (ware grootte 28 cm: A3) · maatstreep = 5 cm · dikte <span class="dk"></span></small></div>
+  <div class="print-pagina"><img src="hert-bed-3.svg" data-v="hert-bed" style="width:180mm" alt="" /><div class="maat"></div><small>Hert van het bed · op 58% (ware grootte ca. 31 cm, geschat: A3) · maatstreep = 5 cm · dikte <span class="dk"></span></small></div>
   <div class="print-pagina"><img src="ster-8.svg" style="width:80mm" alt="" /><img src="ster-plafond.svg" style="width:80mm" alt="" /><div class="maat"></div><small>Sterren · 8 cm · maatstreep = 5 cm</small></div>
   <script>
     // Kies een dikte: wissel alle afbeeldingen, downloads en de PDF. Onthoud de keuze in de URL (?dikte=4).

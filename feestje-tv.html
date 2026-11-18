@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Tussenstand · Oudejaar in Bohemen</title>
+  <!--
+    Het scherm voor de dag zelf, voor op de tv (Chromecast).
+    Vast canvas van 1920 × 1080 dat zich schaalt naar elk scherm. Bewust zuinig voor een Chromecast:
+    geen SVG-filters, geen blend-modes, geen doorlopende animaties; de klok ververst elke seconde
+    alleen tekst en het wiel draait in stapjes van een minuut.
+    Testen op een ander tijdstip: /feestje-tv?nu=2026-12-31T20:15
+  -->
+  <style>
+    @font-face { font-family: "Maximilian"; src: url(feestje-fonts/maximilian.ttf) format("truetype"); font-display: block; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin.woff2) format("woff2"); font-weight: 100 900; font-display: block; }
+    @font-face { font-family: "Grenze"; src: url(feestje-fonts/grenze-latin-ext.woff2) format("woff2"); font-weight: 100 900; unicode-range: U+0100-024F, U+1E00-1EFF; font-display: block; }
+    :root { --nacht: #101c45; --oker: #d9a23e; --rood: #7c2d1a; --goud: #e9be52; --inkt: #2a1f16; --perk: #ecdcb6; --perk-lo: #d9c391; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #070b1c; overflow: hidden; }
+    body { cursor: none; }
+    /* het canvas: altijd 1920 × 1080, geschaald en gecentreerd (zie schaal() onderaan) */
+    #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden;
+      background-color: var(--nacht); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
+    .fries { position: absolute; left: 0; width: 1920px; height: 92px; border-top: 6px solid var(--rood); border-bottom: 6px solid var(--rood); }
+    .fries svg { display: block; }
+    #f-boven { top: 0; } #f-onder { bottom: 0; }
+
+    /* ---------- links: de klok ---------- */
+    #klok { position: absolute; left: 108px; top: 108px; width: 560px; height: 560px; }
+    #nu { position: absolute; left: 48px; top: 684px; width: 680px; }
+    .prog { display: grid; grid-template-columns: 64px 1fr auto; gap: 4px 16px; align-items: center; padding: 16px 26px; }
+    .prog img { width: 56px; height: 56px; grid-row: span 2; }
+    .prog .t { font-family: "Maximilian", serif; font-size: 38px; line-height: 1.05; color: #a2302a; }
+    .prog .u { font-size: 30px; color: var(--inkt); font-variant-numeric: oldstyle-nums tabular-nums; grid-row: span 2; align-self: center; }
+    .prog .s { font-size: 23px; color: #3a2a1a; line-height: 1.2; }
+    /* een strook perkament (vooraf berekende textuur, zie feestje-img/tv) */
+    .prog.nu { color: var(--inkt); background: url(feestje-img/tv/strook.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 8px 14px rgba(0,0,0,.5)); }
+    .straks { display: flex; gap: 14px; align-items: baseline; margin-top: 14px; padding: 0 16px; font-size: 27px; color: #d9cfb6; }
+    .straks .label { font-size: 20px; }
+    .straks b { font-family: "Maximilian", serif; font-weight: 400; font-size: 30px; color: #f1e6cf; }
+    .straks .u { margin-left: auto; color: #cfc3a6; font-variant-numeric: lining-nums tabular-nums; }
+    .label { font-variant-caps: small-caps; letter-spacing: .12em; font-size: 20px; color: #c9a24a; }
+
+    /* ---------- honger en energie, zoals de HUD van KCD2 ---------- */
+    #lijf { position: absolute; left: 64px; top: 900px; width: 650px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .meter { display: grid; grid-template-columns: 52px 1fr; gap: 2px 12px; align-items: center; }
+    .meter > svg:not(.balk) { width: 50px; height: 50px; grid-row: span 2; }
+    .meter .naam { font-size: 22px; display: flex; justify-content: space-between; }
+    .meter .naam b { font-family: "Maximilian", serif; font-weight: 400; color: var(--goud); font-size: 26px; }
+    /* de balk is getekend (SVG, zie Hand): een penseelstreek in een met de hand getrokken kader */
+    .balk { width: 100%; height: 22px; display: block; overflow: visible; }
+    .balk .vul { fill: #d9a637; } .balk.laag .vul { fill: #b8402e; }
+    .balk .klip rect { transition: width 2s ease; }
+
+    /* ---------- rechts: de tussenstand op perkament ---------- */
+    /* geschept perkament met rafelrand (vooraf berekend) en een met de hand getekende rand met ranken (#rand, zie Hand) */
+    #stand { position: absolute; left: 770px; top: 120px; width: 1110px; height: 848px; padding: 44px 64px 20px; color: var(--inkt);
+      background: url(feestje-img/tv/perkament.webp) -22px -22px / 1154px 892px no-repeat; filter: drop-shadow(0 18px 26px rgba(0,0,0,.6)); }
+    #rand { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+    #stand h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 66px; line-height: 1; margin: 0; color: var(--inkt); display: flex; align-items: flex-end; }
+    #stand h1 svg { width: 92px; height: 92px; margin-right: 4px; flex: none; }
+    .kop { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 12px; margin-bottom: 2px; position: relative; }
+    .kop .lijn, tbody tr .lijn { position: absolute; left: 0; bottom: 0; width: 100%; height: 8px; overflow: visible; }
+    .kop .pagina { font-size: 22px; color: #7a5a30; }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: lining-nums tabular-nums; }
+    th { font-weight: 500; font-variant-caps: small-caps; letter-spacing: .06em; font-size: 22px; color: #a2302a; text-align: center; padding: 6px 4px 4px; }
+    th.n { text-align: left; }
+    tbody tr { position: relative; }   /* voor de getekende lijn onder elke rij */
+    td { padding: 0 4px; height: 62px; font-size: 29px; text-align: center; font-variant-numeric: oldstyle-nums tabular-nums; }
+    td.p { width: 64px; }
+    td.w { width: 58px; padding: 0; } td.w svg { width: 44px; height: 54px; display: block; margin: 0 auto; }
+    td.n { text-align: left; font-size: 31px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 470px; }
+    td.s { width: 74px; color: #4a3622; }
+    td.tot { width: 104px; font-family: "Maximilian", serif; font-size: 40px; color: var(--inkt); }
+    /* plaats in Romeinse cijfers, in roodschrift; de eerste drie op een getekend penning (zie Hand.penning) */
+    .plek { display: inline-grid; place-items: center; width: 52px; height: 52px; font-family: "Grenze", serif; font-weight: 600; font-size: 24px; color: #a2302a; letter-spacing: .02em; position: relative; }
+    .plek svg { position: absolute; inset: 0; width: 52px; height: 52px; overflow: visible; }
+    .plek span { position: relative; }
+    tr.p1 .plek, tr.p2 .plek, tr.p3 .plek { color: #2a1f16; }
+    tr.flits td { animation: flits 2.4s ease-out; }
+    @keyframes flits { 0%, 30% { background: rgba(233, 190, 82, .55); } 100% { background: transparent; } }
+    .leeg { text-align: center; font-size: 30px; color: #7a5a30; padding-top: 140px; line-height: 1.5; }
+    .leeg b { font-family: "Maximilian", serif; font-weight: 400; font-size: 44px; color: var(--inkt); display: block; }
+    #lijst { transition: opacity .6s ease; }
+    #lijst.uit { opacity: 0; }
+    #tip { position: absolute; left: 64px; right: 64px; bottom: 34px; font-size: 25px; color: #3a2a1a; padding-top: 12px;
+      display: flex; gap: 14px; align-items: baseline; transition: opacity .8s ease; }
+    #tip svg.hand { width: 58px; height: 28px; flex: none; align-self: center; }   /* een manicule: het handje in de kantlijn */
+    #tip b { font-variant-caps: small-caps; letter-spacing: .08em; color: #a2302a; font-weight: 600; white-space: nowrap; }
+    #tip.uit { opacity: 0; }
+    #status { position: absolute; right: 70px; top: 128px; font-size: 17px; color: #7a5a30; }
+    #status.fout { color: #a2302a; }
+
+    /* ---------- meldingen zoals in de game ("JE KREEG …") ---------- */
+    /* rechtsonder op het perkament, boven de tip: zo blijft de kop van de stand leesbaar */
+    #meldingen { position: absolute; right: 90px; bottom: 140px; width: 600px; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; z-index: 5; }
+    .melding { display: grid; grid-template-columns: 64px 1fr; gap: 16px; align-items: center; padding: 20px 30px; color: var(--inkt);
+      background: url(feestje-img/tv/briefje.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 10px 16px rgba(0,0,0,.55));
+      animation: in .5s ease-out both; }
+    .melding svg { width: 56px; height: 68px; }
+    .melding b { display: block; font-variant-caps: small-caps; letter-spacing: .12em; color: #a2302a; font-size: 22px; font-weight: 600; }
+    .melding span { font-size: 28px; line-height: 1.2; }
+    .melding.weg { animation: uit .5s ease-in both; }
+    @keyframes in { from { opacity: 0; transform: translateX(40px); } }
+    @keyframes uit { to { opacity: 0; transform: translateX(40px); } }
+
+    /* ---------- de laatste minuut ---------- */
+    #aftel { position: absolute; inset: 0; display: none; place-items: center; text-align: center; background: rgba(7, 11, 28, .86); z-index: 9; }
+    #aftel.aan { display: grid; }
+    #aftel .n { font-family: "Maximilian", serif; font-size: 460px; line-height: 1; color: var(--goud); }
+    #aftel .z { font-family: "Maximilian", serif; font-size: 150px; line-height: 1.1; color: var(--goud); }
+    #aftel p { font-size: 44px; margin: 10px 0 0; color: #f1e6cf; }
+  </style>
+</head>
+<body>
+<div id="stage">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="p-herten" width="111" height="80" patternUnits="userSpaceOnUse"><rect width="111" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/herten.svg" x="2" y="4" width="107" height="72" /></pattern>
+      <pattern id="p-draken" width="105.7" height="80" patternUnits="userSpaceOnUse"><rect width="105.7" height="80" fill="#d9a23e" /><image href="feestje-img/malesov/draken.svg" x="0" y="2" width="105.7" height="76" /></pattern>
+    </defs>
+  </svg>
+  <div class="fries" id="f-boven"><svg width="1920" height="80"><rect width="1920" height="80" fill="url(#p-herten)" /></svg></div>
+  <div class="fries" id="f-onder"><svg width="1920" height="80"><rect width="1920" height="80" fill="url(#p-draken)" /></svg></div>
+
+  <!-- het wachtwiel van KCD2 (zelfde opbouw als op /feestje, zonder de zware filters) -->
+  <svg id="klok" viewBox="-200 -200 400 400" aria-label="Klok">
+    <defs>
+      <radialGradient id="w-hout" cx=".5" cy=".45" r=".65"><stop offset="0" stop-color="#6a4426"/><stop offset=".7" stop-color="#4a2e16"/><stop offset="1" stop-color="#2c1b0c"/></radialGradient>
+      <radialGradient id="w-zon" gradientUnits="userSpaceOnUse" r="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".35" stop-color="#f3bf3c"/><stop offset=".7" stop-color="#e9a923" stop-opacity=".75"/><stop offset="1" stop-color="#e9a923" stop-opacity="0"/></radialGradient>
+      <radialGradient id="w-maan" cx=".4" cy=".35"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#d9dbe0"/><stop offset="1" stop-color="#a9adb8"/></radialGradient>
+      <linearGradient id="w-goud" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7dc8a"/><stop offset=".5" stop-color="#d9a637"/><stop offset="1" stop-color="#a87a1c"/></linearGradient>
+      <clipPath id="w-ring"><path d="M0,-190 A190,190 0 1 1 0,190 A190,190 0 1 1 0,-190 Z M0,-146 A146,146 0 1 0 0,146 A146,146 0 1 0 0,-146 Z" clip-rule="evenodd"/></clipPath>
+      <clipPath id="w-schijf"><circle r="134"/></clipPath>
+    </defs>
+    <circle r="194" fill="#1a130b" />
+    <g id="w-dial"><g clip-path="url(#w-ring)"><g id="w-segs"></g><g id="w-glow"></g><g id="w-stars"></g></g></g>
+    <g id="w-nums" font-family="Maximilian, Georgia, serif" font-size="20" text-anchor="middle" dominant-baseline="central"></g>
+    <circle r="190.5" fill="none" stroke="#c9a24a" stroke-width="3" />
+    <circle r="146" fill="#1b140d" stroke="#c9a24a" stroke-width="2" />
+    <g id="w-ticks"></g>
+    <path d="M0,-150 L-7,-134 L7,-134 Z" fill="url(#w-goud)" stroke="#4a330c" stroke-width="1" stroke-linejoin="round" />
+    <circle r="134" fill="url(#w-hout)" stroke="#120b05" stroke-width="2" />
+    <g clip-path="url(#w-schijf)" stroke="#1d1209" stroke-width="2" opacity=".55">
+      <line x1="-92" y1="-140" x2="-92" y2="140"/><line x1="-46" y1="-140" x2="-46" y2="140"/><line x1="0" y1="-140" x2="0" y2="140"/><line x1="46" y1="-140" x2="46" y2="140"/><line x1="92" y1="-140" x2="92" y2="140"/>
+    </g>
+    <text id="k-datum" y="-62" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="19" fill="#f1e6cf"></text>
+    <text id="k-tijd" y="-10" text-anchor="middle" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="64" fill="#e9be52" style="font-variant-numeric: lining-nums" stroke="rgba(0,0,0,.4)" stroke-width="3" paint-order="stroke"></text>
+    <line x1="-74" y1="30" x2="74" y2="30" stroke="#c9a24a" stroke-width="1" opacity=".7" />
+    <text id="k-tot1" y="58" text-anchor="middle" font-family="Grenze, Georgia, serif" font-size="17" fill="#cfc3a6"></text>
+    <text id="k-tot2" y="88" text-anchor="middle" font-family="Maximilian, Georgia, serif" font-size="30" fill="#f1e6cf" style="font-variant-numeric: lining-nums"></text>
+  </svg>
+
+  <div id="nu"></div>
+
+  <div id="lijf">
+    <div class="meter" id="m-voeding">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#e2b544" d="M2,12 H22 C22,18 17,22 12,22 C7,22 2,18 2,12 Z"/><path d="M7,9 q-2,-3 0,-6 M12,9 q-2,-3 0,-6 M17,9 q-2,-3 0,-6" stroke="#e2b544" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+      <div class="naam"><span>Voeding · <em class="st"></em></span><b class="w"></b></div>
+      <svg class="balk" viewBox="0 0 260 22" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="meter" id="m-energie">
+      <svg viewBox="0 0 26 24" aria-hidden="true"><path fill="#e2b544" d="M1,20 V6 h2.5 V13 h21.5 V20 h-2.5 v-3.5 H3.5 V20 Z M5,9.5 a2.6,2.6 0 1 0 5.2,0 a2.6,2.6 0 1 0 -5.2,0 Z M11.5,8 h10 c2,0 3,1.5 3,3 v1.5 h-13 Z"/></svg>
+      <div class="naam"><span>Energie · <em class="st"></em></span><b class="w"></b></div>
+      <svg class="balk" viewBox="0 0 260 22" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <section id="stand">
+    <svg id="rand" aria-hidden="true"></svg>
+    <div class="kop"><h1 aria-label="Tussenstand"><svg id="initiaal" viewBox="0 0 92 92" aria-hidden="true"></svg><span aria-hidden="true">ussenstand</span></h1><span class="pagina" id="pagina"></span><svg class="lijn" viewBox="0 0 982 8" preserveAspectRatio="none"></svg></div>
+    <div id="status"></div>
+    <div id="lijst"></div>
+    <div id="tip"><svg class="hand" viewBox="0 0 58 28" aria-hidden="true"></svg><b>Wist u dat</b><span id="tip-t"></span></div>
+  </section>
+
+  <div id="meldingen" aria-live="polite"></div>
+  <div id="aftel"><div><div class="n" id="aftel-n"></div><p id="aftel-p"></p></div></div>
+</div>
+
+<script src="feestje-config.js"></script>
+<script src="feestje-hemel.js"></script>
+<script src="feestje-wapen.js"></script>
+<script src="feestje-db.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const svgEl = (tag, attrs, parent) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent?.appendChild(el); return el; };
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const seeded = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const OFFSET = (() => { const q = new URLSearchParams(location.search).get('nu'); const t = q ? Date.parse(q) : NaN; return isNaN(t) ? 0 : t - Date.now(); })();
+const now = () => new Date(Date.now() + OFFSET);
+
+/* =========================================================
+   HAND — de eigen tekenstijl: alles met de hand getrokken, zoals in een handschrift.
+   Een lijn wordt in stukjes van ~18 px geknipt; elk punt wijkt een beetje loodrecht af
+   (met een vast zaad, dus elke keer dezelfde lijn) en de punten worden glad verbonden.
+   Inkt trek ik twee keer, iets verschoven: zoals een ganzenveer die opnieuw inkt neemt.
+   ========================================================= */
+const Hand = (() => {
+  const f = n => n.toFixed(1);
+  function lijn(pts, amp, seed, stap = 18) {
+    const rnd = seeded(seed * 7919 + 17), out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x1, y1] = pts[i], [x2, y2] = pts[i + 1], L = Math.hypot(x2 - x1, y2 - y1) || 1, n = Math.max(1, Math.round(L / stap));
+      const nx = -(y2 - y1) / L, ny = (x2 - x1) / L;
+      for (let k = 0; k < n; k++) { const t = k / n, a = (rnd() - .5) * 2 * amp; out.push([x1 + (x2 - x1) * t + nx * a, y1 + (y2 - y1) * t + ny * a]); }
+    }
+    out.push(pts.at(-1));
+    let d = `M${f(out[0][0])},${f(out[0][1])}`;
+    for (let i = 1; i < out.length - 1; i++) { const [x, y] = out[i], [x2, y2] = out[i + 1]; d += ` Q${f(x)},${f(y)} ${f((x + x2) / 2)},${f((y + y2) / 2)}`; }
+    return d + ` L${f(out.at(-1)[0])},${f(out.at(-1)[1])}`;
+  }
+  const rechthoek = (x, y, w, h, amp, seed) => lijn([[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y + 1]], amp, seed);
+  const inkt = (d, kleur, br, op = 1) => `<path d="${d}" fill="none" stroke="${kleur}" stroke-width="${br}" stroke-linecap="round" stroke-linejoin="round" opacity="${op}"/>`;
+  const dubbel = (d1, d2, kleur, br) => inkt(d1, kleur, br, .9) + inkt(d2, kleur, br * .55, .45);
+  function cirkel(cx, cy, r, amp, seed, n = 28) {
+    const rnd = seeded(seed * 104729 + 3), pts = [];
+    for (let i = 0; i < n; i++) { const a = i / n * 2 * Math.PI, rr = r + (rnd() - .5) * 2 * amp; pts.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); }
+    let d = `M${f((pts[0][0] + pts[1][0]) / 2)},${f((pts[0][1] + pts[1][1]) / 2)}`;
+    for (let i = 1; i <= n; i++) { const [x, y] = pts[i % n], [x2, y2] = pts[(i + 1) % n]; d += ` Q${f(x)},${f(y)} ${f((x + x2) / 2)},${f((y + y2) / 2)}`; }
+    return d + 'Z';
+  }
+  // een klimopblad (drielobbig, zoals in de randen van getijdenboeken)
+  const blad = (x, y, hoek, g, kleur) => `<path transform="translate(${f(x)},${f(y)}) rotate(${f(hoek)}) scale(${g})"
+    d="M0,0 C-3,-2 -9,-1 -11,-6 C-12,-10 -8,-12 -6,-11 C-7,-15 -3,-19 0,-20 C3,-19 7,-15 6,-11 C8,-12 12,-10 11,-6 C9,-1 3,-2 0,0 Z"
+    fill="${kleur}" stroke="#2a1f16" stroke-width="${f(.9 / g)}"/><path transform="translate(${f(x)},${f(y)}) rotate(${f(hoek)}) scale(${g})" d="M0,0 L0,-15" stroke="#f1e6cf" stroke-width="${f(.8 / g)}" opacity=".6"/>`;
+  const goudstip = (x, y, r = 3.2) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" fill="url(#bladgoud)" stroke="#6e4f12" stroke-width=".8"/>`;
+  // een rank vanuit een hoek: een slingerende stengel langs de rand, met bladeren en goudstippen
+  function rank(x0, y0, dx, dy, lengte, seed) {
+    const rnd = seeded(seed), pts = [];
+    for (let i = 0; i <= 10; i++) { const t = i / 10, golf = Math.sin(t * Math.PI * 3) * 9 * (1 - t * .5); pts.push([x0 + dx * lengte * t + -dy * golf, y0 + dy * lengte * t + dx * golf]); }
+    let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
+    for (let i = 1; i < pts.length - 1; i++) d += ` Q${f(pts[i][0])},${f(pts[i][1])} ${f((pts[i][0] + pts[i + 1][0]) / 2)},${f((pts[i][1] + pts[i + 1][1]) / 2)}`;
+    let out = inkt(d, '#2a1f16', 2.2) + inkt(d, '#4a6b3c', 1.2, .9);
+    const kleuren = ['#2f4f86', '#a2302a', '#2f4f86', '#4a6b3c'];
+    for (let i = 2; i < 10; i += 2) {
+      const [x, y] = pts[i], kant = i % 4 ? 1 : -1, hoek = Math.atan2(dy, dx) * 180 / Math.PI + 90 * kant + (rnd() - .5) * 30;
+      out += blad(x + -dy * kant * 4, y + dx * kant * 4, hoek, .85 + rnd() * .3, kleuren[(i / 2 + seed) % 4]);
+      out += goudstip(x - -dy * kant * 9, y - dx * kant * 9, 2.6);
+    }
+    return out;
+  }
+  return { lijn, rechthoek, inkt, dubbel, cirkel, blad, goudstip, rank, f };
+})();
+const GOUD = `<defs><linearGradient id="bladgoud" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7a1"/><stop offset=".45" stop-color="#e2b544"/><stop offset="1" stop-color="#9a6c18"/></linearGradient></defs>`;
+const romeins = n => { let o = ''; for (const [v, r] of [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]) while (n >= v) { o += r; n -= v; } return o.toLowerCase(); };
+
+/* ---------- de rand van het perkament: dubbele lijn in rood en blauw, ranken in de hoeken ---------- */
+(() => {
+  const W = 1110, H = 848, { rechthoek, dubbel, rank, goudstip } = Hand;
+  let o = GOUD;
+  o += dubbel(rechthoek(18, 18, W - 36, H - 36, 1.6, 1), rechthoek(19, 19.5, W - 38, H - 39, 1.6, 2), '#a2302a', 2.6);
+  o += dubbel(rechthoek(27, 27, W - 54, H - 54, 1.4, 3), rechthoek(27.5, 28, W - 55, H - 56, 1.4, 4), '#2f4f86', 1.8);
+  o += rank(30, 30, 0, 1, 210, 6);   // linksboven alleen naar beneden: daar staat de beginletter
+  o += rank(W - 30, H - 30, -1, 0, 230, 7) + rank(W - 30, H - 30, 0, -1, 170, 8);
+  o += rank(W - 30, 30, 0, 1, 120, 9) + rank(30, H - 30, 1, 0, 120, 10);
+  for (const [x, y] of [[22.5, 22.5], [W - 22.5, 22.5], [22.5, H - 22.5], [W - 22.5, H - 22.5]]) o += goudstip(x, y, 6);
+  $('#rand').setAttribute('viewBox', `0 0 ${W} ${H}`); $('#rand').innerHTML = o;
+  // de rode lijn onder de kop
+  $('.kop .lijn').innerHTML = Hand.dubbel(Hand.lijn([[0, 4], [982, 4]], 1.3, 11, 30), Hand.lijn([[2, 5], [980, 5.5]], 1.3, 12, 30), '#a2302a', 2.4);
+})();
+
+/* ---------- de verluchte beginletter T: goud op blauw, met witte filigraan, in een rood kader ---------- */
+(() => {
+  const { rechthoek, inkt, lijn } = Hand;
+  let o = GOUD + `<rect x="5" y="5" width="82" height="82" fill="#2f4f86"/>`;
+  // filigraan: krulletjes in de hoeken
+  const krul = (x, y, sx, sy) => `<path d="M${x},${y} c${8 * sx},0 ${12 * sx},${6 * sy} ${8 * sx},${10 * sy} c${-3 * sx},${3 * sy} ${-7 * sx},${0} ${-6 * sx},${-3 * sy} c${1 * sx},${-2 * sy} ${3 * sx},${-2 * sy} ${4 * sx},0" fill="none" stroke="#f1e6cf" stroke-width="1.1" opacity=".85"/>`;
+  o += krul(11, 13, 1, 1) + krul(81, 13, -1, 1) + krul(11, 79, 1, -1) + krul(81, 79, -1, -1);
+  for (const [x, y] of [[46, 12], [12, 46], [80, 46], [46, 82]]) o += `<circle cx="${x}" cy="${y}" r="1.6" fill="#f1e6cf" opacity=".8"/>`;
+  o += `<text x="46" y="73" text-anchor="middle" font-family="Maximilian, serif" font-size="78" fill="url(#bladgoud)" stroke="#3a2410" stroke-width="1.4" paint-order="stroke">T</text>`;
+  o += inkt(rechthoek(4, 4, 84, 84, 1.1, 21), '#a2302a', 3.2) + inkt(rechthoek(8.5, 8.5, 75, 75, .9, 22), '#c99a3a', 1.2, .9);
+  $('#initiaal').innerHTML = o;
+})();
+
+/* ---------- het handje in de kantlijn (manicule) ---------- */
+$('#tip svg.hand').innerHTML = `<path d="M2,8 L13,7 L13,23 L2,22 Z" fill="#e8d6a8" stroke="#2a1f16" stroke-width="1.3"/>
+  <path d="M5,9 L5,21 M9,8.5 L9,22" stroke="#2a1f16" stroke-width=".8" opacity=".6"/>
+  <path d="M13,9 C17,6 23,6 27,9 L52,9.5 C56,9.6 56,14.4 52,14.5 L33,14.5 C35,15.5 35,18 33,18.6 C35,19.5 34,22 32,22.4 C33,23.5 31,25.5 29,25.3 L18,25 C15,25 13,24 13,22 Z"
+    fill="#e8d6a8" stroke="#2a1f16" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M27,14.5 L33,14.5 M26,18.6 L33,18.6 M25,22.4 L32,22.4 M27,9.4 C25,11 25,13 27,14.5" fill="none" stroke="#2a1f16" stroke-width=".9"/>`;
+
+/* ---------- de balken voor honger en energie: een penseelstreek, afgeknipt op de waarde ---------- */
+document.querySelectorAll('.balk').forEach((b, i) => {
+  const { lijn, rechthoek, inkt } = Hand, rnd = seeded(31 + i);
+  // de verfstreek: een gesloten vorm met een rafelige boven- en onderkant
+  const boven = [], onder = [];
+  for (let x = 0; x <= 260; x += 10) { boven.push([x, 5 + (rnd() - .5) * 2.4]); onder.push([x, 17 + (rnd() - .5) * 2.4]); }
+  const vorm = `M${boven.map(p => p.map(Hand.f).join(',')).join(' L')} L${onder.reverse().map(p => p.map(Hand.f).join(',')).join(' L')} Z`;
+  b.innerHTML = `<defs><clipPath id="klip${i}" class="klip"><rect x="0" y="0" width="0" height="22"/></clipPath></defs>
+    <path d="${rechthoek(1, 2, 258, 18, .9, 40 + i)}" fill="rgba(8,6,4,.55)"/>
+    <path class="vul" d="${vorm}" clip-path="url(#klip${i})"/>
+    ${inkt(rechthoek(1, 2, 258, 18, .9, 40 + i), '#c9a24a', 1.6)}${inkt(rechthoek(1.6, 2.4, 257, 17.4, .9, 50 + i), '#c9a24a', .8, .5)}`;
+});
+
+
+/* ---------- schalen naar het scherm ---------- */
+function schaal() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const st = $('#stage').style;
+  st.transform = `translate(${(innerWidth - 1920 * s) / 2}px, ${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
+}
+addEventListener('resize', schaal); schaal();
+
+/* ---------- achtpuntige zilveren sterren op nachtblauw (eenmalig, als achtergrond) ---------- */
+(() => {
+  const rnd = seeded(1405), W = 360, H = 360;
+  const ster = (x, y, r) => { let d = ''; for (let i = 0; i < 16; i++) { const rr = i % 2 ? r * .41 : r, a = i * Math.PI / 8; d += (i ? 'L' : 'M') + (x + rr * Math.sin(a)).toFixed(1) + ',' + (y - rr * Math.cos(a)).toFixed(1); } return d + 'Z'; };
+  const pts = [[45, 50, 16], [200, 30, 11], [310, 110, 15], [120, 160, 12], [250, 220, 17], [40, 270, 11], [170, 320, 14], [330, 300, 10], [95, 95, 6], [280, 30, 6], [20, 170, 6], [225, 140, 5], [140, 250, 6], [320, 200, 5], [60, 350, 5]];
+  const paths = pts.map(([x, y, r]) => `<path d="${ster(x, y, r * .8)}" fill="#cfd5df" opacity=".75"/>`).join('');
+  // de sterren, met daaronder de geschilderde kalklaag van het plafond (feestje-img/tv/plafond.webp)
+  $('#stage').style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${paths}</svg>`)}"), url(feestje-img/tv/plafond.webp)`;
+})();
+
+/* =========================================================
+   DE KLOK — het wachtwiel van KCD2, zonder interactie
+   ========================================================= */
+const Klok = (() => {
+  const f = n => n.toFixed(2);
+  const pos = (r, a) => { const t = a * Math.PI / 180; return [r * Math.sin(t), -r * Math.cos(t)]; };
+  const RING = [[-16, '#0c1a46'], [-10, '#13245c'], [-6, '#2c4588'], [-3, '#7c97c8'], [-.5, '#c9d7e8'], [3, '#eef2f4'], [90, '#f4f5f3']];
+  const ringColor = el => { if (el <= RING[0][0]) return RING[0][1]; for (let i = 1; i < RING.length; i++) if (el <= RING[i][0]) { const [e0, c0] = RING[i - 1], [e1, c1] = RING[i]; return mix(c0, c1, (el - e0) / (e1 - e0)); } return RING.at(-1)[1]; };
+  const lum = hex => { const [r, g, b] = hex2rgb(hex); return (r * .3 + g * .59 + b * .11) / 255; };
+  const star8 = (x, y, z) => { let d = ''; for (let i = 0; i < 16; i++) { const r = i % 2 ? z * .38 : z, a = i * Math.PI / 8; d += (i ? 'L' : 'M') + f(x + r * Math.sin(a)) + ',' + f(y - r * Math.cos(a)); } return d + 'Z'; };
+  let wheelDay = null, sun = {}, hourCol = [];
+  function paintWheel(day) {
+    const key = dayStart(day).getTime(); if (key === wheelDay) return; wheelDay = key;
+    const segs = $('#w-segs'), stars = $('#w-stars'), glow = $('#w-glow');
+    segs.textContent = ''; stars.textContent = '';
+    for (let i = 0; i < 144; i++) { const h = i / 6, [x1, y1] = pos(192, h * 15 - .15), [x2, y2] = pos(192, (h + 1 / 6) * 15 + .15); svgEl('path', { d: `M0,0 L${f(x1)},${f(y1)} A192,192 0 0 1 ${f(x2)},${f(y2)} Z`, fill: ringColor(sunElevation(atHours(day, h + 1 / 12))) }, segs); }
+    let top = -90, noon = 12; for (let m = 0; m < 1440; m += 5) { const el = sunElevation(atHours(day, m / 60)); if (el > top) { top = el; noon = m / 60; } }
+    hourCol = Array.from({ length: 25 }, (_, h) => ringColor(sunElevation(atHours(day, h))));
+    const [sx, sy] = pos(168, noon * 15); let rays = '';
+    for (let i = 0; i < 32; i++) { const a = i * 11.25, [a1x, a1y] = pos(22, a - 3.5), [a2x, a2y] = pos(i % 2 ? 50 : 70, a), [a3x, a3y] = pos(22, a + 3.5); rays += `M${f(sx + a1x)},${f(sy + a1y)} L${f(sx + a2x)},${f(sy + a2y)} L${f(sx + a3x)},${f(sy + a3y)} Z `; }
+    const zg = $('#w-zon'); zg.setAttribute('cx', f(sx)); zg.setAttribute('cy', f(sy)); zg.setAttribute('r', 88);
+    const [mx, my] = pos(168, 0);
+    glow.innerHTML = `<circle cx="${f(sx)}" cy="${f(sy)}" r="88" fill="url(#w-zon)"/><path d="${rays}" fill="#f0b02c" opacity=".7"/><circle cx="${f(sx)}" cy="${f(sy)}" r="22" fill="#f7cf52"/>
+      <circle cx="${f(mx)}" cy="${f(my)}" r="17" fill="url(#w-maan)" stroke="#7d8190"/><circle cx="${f(mx - 5)}" cy="${f(my - 3)}" r="3.5" fill="#b9bcc6" opacity=".7"/><circle cx="${f(mx + 6)}" cy="${f(my + 5)}" r="2.5" fill="#b9bcc6" opacity=".7"/>`;
+    for (let i = 0; i < 48; i++) { const h = i / 2 + .5; if (sunElevation(atHours(day, h)) > -6 || Math.abs(((h + 12) % 24) - 12) < .8) continue; const [x, y] = pos(167, h * 15); svgEl('path', { d: star8(x, y, 5), fill: '#e2b544' }, stars); }
+    sun = sunTimes(day);
+    let t = '';
+    for (let q = 0; q < 48; q++) { const a = q * 7.5, [x1, y1] = pos(136.5, a + .9), [x2, y2] = pos(143.5, a + .9), [x3, y3] = pos(143.5, a + 6.6), [x4, y4] = pos(136.5, a + 6.6);
+      t += `<path d="M${f(x1)},${f(y1)} L${f(x2)},${f(y2)} A143.5,143.5 0 0 1 ${f(x3)},${f(y3)} L${f(x4)},${f(y4)} A136.5,136.5 0 0 0 ${f(x1)},${f(y1)} Z" fill="${q % 2 ? '#3a2a18' : '#4a3620'}"/>`; }
+    const [b1x, b1y] = pos(140, CONFIG.partyFrom * 15), [b2x, b2y] = pos(140, CONFIG.partyTo * 15);
+    t += `<path d="M${f(b1x)},${f(b1y)} A140,140 0 0 1 ${f(b2x)},${f(b2y)}" fill="none" stroke="#9b2a22" stroke-width="3" opacity=".9"/>`;
+    $('#w-ticks').innerHTML = t;
+  }
+  const nums = $('#w-nums');
+  for (let h = 1; h <= 24; h++) { const g = svgEl('g', {}, nums); svgEl('circle', { r: 13, fill: 'none', 'stroke-width': 1.8 }, g); svgEl('text', { y: 1 }, g).textContent = h; }
+  function paintNums(rot) {
+    const rise = sun.rise != null ? Math.round(sun.rise) : -1, set = sun.set != null ? Math.round(sun.set) : -1;
+    [...nums.children].forEach((g, i) => {
+      const h = i + 1, a = h * 15 + rot, [x, y] = pos(168, a);
+      g.setAttribute('transform', `translate(${f(x)},${f(y)}) rotate(${f(a)})`);
+      const bg = hourCol[h] || '#eef2f4'; let ring = 'none', fill = lum(bg) > .55 ? '#1b1712' : '#f1ead8';
+      if (h === 24) fill = '#2a2a33'; else if (h === CONFIG.partyFrom) ring = '#b23a2e'; else if (h === rise || h === set) { ring = '#e2b544'; fill = lum(bg) > .55 ? '#1b1712' : '#f0cf6a'; }
+      g.firstChild.setAttribute('stroke', ring); g.lastChild.setAttribute('fill', fill);
+    });
+  }
+  const DAGEN = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'], MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+  let lastMin = -1;
+  function render() {
+    const t = now(), h = localHours(t);
+    $('#k-tijd').textContent = fmtH(h);
+    const min = Math.floor(t / 60000);
+    if (min === lastMin) return; lastMin = min;           // het wiel maar één keer per minuut
+    paintWheel(t);
+    const rot = -Math.floor(h * 60) / 60 * 15;
+    $('#w-dial').setAttribute('transform', `rotate(${f(rot)})`); $('#w-ticks').setAttribute('transform', `rotate(${f(rot)})`);
+    paintNums(rot);
+    $('#k-datum').textContent = `${DAGEN[t.getDay()]} ${t.getDate()} ${MAANDEN[t.getMonth()]}`;
+    const tot = (d, wat) => { const m = Math.max(0, Math.round((d - t) / 60000)); return m >= 2880 ? [`nog tot ${wat}`, Math.ceil(m / 1440) + ' dagen'] : [`nog tot ${wat}`, Math.floor(m / 60) + ' u ' + String(m % 60).padStart(2, '0')]; };
+    let r;
+    if (t < CONFIG.start) r = tot(CONFIG.start, 'de poort opengaat');
+    else if (t < CONFIG.midnight) r = tot(CONFIG.midnight, 'middernacht');
+    else r = ['het jaar is', 'ingeluid'];
+    $('#k-tot1').textContent = r[0]; $('#k-tot2').textContent = r[1];
+  }
+  return { render };
+})();
+
+/* =========================================================
+   NU EN STRAKS — uit het programma
+   ========================================================= */
+const feestUur = t => {                                 // uren sinds middernacht van de feestdag (dus 24,5 = 00:30 op 1 januari)
+  const d0 = dayStart(new Date(CONFIG.start)); return (t - d0) / 3600e3;
+};
+function nuEnStraks() {
+  const t = now(), h = feestUur(t), P = CONFIG.program;
+  const fmt = x => fmtH(x);
+  const kaart = (it, lbl) => `<div class="label">${lbl}</div><div class="prog nu"><img src="feestje-img/kcd/${it[3]}.png" alt=""><div class="t">${esc(it[1])}</div><div class="u">${fmt(it[0])}</div><div class="s">${esc(it[2])}</div></div>`;
+  const straks = it => `<div class="straks"><span class="label">Straks</span><b>${esc(it ? it[1] : 'Dansen tot de haan kraait')}</b><span class="u">${it ? fmt(it[0]) : ''}</span></div>`;
+  let html;
+  if (t < CONFIG.start) html = kaart(P[0], 'Het feest begint met') + straks(P[1]);
+  else { let i = 0; P.forEach((it, k) => { if (it[0] <= h) i = k; }); html = kaart(P[i], 'Nu') + straks(P[i + 1]); }
+  if ($('#nu').innerHTML !== html) $('#nu').innerHTML = html;
+}
+
+/* =========================================================
+   HONGER EN ENERGIE — volgen het programma (LIJF in feestje-config.js)
+   ========================================================= */
+function lijf(h) {
+  h = Math.max(h, CONFIG.partyFrom);                     // vóór het feest: zoals bij de poort
+  const ramp = (x, at, dur = .5) => clamp((x - at) / dur, 0, 1);
+  const reken = (start, perUur, plussen) => {
+    // per kwartier opbouwen, zodat een maaltijd niet boven 100 "opspaart"
+    let v = start;
+    for (let x = CONFIG.partyFrom; x < h; x += .25) {
+      const stap = Math.min(.25, h - x);
+      v += perUur * stap;
+      for (const [at, , extra] of plussen) v += extra * (ramp(x + stap, at) - ramp(x, at));
+      v = clamp(v, 0, 100);
+    }
+    return v;
+  };
+  return { voeding: reken(LIJF.voeding.start, LIJF.voeding.perUur, LIJF.maaltijden), energie: reken(LIJF.energie.start, LIJF.energie.perUur, LIJF.oppeppers) };
+}
+const woord = (v, lijst) => lijst.find(([min]) => v >= min)[1];
+function toonLijf() {
+  const { voeding, energie } = lijf(feestUur(now()));
+  const zet = (id, v, w) => {
+    const m = $(id); m.querySelector('.w').textContent = Math.round(v);
+    m.querySelector('.st').textContent = w;
+    m.querySelector('.balk .klip rect').setAttribute('width', (v * 2.6).toFixed(1));
+    m.querySelector('.balk').classList.toggle('laag', v < 25);
+  };
+  zet('#m-voeding', voeding, woord(voeding, [[80, 'verzadigd'], [50, 'gevoed'], [25, 'hongerig'], [0, 'uitgehongerd']]));
+  zet('#m-energie', energie, woord(energie, [[75, 'uitgerust'], [45, 'moe'], [20, 'vermoeid'], [0, 'uitgeput']]));
+}
+
+/* =========================================================
+   DE TUSSENSTAND
+   ========================================================= */
+const PER_PAGINA = 10;
+let stand = null, pagina = 0, vorigeTotalen = null;
+const wapen = (w, uid) => {
+  const ok = w && TINCT[w.t1] && TINCT[w.t2] && TINCT[w.c] && w.div in DIVS && w.ch in CHARGES;
+  return `<svg viewBox="0 0 200 240" aria-hidden="true">${shieldMarkup(ok ? w : { t1: 'argent', t2: 'argent', div: 'plain', ch: 'none', c: 'or' }, uid, false, '', true)}</svg>`;
+};
+// een met de hand getrokken lijn onder elke rij (als achtergrond van de rij; per rij een ander zaad)
+const REGELS = Array.from({ length: 10 }, (_, i) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 982 8" preserveAspectRatio="none">${Hand.inkt(Hand.lijn([[0, 5], [982, 5]], 1.1, 60 + i, 40), '#6e4a24', 1.3, .55)}</svg>`)}") left bottom / 100% 8px no-repeat`);
+const regel = i => REGELS[i % REGELS.length];
+// goud, zilver en brons: een getekende penning met een kring van stippen
+const PENNING = { 1: ['#e2b544', '#7a5a1c'], 2: ['#c9ccd3', '#5d616b'], 3: ['#c07a45', '#6e3f1c'] };
+const penning = p => {
+  if (!PENNING[p]) return '';
+  const [kl, rand] = PENNING[p];
+  let stip = ''; for (let k = 0; k < 16; k++) { const a = k / 16 * 2 * Math.PI; stip += `<circle cx="${(26 + 19 * Math.cos(a)).toFixed(1)}" cy="${(26 + 19 * Math.sin(a)).toFixed(1)}" r="1.2" fill="${rand}" opacity=".7"/>`; }
+  return `<svg viewBox="0 0 52 52" aria-hidden="true"><path d="${Hand.cirkel(26, 26, 23, 1.3, p)}" fill="${kl}" stroke="${rand}" stroke-width="2"/>${stip}</svg>`;
+};
+function tekenStand(flits = new Set()) {
+  if (!stand) return;
+  const rows = ranglijst(stand), spelen = stand.spelen;
+  const n = Math.max(1, Math.ceil(rows.length / PER_PAGINA));
+  pagina %= n;
+  $('#pagina').textContent = n > 1 ? `blad ${pagina + 1} van ${n}` : (rows.length ? `${rows.length} ridders in het strijdperk` : '');
+  if (!rows.length) { $('#lijst').innerHTML = `<div class="leeg"><b>Nog geen ridders ingeschreven</b>De heraut noteert de deelnemers bij de poort.</div>`; return; }
+  const deel = rows.slice(pagina * PER_PAGINA, (pagina + 1) * PER_PAGINA);
+  const sw = spelen.length > 6 ? 62 : 74;
+  $('#lijst').innerHTML = `<table><thead><tr><th></th><th></th><th class="n">Ridder</th>${spelen.map(s => `<th style="width:${sw}px">${esc(s.naam)}</th>`).join('')}<th>Totaal</th></tr></thead><tbody>${
+    deel.map((r, i) => `<tr class="p${r.plaats}${flits.has(r.id) ? ' flits' : ''}" style="background:${regel(i)}"><td class="p"><span class="plek">${penning(r.plaats)}<span>${romeins(r.plaats)}</span></span></td><td class="w">${wapen(r.wapen, 'r' + r.id)}</td><td class="n">${esc(r.naam)}</td>${
+      spelen.map(s => { const v = r.per(s.id); return `<td class="s">${v == null ? '·' : v}</td>`; }).join('')}<td class="tot">${r.totaal}</td></tr>`).join('')}</tbody></table>`;
+}
+function nieuweStand(s) {
+  const flits = new Set();
+  const tot = new Map(ranglijst(s).map(r => [r.id, r.totaal]));
+  if (vorigeTotalen) {
+    // wat is er veranderd? per ridder en spel vergelijken voor de melding
+    const oud = new Map(stand.punten.map(p => [p.ridder_id + ':' + p.spel_id, p.punten]));
+    for (const p of s.punten) {
+      const d = p.punten - (oud.get(p.ridder_id + ':' + p.spel_id) ?? 0);
+      if (!d) continue;
+      const r = s.ridders.find(x => x.id === p.ridder_id), sp = s.spelen.find(x => x.id === p.spel_id);
+      if (!r || !sp) continue;
+      flits.add(r.id);
+      melding(d > 0 ? 'Je kreeg' : 'Je verloor', `${d > 0 ? '+' : '−'}${Math.abs(d)} · ${esc(sp.naam)}<br>${esc(r.naam)}`, r.wapen, 'm' + r.id + Date.now());
+    }
+    for (const r of s.ridders) if (!vorigeTotalen.has(r.id)) melding('Nieuwe ridder', esc(r.naam), r.wapen, 'n' + r.id);
+  }
+  stand = s; vorigeTotalen = tot;
+  // spring naar het blad met de wijziging
+  if (flits.size) { const rows = ranglijst(s), i = rows.findIndex(r => flits.has(r.id)); if (i >= 0) pagina = Math.floor(i / PER_PAGINA); }
+  tekenStand(flits);
+}
+function melding(kop, tekst, w, uid) {
+  const el = document.createElement('div'); el.className = 'melding';
+  el.innerHTML = `${wapen(w, 'x' + uid)}<div><b>${kop}</b><span>${tekst}</span></div>`;
+  const box = $('#meldingen'); box.appendChild(el);
+  while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 6000);
+}
+// bladeren bij meer dan 10 ridders
+setInterval(() => {
+  if (!stand || stand.ridders.length <= PER_PAGINA) return;
+  $('#lijst').classList.add('uit');
+  setTimeout(() => { pagina++; tekenStand(); $('#lijst').classList.remove('uit'); }, 600);
+}, 12000);
+
+Db.volg((s, fout) => {
+  const st = $('#status');
+  if (fout) { st.textContent = 'De bode is onderweg… (geen verbinding)'; st.classList.add('fout'); return; }
+  st.textContent = Db.live ? '' : 'demo'; st.classList.remove('fout');
+  nieuweStand(s);
+}, 4000);
+
+/* =========================================================
+   TIPS — zoals op de laadschermen van de game
+   ========================================================= */
+const TIPS = [
+  'u in Kingdom Come de tijd kunt doorspoelen met wachten? Hier niet. Hier is het gewoon gezellig.',
+  'Henry pas in KCD2 leert lezen? U hoeft alleen uw naam te kunnen schrijven, op het scorebord.',
+  'het haasje u altijd ziet, ook als u denkt dat niemand kijkt?',
+  'een ridder met een lege maag slechter mikt? Bezoek de ketel.',
+  'de heilandsbrandewijn in de game het spel opslaat? Hier slaat hij het jaar op. Om kwart voor twaalf.',
+  'valsspelen met dobbelstenen in Bohemen bestraft werd met de schandpaal? Dat geldt hier ook.',
+  'Hans Capon nog nooit een toernooi heeft gewonnen? U kunt het beter.',
+  'u in de game smaller kijkt naar wie bebloede kleren draagt? Morsen met stoofvlees telt niet mee.',
+  'een goed verhaal bij uw kostuum punten kan opleveren bij de keurmeesters?',
+  'de oliebollen om middernacht komen? Honger houdt u tot dan zelf in de hand.',
+  'boogschieten zonder vizier gaat, zoals in de game? Richten op gevoel. En op het doel, niet op de gastheer.',
+  'Fortuna audentes iuvat: het geluk is met de dapperen. Vooral bij het dobbelen.',
+];
+let tipI = Math.floor(Math.random() * TIPS.length);
+function volgendeTip() {
+  $('#tip').classList.add('uit');
+  setTimeout(() => { $('#tip-t').textContent = TIPS[tipI++ % TIPS.length]; $('#tip').classList.remove('uit'); }, 800);
+}
+$('#tip-t').textContent = TIPS[tipI++ % TIPS.length];
+setInterval(volgendeTip, 18000);
+
+/* =========================================================
+   DE LAATSTE MINUUT EN NIEUWJAAR
+   ========================================================= */
+function aftellen() {
+  const t = now(), s = (CONFIG.midnight - t) / 1000, box = $('#aftel');
+  if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'n'; $('#aftel-n').textContent = Math.ceil(s); $('#aftel-p').textContent = 'Heft de bekers'; }
+  else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${now().getFullYear()}. De oliebollen zijn er.`; }
+  else box.classList.remove('aan');
+}
+
+/* ---------- de hartslag: elke seconde ---------- */
+function tik() { Klok.render(); aftellen(); }
+function elkeMinuut() { nuEnStraks(); toonLijf(); }
+document.fonts.ready.then(() => { tik(); elkeMinuut(); });
+tik(); elkeMinuut();
+setInterval(tik, 1000);
+setInterval(elkeMinuut, 30000);
+// het scherm wakker houden (Wake Lock API), zodat de schermbeveiliging van de Chromecast niet over de stand valt.
+// Kan het toestel dat niet, dan gebeurt er niets. Na het wisselen van app moet de vergrendeling opnieuw.
+async function wakker() { try { await navigator.wakeLock?.request('screen'); } catch { /* niet ondersteund of geweigerd */ } }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wakker(); });
+wakker();
+// een tv die dagen aanstaat: één keer per dag (om 6 uur 's ochtends) herladen tegen geheugenlekken
+setTimeout(() => location.reload(), (() => { const t = new Date(), r = new Date(t); r.setHours(30, 0, 0, 0); return r - t; })());
+</script>
+</body>
+</html>
