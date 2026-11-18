@@ -13,6 +13,7 @@ const TINCT = {
 const DIVS = { plain: 'Effen', pale: 'Gedeeld', fess: 'Doorsneden', bend: 'Geschuind', quarterly: 'Gevierendeeld', chevron: 'Keper' };
 const CHARGES = { none: 'Geen', ster: 'Ster', kruis: 'Kruis', maan: 'Maan', zwaard: 'Zwaard', kroon: 'Kroon', roos: 'Roos', beker: 'Beker' };
 const PLACES = ['Skalice', 'Rataje', 'Talmberk', 'Sázava', 'Úžice', 'Ledečko', 'Mrchojedy', 'Samopše', 'Kutná Hora', 'Pirkštejn', 'Sedlec', 'Zbořený Kostelec', 'Malešov', 'Rataje nad Sázavou'];
+const MEER_STUKKEN = { lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl' };
 const SHIELD = 'M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z';
 
 function chargeMarkup(ch, fill) {
@@ -33,6 +34,14 @@ function chargeMarkup(ch, fill) {
       return `<g ${st}>${c}</g><circle r="11" fill="#c99a3a" stroke="#2a1f16" stroke-width="2.5"/>`;
     }
     case 'beker': return `<path d="M-30,-44 H30 C30,-6 14,4 5,8 V30 H20 V42 H-20 V30 H-5 V8 C-14,4 -30,-6 -30,-44 Z" ${st}/>`;
+    // meer stukken (voor de wapenkunde op het tv-scherm; niet in de wapenmaker, zie MEER_STUKKEN)
+    case 'lelie': return `<g ${st}><path d="M0,-52 C15,-32 15,-10 0,8 C-15,-10 -15,-32 0,-52 Z"/><path d="M-6,2 C-30,-6 -46,-26 -34,-42 C-22,-50 -14,-36 -13,-24 C-11,-12 -8,-4 -6,2 Z"/><path d="M6,2 C30,-6 46,-26 34,-42 C22,-50 14,-36 13,-24 C11,-12 8,-4 6,2 Z"/><path d="M-4,14 C-10,30 -22,40 -32,46 C-16,48 -6,42 0,32 C6,42 16,48 32,46 C22,40 10,30 4,14 Z"/><rect x="-26" y="4" width="52" height="10" rx="2"/></g>`;
+    case 'toren': return `<g ${st}><path d="M-30,48 V-26 H-36 V-48 H-22 V-38 H-7 V-48 H7 V-38 H22 V-48 H36 V-26 H30 V48 Z"/><path d="M-10,48 V26 A10,10 0 0 1 10,26 V48 Z" fill="#2a1f16"/><rect x="-5" y="-14" width="10" height="16" rx="5" fill="#2a1f16"/></g>`;
+    case 'sleutel': return `<g ${st}><path fill-rule="evenodd" d="M-17,-32 a17,17 0 1,0 34,0 a17,17 0 1,0 -34,0 Z M-8,-32 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0 Z"/><path d="M-5,-15 H5 V48 H-5 Z M5,26 H22 V34 H5 Z M5,39 H17 V47 H5 Z"/></g>`;
+    case 'hart': return `<path d="M0,42 C-52,6 -42,-38 -16,-38 C-6,-38 0,-30 0,-22 C0,-30 6,-38 16,-38 C42,-38 52,6 0,42 Z" ${st}/>`;
+    case 'ruit': return `<path d="M0,-50 L32,0 L0,50 L-32,0 Z" ${st}/>`;
+    case 'bol': return `<circle r="32" ${st}/>`;
+    case 'pijl': return `<g ${st}><path d="M-4,-28 H4 V40 H-4 Z"/><path d="M0,-54 L13,-26 H-13 Z"/><path d="M-4,30 L-15,48 V36 L-4,20 Z M4,30 L15,48 V36 L4,20 Z"/></g>`;
     default: return '';
   }
 }
