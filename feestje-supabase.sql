@@ -163,26 +163,35 @@ on conflict (id) do nothing;
 
 -- =====================================================================
 --  De quiz (feestje-quiz voor de spelers, feestje-beheer voor de quizmaster, feestje-tv)
---  Punten: 100 voor een goed antwoord + 1 per seconde dat het sneller was dan 30 s
---  (gemeten met de klok van de database, niet die van de gsm's).
+--  Drie soorten vragen:
+--    keuze  vier antwoorden (A–D), eventueel met een afbeelding op de tv
+--           punten: 100 voor goed + 1 per seconde sneller dan 30 s (klok van de database, niet van de gsm's)
+--    woord  vrij intypen; goed als het (zonder hoofdletters, spaties en accenten) in de lijst van goede antwoorden staat
+--           punten: als bij keuze
+--    getal  een schatting; wie het dichtst zit krijgt 100, dan 80, 60, 40, 20 (gelijke afstand = gelijke punten)
 --  De juiste antwoorden zijn voor spelers onleesbaar tot de quizmaster ze toont.
+--  Opnieuw draaien mag: de quiztabellen worden dan leeggemaakt en opnieuw aangelegd (de vragen laadt u daarna opnieuw).
 -- =====================================================================
-create table if not exists fj_vragen (
+drop table if exists fj_antwoorden, fj_vragen, fj_quiz cascade;
+create table fj_vragen (
   nr         int  primary key,
+  soort      text not null default 'keuze' check (soort in ('keuze', 'woord', 'getal')),
   vraag      text not null,
-  antwoorden jsonb not null,                      -- ["…", "…", "…", "…"]
-  juist      int  not null check (juist between 0 and 3)
+  afbeelding text,                                -- pad op de site, bv. 'feestje-img/quiz/komeet.webp' (alleen op de tv)
+  antwoorden jsonb,                               -- keuze: ["…", "…", "…", "…"]
+  juist      jsonb not null                       -- keuze: 0–3 · woord: ["leeuw", "lion"] (vergeleken via fj_norm) · getal: 695
 );
-create table if not exists fj_quiz (
+create table fj_quiz (
   id      int  primary key default 1 check (id = 1),
   nr      int  not null default 0,
   fase    text not null default 'uit' check (fase in ('uit', 'wacht', 'open', 'dicht', 'uitslag')),
   geopend timestamptz
 );
-create table if not exists fj_antwoorden (
+create table fj_antwoorden (
   nr        int    not null,
   ridder_id bigint not null references fj_ridders on delete cascade,
-  keuze     int    not null check (keuze between 0 and 3),
+  keuze     int    check (keuze between 0 and 3),   -- keuze
+  waarde    text,                                   -- woord of getal, zoals ingetypt
   punten    int    not null default 0,
   tijd      timestamptz not null default now(),
   primary key (nr, ridder_id)
@@ -192,33 +201,60 @@ alter table fj_quiz       enable row level security;
 alter table fj_antwoorden enable row level security;
 insert into fj_quiz (id) values (1) on conflict (id) do nothing;
 
+-- normaliseren: kleine letters, zonder accenten, spaties en leestekens ("Groš!" → "gros")
+create or replace function fj_norm(t text) returns text
+language sql immutable as $$
+  select regexp_replace(lower(translate(coalesce(t, ''),
+    'áàâäãåčćçďéèêëěíìîïľĺňñóòôöõřŕšśťúùûüůýÿžźÁÀÂÄÃÅČĆÇĎÉÈÊËĚÍÌÎÏĽĹŇÑÓÒÔÖÕŘŔŠŚŤÚÙÛÜŮÝŸŽŹ',
+    'aaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzzaaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzz')), '[^a-z0-9]', '', 'g');
+$$;
+
+-- het juiste antwoord om te tonen: keuze → het nummer, woord → het eerste goede woord, getal → het getal
+create or replace function fj_quiz_juist(v fj_vragen) returns jsonb
+language sql immutable as $$ select case when v.soort = 'woord' then v.juist->0 else v.juist end $$;
+
 -- wat iedereen mag zien (tv en spelers); het juiste antwoord pas in de fase 'uitslag'
 create or replace function fj_quiz_toestand() returns json
 language sql stable security definer set search_path = public as $$
   select json_build_object(
     'fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen),
+    'soort', case when q.fase <> 'uit' then v.soort end,
     'vraag', case when q.fase <> 'uit' then v.vraag end,
+    'afbeelding', case when q.fase <> 'uit' then v.afbeelding end,
     'antwoorden', case when q.fase <> 'uit' then v.antwoorden end,
     'verstreken', case when q.geopend is not null then extract(epoch from now() - q.geopend) end,
     'aantal', (select count(*) from fj_antwoorden a where a.nr = q.nr),
     'ridders', (select count(*) from fj_ridders),
-    'juist', case when q.fase = 'uitslag' then v.juist end,
-    'uitslag', case when q.fase = 'uitslag' then coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'punten', a.punten) order by a.punten desc)
-                                                           from fj_antwoorden a where a.nr = q.nr), '[]') end)
+    'juist', case when q.fase = 'uitslag' then fj_quiz_juist(v) end,
+    'uitslag', case when q.fase = 'uitslag' then coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten)
+                                                           order by a.punten desc, a.tijd) from fj_antwoorden a where a.nr = q.nr), '[]') end,
+    'stand', case when q.fase = 'uitslag' or (q.fase = 'uit' and q.nr > 0) then coalesce((select json_agg(json_build_object('ridder_id', t.ridder_id, 'punten', t.som) order by t.som desc)
+                                                           from (select ridder_id, sum(punten) som from fj_antwoorden group by ridder_id) t), '[]') end)
   from fj_quiz q left join fj_vragen v on v.nr = q.nr where q.id = 1;
 $$;
 
--- een speler antwoordt (één keer per vraag; alleen terwijl de vraag open staat)
-create or replace function fj_quiz_antwoord(p_ridder bigint, p_keuze int) returns boolean
+-- een speler antwoordt (één keer per vraag; alleen terwijl de vraag open staat).
+-- p_keuze voor keuzevragen, p_tekst voor woord en getal. Een getal krijgt zijn punten pas bij 'toon' (rangorde).
+create or replace function fj_quiz_antwoord(p_ridder bigint, p_keuze int, p_tekst text) returns boolean
 language plpgsql security definer set search_path = public as $$
-declare q fj_quiz; v fj_vragen; sec numeric;
+declare q fj_quiz; v fj_vragen; sec numeric; snel int; pt int := 0;
 begin
   select * into q from fj_quiz where id = 1;
   if q.fase <> 'open' then return false; end if;
   select * into v from fj_vragen where nr = q.nr;
-  sec := extract(epoch from now() - q.geopend);
-  insert into fj_antwoorden (nr, ridder_id, keuze, punten)
-  values (q.nr, p_ridder, p_keuze, case when p_keuze = v.juist then 100 + greatest(0, 30 - floor(sec))::int else 0 end)
+  if not exists (select 1 from fj_ridders where id = p_ridder) then return false; end if;
+  sec := extract(epoch from now() - q.geopend); snel := greatest(0, 30 - floor(sec))::int;
+  if v.soort = 'keuze' then
+    if p_keuze is null or p_keuze not between 0 and 3 then return false; end if;
+    if p_keuze = (v.juist #>> '{}')::int then pt := 100 + snel; end if;
+  elsif v.soort = 'woord' then
+    if fj_norm(p_tekst) = '' then return false; end if;
+    if exists (select 1 from jsonb_array_elements_text(v.juist) g where fj_norm(g) = fj_norm(p_tekst)) then pt := 100 + snel; end if;
+  else
+    if p_tekst !~ '^\s*-?[0-9]+([.,][0-9]+)?\s*$' then return false; end if;
+  end if;
+  insert into fj_antwoorden (nr, ridder_id, keuze, waarde, punten)
+  values (q.nr, p_ridder, case when v.soort = 'keuze' then p_keuze end, case when v.soort <> 'keuze' then left(trim(p_tekst), 60) end, pt)
   on conflict (nr, ridder_id) do nothing;
   return found;
 end $$;
@@ -226,16 +262,23 @@ end $$;
 -- de quizmaster: start · open · sluit · toon · volgende · stop · reset
 create or replace function fj_quiz_stap(p_pin text, p_actie text) returns json
 language plpgsql security definer set search_path = public as $$
-declare q fj_quiz; totaal int; quiz_spel bigint;
+declare q fj_quiz; v fj_vragen; totaal int; quiz_spel bigint;
 begin
   perform fj_eis_pin(p_pin);
   select * into q from fj_quiz where id = 1;
+  select * into v from fj_vragen where nr = q.nr;
   select count(*) into totaal from fj_vragen;
-  if p_actie = 'start' then update fj_quiz set nr = 1, fase = 'wacht', geopend = null where id = 1;
+  if p_actie = 'start' and totaal > 0 then update fj_quiz set nr = 1, fase = 'wacht', geopend = null where id = 1;
   elsif p_actie = 'open' and q.fase = 'wacht' then update fj_quiz set fase = 'open', geopend = now() where id = 1;
   elsif p_actie = 'sluit' and q.fase = 'open' then update fj_quiz set fase = 'dicht' where id = 1;
   elsif p_actie = 'toon' and q.fase in ('open', 'dicht') then
     update fj_quiz set fase = 'uitslag' where id = 1;
+    if v.soort = 'getal' then        -- schatting: rangorde op afstand (gelijke afstand = gelijke plaats)
+      update fj_antwoorden a set punten = greatest(0, 100 - 20 * (r.plaats - 1))
+      from (select ridder_id, rank() over (order by abs(replace(waarde, ',', '.')::numeric - (v.juist #>> '{}')::numeric)) plaats
+            from fj_antwoorden where nr = q.nr) r
+      where a.nr = q.nr and a.ridder_id = r.ridder_id;
+    end if;
     -- de punten van alle vragen samen naar de kolom Quiz van de tussenstand
     select id into quiz_spel from fj_spelen where naam = 'Quiz';
     if quiz_spel is not null then
@@ -261,26 +304,30 @@ language plpgsql security definer set search_path = public as $$
 declare uit json;
 begin
   perform fj_eis_pin(p_pin);
-  select json_build_object('fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen), 'vraag', v.vraag, 'antwoorden', v.antwoorden, 'juist', v.juist,
+  select json_build_object('fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen), 'soort', v.soort, 'vraag', v.vraag,
+    'afbeelding', v.afbeelding, 'antwoorden', v.antwoorden, 'juist', fj_quiz_juist(v),
     'verstreken', extract(epoch from now() - q.geopend), 'ridders', (select count(*) from fj_ridders),
     'antwoorden_van', coalesce((select json_agg(a.ridder_id) from fj_antwoorden a where a.nr = q.nr), '[]'))
   into uit from fj_quiz q left join fj_vragen v on v.nr = q.nr where q.id = 1;
   return uit;
 end $$;
 
--- vragen laden (vervangt alle vragen en begint opnieuw): [{"vraag": "…", "antwoorden": [4×"…"], "juist": 0-3}, …]
+-- vragen laden (vervangt alle vragen en begint opnieuw):
+-- [{"soort": "keuze", "vraag": "…", "afbeelding": "…", "antwoorden": [4×"…"], "juist": 0}, {"soort": "woord", …, "juist": ["leeuw", "lion"]}, {"soort": "getal", …, "juist": 695}]
 create or replace function fj_quiz_laad(p_pin text, p_vragen jsonb) returns int
 language plpgsql security definer set search_path = public as $$
 begin
   perform fj_eis_pin(p_pin);
   delete from fj_antwoorden; delete from fj_vragen;
-  insert into fj_vragen (nr, vraag, antwoorden, juist)
-  select ord, e->>'vraag', e->'antwoorden', (e->>'juist')::int from jsonb_array_elements(p_vragen) with ordinality as t(e, ord);
+  insert into fj_vragen (nr, soort, vraag, afbeelding, antwoorden, juist)
+  select ord, coalesce(e->>'soort', 'keuze'), e->>'vraag', e->>'afbeelding', e->'antwoorden', e->'juist'
+  from jsonb_array_elements(p_vragen) with ordinality as t(e, ord);
   update fj_quiz set nr = 0, fase = 'uit', geopend = null where id = 1;
+  delete from fj_punten where spel_id = (select id from fj_spelen where naam = 'Quiz');
   return (select count(*) from fj_vragen);
 end $$;
 
-revoke execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_laad(text, jsonb)
-  from public, anon, authenticated;
-grant execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_laad(text, jsonb)
+revoke execute on function fj_norm(text), fj_quiz_juist(fj_vragen), fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text),
+  fj_quiz_meester(text), fj_quiz_laad(text, jsonb) from public, anon, authenticated;
+grant execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_laad(text, jsonb)
   to anon, authenticated;

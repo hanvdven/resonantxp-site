@@ -63,39 +63,59 @@ const Db = (() => {
   }
   const nextId = list => list.reduce((m, x) => Math.max(m, x.id), 0) + 1;
   const demoPin = pin => { if (String(pin) !== DEMO_PIN) throw new Error('Verkeerde pincode'); };
-  // de quiz in demomodus: dezelfde regels als de functies in de database
+  // normaliseren zoals fj_norm in de database: kleine letters, zonder accenten, spaties en leestekens
+  const norm = t => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  // het juiste antwoord om te tonen: keuze → nummer, woord → het eerste goede woord, getal → het getal
+  const toonJuist = v => v ? (v.soort === 'woord' ? v.juist[0] : v.juist) : null;
+  // de quiz in demomodus: dezelfde regels als de functies in de database (zie fj_quiz_* in feestje-supabase.sql)
   const Quiz = (() => {
     const QK = 'feestje.demo.quiz';
     const lees = () => { try { return JSON.parse(localStorage.getItem(QK)) || null; } catch { return null; } };
     const leeg = () => ({ vragen: typeof QUIZ_VRAGEN !== 'undefined' ? QUIZ_VRAGEN : [], nr: 0, fase: 'uit', geopend: null, antwoorden: [] });
     const get = () => lees() || leeg();
     const put = q => { try { localStorage.setItem(QK, JSON.stringify(q)); } catch {} bc?.postMessage('quiz'); };
+    const soort = v => v?.soort || 'keuze';
+    function stand(q) {
+      const som = new Map(); q.antwoorden.forEach(a => som.set(a.ridder_id, (som.get(a.ridder_id) || 0) + a.punten));
+      return [...som].map(([ridder_id, punten]) => ({ ridder_id, punten })).sort((a, b) => b.punten - a.punten);
+    }
     function toestand(meester) {
-      const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr);
-      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, vraag: q.fase !== 'uit' ? v?.vraag : null, antwoorden: q.fase !== 'uit' ? v?.antwoorden : null,
+      const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr), zie = q.fase !== 'uit' || meester;
+      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
+        afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null,
         verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
-        juist: q.fase === 'uitslag' || meester ? v?.juist : null,
-        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, punten }) => ({ ridder_id, keuze, punten })) : null };
+        juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
+        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten }) => ({ ridder_id, keuze, waarde, punten })) : null,
+        stand: q.fase === 'uitslag' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
       if (meester) t.antwoorden_van = hier.map(a => a.ridder_id);
       return t;
     }
-    function antwoord(ridder, keuze) {
+    function antwoord(ridder, keuze, tekst) {
       const q = get(); if (q.fase !== 'open') return false;
       if (q.antwoorden.some(a => a.nr === q.nr && a.ridder_id === ridder)) return false;
-      const sec = (Date.now() - q.geopend) / 1000, goed = keuze === q.vragen[q.nr - 1].juist;
-      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze, punten: goed ? 100 + Math.max(0, 30 - Math.floor(sec)) : 0 }); put(q); return true;
+      if (!demoGet().ridders.some(r => r.id === ridder)) return false;
+      const v = q.vragen[q.nr - 1], s = soort(v), snel = Math.max(0, 30 - Math.floor((Date.now() - q.geopend) / 1000));
+      let punten = 0;
+      if (s === 'keuze') { if (!(keuze >= 0 && keuze <= 3)) return false; if (keuze === v.juist) punten = 100 + snel; }
+      else if (s === 'woord') { if (!norm(tekst)) return false; if (v.juist.some(g => norm(g) === norm(tekst))) punten = 100 + snel; }
+      else if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
+      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 60), punten });
+      put(q); return true;
     }
     function stap(actie) {
-      const q = get();
-      if (actie === 'start') Object.assign(q, { nr: 1, fase: 'wacht', geopend: null });
+      const q = get(), v = q.vragen[q.nr - 1];
+      if (actie === 'start' && q.vragen.length) Object.assign(q, { nr: 1, fase: 'wacht', geopend: null });
       else if (actie === 'open' && q.fase === 'wacht') Object.assign(q, { fase: 'open', geopend: Date.now() });
       else if (actie === 'sluit' && q.fase === 'open') q.fase = 'dicht';
       else if (actie === 'toon' && (q.fase === 'open' || q.fase === 'dicht')) {
         q.fase = 'uitslag';
+        if (soort(v) === 'getal') {   // schatting: rangorde op afstand, gelijke afstand = gelijke plaats (zoals rank() in SQL)
+          const hier = q.antwoorden.filter(a => a.nr === q.nr), af = a => Math.abs(parseFloat(a.waarde.replace(',', '.')) - v.juist);
+          hier.forEach(a => { const plaats = 1 + hier.filter(b => af(b) < af(a)).length; a.punten = Math.max(0, 100 - 20 * (plaats - 1)); });
+        }
         const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
         if (spel) {
-          const som = new Map(); q.antwoorden.forEach(a => som.set(a.ridder_id, (som.get(a.ridder_id) || 0) + a.punten));
-          d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat([...som].map(([ridder_id, punten]) => ({ ridder_id, spel_id: spel.id, punten })));
+          d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));
           try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
         }
       } else if (actie === 'volgende') { if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit'; }
@@ -141,7 +161,11 @@ const Db = (() => {
     /* ---------- de quiz (zie fj_quiz_* in feestje-supabase.sql; de demo doet hetzelfde in localStorage) ---------- */
     quizToestand: async () => live ? rpc('fj_quiz_toestand') : Quiz.toestand(false),
     quizMeester: async pin => live ? rpc('fj_quiz_meester', { p_pin: pin }) : (demoPin(pin), Quiz.toestand(true)),
-    quizAntwoord: async (ridder, keuze) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze }) : Quiz.antwoord(ridder, keuze),
+    // keuze: 0–3 bij een keuzevraag, anders null; tekst: het woord of het getal, anders null
+    quizAntwoord: async (ridder, keuze, tekst = null) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze, p_tekst: tekst }) : Quiz.antwoord(ridder, keuze, tekst),
+    // de vragen zoals de database ze wil (soort ingevuld; de database normaliseert de woorden zelf bij het vergelijken)
+    quizVoorbereid: vragen => vragen.map(v => ({ soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
+    norm,
     quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
     quizLaad: async (pin, vragen) => live ? rpc('fj_quiz_laad', { p_pin: pin, p_vragen: vragen }) : (demoPin(pin), Quiz.laad(vragen)),
 

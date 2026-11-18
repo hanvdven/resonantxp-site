@@ -161,6 +161,46 @@
     #stage.wapens #klok { left: 1660px; top: 14px; width: 210px; height: 210px; z-index: 3; }
     #stage.wapens #klok .klein-weg { display: none; }
     #stage.wapens #k-tijd { font-size: 74px; transform: translateY(60px); }
+    /* ---------- de quiz: een volledig perkament, de klok klein rechtsboven (zoals bij de wapenkunde) ---------- */
+    #quizscherm { position: absolute; left: 34px; top: 112px; width: 1852px; height: 860px; padding: 44px 70px 36px; color: var(--inkt); z-index: 2;
+      background: url(feestje-img/tv/perkament.webp) -40px -40px / calc(100% + 80px) calc(100% + 80px) no-repeat; filter: drop-shadow(0 18px 26px rgba(0,0,0,.6));
+      opacity: 0; pointer-events: none; transition: opacity .8s ease; display: grid; grid-template-rows: auto 1fr auto; }
+    #stage.quiz #quizscherm { opacity: 1; pointer-events: auto; }
+    #stage.quiz #paneel, #stage.quiz #nu, #stage.quiz #wapenkunde { opacity: 0; pointer-events: none; }
+    #stage.quiz #klok { left: 1660px; top: 14px; width: 210px; height: 210px; z-index: 3; }
+    #stage.quiz #klok .klein-weg { display: none; }
+    #stage.quiz #k-tijd { font-size: 74px; transform: translateY(60px); }
+    #quizscherm h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 60px; line-height: 1; margin: 0; display: flex; align-items: flex-end; gap: 24px; position: relative; }
+    #quizscherm h1 small { font-family: "Grenze", serif; font-size: 30px; font-weight: 600; color: var(--rubriek); font-variant-caps: small-caps; letter-spacing: .08em; padding-bottom: 6px; }
+    .qz { display: grid; grid-template-columns: 1fr 620px; gap: 0 48px; min-height: 0; margin-top: 18px; position: relative; }
+    .qz.zonder { grid-template-columns: 1fr 360px; }
+    .qz .vraag { font-size: 48px; line-height: 1.15; margin: 0 0 26px; }
+    .qz .keuzes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 26px; }
+    .qz .keuzes div { display: grid; grid-template-columns: 70px 1fr; gap: 18px; align-items: center; font-size: 36px; line-height: 1.1; transition: opacity .6s; }
+    .qz .keuzes svg { width: 66px; height: 79px; }
+    .qz .keuzes .mis { opacity: .28; }
+    .qz .keuzes .goed span { color: var(--rubriek); font-weight: 600; }
+    .qz .keuzes .aantal { font-size: 28px; color: var(--inkt-zacht); font-weight: 400; margin-left: 8px; }
+    .qz .keuzes div { font-size: 40px; }
+    .qz .vrij { font-size: 38px; color: var(--inkt-zacht); }
+    .qz .vrij b { display: block; font-family: "Maximilian", serif; font-weight: 400; font-size: 120px; line-height: 1; color: var(--rubriek); margin-top: 6px; }
+    .qz .rechts { display: grid; align-content: start; justify-items: center; gap: 14px; min-height: 0; }
+    .qz .rechts img.plaat { display: block; max-width: 620px; max-height: 500px; object-fit: contain; box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40,24,8,.45); }
+    .qz .rechts img.svg { box-shadow: none; max-height: 480px; }
+    .qz .qr { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; font-size: 26px; color: var(--inkt-zacht); }
+    .qz .qr img { width: 150px; height: 150px; }
+    .qz.zonder .qr { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+    .qz.zonder .qr img { width: 300px; height: 300px; }
+    .qz .qr b { color: var(--inkt); font-weight: 600; }
+    .qz .lijst { display: grid; gap: 6px; font-size: 32px; margin-top: 10px; }
+    .qz .lijst div { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 18px; align-items: baseline; }
+    .qz .lijst i { font-style: normal; color: var(--rubriek); font-weight: 700; }
+    .qz .lijst span.w { color: var(--inkt-zacht); }
+    .qz .lijst b { font-family: "Maximilian", serif; font-weight: 400; font-size: 40px; }
+    .qvoet { display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; font-size: 30px; margin-top: 14px; }
+    .qvoet .balk { height: 16px; border-radius: 8px; background: rgba(90, 60, 25, .2); overflow: hidden; }
+    .qvoet .balk i { display: block; height: 100%; background: var(--rubriek); width: 100%; }
+    .qvoet .balk.op i { background: #8a7a5c; }
     #wapenkunde h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 70px; line-height: 1; margin: 0; display: flex; align-items: flex-end; }
     #wapenkunde h1 svg { width: 96px; height: 96px; margin-right: 4px; }
     #wapenkunde .sub { font-size: 28px; color: var(--inkt-zacht); margin: 6px 140px 14px 0; }
@@ -266,6 +306,10 @@
   </section>
 
   <section id="wapenkunde" class="sleet" aria-label="Wapenkunde"></section>
+  <section id="quizscherm" class="sleet" aria-label="Quiz"><svg id="rand-qz" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
+    <h1><span><svg id="initiaal-qz" viewBox="0 0 92 92" aria-hidden="true" style="width:86px;height:86px;vertical-align:bottom"></svg>ennis van het rijk</span><small id="qz-nr"></small></h1>
+    <div class="qz" id="qz"></div>
+    <div class="qvoet" id="qz-voet"></div></section>
 
   <div id="meldingen" aria-live="polite"></div>
   <div id="aftel"><canvas id="vuurwerk" width="1920" height="1080" aria-hidden="true"></canvas><div class="tekst"><div class="n" id="aftel-n"></div><p id="aftel-p"></p></div></div>
@@ -633,7 +677,7 @@ function naarHoofdpagina(vanzelf = false) {
   handmatig = false; keuze = !vanzelf && $('#stage').classList.contains('wapens') ? 'hoofd' : null;
   pagina = 0; tekenStand(); kiesTab(rotatie()[0], true); wapenModus();
 }
-$('#klok').addEventListener('click', () => naarHoofdpagina());
+$('#klok').addEventListener('click', () => { if (!QuizTV.verberg()) naarHoofdpagina(); });
 setInterval(() => {
   if (handmatig || Date.now() < tabTot) { if (handmatig && TABS[tab].id === 'wunder' && Date.now() >= tabTot) { Wonder.volgende(); tabTot = Date.now() + TABS[tab].duur * 1000; } return; }
   if (TABS[tab].id === 'stand' && stand && ranglijst(stand).length > PER_PAGINA && (pagina + 1) * PER_PAGINA < stand.ridders.length) { pagina++; tekenStand(); tabTot = Date.now() + 15000; return; }
@@ -732,6 +776,7 @@ function nieuweStand(s) {
       const r = s.ridders.find(x => x.id === p.ridder_id), sp = s.spelen.find(x => x.id === p.spel_id);
       if (!r || !sp) continue;
       flits.add(r.id);
+      if (sp.naam === 'Quiz') continue;          // de quizpunten staan al op het quizscherm: geen stortvloed aan meldingen
       melding(d > 0 ? 'Je kreeg' : 'Je verloor', `${d > 0 ? '+' : '−'}${Math.abs(d)} · ${esc(sp.naam)}<br>${esc(r.naam)}`, r.wapen, 'm' + r.id + Date.now());
     }
     for (const r of s.ridders) if (!vorigeTotalen.has(r.id)) melding('Nieuwe ridder', esc(r.naam), r.wapen, 'n' + r.id);
@@ -928,6 +973,84 @@ const ECHT = [
   for (const [x, y] of [[22.5, 22.5], [W - 22.5, 22.5], [22.5, H - 22.5], [W - 22.5, H - 22.5]]) o += goudstip(x, y, 6);
   $('#rand-wk').setAttribute('viewBox', `0 0 ${W} ${H}`); $('#rand-wk').innerHTML = o;
 })();
+/* =========================================================
+   DE QUIZ op de tv: vraag, afbeelding, A–D, tijdbalk, wie al antwoordde, de QR-code; daarna de uitslag en de eindstand.
+   De quizmaster stuurt vanuit /feestje-beheer; spelers antwoorden op /feestje-quiz. Zolang de quiz loopt, staat dit
+   scherm vooraan (behalve rond middernacht). Klik op de klok = verbergen tot de volgende stap van de quizmaster.
+   ========================================================= */
+const QuizTV = (() => {
+  const LETTERS = ['A', 'B', 'C', 'D'], KLEUREN_Q = ['gules', 'azure', 'vert', 'or'];
+  const letterSchild = i => `<svg viewBox="0 0 200 240" aria-hidden="true"><path d="${SHIELD}" fill="${TINCT[KLEUREN_Q[i]][1]}" stroke="#2a1f16" stroke-width="8"/>`
+    + `<text x="100" y="150" text-anchor="middle" font-family="Maximilian, serif" font-size="130" fill="${i === 3 ? '#2a1f16' : '#f6ecd6'}">${LETTERS[i]}</text></svg>`;
+  let t = null, opgehaald = 0, getekend = '', verborgen = '', eindTot = 0, vorigeFase = 'uit';
+  const naam = id => (stand?.ridders.find(r => r.id === id)?.naam || '?').split(' van ')[0];
+  const zichtbaar = () => t && !(t.fase === 'uit' && Date.now() > eindTot) && verborgen !== `${t.fase}|${t.nr}`;
+  function teken() {
+    const aan = zichtbaar() && !$('#stage').classList.contains('nacht');
+    $('#stage').classList.toggle('quiz', !!aan);
+    if (!aan) return;
+    const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' ? t.stand : null, (stand?.ridders || []).length]);
+    if (staat !== getekend) { getekend = staat; inhoud(); }
+    voet();
+  }
+  function inhoud() {
+    $('#qz-nr').textContent = t.nr && t.fase !== 'uit' ? `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}` : '';
+    const qr = `<div class="qr"><img src="feestje-img/quiz/qr.svg" alt=""><div>Speel mee op je gsm:<br><b>resonantxp.com/feestje-quiz</b></div></div>`;
+    if (t.fase === 'uit') {          // de eindstand
+      const rij = (t.stand || []).slice(0, 10).map(x => `<div><i>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</i><span>${esc(naam(x.ridder_id))}</span><span></span><b>${x.punten}</b></div>`).join('');
+      $('#qz').className = 'qz zonder';
+      $('#qz').innerHTML = `<div><p class="vraag">De eindstand</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts"></div>`;
+      return;
+    }
+    const uitslag = t.fase === 'uitslag', plaat = t.afbeelding;
+    let links = `<p class="vraag">${esc(t.vraag)}</p>`;
+    const hoeveel = i => (t.uitslag || []).filter(u => u.keuze === i).length;
+    if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
+    else links += `<div class="vrij">${uitslag ? `Het juiste antwoord<b>${esc(t.juist)}</b>` : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : 'Typ het antwoord op je gsm.'}</div>`;
+    if (uitslag) {
+      const goed = (t.uitslag || []).filter(u => u.punten > 0).slice(0, 5);
+      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(u.waarde)}</span><b>+${u.punten}</b></div>`).join('')
+        || '<div><span></span><span>Niemand had het goed.</span></div>'}</div>`;
+    }
+    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="">${uitslag ? '' : qr}` : qr;
+    $('#qz').className = 'qz' + (plaat ? '' : ' zonder');
+    $('#qz').innerHTML = `<div>${links}</div><div class="rechts">${rechts}</div>`;
+  }
+  function voet() {
+    if (!t || t.fase === 'uit') { $('#qz-voet').innerHTML = ''; return; }
+    const sec = t.fase === 'open' ? (t.verstreken || 0) + (performance.now() - opgehaald) / 1000 : 0;
+    const rest = Math.max(0, 30 - sec);
+    const tekst = { wacht: 'Lees de vraag. De quizmaster opent ze zo.', open: rest > 0 ? `nog ${Math.ceil(rest)} s voor de snelheidsbonus` : 'De bonus is op; antwoorden mag nog.',
+      dicht: 'De vraag is gesloten.', uitslag: '' }[t.fase];
+    const html = `<div><div class="balk${t.fase === 'open' && rest === 0 ? ' op' : ''}"><i style="width:${t.fase === 'open' ? rest / 30 * 100 : t.fase === 'wacht' ? 100 : 0}%"></i></div><div style="margin-top:6px">${tekst}</div></div>
+      <div>${t.aantal} van ${t.ridders} ridders antwoordden</div>`;
+    if ($('#qz-voet').innerHTML !== html) $('#qz-voet').innerHTML = html;
+  }
+  async function haal() {
+    try {
+      const n = await Db.quizToestand();
+      if (vorigeFase !== 'uit' && n.fase === 'uit' && n.nr > 0) eindTot = Date.now() + 3 * 60e3;   // de eindstand drie minuten laten staan
+      vorigeFase = n.fase; t = n; opgehaald = performance.now();
+    } catch { /* volgende keer */ }
+    teken();
+  }
+  // de rand en de initiaal, zoals de wapenkunde
+  (() => {
+    const W = 1852, H = 860, { rechthoek, dubbel, rank, goudstip } = Hand;
+    let o = GOUD;
+    o += dubbel(rechthoek(18, 18, W - 36, H - 36, 1.6, 91), rechthoek(19, 19.5, W - 38, H - 39, 1.6, 92), '#a2302a', 2.6);
+    o += dubbel(rechthoek(27, 27, W - 54, H - 54, 1.4, 93), rechthoek(27.5, 28, W - 55, H - 56, 1.4, 94), '#2f4f86', 1.8);
+    o += rank(30, 30, 0, 1, 220, 96) + rank(W - 30, H - 30, -1, 0, 260, 97) + rank(30, H - 30, 1, 0, 160, 98);
+    for (const [x, y] of [[22.5, 22.5], [W - 22.5, 22.5], [22.5, H - 22.5], [W - 22.5, H - 22.5]]) o += goudstip(x, y, 6);
+    $('#rand-qz').setAttribute('viewBox', `0 0 ${W} ${H}`); $('#rand-qz').innerHTML = o;
+  })();
+  return {
+    start() { haal(); setInterval(haal, 1500); setInterval(voet, 250); document.fonts.ready.then(() => { tekenInitiaal('K'); $('#initiaal-qz').innerHTML = $('#initiaal').innerHTML; tekenInitiaal(TABS[tab].letter); }); },
+    verberg() { if (t && zichtbaar()) { verborgen = `${t.fase}|${t.nr}`; if (t.fase === 'uit') eindTot = 0; teken(); return true; } return false; },
+    teken,
+  };
+})();
+
 function wapenModus() {
   const t = now(), h = feestUur(t), aan = keuze ? keuze === 'wapens' : h >= CONFIG.partyFrom && h < 18 && t >= CONFIG.start;
   $('#stage').classList.toggle('wapens', aan);
@@ -1155,6 +1278,7 @@ function tik() { Klok.render(); aftellen(); wapenModus(); aankondigen(); }
 function elkeMinuut() { nuStrook(); toonLijf(); if (TABS[tab].id === 'getijden') tekenGetijden(); }
 kiesTab(rotatie()[0], true);
 Spotify.start();
+QuizTV.start();
 document.fonts.ready.then(() => { Klok.opnieuw(); elkeMinuut(); });
 tik(); elkeMinuut();
 setTimeout(() => { tik(); setInterval(tik, 1000); }, 1000 - (now().getTime() % 1000) + 5);   // gelijk met de seconde
