@@ -980,6 +980,7 @@
   <script src="feestje-config.js"></script>
   <script src="feestje-wapen.js"></script>
   <script src="feestje-hemel.js"></script>
+  <script src="feestje-sterren.js"></script>
   <script src="feestje-dobbel.js"></script>
   <script>
   'use strict';
@@ -1050,12 +1051,24 @@
   /* =========================================================
      STERREN, LANDSCHAP, PAGINAHEMEL
      ========================================================= */
+  /* De echte sterren boven Kessel-Lo, nu (feestje-sterren.js). We kijken naar het zuiden: 150° breed, van de horizon
+     (de top van de verre heuvels) tot 50° hoog; de hoogte is dus zo'n twee keer samengedrukt, zoals een miniaturist
+     zou doen in een lage strook. Elke 4 minuten opnieuw: zo snel draait de hemel één graad. */
   (function makeStars() {
-    const svg = $('#stars'), rnd = seeded(1403);
-    for (let i = 0; i < 150; i++) {
-      const c = svgEl('circle', { cx: (rnd() * 1000).toFixed(1), cy: (rnd() * 760).toFixed(1), r: (rnd() * 1.2 + .3).toFixed(2), fill: '#fff3d6', opacity: (rnd() * .6 + .3).toFixed(2) }, svg);
-      if (rnd() < .3) (rnd() < .5 ? $('#stars-a') : $('#stars-b')).appendChild(c);   // deze twinkelen mee met hun laag
+    const lagen = [$('#stars'), $('#stars-a'), $('#stars-b')], mini = $('.miniature');
+    function teken() {
+      const W = mini.clientWidth, H = mini.clientHeight; if (!W || !H) return;
+      for (const l of lagen) { l.setAttribute('viewBox', `0 0 ${W} ${H}`); l.setAttribute('preserveAspectRatio', 'none'); l.textContent = ''; }
+      const horizon = H * .6, schaal = Math.min(1.4, Math.max(.8, W / 700));
+      sterrenBoven(now(), CONFIG.lat, CONFIG.lon).forEach(({ alt, az, mag }, i) => {
+        const dx = ((az - 180 + 540) % 360) - 180; if (Math.abs(dx) > 75 || alt > 52) return;
+        const c = svgEl('circle', { cx: (W / 2 + dx / 150 * W).toFixed(1), cy: (horizon - alt / 50 * horizon).toFixed(1),
+          r: (clamp(2.6 - .45 * mag, .55, 3.4) * schaal).toFixed(2), fill: '#fff3d6', opacity: clamp(1.05 - .14 * mag, .35, 1).toFixed(2) }, lagen[0]);
+        if (i % 10 < 3) lagen[1 + i % 2].appendChild(c);   // een op drie twinkelt mee met een laag
+      });
     }
+    teken(); setInterval(teken, 240000);
+    let rt = null; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(teken, 300); });
   })();
 
   (function makeLandscape() {

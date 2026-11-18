@@ -14,6 +14,7 @@ const DIVS = { plain: 'Effen', pale: 'Gedeeld', fess: 'Doorsneden', bend: 'Gesch
 const CHARGES = { none: 'Geen', ster: 'Ster', kruis: 'Kruis', maan: 'Maan', zwaard: 'Zwaard', kroon: 'Kroon', roos: 'Roos', beker: 'Beker' };
 const PLACES = ['Skalice', 'Rataje', 'Talmberk', 'Sázava', 'Úžice', 'Ledečko', 'Mrchojedy', 'Samopše', 'Kutná Hora', 'Pirkštejn', 'Sedlec', 'Zbořený Kostelec', 'Malešov', 'Rataje nad Sázavou'];
 const MEER_STUKKEN = { lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl', leeuw: 'Leeuw', adelaar: 'Adelaar', dubbeladelaar: 'Dubbele adelaar', michiel: 'Sint-Michiel', iris: 'Iris' };
+const ALLE_STUKKEN = { ...CHARGES, ...MEER_STUKKEN };   // voor het beheer en het tv-scherm (de wapenmaker op /feestje houdt het bij CHARGES)
 const SHIELD = 'M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z';
 
 function chargeMarkup(ch, fill) {

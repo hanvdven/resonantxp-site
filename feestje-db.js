@@ -42,12 +42,12 @@ const Db = (() => {
   const W = (t1, t2, div, ch, c) => ({ t1, t2, div, ch, c });
   function demoSeed() {
     const ridders = [
-      ['Heer Jindřich van Skalice', W('azure', 'or', 'pale', 'ster', 'or')],
-      ['Hans Capon van Rataje', W('gules', 'argent', 'fess', 'kroon', 'or')],
-      ['Vrouwe Theresa van de Molen', W('vert', 'or', 'bend', 'roos', 'argent')],
-      ['Broeder Godwin', W('sable', 'argent', 'plain', 'beker', 'or')],
-      ['Ritmeester Bernard', W('or', 'gules', 'chevron', 'zwaard', 'sable')],
-      ['Janosh Pfefferkorn', W('purpure', 'or', 'quarterly', 'maan', 'argent')],
+      ['Heer Jindřich van Skalitz', W('azure', 'or', 'pale', 'ster', 'or')],
+      ['Jonker Hans van Rataje', W('gules', 'argent', 'fess', 'kroon', 'or')],
+      ['Vrouwe Theresa van Skalice', W('vert', 'or', 'bend', 'roos', 'argent')],
+      ['Broeder Godwin van Sázava', W('sable', 'argent', 'plain', 'beker', 'or')],
+      ['Ritmeester Bernard van Trosky', W('or', 'gules', 'chevron', 'zwaard', 'sable')],
+      ['Meester Janosh van Kuttenberg', W('purpure', 'or', 'quarterly', 'maan', 'argent')],
     ].map(([naam, wapen], i) => ({ id: i + 1, naam, wapen }));
     const spelen = ['Wapen', 'Kostuum', 'Zwaard', 'Boog', 'Dobbelen', 'Proeverij', 'Quiz'].map((naam, i) => ({ id: i + 1, naam, volgorde: i + 1 }));
     const P = [[1, 1, 7], [1, 2, 8], [1, 3, 5], [1, 4, 9], [2, 2, 6], [2, 3, 9], [2, 5, 12], [3, 1, 9], [3, 2, 9], [3, 4, 7], [4, 2, 4], [4, 6, 8], [4, 7, 10], [5, 3, 10], [5, 4, 6], [6, 1, 5], [6, 2, 7], [6, 5, 8]];
