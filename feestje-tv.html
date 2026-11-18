@@ -1207,27 +1207,30 @@ const Vuurwerk = (() => {
   /* De komeet van 1401 (folio 65): groot en traag, de kop vooraan, de pauwenstaart schuin omhoog erachter.
      kop = waar in het knipsel de kern zit. Eén tegelijk; zodra hij weg is, komt de volgende. */
   const KOMEET = { img: laad('komeet-1401'), kop: [75, 150], schaal: 1.45 };
-  /* bewegende strepen over de staart, in de kleuren, richting en dikte van de geschilderde strepen: ze vertrekken bij
-     de kop en schuiven langs een straal naar buiten (in de coördinaten van het knipsel: kop links, staart rechts omhoog) */
-  const STREEPKLEUR = ['#f6e3a8', '#efc77a', '#e6a24e', '#d9823a', '#fff1cc', '#c8743a'];
-  const nieuweStreep = (r = rnd(10, 60)) => {
-    const doelY = rnd(15, 285), dx = 690 - 75, dy = doelY - 150, l = Math.hypot(dx, dy);
-    return { ux: dx / l, uy: dy / l, r, max: l * rnd(.7, 1), len: rnd(40, 130), v: rnd(50, 110), dik: rnd(.8, 2.4),
-      kleur: STREEPKLEUR[(Math.random() * STREEPKLEUR.length) | 0], buig: rnd(-.12, .12) };
+  /* speed lines over de staart (zoals in anime): korte, dunne strepen die in een flits van de kop naar achteren schieten
+     en meteen weer verdwijnen. In de coördinaten van het knipsel: kop links, staart rechts omhoog. */
+  const STREEPKLEUR = ['#fff6dc', '#f6e3a8', '#efc77a', '#e6a24e', '#ffffff'];
+  const nieuweStreep = (leeftijd = 0) => {
+    const doelY = rnd(20, 280), dx = 690 - 75, dy = doelY - 150, l = Math.hypot(dx, dy);
+    return { ux: dx / l, uy: dy / l, r: rnd(20, l * .75), max: l, len: rnd(25, 85), v: rnd(700, 1300), dik: rnd(.7, 2),
+      t: leeftijd, duur: rnd(.18, .42), kleur: STREEPKLEUR[(Math.random() * STREEPKLEUR.length) | 0] };
   };
-  function komeet() { kometen.push({ x: W + 60, y: rnd(150, 300), vx: -55, vy: 7, strepen: Array.from({ length: 60 }, () => nieuweStreep(rnd(10, 520))) }); }
+  function komeet() { kometen.push({ x: W + 60, y: rnd(150, 300), vx: -55, vy: 7, strepen: Array.from({ length: 70 }, () => nieuweStreep(-rnd(0, .4))) }); }
   function strepen(k, dt) {
-    const { kop, schaal } = KOMEET;
+    const { schaal } = KOMEET;
     g.save(); g.translate(k.x, k.y); g.scale(schaal, schaal); g.lineCap = 'round';
     for (const st of k.strepen) {
-      st.r += st.v * dt; if (st.r > st.max) Object.assign(st, nieuweStreep());
-      const a = Math.min(1, st.r / 60, (st.max - st.r) / 80);           // in- en uitfaden
+      st.t += dt; if (st.t < 0) continue;                                  // nog even wachten (gespreid begin)
+      st.r += st.v * dt;
+      if (st.t > st.duur || st.r > st.max) { Object.assign(st, nieuweStreep(-rnd(0, .15))); continue; }
+      const f = st.t / st.duur, a = f < .2 ? f / .2 : (1 - f) / .8;       // flits: snel aan, uitdoven
       const x1 = st.ux * st.r, y1 = st.uy * st.r, x2 = st.ux * (st.r + st.len), y2 = st.uy * (st.r + st.len);
-      g.globalAlpha = Math.max(0, a) * .75; g.strokeStyle = st.kleur; g.lineWidth = st.dik;
-      g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 - st.uy * st.buig * st.len, (y1 + y2) / 2 + st.ux * st.buig * st.len, x2, y2); g.stroke();
+      g.globalAlpha = a * .85; g.strokeStyle = st.kleur; g.lineWidth = st.dik;
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
     }
     g.globalAlpha = 1; g.restore();
   }
+
 
   /* De draken van folio 127 ("vliegende draken boven Bohemen", 1533). kop: aan welke kant van het knipsel de kop zit,
      zodat elke draak met de kop vooruit vliegt. Een zwerm van ~40, zoals op de plaat de meeste naar links. */
