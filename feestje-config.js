@@ -35,3 +35,15 @@ const LIJF = {
   maaltijden: [[20, 'Het riddermaal', 75], [21, 'De proeverij', 12], [24, 'Oliebollen', 35]],
   oppeppers:  [[23.75, 'Heilandsbrandewijn', 15], [24, 'Middernacht', 25]],
 };
+
+/* Uitleg per spel, voor het tabblad "Spelen" op het tv-scherm. De naam moet gelijk zijn aan die in de database (fj_spelen).
+   [naam, icoon uit feestje-img/kcd, uitleg]. Een voorstel: pas gerust aan. */
+const UITLEG = [
+  ['Wapen', 'schild', 'Schilder uw wapen op schild of tuniek, van 16:00 tot 18:00. Tot 10 punten voor kleur, vorm en heraldiek.'],
+  ['Kostuum', 'tuniek', 'Punten voor echtheid, vindingrijkheid en het verhaal erbij. De prijs volgt bij het riddermaal.'],
+  ['Zwaard', 'arena', 'Schuimzwaarden op het erf. Een treffer is een punt, een vooraf aangekondigde meesteraanval drie.'],
+  ['Boog', 'boog', 'Vijf pijlen op de schijf, zonder vizier, zoals het hoort. De roos is tien punten.'],
+  ['Dobbelen', 'dobbel', 'Zes stenen. Een 1 is 100, een 5 is 50, drie gelijke zijn honderd keer de waarde. Wie eerst 2000 heeft, wint groschen.'],
+  ['Proeverij', 'honing', 'Proef blind en raad wat het is. Een punt per goed antwoord, en een bonus voor wie het mooist ernaast zit.'],
+  ['Quiz', 'lezen', 'Van Trosky tot Kuttenberg, van bier tot boerenwijsheid. Tien vragen per ronde.'],
+];
