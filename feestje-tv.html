@@ -550,6 +550,11 @@ document.fonts.ready.then(() => { tik(); elkeMinuut(); });
 tik(); elkeMinuut();
 setInterval(tik, 1000);
 setInterval(elkeMinuut, 30000);
+// het scherm wakker houden (Wake Lock API), zodat de schermbeveiliging van de Chromecast niet over de stand valt.
+// Kan het toestel dat niet, dan gebeurt er niets. Na het wisselen van app moet de vergrendeling opnieuw.
+async function wakker() { try { await navigator.wakeLock?.request('screen'); } catch { /* niet ondersteund of geweigerd */ } }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wakker(); });
+wakker();
 // een tv die dagen aanstaat: één keer per dag (om 6 uur 's ochtends) herladen tegen geheugenlekken
 setTimeout(() => location.reload(), (() => { const t = new Date(), r = new Date(t); r.setHours(30, 0, 0, 0); return r - t; })());
 </script>
