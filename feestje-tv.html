@@ -162,6 +162,12 @@
     #klok { transition: left .9s ease, top .9s ease, width .9s ease, height .9s ease, opacity .8s ease; }
     #stage.nacht #klok { left: 580px; top: 36px; width: 760px; height: 760px; z-index: 3; }
     #stage.nieuwjaar #klok { opacity: 0; pointer-events: none; }        /* na middernacht: alleen hemel, stad en vuurwerk */
+    /* de laatste minuut: het midden van de klok telt de seconden af; uur, datum en de rest mogen weg */
+    #k-sec, #k-sec-o { display: none; }
+    #klok.laatste #k-sec, #klok.laatste #k-sec-o { display: inline; }
+    #klok.laatste #k-tijd, #klok.laatste .klein-weg { display: none; }
+    @keyframes tikSec { from { opacity: .35; } to { opacity: 1; } }
+    #klok.laatste #k-sec.tik { animation: tikSec .45s ease-out; }
     #stage.nieuwjaar #aftel { place-items: center; padding-bottom: 120px; }
     #stage.nieuwjaar #aftel .z { font-size: 170px; }
     #aftel { position: absolute; inset: 0; display: none; place-items: end center; text-align: center; padding-bottom: 96px; z-index: 9; pointer-events: none; }
@@ -332,6 +338,9 @@
       <text class="klein-weg" id="k-b1" y="50" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
       <text class="klein-weg" id="k-b2" y="74" font-family="Maximilian, Georgia, serif" font-size="20" fill="#e9be52"></text>
       <g class="klein-weg rom" id="k-b2r" font-family="Grenze, Georgia, serif" font-weight="700" font-size="20" fill="#e9be52" transform="translate(0,74)"></g>
+      <!-- de laatste minuut: alleen de seconden, groot in het midden -->
+      <text id="k-sec" y="-6" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="170" fill="#e9be52"></text>
+      <text id="k-sec-o" y="88" font-family="Grenze, Georgia, serif" font-size="16" fill="#d9cdb0" letter-spacing="2">TOT MIDDERNACHT</text>
     </g>
     <!-- honger en energie, met de icoontjes uit de game (zoals in het wachtmenu) -->
     <g id="k-lijf" class="klein-weg" font-family="Maximilian, Georgia, serif" font-size="21" fill="#f1e6cf">
@@ -650,6 +659,12 @@ const Klok = (() => {
     } else if (t < CONFIG.midnight) { a1 = 'TOT MIDDERNACHT'; a2 = hms; }
     else { a1 = 'ANNO DOMINI'; a2 = roman(CONFIG.annoDomini); b1 = 'ZALIG NIEUWJAAR'; }
     $('#k-a1').textContent = a1; $('#k-b1').textContent = b1;
+    // de laatste minuut: alleen de seconden, groot in het midden van de klok (elke seconde een korte flits)
+    const laatste = t >= CONFIG.start && s > 0 && s <= 60;
+    $('#klok').classList.toggle('laatste', laatste);
+    if (laatste && $('#k-sec').textContent !== String(s)) {
+      const el = $('#k-sec'); el.textContent = String(s); el.classList.remove('tik'); void el.getBBox(); el.classList.add('tik');
+    } else if (!laatste) $('#k-sec').textContent = '';
     zet($('#k-a2'), $('#k-a2r'), a2, 234); zet($('#k-b2'), $('#k-b2r'), b2, 214);    const min = Math.floor(t / 60000);
     if (min === lastMin) return; lastMin = min;           // het wiel maar één keer per minuut
     paintWheel(t);
