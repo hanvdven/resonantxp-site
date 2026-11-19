@@ -13,9 +13,20 @@ const TINCT = {
 const DIVS = { plain: 'Effen', pale: 'Gedeeld', fess: 'Doorsneden', bend: 'Geschuind', quarterly: 'Gevierendeeld', chevron: 'Keper' };
 const CHARGES = { none: 'Geen', ster: 'Ster', kruis: 'Kruis', maan: 'Maan', zwaard: 'Zwaard', kroon: 'Kroon', roos: 'Roos', beker: 'Beker' };
 const PLACES = ['Skalice', 'Rataje', 'Talmberk', 'Sázava', 'Úžice', 'Ledečko', 'Mrchojedy', 'Samopše', 'Kutná Hora', 'Pirkštejn', 'Sedlec', 'Zbořený Kostelec', 'Malešov', 'Rataje nad Sázavou'];
-const MEER_STUKKEN = { lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl', leeuw: 'Leeuw', adelaar: 'Adelaar', dubbeladelaar: 'Dubbele adelaar', michiel: 'Sint-Michiel', iris: 'Iris' };
-const ALLE_STUKKEN = { ...CHARGES, ...MEER_STUKKEN };   // voor het beheer en het tv-scherm (de wapenmaker op /feestje houdt het bij CHARGES)
+const MEER_STUKKEN = { poes: 'Slapende poes', solsleutel: 'Solsleutel', zon: 'Zon', schelp: 'Jakobsschelp', hoorn: 'Jachthoorn', boom: 'Boom', lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl', leeuw: 'Leeuw', adelaar: 'Adelaar', dubbeladelaar: 'Dubbele adelaar', michiel: 'Sint-Michiel', iris: 'Iris' };
+const ALLE_STUKKEN = { ...CHARGES, ...MEER_STUKKEN };   // alle stukken: de wapenmaker op /feestje, het beheer en het tv-scherm
 const SHIELD = 'M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z';
+// de riddernaam: titel + voornaam + "van" + geboortestad, bv. "Jonker Han van Leuven" (beheer én uitnodiging)
+const TITELS = ['Heer', 'Vrouwe', 'Ridder', 'Jonker', 'Jonkvrouw', 'Broeder', 'Zuster', 'Meester', 'Ritmeester', 'Burggraaf', 'Burggravin',
+  'Baljuw', 'Hofdame', 'Schildknaap', 'Kanselier', 'Pelgrim'];
+const riddernaam = (titel, voor, stad) => [titel, voor.trim(), stad.trim() ? 'van ' + stad.trim() : ''].filter(Boolean).join(' ');
+// omgekeerd: "Jonker Han van Leuven" → { titel: 'Jonker', voor: 'Han', stad: 'Leuven' } (titel leeg als hij niet in de lijst staat)
+function naamDelen(naam) {
+  let rest = String(naam || '').trim(), titel = '';
+  const t = TITELS.find(x => rest.startsWith(x + ' ')); if (t) { titel = t; rest = rest.slice(t.length + 1); }
+  const i = rest.lastIndexOf(' van ');
+  return i > 0 ? { titel, voor: rest.slice(0, i), stad: rest.slice(i + 5) } : { titel, voor: rest, stad: '' };
+}
 
 function chargeMarkup(ch, fill) {
   const st = `fill="${fill}" stroke="#2a1f16" stroke-width="2.5" stroke-linejoin="round"`;
@@ -35,7 +46,47 @@ function chargeMarkup(ch, fill) {
       return `<g ${st}>${c}</g><circle r="11" fill="#c99a3a" stroke="#2a1f16" stroke-width="2.5"/>`;
     }
     case 'beker': return `<path d="M-30,-44 H30 C30,-6 14,4 5,8 V30 H20 V42 H-20 V30 H-5 V8 C-14,4 -30,-6 -30,-44 Z" ${st}/>`;
-    // meer stukken (voor de wapenkunde op het tv-scherm; niet in de wapenmaker, zie MEER_STUKKEN)
+    // meer stukken (MEER_STUKKEN)
+    // de slapende poes: opgerold, de staart om zich heen, ogen dicht (en twee z'tjes)
+    case 'poes': {
+      const ink = '#2a1f16';
+      const staart = 'M40,14 C48,36 20,46 -4,44 C-22,43 -36,38 -40,30';
+      return `<g stroke="${ink}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+        <ellipse cx="4" cy="12" rx="44" ry="27" fill="${fill}"/>
+        <path d="M-40,-12 L-38,-32 L-26,-19 Z M-20,-20 L-10,-34 L-8,-15 Z" fill="${fill}"/>
+        <circle cx="-25" cy="-2" r="18" fill="${fill}"/>
+        <path d="${staart}" fill="none" stroke="${ink}" stroke-width="13"/><path d="${staart}" fill="none" stroke="${fill}" stroke-width="8"/>
+        <path d="M-34,-3 q4,4 8,0 M-21,-3 q4,4 8,0" fill="none" stroke-width="2.2"/>
+        <path d="M-27,5 l-2,3 l4,0 Z" fill="${ink}" stroke-width="1.2"/>
+        <path d="M14,-30 h9 l-9,9 h9 M28,-46 h11 l-11,11 h11" fill="none" stroke-width="2.6"/></g>`;
+    }
+    // de solsleutel (G-sleutel): één lijn, in de kleur van het stuk met een donkere omlijning
+    case 'solsleutel': {
+      const ink = '#2a1f16';
+      const d = 'M2,16 C-6,16 -8,6 0,3 C12,0 19,12 13,24 C7,35 -14,35 -20,22 C-26,8 -14,-8 -1,-19 C10,-28 17,-40 13,-50 C9,-58 -1,-55 -3,-44 L5,46 C5,55 -5,58 -10,52';
+      return `<path d="${d}" fill="none" stroke="${ink}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="${d}" fill="none" stroke="${fill}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="-9" cy="47" r="7" fill="${fill}" stroke="${ink}" stroke-width="2.5"/>`;
+    }
+    case 'zon': {
+      let p = '';
+      for (let i = 0; i < 32; i++) { const rr = i % 2 ? 30 : 50, a = -Math.PI / 2 + i * Math.PI / 16; p += `${(rr * Math.cos(a)).toFixed(1)},${(rr * Math.sin(a)).toFixed(1)} `; }
+      return `<g ${st}><polygon points="${p}"/><circle r="26"/></g>
+        <g fill="none" stroke="#2a1f16" stroke-width="2" stroke-linecap="round"><path d="M-12,-6 q4,-4 8,0 M4,-6 q4,-4 8,0 M-9,10 q9,7 18,0"/></g>`;
+    }
+    // de Jakobsschelp van de pelgrims
+    case 'schelp': {
+      let ribben = '';
+      for (let i = 1; i < 8; i++) { const a = Math.PI + i * Math.PI / 8, x = (44 * Math.cos(a)).toFixed(1), y = (-6 + 40 * Math.sin(a)).toFixed(1); ribben += `M0,36 L${x},${y} `; }
+      return `<g ${st}><path d="M-14,36 L-24,48 H24 L14,36 Z"/><path d="M0,40 C-40,36 -52,-8 -38,-34 C-22,-54 22,-54 38,-34 C52,-8 40,36 0,40 Z"/>
+        <path d="${ribben}" fill="none" stroke-width="2"/></g>`;
+    }
+    case 'hoorn': return `<g ${st} transform="scale(1.22)"><path d="M-30,-14 C-20,-44 22,-44 30,-16" fill="none" stroke-width="4"/>
+      <path d="M-44,-6 C-38,30 26,34 36,-4 L50,-20 L46,6 L32,0 C20,22 -28,20 -32,-8 Z"/><rect x="-52" y="-12" width="10" height="10" rx="2"/>
+      <path d="M-14,14 l4,-14 M10,14 l-2,-14" fill="none" stroke-width="2"/></g>`;
+    case 'boom': return `<g ${st}><path d="M-7,48 L-5,8 H5 L7,48 L16,52 H-16 Z"/>
+      <path d="M0,-52 C14,-52 22,-42 22,-34 C36,-34 44,-20 38,-8 C46,4 36,20 22,16 C16,26 -16,26 -22,16 C-36,20 -46,4 -38,-8 C-44,-20 -36,-34 -22,-34 C-22,-42 -14,-52 0,-52 Z"/>
+      <path d="M-14,-18 q6,-8 12,0 M6,-4 q6,-8 12,0 M-22,4 q6,-8 12,0" fill="none" stroke-width="2"/></g>`;
     case 'lelie': return `<g ${st}><path d="M0,-52 C15,-32 15,-10 0,8 C-15,-10 -15,-32 0,-52 Z"/><path d="M-6,2 C-30,-6 -46,-26 -34,-42 C-22,-50 -14,-36 -13,-24 C-11,-12 -8,-4 -6,2 Z"/><path d="M6,2 C30,-6 46,-26 34,-42 C22,-50 14,-36 13,-24 C11,-12 8,-4 6,2 Z"/><path d="M-4,14 C-10,30 -22,40 -32,46 C-16,48 -6,42 0,32 C6,42 16,48 32,46 C22,40 10,30 4,14 Z"/><rect x="-26" y="4" width="52" height="10" rx="2"/></g>`;
     case 'toren': return `<g ${st}><path d="M-30,48 V-26 H-36 V-48 H-22 V-38 H-7 V-48 H7 V-38 H22 V-48 H36 V-26 H30 V48 Z"/><path d="M-10,48 V26 A10,10 0 0 1 10,26 V48 Z" fill="#2a1f16"/><rect x="-5" y="-14" width="10" height="16" rx="5" fill="#2a1f16"/></g>`;
     case 'sleutel': return `<g ${st}><path fill-rule="evenodd" d="M-17,-32 a17,17 0 1,0 34,0 a17,17 0 1,0 -34,0 Z M-8,-32 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0 Z"/><path d="M-5,-15 H5 V48 H-5 Z M5,26 H22 V34 H5 Z M5,39 H17 V47 H5 Z"/></g>`;

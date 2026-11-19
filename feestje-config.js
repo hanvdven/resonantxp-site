@@ -52,4 +52,10 @@ const UITLEG = [
 /* Spotify: "nu speelt" op het tv-scherm. Leeg = uit. Client ID van uw eigen app op developer.spotify.com
    (niet geheim). terug = de Redirect URI, letterlijk zo ingevuld in het Spotify-dashboard (en daar op Save gedrukt).
    Vast adres, los van hoe de tv de pagina opende (www of niet, voorbeeld-URL): Spotify vergelijkt teken voor teken. */
-const SPOTIFY = { clientId: '92040bfb176b435d93212aa09fa88051', terug: 'https://resonantxp.com/feestje-tv' };
+const SPOTIFY = {
+  clientId: '92040bfb176b435d93212aa09fa88051', terug: 'https://resonantxp.com/feestje-tv',
+  // meekijken (nu speelt), bedienen (muziek naar de tv halen) en zelf afspelen (Web Playback SDK: streaming + e-mail + private).
+  // Wijzigt deze lijst, dan moet Spotify opnieuw gekoppeld worden: een bestaande koppeling houdt haar oude rechten.
+  scope: 'user-read-currently-playing user-read-playback-state user-modify-playback-state streaming user-read-email user-read-private',
+  toestel: 'De herberg (tv)',   // zo heet de tv in de lijst met apparaten in de Spotify-app
+};

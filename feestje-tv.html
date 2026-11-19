@@ -26,7 +26,7 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; background: #070b1c; overflow: hidden; }
     body.stil { cursor: none; }   /* de muis verdwijnt na 3 s stilstand (zie muis()) */
-    #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden;
+    #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; transition: transform 1.2s ease;
       background: var(--nacht) url(feestje-img/tv/plafond.webp); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
     .fries { position: absolute; left: 0; width: 1920px; height: 92px; border-top: 6px solid var(--rood); border-bottom: 6px solid var(--rood); }
     .fries svg { display: block; }
@@ -134,9 +134,20 @@
     .melding span { font-size: 30px; line-height: 1.2; }
     .melding.weg { animation: uit .5s ease-in both; }
     .melding > img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
-    .melding.muziek img { width: 64px; height: 64px; object-fit: cover; box-shadow: 0 0 0 2px #6e4a24; }
-    .melding.muziek .noot { font-size: 48px; text-align: center; color: var(--rubriek); }
-    .melding.muziek i { font-style: normal; font-size: 26px; color: var(--inkt-zacht); }
+    /* "Nu speelt": lager, over de lijst, in de stijl van de meldingen in het spel (donkere band, goud randje en kop) */
+    #nuspeelt { position: absolute; right: 64px; bottom: 96px; width: 680px; z-index: 6; pointer-events: none; }
+    .nuspeelt { display: grid; grid-template-columns: 76px 1fr; gap: 22px; align-items: center; padding: 18px 40px 18px 22px; color: #f2ead8;
+      background: linear-gradient(90deg, rgba(14,11,8,.95), rgba(14,11,8,.86) 70%, rgba(14,11,8,.58)); border-left: 4px solid #e3b84f;
+      box-shadow: 0 12px 30px rgba(0,0,0,.45); animation: kcdIn .45s ease-out both; }
+    .nuspeelt.weg { animation: kcdUit .5s ease-in both; }
+    @keyframes kcdIn { from { opacity: 0; transform: translateX(30px); } }
+    @keyframes kcdUit { to { opacity: 0; transform: translateX(30px); } }
+    .nuspeelt img { width: 76px; height: 76px; object-fit: cover; box-shadow: 0 0 0 2px #b98a2e, 0 4px 10px rgba(0,0,0,.6); }
+    .nuspeelt .noot { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-size: 40px; color: #e3b84f;
+      background: radial-gradient(circle at 35% 30%, #6c5a3e, #2a2016); border: 2px solid #b98a2e; box-shadow: inset 0 0 0 3px #1a140d; }
+    .nuspeelt b { display: block; font-variant-caps: small-caps; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; font-size: 22px; color: #e3b84f; margin-bottom: 4px; }
+    .nuspeelt span { display: block; font-size: 32px; line-height: 1.15; }
+    .nuspeelt i { display: block; font-style: normal; font-size: 25px; color: rgba(242,234,216,.72); margin-top: 2px; }
     @keyframes in { from { opacity: 0; transform: translateX(40px); } }
     @keyframes uit { to { opacity: 0; transform: translateX(40px); } }
 
@@ -151,6 +162,12 @@
     #klok { transition: left .9s ease, top .9s ease, width .9s ease, height .9s ease, opacity .8s ease; }
     #stage.nacht #klok { left: 580px; top: 36px; width: 760px; height: 760px; z-index: 3; }
     #stage.nieuwjaar #klok { opacity: 0; pointer-events: none; }        /* na middernacht: alleen hemel, stad en vuurwerk */
+    /* de laatste minuut: het midden van de klok telt de seconden af; uur, datum en de rest mogen weg */
+    #k-sec, #k-sec-o { display: none; }
+    #klok.laatste #k-sec, #klok.laatste #k-sec-o { display: inline; }
+    #klok.laatste #k-tijd, #klok.laatste .klein-weg { display: none; }
+    @keyframes tikSec { from { opacity: .35; } to { opacity: 1; } }
+    #klok.laatste #k-sec.tik { animation: tikSec .45s ease-out; }
     #stage.nieuwjaar #aftel { place-items: center; padding-bottom: 120px; }
     #stage.nieuwjaar #aftel .z { font-size: 170px; }
     #aftel { position: absolute; inset: 0; display: none; place-items: end center; text-align: center; padding-bottom: 96px; z-index: 9; pointer-events: none; }
@@ -181,9 +198,9 @@
     #stage.quiz #k-tijd { font-size: 74px; transform: translateY(60px); }
     #quizscherm h1 { font-family: "Maximilian", serif; font-weight: 400; font-size: 60px; line-height: 1; margin: 0; display: flex; align-items: flex-end; gap: 24px; position: relative; }
     #quizscherm h1 small { font-family: "Grenze", serif; font-size: 30px; font-weight: 600; color: var(--rubriek); font-variant-caps: small-caps; letter-spacing: .08em; padding-bottom: 6px; }
-    .qz { display: grid; grid-template-columns: 1fr 620px; gap: 0 48px; min-height: 0; margin-top: 18px; position: relative; }
+    .qz { display: grid; grid-template-columns: 1fr 1fr; gap: 0 48px; min-height: 0; margin-top: 18px; position: relative; }   /* vaste helften: niets verspringt per vraag */
     .qz.zonder { grid-template-columns: 1fr 360px; }
-    .qz .vraag { font-size: 48px; line-height: 1.15; margin: 0 0 26px; }
+    .qz .vraag { font-size: 44px; line-height: 1.15; margin: 0 0 26px; }
     .qz .vraag em { font-style: normal; color: var(--rubriek); }
     .qz .nieuweronde { font-family: "Maximilian", serif; font-size: 54px; line-height: 1; color: var(--rubriek); margin: 0 0 18px; }
     .qz .keuzes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 26px; }
@@ -192,7 +209,7 @@
     .qz .keuzes .mis { opacity: .28; }
     .qz .keuzes .goed span { color: var(--rubriek); font-weight: 600; }
     .qz .keuzes .aantal { font-size: 28px; color: var(--inkt-zacht); font-weight: 400; margin-left: 8px; }
-    .qz .keuzes div { font-size: 40px; }
+    .qz .keuzes div { font-size: 36px; }
     .qz .vrij { font-size: 38px; color: var(--inkt-zacht); }
     .qz .formule { margin: 10px 0 4px; font-size: 26px; color: var(--inkt-zacht); font-variant-numeric: lining-nums; }
     .qz .formule i { font-style: italic; }
@@ -200,7 +217,8 @@
     .qz .vrij.meer b { font-size: 64px; line-height: 1.15; }
     .qz .vrij b { display: block; font-family: "Maximilian", serif; font-weight: 400; font-size: 120px; line-height: 1; color: var(--rubriek); margin-top: 6px; }
     .qz .rechts { display: grid; align-content: start; justify-items: center; gap: 14px; min-height: 0; }
-    .qz .rechts img.plaat { display: block; max-width: 620px; max-height: 500px; object-fit: contain; box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40,24,8,.45); }
+    .qz:not(.zonder):not(.intro) .rechts { height: 100%; display: flex; align-items: center; justify-content: center; }
+    .qz .rechts img.plaat { display: block; max-width: calc(100% - 16px); max-height: calc(100% - 16px); object-fit: contain; box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40,24,8,.45); }
     .qz .rechts img.svg { box-shadow: none; max-height: 480px; }
     .qz .qr { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; font-size: 26px; color: var(--inkt-zacht); }
     .qz .qr img { width: 150px; height: 150px; }
@@ -208,11 +226,34 @@
     .qz.zonder .qr img { width: 300px; height: 300px; }
     .qz .qr b { color: var(--inkt); font-weight: 600; }
     .qz .lijst { display: grid; gap: 6px; font-size: 32px; margin-top: 10px; }
-    .qz .lijst div { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 18px; align-items: baseline; }
+    .qz .lijst div { display: grid; grid-template-columns: 60px 44px 1fr auto auto; gap: 18px; align-items: center; }
     .qz .lijst i { font-style: normal; color: var(--rubriek); font-weight: 700; }
     .qz .lijst span.w { color: var(--inkt-zacht); }
     .qz .lijst b { font-family: "Maximilian", serif; font-weight: 400; font-size: 40px; }
-    .qvoet { display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center; font-size: 30px; margin-top: 14px; }
+    .qvoet { display: grid; grid-template-columns: 1fr auto auto; gap: 30px; align-items: center; font-size: 30px; margin-top: 14px; }
+    .qvoet .miniqr { width: 96px; height: 96px; display: block; }
+    /* de schilden van de spelers: vallen binnen op het beginscherm, springen erbij wie antwoordt, rijen schuiven binnen */
+    @keyframes schildIn { from { transform: translateY(-70px) rotate(-14deg) scale(.5); opacity: 0; } 60% { transform: translateY(8px) rotate(4deg) scale(1.06); opacity: 1; } to { transform: none; } }
+    @keyframes schildPop { from { transform: scale(.2); opacity: 0; } 70% { transform: scale(1.25); opacity: 1; } to { transform: none; } }
+    @keyframes rijIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+    #quizscherm h1 .wie { margin-left: auto; margin-right: 190px; display: flex; gap: 6px; align-self: center; }
+    #quizscherm h1 .wie .schild svg { width: 38px; height: 46px; display: block; }
+    #quizscherm h1 .wie .schild { animation: schildPop .5s ease-out both; }
+    .qz.intro .schare { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 22px; }
+    .qz.intro .schare .schild { display: grid; justify-items: center; gap: 2px; font-size: 19px; width: 96px; text-align: center; line-height: 1.1; animation: schildIn .8s cubic-bezier(.3, 1.4, .6, 1) both; }
+    .qz.intro .schare .schild svg { width: 60px; height: 72px; filter: drop-shadow(0 4px 4px rgba(40, 24, 8, .35)); }
+    .qz .lijst > div { animation: rijIn .5s ease-out both; }
+    .qz .lijst .ws svg { width: 40px; height: 48px; display: block; }
+    .qz.enkel { grid-template-columns: 1fr; }
+    .qz.intro { grid-template-columns: 1fr 480px; align-items: start; }
+    .qz.intro .nieuweronde { font-size: 64px; margin-bottom: 10px; }
+    .qz.intro .vraag { margin-bottom: 14px; }
+    .qz.intro .rondes { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 30px; font-size: 30px; margin: 0 0 14px; }
+    .qz.intro .rondes div { display: grid; grid-template-columns: 54px 1fr; align-items: baseline; }
+    .qz.intro .rondes i { font-style: normal; color: var(--rubriek); font-weight: 700; }
+    .qz.intro .uitleg { font-size: 26px; color: var(--inkt-zacht); margin: 0; }
+    .qz.intro .rechts { justify-items: center; text-align: center; font-size: 30px; }
+    .qz.intro .rechts img { width: 400px; height: 400px; }
     .qvoet .balk { height: 16px; border-radius: 8px; background: rgba(90, 60, 25, .2); overflow: hidden; }
     .qvoet .balk i { display: block; height: 100%; background: var(--rubriek); width: 100%; }
     .qvoet .balk.op i { background: #8a7a5c; }
@@ -297,6 +338,9 @@
       <text class="klein-weg" id="k-b1" y="50" font-family="Grenze, Georgia, serif" font-size="14" fill="#d9cdb0" letter-spacing="1"></text>
       <text class="klein-weg" id="k-b2" y="74" font-family="Maximilian, Georgia, serif" font-size="20" fill="#e9be52"></text>
       <g class="klein-weg rom" id="k-b2r" font-family="Grenze, Georgia, serif" font-weight="700" font-size="20" fill="#e9be52" transform="translate(0,74)"></g>
+      <!-- de laatste minuut: alleen de seconden, groot in het midden -->
+      <text id="k-sec" y="-6" dominant-baseline="central" font-family="Maximilian, Georgia, serif" font-size="170" fill="#e9be52"></text>
+      <text id="k-sec-o" y="88" font-family="Grenze, Georgia, serif" font-size="16" fill="#d9cdb0" letter-spacing="2">TOT MIDDERNACHT</text>
     </g>
     <!-- honger en energie, met de icoontjes uit de game (zoals in het wachtmenu) -->
     <g id="k-lijf" class="klein-weg" font-family="Maximilian, Georgia, serif" font-size="21" fill="#f1e6cf">
@@ -326,11 +370,12 @@
 
   <section id="wapenkunde" class="sleet" aria-label="Wapenkunde"></section>
   <section id="quizscherm" class="sleet" aria-label="Quiz"><svg id="rand-qz" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
-    <h1><span><svg id="initiaal-qz" viewBox="0 0 92 92" aria-hidden="true" style="width:86px;height:86px;vertical-align:bottom"></svg>ennisproef</span><small id="qz-nr"></small></h1>
+    <h1><span><svg id="initiaal-qz" viewBox="0 0 92 92" aria-hidden="true" style="width:86px;height:86px;vertical-align:bottom"></svg>ennisproef</span><small id="qz-nr"></small><div class="wie" id="qz-wie" aria-hidden="true"></div></h1>
     <div class="qz" id="qz"></div>
     <div class="qvoet" id="qz-voet"></div></section>
 
   <div id="meldingen" aria-live="polite"></div>
+  <div id="nuspeelt" aria-live="polite"></div>
   <div id="aftel"><canvas id="vuurwerk" width="1920" height="1080" aria-hidden="true"></canvas><div class="tekst"><div class="n" id="aftel-n"></div><p id="aftel-p"></p></div></div>
 
   <button id="test-knop" type="button" aria-label="Verborgen menu" aria-expanded="false" aria-controls="test"></button>
@@ -347,6 +392,7 @@
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
     <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
     <div id="sp-qr" hidden><div class="qrvak"></div><p>Scan met je gsm en log daar in bij Spotify. <span id="sp-qr-staat"></span></p></div>
+    <div class="rij"><button id="sp-speel">Muziek naar de tv</button><span id="sp-speler" style="align-self:center"></span></div>
     <p style="opacity:.75;font-size:.85em">Redirect URI in het Spotify-dashboard, letterlijk: <code id="sp-terug"></code></p>
   </div>
 </div>
@@ -451,8 +497,11 @@ function tekenInitiaal(letter) {
 }
 
 /* ---------- schalen naar het scherm ---------- */
+// Overdag past het hele beeld (contain: kaders en tabellen tot aan de rand). Rond middernacht vult de sterrenhemel met de
+// stad het hele scherm (cover): is het scherm niet precies 16:9 (een balk van de browser), dan geen randen naast de stad.
 function schaal() {
-  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const vul = $('#stage').classList.contains('nacht');
+  const s = (vul ? Math.max : Math.min)(innerWidth / 1920, innerHeight / 1080);
   $('#stage').style.transform = `translate(${(innerWidth - 1920 * s) / 2}px, ${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
 }
 addEventListener('resize', schaal); schaal();
@@ -610,6 +659,12 @@ const Klok = (() => {
     } else if (t < CONFIG.midnight) { a1 = 'TOT MIDDERNACHT'; a2 = hms; }
     else { a1 = 'ANNO DOMINI'; a2 = roman(CONFIG.annoDomini); b1 = 'ZALIG NIEUWJAAR'; }
     $('#k-a1').textContent = a1; $('#k-b1').textContent = b1;
+    // de laatste minuut: alleen de seconden, groot in het midden van de klok (elke seconde een korte flits)
+    const laatste = t >= CONFIG.start && s > 0 && s <= 60;
+    $('#klok').classList.toggle('laatste', laatste);
+    if (laatste && $('#k-sec').textContent !== String(s)) {
+      const el = $('#k-sec'); el.textContent = String(s); el.classList.remove('tik'); void el.getBBox(); el.classList.add('tik');
+    } else if (!laatste) $('#k-sec').textContent = '';
     zet($('#k-a2'), $('#k-a2r'), a2, 234); zet($('#k-b2'), $('#k-b2r'), b2, 214);    const min = Math.floor(t / 60000);
     if (min === lastMin) return; lastMin = min;           // het wiel maar één keer per minuut
     paintWheel(t);
@@ -860,7 +915,9 @@ Db.volg((s, fout) => {
 function aftellen() {
   const t = now(), s = (CONFIG.midnight - t) / 1000, box = $('#aftel');
   // de laatste minuut tot vier minuten na middernacht: alleen de klok (in het midden), de hemel en de stad
+  const wasNacht = $('#stage').classList.contains('nacht');
   $('#stage').classList.toggle('nacht', s <= 60 && s > -240);
+  if (wasNacht !== $('#stage').classList.contains('nacht')) schaal();
   $('#stage').classList.toggle('nieuwjaar', s <= 0 && s > -240);
   if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = ''; $('#aftel-p').textContent = 'Heft de bekers'; }
   else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${CONFIG.annoDomini}`; }
@@ -898,15 +955,17 @@ function aftellen() {
     !handmatig ? b.dataset.p === '' : keuze === 'wapens' ? b.dataset.p === 'wapens' : b.dataset.p === TABS[tab].id));
   knop.addEventListener('click', pgStaat); $('#klok').addEventListener('click', pgStaat);
   const spStaat = () => {
-    const a = $('#sp-koppel'), aan = Spotify.gekoppeld();
-    $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Spotify.inlog() ? 'niet gekoppeld' : 'even geduld…';
+    const a = $('#sp-koppel'), aan = Muziek.gekoppeld();
+    $('#sp-staat').textContent = !Muziek.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Muziek.inlog() ? 'niet gekoppeld' : 'even geduld…';
     a.textContent = aan ? 'Spotify ontkoppelen' : 'Inloggen op de tv';
-    a.href = !aan && Spotify.inlog() ? Spotify.inlog() : '#';
-    $('#sp-terug').textContent = Spotify.terug;
+    a.href = !aan && Muziek.inlog() ? Muziek.inlog() : '#';
+    $('#sp-terug').textContent = Muziek.terug;
+    $('#sp-speler').textContent = Muziek.staat();
   };
+  $('#sp-speel').addEventListener('click', () => Muziek.naarTv());
   $('#sp-gsm').addEventListener('click', () => {
-    if (!Spotify.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
-    const url = Spotify.viaGsm(ok => {
+    if (!Muziek.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
+    const url = Muziek.viaGsm(ok => {
       $('#sp-qr-staat').textContent = ok ? 'Gekoppeld ✓' : 'Verlopen. Druk opnieuw op de knop.';
       if (ok) { setTimeout(() => { $('#sp-qr').hidden = true; }, 2500); melding('Spotify', 'gekoppeld', null, '', { icoon: 'herberg', ms: 5000 }); }
       spStaat();
@@ -916,8 +975,8 @@ function aftellen() {
     $('#sp-qr-staat').textContent = 'Wachten op je gsm…'; $('#sp-qr').hidden = false;
   });
   $('#sp-koppel').addEventListener('click', async e => {
-    if (Spotify.gekoppeld()) { e.preventDefault(); Spotify.ontkoppel(); await Spotify.bereid(); spStaat(); }
-    else if (!Spotify.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
+    if (Muziek.gekoppeld()) { e.preventDefault(); Muziek.ontkoppel(); await Muziek.bereid(); spStaat(); }
+    else if (!Muziek.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
   });
   knop.addEventListener('click', spStaat);
   $('#test-in').addEventListener('change', e => { const t = new Date(e.target.value); if (!isNaN(t)) zet(t); });
@@ -1022,6 +1081,19 @@ const QuizTV = (() => {
     + `<text x="100" y="150" text-anchor="middle" font-family="Maximilian, serif" font-size="130" fill="${i === 3 ? '#2a1f16' : '#f6ecd6'}">${LETTERS[i]}</text></svg>`;
   let t = null, opgehaald = 0, getekend = '', verborgen = '', eindTot = 0, vorigeFase = 'uit';
   const naam = id => (stand?.ridders.find(r => r.id === id)?.naam || '?').split(' van ')[0];
+  const schildVan = (id, uid) => { const r = stand?.ridders.find(x => x.id === id); return r ? wapen(r.wapen, uid) : ''; };
+  // schilden bijwerken zonder alles opnieuw te tekenen: alleen nieuwe toevoegen (die spelen hun animatie), weg wat niet meer hoort
+  function schilden(el, ids, metNaam) {
+    if (!el) return;
+    const wil = new Set(ids.map(String));
+    el.querySelectorAll('.schild').forEach(x => { if (!wil.has(x.dataset.id)) x.remove(); });
+    for (const id of ids) {
+      if (el.querySelector(`.schild[data-id="${id}"]`) || !stand?.ridders.some(x => x.id === id)) continue;
+      const d = document.createElement('div'); d.className = 'schild'; d.dataset.id = id;
+      d.innerHTML = schildVan(id, (metNaam ? 'qg' : 'qk') + id) + (metNaam ? `<span>${esc(naam(id))}</span>` : '');
+      el.appendChild(d);
+    }
+  }
   const zichtbaar = () => t && !(t.fase === 'uit' && Date.now() > eindTot) && verborgen !== `${t.fase}|${t.nr}`;
   function teken() {
     const aan = zichtbaar() && !$('#stage').classList.contains('nacht');
@@ -1029,6 +1101,8 @@ const QuizTV = (() => {
     if (!aan) return;
     const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' || t.fase === 'stand' ? t.stand : null, (stand?.ridders || []).length]);
     if (staat !== getekend) { getekend = staat; inhoud(); }
+    schilden($('#qz-schare'), t.fase === 'intro' ? t.aanwezig || [] : [], true);
+    schilden($('#qz-wie'), t.fase === 'open' || t.fase === 'dicht' ? t.van || [] : [], false);
     voet();
   }
   function inhoud() {
@@ -1037,19 +1111,30 @@ const QuizTV = (() => {
       : ri ? `Ronde ${romeins(ri.nr)} · ${ri.naam} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`;
     const qr = `<div class="qr"><img src="feestje-img/quiz/qr.svg" alt=""><div>Speel mee op je gsm:<br><b>resonantxp.com/feestje-quiz</b></div></div>`;
     if (t.fase === 'uit' || t.fase === 'stand') {          // de eindstand, of de tussenstand na een ronde
-      const rij = (t.stand || []).slice(0, 10).map(x => `<div><i>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</i><span>${esc(naam(x.ridder_id))}</span><span></span><b>${x.punten}</b></div>`).join('');
+      const rij = (t.stand || []).slice(0, 10).map((x, i) => `<div style="animation-delay:${(i * .12).toFixed(2)}s"><i>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</i><span class="ws">${schildVan(x.ridder_id, 'qs' + x.ridder_id)}</span><span>${esc(naam(x.ridder_id))}</span><span></span><b>${x.punten}</b></div>`).join('');
       const kop = t.fase === 'uit' ? 'De eindstand' : `De tussenstand${ri ? ` na <em>${esc(ri.naam)}</em>` : ''}`;
       $('#qz').className = 'qz zonder';
       $('#qz').innerHTML = `<div><p class="vraag">${kop}</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts">${t.fase === 'stand' ? qr : ''}</div>`;
+      return;
+    }
+    if (t.fase === 'intro') {                              // het beginscherm: scannen, naam kiezen, de rondes
+      const rondes = [...new Set((t.rondes || []).filter(Boolean))];
+      $('#qz').className = 'qz intro';
+      $('#qz').innerHTML = `<div><p class="nieuweronde">De Kennisproef begint zo</p><p class="vraag">Scan de code met je gsm en kies je naam.</p>
+        ${rondes.length ? `<div class="rondes">${rondes.map((r, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(r)}</span></div>`).join('')}</div>` : ''}
+        <p class="uitleg">Een juist antwoord is 100 punten, plus een bonus voor wie snel is. Bij een schatting telt hoe dicht je zit.</p>
+        <div class="schare" id="qz-schare"></div></div>
+        <div class="rechts"><img src="feestje-img/quiz/qr.svg" alt=""><b>resonantxp.com/feestje-quiz</b></div>`;
       return;
     }
     const uitslag = t.fase === 'uitslag', plaat = t.afbeelding;
     // de eerste vraag van een ronde: de naam van de ronde groot erboven
     let links = (ri && ri.inRonde === 1 && t.fase === 'wacht' ? `<p class="nieuweronde">Ronde ${romeins(ri.nr)} · ${esc(ri.naam)}</p>` : '') + `<p class="vraag">${esc(t.vraag)}</p>`;
     const hoeveel = i => (t.uitslag || []).filter(u => u.keuze === i).length;
-    if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
+    if (t.soort === 'keuze' && t.fase === 'wacht') links += `<div class="vrij">De antwoorden verschijnen zodra de quizmaster de vraag opent.</div>`;   // eerst lezen, dan pas kiezen
+    else if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
     else links += `<div class="vrij${t.soort === 'meer' ? ' meer' : ''}">${uitslag ? `${t.soort === 'meer' ? 'De juiste antwoorden' : 'Het juiste antwoord'}<b>${Array.isArray(t.juist) ? t.juist.map(esc).join(' · ') : esc(t.juist)}</b>`
-      : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : t.soort === 'meer' ? 'Typ op je gsm zoveel antwoorden als je weet: 50 punten per juist antwoord.' : 'Typ het antwoord op je gsm.'}</div>`;
+      : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : t.soort === 'meer' ? `${(t.antwoorden || []).length ? `Vul op je gsm in: ${t.antwoorden.map(esc).join(' · ')}.` : 'Typ op je gsm zoveel antwoorden als je weet.'} 50 punten per juist antwoord.` : 'Typ het antwoord op je gsm.'}</div>`;
     if (uitslag && t.soort === 'getal') {   // voor de nerds: de formule, met de beste gok als voorbeeld
       const b = (t.uitslag || []).find(u => u.punten > 0), getal = x => String(x).replace('.', ',');
       const ln = b ? Math.log(parseFloat(String(b.waarde).replace(',', '.')) / +t.juist) : 0, f = n => n.toFixed(3).replace('.', ',');
@@ -1059,21 +1144,21 @@ const QuizTV = (() => {
     }
     if (uitslag) {
       const goed = (t.uitslag || []).filter(u => u.punten > 0).slice(0, 5);
-      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')
-        || '<div><span></span><span>Niemand had het goed.</span></div>'}</div>`;
+      links += `<div class="lijst">${goed.map((u, i) => `<div style="animation-delay:${(i * .15).toFixed(2)}s"><i>${romeins(i + 1)}</i><span class="ws">${schildVan(u.ridder_id, 'qu' + u.ridder_id)}</span><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')
+        || '<div><span></span><span></span><span>Niemand had het goed.</span></div>'}</div>`;
     }
-    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="" onerror="this.remove()">${uitslag ? '' : qr}` : qr;
-    $('#qz').className = 'qz' + (plaat ? '' : ' zonder');
+    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="" onerror="this.remove()">` : '';
+    $('#qz').className = 'qz' + (plaat ? '' : ' enkel');   // de QR-code staat klein in de voetregel, naast de tijdsbalk
     $('#qz').innerHTML = `<div>${links}</div><div class="rechts">${rechts}</div>`;
   }
   function voet() {
-    if (!t || t.fase === 'uit' || t.fase === 'stand') { $('#qz-voet').innerHTML = ''; return; }
+    if (!t || t.fase === 'uit' || t.fase === 'stand' || t.fase === 'intro') { $('#qz-voet').innerHTML = ''; return; }
     const sec = t.fase === 'open' ? (t.verstreken || 0) + (performance.now() - opgehaald) / 1000 : 0;
-    const rest = Math.max(0, 30 - sec);
-    const tekst = { wacht: 'Lees de vraag. De quizmaster opent ze zo.', open: rest > 0 ? `nog ${Math.ceil(rest)} s voor de snelheidsbonus` : 'De bonus is op; antwoorden mag nog.',
+    const tijd = t.tijd || 30, rest = Math.max(0, tijd - sec);   // na de bedenktijd toont de quiz vanzelf het antwoord (fj_quiz_klok)
+    const tekst = { wacht: 'Lees de vraag. De quizmaster opent ze zo.', open: rest > 0 ? `nog ${Math.ceil(rest)} s` : 'De tijd is om.',
       dicht: 'De vraag is gesloten.', uitslag: '' }[t.fase];
-    const html = `<div><div class="balk${t.fase === 'open' && rest === 0 ? ' op' : ''}"><i style="width:${t.fase === 'open' ? rest / 30 * 100 : t.fase === 'wacht' ? 100 : 0}%"></i></div><div style="margin-top:6px">${tekst}</div></div>
-      <div>${t.aantal} van ${t.ridders} ridders antwoordden</div>`;
+    const html = `<div><div class="balk${t.fase === 'open' && rest === 0 ? ' op' : ''}"><i style="width:${t.fase === 'open' ? rest / tijd * 100 : t.fase === 'wacht' ? 100 : 0}%"></i></div><div style="margin-top:6px">${tekst}</div></div>
+      <div>${t.aantal} van ${t.spelers || t.ridders} ${t.spelers ? 'spelers' : 'ridders'} antwoordden</div><img class="miniqr" src="feestje-img/quiz/qr.svg" alt="">`;
     if ($('#qz-voet').innerHTML !== html) $('#qz-voet').innerHTML = html;
   }
   async function haal() {
@@ -1112,11 +1197,12 @@ function wapenModus() {
 
 
 /* =========================================================
-   SPOTIFY — "Nu speelt" bij elk nieuw nummer. De muziek zelf speelt via de Spotify-app (Spotify Connect);
-   dit scherm vraagt alleen om de 5 s wat er speelt. Inloggen: OAuth "Authorization Code met PKCE"
+   SPOTIFY — "Nu speelt" bij elk nieuw nummer (om de 5 s gevraagd), én de tv als Spotify-speler: de Web Playback SDK
+   maakt van deze pagina een Spotify Connect-toestel ("De herberg (tv)"), het geluid komt uit de tv. Vereist Premium,
+   en een browser met EME/Widevine (beveiligde audio); lukt dat niet, dan zegt het verborgen menu waarom. Inloggen: OAuth "Authorization Code met PKCE"
    (geen server, geen geheime sleutel). Tokens blijven alleen op dit toestel (localStorage).
    ========================================================= */
-const Spotify = (() => {
+const Muziek = (() => {   // niet "Spotify": die naam neemt de Web Playback SDK zelf in (window.Spotify)
   const ID = (typeof SPOTIFY !== 'undefined' && SPOTIFY.clientId) || '';
   const TERUG = (typeof SPOTIFY !== 'undefined' && SPOTIFY.terug) || location.origin + '/feestje-tv';   // = Redirect URI bij Spotify
   const SLEUTEL = 'feestje.spotify';
@@ -1132,7 +1218,7 @@ const Spotify = (() => {
     const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
     try { localStorage.setItem('feestje.spotify.v', verifier); } catch {}
     return inlog = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
-      code_challenge_method: 'S256', code_challenge: challenge, scope: 'user-read-currently-playing user-read-playback-state' });
+      code_challenge_method: 'S256', code_challenge: challenge, scope: SPOTIFY.scope });
   }
   async function token(body) {
     const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1140,7 +1226,7 @@ const Spotify = (() => {
     const j = await r.json();
     if (!r.ok) throw Object.assign(new Error(j.error_description || j.error || r.status), { code: j.error });
     const oud = lees() || {};
-    const t = { access: j.access_token, refresh: j.refresh_token || oud.refresh, tot: Date.now() + (j.expires_in - 60) * 1000 };
+    const t = { access: j.access_token, refresh: j.refresh_token || oud.refresh, tot: Date.now() + (j.expires_in - 60) * 1000, scope: j.scope ?? oud.scope };
     schrijf(t); return t;
   }
   async function geldig() {
@@ -1176,6 +1262,53 @@ const Spotify = (() => {
     }
     if (!lees()) await bereid();
     kijk(); setInterval(kijk, 5000);
+    if (lees()) spelerAan();
+  }
+
+  /* — de tv als speler (Web Playback SDK) — */
+  let speler = null, toestel = '', staat = '', bijStaat = () => {};
+  const zet = s => { staat = s; bijStaat(s); };
+  function laadSdk() {
+    return new Promise((ok, nee) => {
+      if (window.Spotify && window.Spotify.Player) return ok();
+      window.onSpotifyWebPlaybackSDKReady = ok;
+      const s = document.createElement('script'); s.src = 'https://sdk.scdn.co/spotify-player.js';
+      s.onerror = () => nee(new Error('kon de Spotify-speler niet laden'));
+      document.head.appendChild(s);
+    });
+  }
+  async function spelerAan() {
+    if (speler) return;
+    let t = await geldig(); if (!t) return zet('niet gekoppeld');
+    if (t.scope === undefined) { schrijf({ ...t, tot: 0 }); t = await geldig(); if (!t) return zet('niet gekoppeld'); }   // oude koppeling: rechten opvragen
+    if (!/\bstreaming\b/.test(t.scope || '')) return zet('opnieuw koppelen: de koppeling mag nog niet afspelen');
+    if (!navigator.requestMediaKeySystemAccess) return zet('deze browser kan geen beveiligde audio afspelen (geen EME)');
+    zet('speler laden…');
+    try { await laadSdk(); } catch (e) { return zet(e.message); }
+    speler = new window.Spotify.Player({
+      name: SPOTIFY.toestel || 'Feestje-tv', volume: 0.8,
+      getOAuthToken: async cb => { const t = await geldig(); cb(t ? t.access : ''); },
+    });
+    speler.addListener('ready', ({ device_id }) => { toestel = device_id; zet(`klaar: kies "${SPOTIFY.toestel}" in Spotify, of druk op "Muziek naar de tv"`); });
+    speler.addListener('not_ready', () => { toestel = ''; zet('verbinding met Spotify kwijt, opnieuw aan het verbinden…'); });
+    speler.addListener('initialization_error', ({ message }) => zet('deze browser kan de speler niet starten (' + message + ')'));
+    speler.addListener('authentication_error', ({ message }) => zet('inloggen mislukt (' + message + '): opnieuw koppelen'));
+    speler.addListener('account_error', () => zet('dit account heeft geen Premium'));
+    speler.addListener('playback_error', ({ message }) => zet('afspelen mislukt (' + message + ')'));
+    speler.addListener('autoplay_failed', () => zet('de browser houdt het geluid tegen: druk op "Muziek naar de tv"'));
+    speler.addListener('player_state_changed', s => { if (s && toestel) zet(s.paused ? 'gepauzeerd' : 'speelt op de tv ♪'); });
+    if (!(await speler.connect())) zet('kon niet verbinden met Spotify');
+  }
+  /* Muziek naar de tv halen. activateElement() moet in de klik zelf gebeuren (vóór elke await): browsers laten pas
+     geluid toe na een handeling van de gebruiker, en een klik met de afstandsbediening telt daarvoor. */
+  async function naarTv() {
+    if (speler) speler.activateElement();
+    if (!speler) { await spelerAan(); if (speler) speler.activateElement(); }
+    if (!toestel) return;
+    const t = await geldig(); if (!t) return zet('niet gekoppeld');
+    const r = await fetch('https://api.spotify.com/v1/me/player', { method: 'PUT',
+      headers: { Authorization: 'Bearer ' + t.access, 'Content-Type': 'application/json' }, body: JSON.stringify({ device_ids: [toestel], play: true }) });
+    if (!r.ok && r.status !== 204) zet(r.status === 403 ? 'Spotify weigert (Premium nodig, of opnieuw koppelen)' : 'overzetten mislukt (' + r.status + ')');
   }
   // koppelen via de gsm: de tv toont een QR-code met een geheime code; de gsm logt in en zet de refresh-token
   // in de database onder die code (fj_spotify_zet); de tv haalt hem één keer op (fj_spotify_haal)
@@ -1187,20 +1320,22 @@ const Spotify = (() => {
       if (Date.now() > koppelTot) { clearInterval(koppelTimer); klaar(false); return; }
       try {
         const r = await Db.spotifyHaal(koppelId);
-        if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); }
+        if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); spelerAan(); }
       } catch { /* volgende keer */ }
     }, 2500);
     // de gsm begint op hetzelfde adres als waar Spotify naar terugkeert: de PKCE-sleutel staat dan in dezelfde localStorage
     return new URL(TERUG).origin + '/feestje-spotify?id=' + koppelId;
   }
-  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID, viaGsm, terug: TERUG };
+  function ontkoppel() { if (speler) { speler.disconnect(); speler = null; toestel = ''; } schrijf(null); zet(''); }
+  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel, aan: !!ID, viaGsm, terug: TERUG,
+    naarTv, staat: () => staat, bijStaat: f => { bijStaat = f; } };
 })();
-function nuSpeelt(titel, artiest, hoes) {
-  const el = document.createElement('div'); el.className = 'melding muziek';
-  el.innerHTML = `${hoes ? `<img src="${esc(hoes)}" alt="">` : '<span class="noot">♪</span>'}<div><b>Nu speelt</b><span>${esc(titel)}<br><i>${esc(artiest)}</i></span></div>`;
-  const box = $('#meldingen'); box.appendChild(el);
-  while (box.children.length > 3) box.firstChild.remove();
-  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 8000);
+function nuSpeelt(titel, artiest, hoes) {   // één tegelijk: een nieuw nummer vervangt het vorige
+  const box = $('#nuspeelt'); box.textContent = '';
+  const el = document.createElement('div'); el.className = 'nuspeelt';
+  el.innerHTML = `${hoes ? `<img src="${esc(hoes)}" alt="">` : '<span class="noot">♪</span>'}<div><b>Nu speelt</b><span>${esc(titel)}</span><i>${esc(artiest)}</i></div>`;
+  box.appendChild(el);
+  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 9000);
 }
 
 
@@ -1272,15 +1407,30 @@ const Vuurwerk = (() => {
     const soort = groot ? GROOT[(Math.random() * GROOT.length) | 0] : KLEIN[(Math.random() * KLEIN.length) | 0];
     const richting = Math.random() < .72 ? -1 : 1, schaal = groot ? rnd(.55, .85) : rnd(.45, 1);
     const rand = 300 * schaal + voorsprong;                          // net buiten beeld (of verder, om de zwerm te spreiden)
-    const d = { ...soort, x: richting < 0 ? W + rand : -rand, y: rnd(110, H - 120), richting, schaal,
+    const d = { ...soort, soort, x: richting < 0 ? W + rand : -rand, y: rnd(110, H - 120), richting, schaal,
       v: groot ? rnd(90, 130) : rnd(110, 190), t: 0, fase: rnd(0, 6), vuur: -rnd(.3, 2) };
     const i = draken.findIndex(x => x.schaal > schaal); i < 0 ? draken.push(d) : draken.splice(i, 0, d);   // kleine (verre) eerst tekenen
   }
+  /* verre draken een heel klein beetje donkerder, naar het blauw van de nachtlucht toe (luchtperspectief). Eén keer per
+     knipsel twee getinte kopieën maken (source-atop: alleen waar de draak is), daarna gewoon kopiëren: licht voor een Chromecast. */
+  const TINT = [.10, .2];
+  function getint(soort, i) {
+    soort.getint = soort.getint || [];
+    if (!soort.getint[i]) {
+      const c = document.createElement('canvas'); c.width = soort.img.naturalWidth; c.height = soort.img.naturalHeight;
+      const x = c.getContext('2d'); x.drawImage(soort.img, 0, 0);
+      x.globalCompositeOperation = 'source-atop'; x.fillStyle = `rgba(10, 18, 44, ${TINT[i]})`; x.fillRect(0, 0, c.width, c.height);
+      soort.getint[i] = c;
+    }
+    return soort.getint[i];
+  }
   function tekenDraak(d) {
     if (!d.img.complete || !d.img.naturalWidth) return;
+    // de kleintjes: hoe kleiner (verder weg), hoe donkerder; de grote blijven zoals ze zijn
+    const bron = d.groot ? d.img : d.schaal < .62 ? getint(d.soort, 1) : d.schaal < .82 ? getint(d.soort, 0) : d.img;
     const spiegel = (d.kop === 'L' ? -1 : 1) * d.richting;          // kop vooruit
     g.save(); g.translate(d.x, d.y); g.rotate(Math.cos(d.t * 1.1 + d.fase) * .035 * d.richting); g.scale(spiegel * d.schaal, d.schaal);
-    g.drawImage(d.img, -d.img.width / 2, -d.img.height / 2); g.restore();
+    g.drawImage(bron, -d.img.width / 2, -d.img.height / 2); g.restore();
   }
   function stap(nu) {
     const dt = Math.min(.05, (nu - vorige) / 1000 || .016); vorige = nu;
@@ -1346,7 +1496,8 @@ const Vuurwerk = (() => {
 function tik() { Klok.render(); aftellen(); wapenModus(); aankondigen(); }
 function elkeMinuut() { nuStrook(); toonLijf(); if (TABS[tab].id === 'getijden') tekenGetijden(); }
 kiesTab(rotatie()[0], true);
-Spotify.start();
+Muziek.bijStaat(s => { $('#sp-speler').textContent = s; });   // na de definitie van Muziek (const: geen hoisting)
+Muziek.start();
 QuizTV.start();
 document.fonts.ready.then(() => { Klok.opnieuw(); elkeMinuut(); });
 tik(); elkeMinuut();

@@ -46,7 +46,7 @@
     const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
     try { localStorage.setItem('feestje.spotify.gsm.' + id, verifier); } catch {}   // localStorage: de login kan in een ander tabblad terugkomen
     const url = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
-      code_challenge_method: 'S256', code_challenge: challenge, scope: 'user-read-currently-playing user-read-playback-state', state: 'gsm.' + id });
+      code_challenge_method: 'S256', code_challenge: challenge, scope: SPOTIFY.scope, state: 'gsm.' + id });
     app.innerHTML = `<p>Hiermee ziet het scherm in de zaal welk nummer er speelt. Log in met het Spotify-account dat de muziek afspeelt.</p>
       <a class="knop" href="${esc(url)}">Inloggen bij Spotify</a>
       <p class="stil">Alleen "wat speelt er nu" wordt gedeeld, niet uw wachtwoord. De koppeling blijft op de tv; deze gsm bewaart niets.</p>`;
