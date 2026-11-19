@@ -84,17 +84,18 @@ const Db = (() => {
     }
     function toestand(meester) {
       const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr), zie = q.fase !== 'uit' || meester;
-      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
+      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, ronde: v?.ronde || null, rondes: q.vragen.map(w => w.ronde || ''),
+        soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
         afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null,
         verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
         juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
         uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten, tijd }) => ({ ridder_id, keuze, waarde, punten, sec: tijd && q.geopend ? Math.floor((tijd - q.geopend) / 1000) : null })) : null,
-        stand: q.fase === 'uitslag' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
+        stand: q.fase === 'uitslag' || q.fase === 'stand' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
       if (meester) {
         t.antwoorden_van = hier.map(a => a.ridder_id);
         t.alle = hier.map(({ ridder_id, keuze, waarde, punten, oordeel, tijd }) => ({ ridder_id, keuze, waarde, punten, oordeel: oordeel ?? null, sec: q.geopend && tijd ? Math.round((tijd - q.geopend) / 100) / 10 : null }));
         const w = q.vragen[(q.fase === 'uit' && !q.nr) ? 0 : q.nr];
-        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, soort: soort(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
+        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, ronde: w.ronde || null, soort: soort(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
       }
       return t;
     }
@@ -127,7 +128,11 @@ const Db = (() => {
           d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));
           try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
         }
-      } else if (actie === 'volgende') { if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit'; }
+      } else if (actie === 'volgende') {
+        const w = q.vragen[q.nr];   // de volgende vraag
+        if (q.fase === 'uitslag' && w && v?.ronde && w.ronde !== v.ronde) q.fase = 'stand';   // einde van een ronde: eerst de tussenstand
+        else if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit';
+      }
       else if (actie === 'stop') q.fase = 'uit';
       else if (actie === 'reset') Object.assign(q, { nr: 0, fase: 'uit', geopend: null, antwoorden: [] });
       put(q);
@@ -140,7 +145,7 @@ const Db = (() => {
       const snel = Math.max(0, 30 - Math.floor(((a.tijd || q.geopend) - q.geopend) / 1000));
       const auto = s === 'keuze' ? (a.keuze === v.juist ? 100 + snel : 0) : s === 'woord' ? (v.juist.some(g => norm(g) === norm(a.waarde)) ? 100 + snel : 0) : 50 * meerGoed(v, a.waarde);
       a.oordeel = goed; a.punten = goed == null ? auto : goed ? (s === 'meer' ? 50 * v.juist.length : 100 + snel) : 0;
-      if (q.fase === 'uitslag') {
+      if (q.fase === 'uitslag' || q.fase === 'stand') {
         const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
         if (spel) { d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten }))); try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd'); }
       }
@@ -195,7 +200,7 @@ const Db = (() => {
     // keuze: 0–3 bij een keuzevraag, anders null; tekst: het woord of het getal, anders null
     quizAntwoord: async (ridder, keuze, tekst = null) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze, p_tekst: tekst }) : Quiz.antwoord(ridder, keuze, tekst),
     // de vragen zoals de database ze wil (soort ingevuld; de database normaliseert de woorden zelf bij het vergelijken)
-    quizVoorbereid: vragen => vragen.map(v => ({ soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
+    quizVoorbereid: vragen => vragen.map(v => ({ ronde: v.ronde || null, soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
     norm,
     quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
     quizKeur: async (pin, ridder, goed) => live ? rpc('fj_quiz_keur', { p_pin: pin, p_ridder: ridder, p_goed: goed }) : (demoPin(pin), Quiz.keur(ridder, goed), Quiz.toestand(true)),
@@ -237,4 +242,15 @@ function ranglijst(stand) {
   let plaats = 0, vorige = null;
   rows.forEach((r, i) => { if (r.totaal !== vorige) { plaats = i + 1; vorige = r.totaal; } r.plaats = plaats; });
   return rows;
+}
+
+/* Rondes: uit de lijst rondenamen (één per vraag, in volgorde) en het vraagnummer: de hoeveelste ronde, de naam,
+   de hoeveelste vraag binnen die ronde en hoeveel vragen ze telt. Zonder rondes: null. */
+function rondeInfo(rondes, nr) {
+  if (!rondes?.length || !nr || !rondes[nr - 1]) return null;
+  let r = 0, start = 0;
+  for (let i = 0; i < nr; i++) if (i === 0 || rondes[i] !== rondes[i - 1]) { r++; start = i; }
+  let eind = start; while (eind + 1 < rondes.length && rondes[eind + 1] === rondes[start]) eind++;
+  let aantal = 0; rondes.forEach((x, i) => { if (i === 0 || x !== rondes[i - 1]) aantal++; });
+  return { nr: r, naam: rondes[nr - 1], inRonde: nr - start, rondeTotaal: eind - start + 1, aantal, laatste: nr - 1 === eind };
 }

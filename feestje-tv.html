@@ -184,6 +184,8 @@
     .qz { display: grid; grid-template-columns: 1fr 620px; gap: 0 48px; min-height: 0; margin-top: 18px; position: relative; }
     .qz.zonder { grid-template-columns: 1fr 360px; }
     .qz .vraag { font-size: 48px; line-height: 1.15; margin: 0 0 26px; }
+    .qz .vraag em { font-style: normal; color: var(--rubriek); }
+    .qz .nieuweronde { font-family: "Maximilian", serif; font-size: 54px; line-height: 1; color: var(--rubriek); margin: 0 0 18px; }
     .qz .keuzes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 26px; }
     .qz .keuzes div { display: grid; grid-template-columns: 70px 1fr; gap: 18px; align-items: center; font-size: 36px; line-height: 1.1; transition: opacity .6s; }
     .qz .keuzes svg { width: 66px; height: 79px; }
@@ -1023,21 +1025,25 @@ const QuizTV = (() => {
     const aan = zichtbaar() && !$('#stage').classList.contains('nacht');
     $('#stage').classList.toggle('quiz', !!aan);
     if (!aan) return;
-    const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' ? t.stand : null, (stand?.ridders || []).length]);
+    const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' || t.fase === 'stand' ? t.stand : null, (stand?.ridders || []).length]);
     if (staat !== getekend) { getekend = staat; inhoud(); }
     voet();
   }
   function inhoud() {
-    $('#qz-nr').textContent = t.nr && t.fase !== 'uit' ? `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}` : '';
+    const ri = rondeInfo(t.rondes, t.nr);
+    $('#qz-nr').textContent = !t.nr || t.fase === 'uit' ? '' : t.fase === 'stand' ? (ri ? `Na ronde ${romeins(ri.nr)} van ${romeins(ri.aantal)}` : '')
+      : ri ? `Ronde ${romeins(ri.nr)} · ${ri.naam} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`;
     const qr = `<div class="qr"><img src="feestje-img/quiz/qr.svg" alt=""><div>Speel mee op je gsm:<br><b>resonantxp.com/feestje-quiz</b></div></div>`;
-    if (t.fase === 'uit') {          // de eindstand
+    if (t.fase === 'uit' || t.fase === 'stand') {          // de eindstand, of de tussenstand na een ronde
       const rij = (t.stand || []).slice(0, 10).map(x => `<div><i>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</i><span>${esc(naam(x.ridder_id))}</span><span></span><b>${x.punten}</b></div>`).join('');
+      const kop = t.fase === 'uit' ? 'De eindstand' : `De tussenstand${ri ? ` na <em>${esc(ri.naam)}</em>` : ''}`;
       $('#qz').className = 'qz zonder';
-      $('#qz').innerHTML = `<div><p class="vraag">De eindstand</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts"></div>`;
+      $('#qz').innerHTML = `<div><p class="vraag">${kop}</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts">${t.fase === 'stand' ? qr : ''}</div>`;
       return;
     }
     const uitslag = t.fase === 'uitslag', plaat = t.afbeelding;
-    let links = `<p class="vraag">${esc(t.vraag)}</p>`;
+    // de eerste vraag van een ronde: de naam van de ronde groot erboven
+    let links = (ri && ri.inRonde === 1 && t.fase === 'wacht' ? `<p class="nieuweronde">Ronde ${romeins(ri.nr)} · ${esc(ri.naam)}</p>` : '') + `<p class="vraag">${esc(t.vraag)}</p>`;
     const hoeveel = i => (t.uitslag || []).filter(u => u.keuze === i).length;
     if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
     else links += `<div class="vrij${t.soort === 'meer' ? ' meer' : ''}">${uitslag ? `${t.soort === 'meer' ? 'De juiste antwoorden' : 'Het juiste antwoord'}<b>${Array.isArray(t.juist) ? t.juist.map(esc).join(' · ') : esc(t.juist)}</b>`
@@ -1054,12 +1060,12 @@ const QuizTV = (() => {
       links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')
         || '<div><span></span><span>Niemand had het goed.</span></div>'}</div>`;
     }
-    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="">${uitslag ? '' : qr}` : qr;
+    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="" onerror="this.remove()">${uitslag ? '' : qr}` : qr;
     $('#qz').className = 'qz' + (plaat ? '' : ' zonder');
     $('#qz').innerHTML = `<div>${links}</div><div class="rechts">${rechts}</div>`;
   }
   function voet() {
-    if (!t || t.fase === 'uit') { $('#qz-voet').innerHTML = ''; return; }
+    if (!t || t.fase === 'uit' || t.fase === 'stand') { $('#qz-voet').innerHTML = ''; return; }
     const sec = t.fase === 'open' ? (t.verstreken || 0) + (performance.now() - opgehaald) / 1000 : 0;
     const rest = Math.max(0, 30 - sec);
     const tekst = { wacht: 'Lees de vraag. De quizmaster opent ze zo.', open: rest > 0 ? `nog ${Math.ceil(rest)} s voor de snelheidsbonus` : 'De bonus is op; antwoorden mag nog.',

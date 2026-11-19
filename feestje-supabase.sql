@@ -178,6 +178,7 @@ on conflict (id) do nothing;
 drop table if exists fj_antwoorden, fj_vragen, fj_quiz cascade;
 create table fj_vragen (
   nr         int  primary key,
+  ronde      text,                                -- bv. 'Tsjechië'; opeenvolgende vragen met dezelfde ronde horen samen
   soort      text not null default 'keuze' check (soort in ('keuze', 'woord', 'getal', 'meer')),
   vraag      text not null,
   afbeelding text,                                -- pad op de site, bv. 'feestje-img/quiz/komeet.webp' (alleen op de tv)
@@ -187,7 +188,7 @@ create table fj_vragen (
 create table fj_quiz (
   id      int  primary key default 1 check (id = 1),
   nr      int  not null default 0,
-  fase    text not null default 'uit' check (fase in ('uit', 'wacht', 'open', 'dicht', 'uitslag')),
+  fase    text not null default 'uit' check (fase in ('uit', 'wacht', 'open', 'dicht', 'uitslag', 'stand')),   -- stand = tussenstand na een ronde
   geopend timestamptz
 );
 create table fj_antwoorden (
@@ -209,6 +210,10 @@ insert into fj_quiz (id) values (1) on conflict (id) do nothing;
 alter table fj_vragen drop constraint if exists fj_vragen_soort_check;
 alter table fj_vragen add constraint fj_vragen_soort_check check (soort in ('keuze', 'woord', 'getal', 'meer'));
 alter table fj_antwoorden add column if not exists oordeel boolean;
+-- rondes met een tussenstand
+alter table fj_vragen add column if not exists ronde text;
+alter table fj_quiz drop constraint if exists fj_quiz_fase_check;
+alter table fj_quiz add constraint fj_quiz_fase_check check (fase in ('uit', 'wacht', 'open', 'dicht', 'uitslag', 'stand'));
 
 -- normaliseren: kleine letters, zonder accenten, zonder lidwoord vooraan, zonder spaties en leestekens
 -- ("Groš!" → "gros", "De Leeuw" → "leeuw", "een leeuw" → "leeuw", "the lion" → "lion")
@@ -238,6 +243,7 @@ create or replace function fj_quiz_toestand() returns json
 language sql stable security definer set search_path = public as $$
   select json_build_object(
     'fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen),
+    'ronde', v.ronde, 'rondes', (select json_agg(coalesce(w.ronde, '') order by w.nr) from fj_vragen w),
     'soort', case when q.fase <> 'uit' then v.soort end,
     'vraag', case when q.fase <> 'uit' then v.vraag end,
     'afbeelding', case when q.fase <> 'uit' then v.afbeelding end,
@@ -249,7 +255,7 @@ language sql stable security definer set search_path = public as $$
     'uitslag', case when q.fase = 'uitslag' then coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten,
                                                            'sec', floor(extract(epoch from a.tijd - q.geopend)))
                                                            order by a.punten desc, a.tijd) from fj_antwoorden a where a.nr = q.nr), '[]') end,
-    'stand', case when q.fase = 'uitslag' or (q.fase = 'uit' and q.nr > 0) then coalesce((select json_agg(json_build_object('ridder_id', t.ridder_id, 'punten', t.som) order by t.som desc)
+    'stand', case when q.fase in ('uitslag', 'stand') or (q.fase = 'uit' and q.nr > 0) then coalesce((select json_agg(json_build_object('ridder_id', t.ridder_id, 'punten', t.som) order by t.som desc)
                                                            from (select ridder_id, sum(punten) som from fj_antwoorden group by ridder_id) t), '[]') end)
   from fj_quiz q left join fj_vragen v on v.nr = q.nr where q.id = 1;
 $$;
@@ -307,7 +313,10 @@ begin
       on conflict (ridder_id, spel_id) do update set punten = excluded.punten;
     end if;
   elsif p_actie = 'volgende' then
-    if q.nr < totaal then update fj_quiz set nr = q.nr + 1, fase = 'wacht', geopend = null where id = 1;
+    if q.fase = 'uitslag' and q.nr < totaal and v.ronde is not null
+       and (select w.ronde from fj_vragen w where w.nr = q.nr + 1) is distinct from v.ronde then
+      update fj_quiz set fase = 'stand' where id = 1;            -- einde van een ronde: eerst de tussenstand
+    elsif q.nr < totaal then update fj_quiz set nr = q.nr + 1, fase = 'wacht', geopend = null where id = 1;
     else update fj_quiz set fase = 'uit' where id = 1; end if;
   elsif p_actie = 'stop' then update fj_quiz set fase = 'uit' where id = 1;
   elsif p_actie = 'reset' then
@@ -325,12 +334,13 @@ declare uit json;
 begin
   perform fj_eis_pin(p_pin);
   select json_build_object('fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen), 'soort', v.soort, 'vraag', v.vraag,
+    'ronde', v.ronde, 'rondes', (select json_agg(coalesce(w.ronde, '') order by w.nr) from fj_vragen w),
     'afbeelding', v.afbeelding, 'antwoorden', v.antwoorden, 'juist', fj_quiz_juist(v),
     'verstreken', extract(epoch from now() - q.geopend), 'ridders', (select count(*) from fj_ridders),
     'antwoorden_van', coalesce((select json_agg(a.ridder_id) from fj_antwoorden a where a.nr = q.nr), '[]'),
     'alle', coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten, 'oordeel', a.oordeel,
                         'sec', round(extract(epoch from a.tijd - q.geopend)::numeric, 1)) order by a.tijd) from fj_antwoorden a where a.nr = q.nr), '[]'),
-    'volgende', (select json_build_object('nr', w.nr, 'soort', w.soort, 'vraag', w.vraag, 'afbeelding', w.afbeelding, 'antwoorden', w.antwoorden, 'juist', fj_quiz_juist(w))
+    'volgende', (select json_build_object('nr', w.nr, 'ronde', w.ronde, 'soort', w.soort, 'vraag', w.vraag, 'afbeelding', w.afbeelding, 'antwoorden', w.antwoorden, 'juist', fj_quiz_juist(w))
                  from fj_vragen w where w.nr = case when q.fase = 'uit' and q.nr = 0 then 1 else q.nr + 1 end))
   into uit from fj_quiz q left join fj_vragen v on v.nr = q.nr where q.id = 1;
   return uit;
@@ -354,7 +364,7 @@ begin
   update fj_antwoorden set oordeel = p_goed,
     punten = case when p_goed is null then auto when p_goed then case when v.soort = 'meer' then 50 * jsonb_array_length(v.juist) else 100 + snel end else 0 end
   where nr = q.nr and ridder_id = p_ridder;
-  if q.fase = 'uitslag' then           -- de tussenstand meteen bijwerken
+  if q.fase in ('uitslag', 'stand') then   -- de tussenstand meteen bijwerken
     select id into quiz_spel from fj_spelen where naam = 'Quiz';
     if quiz_spel is not null then
       insert into fj_punten (ridder_id, spel_id, punten)
@@ -372,8 +382,8 @@ language plpgsql security definer set search_path = public as $$
 begin
   perform fj_eis_pin(p_pin);
   delete from fj_antwoorden where true; delete from fj_vragen where true;   -- "where true": zie pg-safeupdate hierboven
-  insert into fj_vragen (nr, soort, vraag, afbeelding, antwoorden, juist)
-  select ord, coalesce(e->>'soort', 'keuze'), e->>'vraag', e->>'afbeelding', e->'antwoorden', e->'juist'
+  insert into fj_vragen (nr, ronde, soort, vraag, afbeelding, antwoorden, juist)
+  select ord, e->>'ronde', coalesce(e->>'soort', 'keuze'), e->>'vraag', e->>'afbeelding', e->'antwoorden', e->'juist'
   from jsonb_array_elements(p_vragen) with ordinality as t(e, ord);
   update fj_quiz set nr = 0, fase = 'uit', geopend = null where id = 1;
   delete from fj_punten where spel_id = (select id from fj_spelen where naam = 'Quiz');

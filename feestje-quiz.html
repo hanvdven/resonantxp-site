@@ -119,13 +119,15 @@
     if (!t) return;
     const mijn = mijnAntwoord();
     // opnieuw tekenen alleen als er iets veranderde (anders verdwijnt wat u aan het typen bent)
-    const staat = [t.fase, t.nr, t.vraag, JSON.stringify(mijn), t.fase === 'uitslag' ? JSON.stringify(t.uitslag) : '', t.fase === 'uit' ? JSON.stringify(t.stand) : ''].join('§');
+    const staat = [t.fase, t.nr, t.vraag, JSON.stringify(mijn), t.fase === 'uitslag' ? JSON.stringify(t.uitslag) : '', t.fase === 'uit' || t.fase === 'stand' ? JSON.stringify(t.stand) : ''].join('§');
     if (staat === getekend && !forceer) { tijdbalk(); return; }
     getekend = staat;
-    const kop = t.nr ? `<div class="nr">Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}</div>` : '';
-    const plaat = t.afbeelding ? `<img class="plaat" src="${esc(t.afbeelding)}" alt="">` : '';
+    const ri = rondeInfo(t.rondes, t.nr);
+    const kop = t.nr ? `<div class="nr">${ri ? `Ronde ${romeins(ri.nr)} · ${esc(ri.naam)} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`}</div>` : '';
+    const plaat = t.afbeelding ? `<img class="plaat" src="${esc(t.afbeelding)}" alt="" onerror="this.remove()">` : '';
     const vraag = `${kop}<p class="vraag">${esc(t.vraag)}</p>${plaat}`;
 
+    if (t.fase === 'stand') return eindstand(ri ? `De tussenstand na ${esc(ri.naam)}` : 'De tussenstand');
     if (t.fase === 'uit') {
       if (t.nr > 0 && t.stand?.length) return eindstand();
       app.innerHTML = `<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
@@ -168,9 +170,9 @@
     }
     app.innerHTML = `${vraag}<div class="kaart">${mijn ? `Uw antwoord: <b>${mijnTekst}</b><br>Ontvangen. Wacht op de uitslag.` : 'Deze vraag is gesloten.'}</div>`;
   }
-  function eindstand() {
-    const rij = t.stand.map((x, i) => `<li class="${x.ridder_id === ridder ? 'ik' : ''}"><span>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</span><span>${esc(naam(x.ridder_id))}</span><span>${x.punten}</span></li>`).join('');
-    app.innerHTML = `<p class="groot">De eindstand</p><ol class="stand">${rij}</ol><p class="stil">De punten staan ook in de tussenstand, onder Quiz.</p>`;
+  function eindstand(titel = 'De eindstand') {
+    const rij = (t.stand || []).map((x, i) => `<li class="${x.ridder_id === ridder ? 'ik' : ''}"><span>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</span><span>${esc(naam(x.ridder_id))}</span><span>${x.punten}</span></li>`).join('');
+    app.innerHTML = `<p class="groot">${titel}</p><ol class="stand">${rij}</ol><p class="stil">${titel === 'De eindstand' ? 'De punten staan ook in de tussenstand, onder Quiz.' : 'De volgende ronde begint zo.'}</p>`;
   }
   function tijdbalk() {
     const b = $('#balk'); if (!b || t.fase !== 'open') return;

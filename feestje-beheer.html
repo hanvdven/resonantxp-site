@@ -218,7 +218,9 @@
     const staat = JSON.stringify([m.fase, m.nr, m.totaal, m.alle, m.fase === 'open' ? Math.floor(m.verstreken || 0) : 0]);
     if (staat === qStaat && !actie) return; qStaat = staat;
     const k = (a, label, extra = '') => `<button type="button" class="knop ${extra}" data-a="${a}">${label}</button>`;
-    const vraag = m.nr ? vraagKaart(m, `<p class="qnr">Vraag ${romeinsK(m.nr)} van ${romeinsK(m.totaal)} · ${SOORT[m.soort] || ''}</p>`) : '';
+    const ri = rondeInfo(m.rondes, m.nr), rv = m.volgende ? rondeInfo(m.rondes, m.volgende.nr) : null;
+    const rondeTekst = r => r ? `Ronde ${romeinsK(r.nr)} · ${esc(r.naam)} · vraag ${romeinsK(r.inRonde)} van ${romeinsK(r.rondeTotaal)}` : '';
+    const vraag = m.nr ? vraagKaart(m, `<p class="qnr">${ri ? rondeTekst(ri) : `Vraag ${romeinsK(m.nr)} van ${romeinsK(m.totaal)}`} · ${SOORT[m.soort] || ''}</p>`) : '';
     // alle antwoorden, met ✓ / ✗ om bij te keuren (niet bij een schatting: daar beslist de afstand)
     const tekstVan = a => a.keuze != null ? `${LETTERS[a.keuze]}. ${esc(m.antwoorden?.[a.keuze] ?? '')}` : esc(String(a.waarde ?? '').split('|').filter(Boolean).join(', '));
     const keurbaar = m.soort !== 'getal';
@@ -227,7 +229,7 @@
         ${keurbaar ? `<td class="k"><button type="button" data-r="${a.ridder_id}" data-g="1" aria-pressed="${a.oordeel === true}" aria-label="Goed">✓</button><button type="button" data-r="${a.ridder_id}" data-g="0" aria-pressed="${a.oordeel === false}" aria-label="Fout">✗</button></td>` : ''}</tr>`).join('')}</tbody></table>
         <p class="qwie">${m.alle.length} van ${m.ridders} geantwoord.${keurbaar ? ' Tik ✓ of ✗ om bij te keuren; nog eens tikken = weer automatisch.' : ''}</p>`
       : `<p class="qwie">Nog niemand geantwoord (${m.ridders} ridders).</p>`;
-    const volgende = m.volgende ? `<details class="qvolg"${m.fase === 'uitslag' || (m.fase === 'uit' && !m.nr) ? ' open' : ''}><summary>Volgende vraag bekijken</summary>${vraagKaart(m.volgende, `<p class="qnr">Vraag ${romeinsK(m.volgende.nr)} · ${SOORT[m.volgende.soort] || ''}</p>`)}</details>` : '';
+    const volgende = m.volgende ? `<details class="qvolg"${m.fase === 'uitslag' || m.fase === 'stand' || (m.fase === 'uit' && !m.nr) ? ' open' : ''}><summary>Volgende vraag bekijken</summary>${vraagKaart(m.volgende, `<p class="qnr">${rv ? rondeTekst(rv) : `Vraag ${romeinsK(m.volgende.nr)}`} · ${SOORT[m.volgende.soort] || ''}</p>`)}</details>` : '';
     let knoppen = '';
     if (m.fase === 'uit' && !m.nr) knoppen = `<p>${m.totaal ? `${m.totaal} vragen klaar.` : 'Nog geen vragen geladen.'} Spelers gaan naar <b>resonantxp.com/feestje-quiz</b> (QR-code op de tv).</p>
       ${k('laad', `Vragen laden (${QUIZ_VRAGEN.length} uit feestje-quiz-vragen.js)`, 'licht')}${m.totaal ? k('start', 'Start de quiz') : ''}${m.totaal ? volgende : ''}`;
@@ -235,7 +237,8 @@
     else if (m.fase === 'wacht') knoppen = `${vraag}<p>De vraag staat op de tv. Open hem als iedereen hem gelezen heeft.</p>${k('open', 'Open de vraag')}${volgende}`;
     else if (m.fase === 'open') knoppen = `${vraag}<p class="qtijd">${Math.floor(m.verstreken || 0)} s</p>${alle}${k('sluit', 'Sluit de vraag', 'licht')}${k('toon', 'Toon het antwoord')}${volgende}`;
     else if (m.fase === 'dicht') knoppen = `${vraag}${alle}${k('toon', 'Toon het antwoord')}${volgende}`;
-    else if (m.fase === 'uitslag') knoppen = `${vraag}${alle}${k('volgende', m.nr < m.totaal ? 'Volgende vraag' : 'Einde: eindstand op de tv')}${volgende}`;
+    else if (m.fase === 'uitslag') knoppen = `${vraag}${alle}${k('volgende', m.nr >= m.totaal ? 'Einde: eindstand op de tv' : ri?.laatste ? `Tussenstand na ${esc(ri.naam)}` : 'Volgende vraag')}${volgende}`;
+    else if (m.fase === 'stand') knoppen = `<p>De tussenstand na <b>${esc(ri?.naam || '')}</b> staat op de tv en op de gsm's.</p>${k('volgende', `Volgende ronde${rv ? `: ${esc(rv.naam)}` : ''}`)}${volgende}`;
     if (m.fase !== 'uit') knoppen += `<div class="qklein"><button type="button" class="verwijder" data-a="stop">Quiz stoppen</button> <button type="button" class="verwijder" data-a="reset">Alles wissen</button></div>`;
     const open = box.querySelector('.qvolg')?.open;          // het voorbeeld open houden als u het zelf opende
     box.innerHTML = knoppen;
