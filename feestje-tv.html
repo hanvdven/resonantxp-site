@@ -347,6 +347,7 @@
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
     <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
     <div id="sp-qr" hidden><div class="qrvak"></div><p>Scan met je gsm en log daar in bij Spotify. <span id="sp-qr-staat"></span></p></div>
+    <div class="rij"><button id="sp-speel">Muziek naar de tv</button><span id="sp-speler" style="align-self:center"></span></div>
     <p style="opacity:.75;font-size:.85em">Redirect URI in het Spotify-dashboard, letterlijk: <code id="sp-terug"></code></p>
   </div>
 </div>
@@ -898,15 +899,17 @@ function aftellen() {
     !handmatig ? b.dataset.p === '' : keuze === 'wapens' ? b.dataset.p === 'wapens' : b.dataset.p === TABS[tab].id));
   knop.addEventListener('click', pgStaat); $('#klok').addEventListener('click', pgStaat);
   const spStaat = () => {
-    const a = $('#sp-koppel'), aan = Spotify.gekoppeld();
-    $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Spotify.inlog() ? 'niet gekoppeld' : 'even geduld…';
+    const a = $('#sp-koppel'), aan = Muziek.gekoppeld();
+    $('#sp-staat').textContent = !Muziek.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Muziek.inlog() ? 'niet gekoppeld' : 'even geduld…';
     a.textContent = aan ? 'Spotify ontkoppelen' : 'Inloggen op de tv';
-    a.href = !aan && Spotify.inlog() ? Spotify.inlog() : '#';
-    $('#sp-terug').textContent = Spotify.terug;
+    a.href = !aan && Muziek.inlog() ? Muziek.inlog() : '#';
+    $('#sp-terug').textContent = Muziek.terug;
+    $('#sp-speler').textContent = Muziek.staat();
   };
+  $('#sp-speel').addEventListener('click', () => Muziek.naarTv());
   $('#sp-gsm').addEventListener('click', () => {
-    if (!Spotify.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
-    const url = Spotify.viaGsm(ok => {
+    if (!Muziek.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
+    const url = Muziek.viaGsm(ok => {
       $('#sp-qr-staat').textContent = ok ? 'Gekoppeld ✓' : 'Verlopen. Druk opnieuw op de knop.';
       if (ok) { setTimeout(() => { $('#sp-qr').hidden = true; }, 2500); melding('Spotify', 'gekoppeld', null, '', { icoon: 'herberg', ms: 5000 }); }
       spStaat();
@@ -916,8 +919,8 @@ function aftellen() {
     $('#sp-qr-staat').textContent = 'Wachten op je gsm…'; $('#sp-qr').hidden = false;
   });
   $('#sp-koppel').addEventListener('click', async e => {
-    if (Spotify.gekoppeld()) { e.preventDefault(); Spotify.ontkoppel(); await Spotify.bereid(); spStaat(); }
-    else if (!Spotify.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
+    if (Muziek.gekoppeld()) { e.preventDefault(); Muziek.ontkoppel(); await Muziek.bereid(); spStaat(); }
+    else if (!Muziek.inlog()) e.preventDefault();          // geen Client ID of nog niet klaar: niets doen (geen alert, die blokkeert TV Bro)
   });
   knop.addEventListener('click', spStaat);
   $('#test-in').addEventListener('change', e => { const t = new Date(e.target.value); if (!isNaN(t)) zet(t); });
@@ -1112,11 +1115,12 @@ function wapenModus() {
 
 
 /* =========================================================
-   SPOTIFY — "Nu speelt" bij elk nieuw nummer. De muziek zelf speelt via de Spotify-app (Spotify Connect);
-   dit scherm vraagt alleen om de 5 s wat er speelt. Inloggen: OAuth "Authorization Code met PKCE"
+   SPOTIFY — "Nu speelt" bij elk nieuw nummer (om de 5 s gevraagd), én de tv als Spotify-speler: de Web Playback SDK
+   maakt van deze pagina een Spotify Connect-toestel ("De herberg (tv)"), het geluid komt uit de tv. Vereist Premium,
+   en een browser met EME/Widevine (beveiligde audio); lukt dat niet, dan zegt het verborgen menu waarom. Inloggen: OAuth "Authorization Code met PKCE"
    (geen server, geen geheime sleutel). Tokens blijven alleen op dit toestel (localStorage).
    ========================================================= */
-const Spotify = (() => {
+const Muziek = (() => {   // niet "Spotify": die naam neemt de Web Playback SDK zelf in (window.Spotify)
   const ID = (typeof SPOTIFY !== 'undefined' && SPOTIFY.clientId) || '';
   const TERUG = (typeof SPOTIFY !== 'undefined' && SPOTIFY.terug) || location.origin + '/feestje-tv';   // = Redirect URI bij Spotify
   const SLEUTEL = 'feestje.spotify';
@@ -1132,7 +1136,7 @@ const Spotify = (() => {
     const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
     try { localStorage.setItem('feestje.spotify.v', verifier); } catch {}
     return inlog = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({ client_id: ID, response_type: 'code', redirect_uri: TERUG,
-      code_challenge_method: 'S256', code_challenge: challenge, scope: 'user-read-currently-playing user-read-playback-state' });
+      code_challenge_method: 'S256', code_challenge: challenge, scope: SPOTIFY.scope });
   }
   async function token(body) {
     const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1140,7 +1144,7 @@ const Spotify = (() => {
     const j = await r.json();
     if (!r.ok) throw Object.assign(new Error(j.error_description || j.error || r.status), { code: j.error });
     const oud = lees() || {};
-    const t = { access: j.access_token, refresh: j.refresh_token || oud.refresh, tot: Date.now() + (j.expires_in - 60) * 1000 };
+    const t = { access: j.access_token, refresh: j.refresh_token || oud.refresh, tot: Date.now() + (j.expires_in - 60) * 1000, scope: j.scope ?? oud.scope };
     schrijf(t); return t;
   }
   async function geldig() {
@@ -1176,6 +1180,53 @@ const Spotify = (() => {
     }
     if (!lees()) await bereid();
     kijk(); setInterval(kijk, 5000);
+    if (lees()) spelerAan();
+  }
+
+  /* — de tv als speler (Web Playback SDK) — */
+  let speler = null, toestel = '', staat = '', bijStaat = () => {};
+  const zet = s => { staat = s; bijStaat(s); };
+  function laadSdk() {
+    return new Promise((ok, nee) => {
+      if (window.Spotify && window.Spotify.Player) return ok();
+      window.onSpotifyWebPlaybackSDKReady = ok;
+      const s = document.createElement('script'); s.src = 'https://sdk.scdn.co/spotify-player.js';
+      s.onerror = () => nee(new Error('kon de Spotify-speler niet laden'));
+      document.head.appendChild(s);
+    });
+  }
+  async function spelerAan() {
+    if (speler) return;
+    let t = await geldig(); if (!t) return zet('niet gekoppeld');
+    if (t.scope === undefined) { schrijf({ ...t, tot: 0 }); t = await geldig(); if (!t) return zet('niet gekoppeld'); }   // oude koppeling: rechten opvragen
+    if (!/\bstreaming\b/.test(t.scope || '')) return zet('opnieuw koppelen: de koppeling mag nog niet afspelen');
+    if (!navigator.requestMediaKeySystemAccess) return zet('deze browser kan geen beveiligde audio afspelen (geen EME)');
+    zet('speler laden…');
+    try { await laadSdk(); } catch (e) { return zet(e.message); }
+    speler = new window.Spotify.Player({
+      name: SPOTIFY.toestel || 'Feestje-tv', volume: 0.8,
+      getOAuthToken: async cb => { const t = await geldig(); cb(t ? t.access : ''); },
+    });
+    speler.addListener('ready', ({ device_id }) => { toestel = device_id; zet(`klaar: kies "${SPOTIFY.toestel}" in Spotify, of druk op "Muziek naar de tv"`); });
+    speler.addListener('not_ready', () => { toestel = ''; zet('verbinding met Spotify kwijt, opnieuw aan het verbinden…'); });
+    speler.addListener('initialization_error', ({ message }) => zet('deze browser kan de speler niet starten (' + message + ')'));
+    speler.addListener('authentication_error', ({ message }) => zet('inloggen mislukt (' + message + '): opnieuw koppelen'));
+    speler.addListener('account_error', () => zet('dit account heeft geen Premium'));
+    speler.addListener('playback_error', ({ message }) => zet('afspelen mislukt (' + message + ')'));
+    speler.addListener('autoplay_failed', () => zet('de browser houdt het geluid tegen: druk op "Muziek naar de tv"'));
+    speler.addListener('player_state_changed', s => { if (s && toestel) zet(s.paused ? 'gepauzeerd' : 'speelt op de tv ♪'); });
+    if (!(await speler.connect())) zet('kon niet verbinden met Spotify');
+  }
+  /* Muziek naar de tv halen. activateElement() moet in de klik zelf gebeuren (vóór elke await): browsers laten pas
+     geluid toe na een handeling van de gebruiker, en een klik met de afstandsbediening telt daarvoor. */
+  async function naarTv() {
+    if (speler) speler.activateElement();
+    if (!speler) { await spelerAan(); if (speler) speler.activateElement(); }
+    if (!toestel) return;
+    const t = await geldig(); if (!t) return zet('niet gekoppeld');
+    const r = await fetch('https://api.spotify.com/v1/me/player', { method: 'PUT',
+      headers: { Authorization: 'Bearer ' + t.access, 'Content-Type': 'application/json' }, body: JSON.stringify({ device_ids: [toestel], play: true }) });
+    if (!r.ok && r.status !== 204) zet(r.status === 403 ? 'Spotify weigert (Premium nodig, of opnieuw koppelen)' : 'overzetten mislukt (' + r.status + ')');
   }
   // koppelen via de gsm: de tv toont een QR-code met een geheime code; de gsm logt in en zet de refresh-token
   // in de database onder die code (fj_spotify_zet); de tv haalt hem één keer op (fj_spotify_haal)
@@ -1187,13 +1238,15 @@ const Spotify = (() => {
       if (Date.now() > koppelTot) { clearInterval(koppelTimer); klaar(false); return; }
       try {
         const r = await Db.spotifyHaal(koppelId);
-        if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); }
+        if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); spelerAan(); }
       } catch { /* volgende keer */ }
     }, 2500);
     // de gsm begint op hetzelfde adres als waar Spotify naar terugkeert: de PKCE-sleutel staat dan in dezelfde localStorage
     return new URL(TERUG).origin + '/feestje-spotify?id=' + koppelId;
   }
-  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID, viaGsm, terug: TERUG };
+  function ontkoppel() { if (speler) { speler.disconnect(); speler = null; toestel = ''; } schrijf(null); zet(''); }
+  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel, aan: !!ID, viaGsm, terug: TERUG,
+    naarTv, staat: () => staat, bijStaat: f => { bijStaat = f; } };
 })();
 function nuSpeelt(titel, artiest, hoes) {
   const el = document.createElement('div'); el.className = 'melding muziek';
@@ -1346,7 +1399,8 @@ const Vuurwerk = (() => {
 function tik() { Klok.render(); aftellen(); wapenModus(); aankondigen(); }
 function elkeMinuut() { nuStrook(); toonLijf(); if (TABS[tab].id === 'getijden') tekenGetijden(); }
 kiesTab(rotatie()[0], true);
-Spotify.start();
+Muziek.bijStaat(s => { $('#sp-speler').textContent = s; });   // na de definitie van Muziek (const: geen hoisting)
+Muziek.start();
 QuizTV.start();
 document.fonts.ready.then(() => { Klok.opnieuw(); elkeMinuut(); });
 tik(); elkeMinuut();
