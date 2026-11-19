@@ -34,7 +34,7 @@
   'use strict';
   const app = document.getElementById('app');
   const ID = (typeof SPOTIFY !== 'undefined' && SPOTIFY.clientId) || '';
-  const TERUG = location.origin + '/feestje-tv';          // dezelfde Redirect URI als op de tv
+  const TERUG = (typeof SPOTIFY !== 'undefined' && SPOTIFY.terug) || location.origin + '/feestje-tv';   // dezelfde Redirect URI als op de tv
   const q = new URLSearchParams(location.search);
   const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

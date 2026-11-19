@@ -347,6 +347,7 @@
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
     <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
     <div id="sp-qr" hidden><div class="qrvak"></div><p>Scan met je gsm en log daar in bij Spotify. <span id="sp-qr-staat"></span></p></div>
+    <p style="opacity:.75;font-size:.85em">Redirect URI in het Spotify-dashboard, letterlijk: <code id="sp-terug"></code></p>
   </div>
 </div>
 
@@ -901,6 +902,7 @@ function aftellen() {
     $('#sp-staat').textContent = !Spotify.aan ? 'nog geen Client ID in feestje-config.js' : aan ? 'gekoppeld ✓' : Spotify.inlog() ? 'niet gekoppeld' : 'even geduld…';
     a.textContent = aan ? 'Spotify ontkoppelen' : 'Inloggen op de tv';
     a.href = !aan && Spotify.inlog() ? Spotify.inlog() : '#';
+    $('#sp-terug').textContent = Spotify.terug;
   };
   $('#sp-gsm').addEventListener('click', () => {
     if (!Spotify.aan) { $('#sp-staat').textContent = 'nog geen Client ID in feestje-config.js'; return; }
@@ -1116,7 +1118,7 @@ function wapenModus() {
    ========================================================= */
 const Spotify = (() => {
   const ID = (typeof SPOTIFY !== 'undefined' && SPOTIFY.clientId) || '';
-  const TERUG = location.origin + '/feestje-tv';          // exact zo invullen als Redirect URI bij Spotify
+  const TERUG = (typeof SPOTIFY !== 'undefined' && SPOTIFY.terug) || location.origin + '/feestje-tv';   // = Redirect URI bij Spotify
   const SLEUTEL = 'feestje.spotify';
   const lees = () => { try { return JSON.parse(localStorage.getItem(SLEUTEL)) || null; } catch { return null; } };
   const schrijf = v => { try { v ? localStorage.setItem(SLEUTEL, JSON.stringify(v)) : localStorage.removeItem(SLEUTEL); } catch {} };
@@ -1188,9 +1190,10 @@ const Spotify = (() => {
         if (r) { clearInterval(koppelTimer); schrijf({ access: '', refresh: r, tot: 0 }); vorige = null; await kijk(); klaar(true); }
       } catch { /* volgende keer */ }
     }, 2500);
-    return location.origin + '/feestje-spotify?id=' + koppelId;
+    // de gsm begint op hetzelfde adres als waar Spotify naar terugkeert: de PKCE-sleutel staat dan in dezelfde localStorage
+    return new URL(TERUG).origin + '/feestje-spotify?id=' + koppelId;
   }
-  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID, viaGsm };
+  return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel: () => schrijf(null), aan: !!ID, viaGsm, terug: TERUG };
 })();
 function nuSpeelt(titel, artiest, hoes) {
   const el = document.createElement('div'); el.className = 'melding muziek';
