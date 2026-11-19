@@ -26,7 +26,7 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; background: #070b1c; overflow: hidden; }
     body.stil { cursor: none; }   /* de muis verdwijnt na 3 s stilstand (zie muis()) */
-    #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden;
+    #stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; transition: transform 1.2s ease;
       background: var(--nacht) url(feestje-img/tv/plafond.webp); font-family: "Grenze", Georgia, serif; color: #f1e6cf; }
     .fries { position: absolute; left: 0; width: 1920px; height: 92px; border-top: 6px solid var(--rood); border-bottom: 6px solid var(--rood); }
     .fries svg { display: block; }
@@ -134,9 +134,20 @@
     .melding span { font-size: 30px; line-height: 1.2; }
     .melding.weg { animation: uit .5s ease-in both; }
     .melding > img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
-    .melding.muziek img { width: 64px; height: 64px; object-fit: cover; box-shadow: 0 0 0 2px #6e4a24; }
-    .melding.muziek .noot { font-size: 48px; text-align: center; color: var(--rubriek); }
-    .melding.muziek i { font-style: normal; font-size: 26px; color: var(--inkt-zacht); }
+    /* "Nu speelt": lager, over de lijst, in de stijl van de meldingen in het spel (donkere band, goud randje en kop) */
+    #nuspeelt { position: absolute; right: 64px; bottom: 96px; width: 680px; z-index: 6; pointer-events: none; }
+    .nuspeelt { display: grid; grid-template-columns: 76px 1fr; gap: 22px; align-items: center; padding: 18px 40px 18px 22px; color: #f2ead8;
+      background: linear-gradient(90deg, rgba(14,11,8,.95), rgba(14,11,8,.86) 70%, rgba(14,11,8,.58)); border-left: 4px solid #e3b84f;
+      box-shadow: 0 12px 30px rgba(0,0,0,.45); animation: kcdIn .45s ease-out both; }
+    .nuspeelt.weg { animation: kcdUit .5s ease-in both; }
+    @keyframes kcdIn { from { opacity: 0; transform: translateX(30px); } }
+    @keyframes kcdUit { to { opacity: 0; transform: translateX(30px); } }
+    .nuspeelt img { width: 76px; height: 76px; object-fit: cover; box-shadow: 0 0 0 2px #b98a2e, 0 4px 10px rgba(0,0,0,.6); }
+    .nuspeelt .noot { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-size: 40px; color: #e3b84f;
+      background: radial-gradient(circle at 35% 30%, #6c5a3e, #2a2016); border: 2px solid #b98a2e; box-shadow: inset 0 0 0 3px #1a140d; }
+    .nuspeelt b { display: block; font-variant-caps: small-caps; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; font-size: 22px; color: #e3b84f; margin-bottom: 4px; }
+    .nuspeelt span { display: block; font-size: 32px; line-height: 1.15; }
+    .nuspeelt i { display: block; font-style: normal; font-size: 25px; color: rgba(242,234,216,.72); margin-top: 2px; }
     @keyframes in { from { opacity: 0; transform: translateX(40px); } }
     @keyframes uit { to { opacity: 0; transform: translateX(40px); } }
 
@@ -355,6 +366,7 @@
     <div class="qvoet" id="qz-voet"></div></section>
 
   <div id="meldingen" aria-live="polite"></div>
+  <div id="nuspeelt" aria-live="polite"></div>
   <div id="aftel"><canvas id="vuurwerk" width="1920" height="1080" aria-hidden="true"></canvas><div class="tekst"><div class="n" id="aftel-n"></div><p id="aftel-p"></p></div></div>
 
   <button id="test-knop" type="button" aria-label="Verborgen menu" aria-expanded="false" aria-controls="test"></button>
@@ -476,8 +488,11 @@ function tekenInitiaal(letter) {
 }
 
 /* ---------- schalen naar het scherm ---------- */
+// Overdag past het hele beeld (contain: kaders en tabellen tot aan de rand). Rond middernacht vult de sterrenhemel met de
+// stad het hele scherm (cover): is het scherm niet precies 16:9 (een balk van de browser), dan geen randen naast de stad.
 function schaal() {
-  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const vul = $('#stage').classList.contains('nacht');
+  const s = (vul ? Math.max : Math.min)(innerWidth / 1920, innerHeight / 1080);
   $('#stage').style.transform = `translate(${(innerWidth - 1920 * s) / 2}px, ${(innerHeight - 1080 * s) / 2}px) scale(${s})`;
 }
 addEventListener('resize', schaal); schaal();
@@ -885,7 +900,9 @@ Db.volg((s, fout) => {
 function aftellen() {
   const t = now(), s = (CONFIG.midnight - t) / 1000, box = $('#aftel');
   // de laatste minuut tot vier minuten na middernacht: alleen de klok (in het midden), de hemel en de stad
+  const wasNacht = $('#stage').classList.contains('nacht');
   $('#stage').classList.toggle('nacht', s <= 60 && s > -240);
+  if (wasNacht !== $('#stage').classList.contains('nacht')) schaal();
   $('#stage').classList.toggle('nieuwjaar', s <= 0 && s > -240);
   if (s <= 60 && s > 0) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = ''; $('#aftel-p').textContent = 'Heft de bekers'; }
   else if (s <= 0 && s > -240) { box.classList.add('aan'); $('#aftel-n').className = 'z'; $('#aftel-n').textContent = 'Zalig nieuwjaar'; $('#aftel-p').textContent = `Anno Domini ${CONFIG.annoDomini}`; }
@@ -1298,12 +1315,12 @@ const Muziek = (() => {   // niet "Spotify": die naam neemt de Web Playback SDK 
   return { start, bereid, inlog: () => inlog, gekoppeld: () => !!lees(), ontkoppel, aan: !!ID, viaGsm, terug: TERUG,
     naarTv, staat: () => staat, bijStaat: f => { bijStaat = f; } };
 })();
-function nuSpeelt(titel, artiest, hoes) {
-  const el = document.createElement('div'); el.className = 'melding muziek';
-  el.innerHTML = `${hoes ? `<img src="${esc(hoes)}" alt="">` : '<span class="noot">♪</span>'}<div><b>Nu speelt</b><span>${esc(titel)}<br><i>${esc(artiest)}</i></span></div>`;
-  const box = $('#meldingen'); box.appendChild(el);
-  while (box.children.length > 3) box.firstChild.remove();
-  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 8000);
+function nuSpeelt(titel, artiest, hoes) {   // één tegelijk: een nieuw nummer vervangt het vorige
+  const box = $('#nuspeelt'); box.textContent = '';
+  const el = document.createElement('div'); el.className = 'nuspeelt';
+  el.innerHTML = `${hoes ? `<img src="${esc(hoes)}" alt="">` : '<span class="noot">♪</span>'}<div><b>Nu speelt</b><span>${esc(titel)}</span><i>${esc(artiest)}</i></div>`;
+  box.appendChild(el);
+  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 500); }, 9000);
 }
 
 
@@ -1375,15 +1392,30 @@ const Vuurwerk = (() => {
     const soort = groot ? GROOT[(Math.random() * GROOT.length) | 0] : KLEIN[(Math.random() * KLEIN.length) | 0];
     const richting = Math.random() < .72 ? -1 : 1, schaal = groot ? rnd(.55, .85) : rnd(.45, 1);
     const rand = 300 * schaal + voorsprong;                          // net buiten beeld (of verder, om de zwerm te spreiden)
-    const d = { ...soort, x: richting < 0 ? W + rand : -rand, y: rnd(110, H - 120), richting, schaal,
+    const d = { ...soort, soort, x: richting < 0 ? W + rand : -rand, y: rnd(110, H - 120), richting, schaal,
       v: groot ? rnd(90, 130) : rnd(110, 190), t: 0, fase: rnd(0, 6), vuur: -rnd(.3, 2) };
     const i = draken.findIndex(x => x.schaal > schaal); i < 0 ? draken.push(d) : draken.splice(i, 0, d);   // kleine (verre) eerst tekenen
   }
+  /* verre draken een heel klein beetje donkerder, naar het blauw van de nachtlucht toe (luchtperspectief). Eén keer per
+     knipsel twee getinte kopieën maken (source-atop: alleen waar de draak is), daarna gewoon kopiëren: licht voor een Chromecast. */
+  const TINT = [.10, .2];
+  function getint(soort, i) {
+    soort.getint = soort.getint || [];
+    if (!soort.getint[i]) {
+      const c = document.createElement('canvas'); c.width = soort.img.naturalWidth; c.height = soort.img.naturalHeight;
+      const x = c.getContext('2d'); x.drawImage(soort.img, 0, 0);
+      x.globalCompositeOperation = 'source-atop'; x.fillStyle = `rgba(10, 18, 44, ${TINT[i]})`; x.fillRect(0, 0, c.width, c.height);
+      soort.getint[i] = c;
+    }
+    return soort.getint[i];
+  }
   function tekenDraak(d) {
     if (!d.img.complete || !d.img.naturalWidth) return;
+    // de kleintjes: hoe kleiner (verder weg), hoe donkerder; de grote blijven zoals ze zijn
+    const bron = d.groot ? d.img : d.schaal < .62 ? getint(d.soort, 1) : d.schaal < .82 ? getint(d.soort, 0) : d.img;
     const spiegel = (d.kop === 'L' ? -1 : 1) * d.richting;          // kop vooruit
     g.save(); g.translate(d.x, d.y); g.rotate(Math.cos(d.t * 1.1 + d.fase) * .035 * d.richting); g.scale(spiegel * d.schaal, d.schaal);
-    g.drawImage(d.img, -d.img.width / 2, -d.img.height / 2); g.restore();
+    g.drawImage(bron, -d.img.width / 2, -d.img.height / 2); g.restore();
   }
   function stap(nu) {
     const dt = Math.min(.05, (nu - vorige) / 1000 || .016); vorige = nu;
