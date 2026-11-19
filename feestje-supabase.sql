@@ -291,7 +291,7 @@ begin
     else update fj_quiz set fase = 'uit' where id = 1; end if;
   elsif p_actie = 'stop' then update fj_quiz set fase = 'uit' where id = 1;
   elsif p_actie = 'reset' then
-    delete from fj_antwoorden;
+    delete from fj_antwoorden where true;   -- "where true": Supabase (pg-safeupdate) weigert een DELETE zonder WHERE
     update fj_quiz set nr = 0, fase = 'uit', geopend = null where id = 1;
     delete from fj_punten where spel_id = (select id from fj_spelen where naam = 'Quiz');
   end if;
@@ -318,7 +318,7 @@ create or replace function fj_quiz_laad(p_pin text, p_vragen jsonb) returns int
 language plpgsql security definer set search_path = public as $$
 begin
   perform fj_eis_pin(p_pin);
-  delete from fj_antwoorden; delete from fj_vragen;
+  delete from fj_antwoorden where true; delete from fj_vragen where true;   -- "where true": zie pg-safeupdate hierboven
   insert into fj_vragen (nr, soort, vraag, afbeelding, antwoorden, juist)
   select ord, coalesce(e->>'soort', 'keuze'), e->>'vraag', e->>'afbeelding', e->'antwoorden', e->'juist'
   from jsonb_array_elements(p_vragen) with ordinality as t(e, ord);
