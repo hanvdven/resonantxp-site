@@ -115,6 +115,8 @@
     .uur .s { font-size: 24px; color: var(--inkt-zacht); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .uur.nu { background: rgba(233, 190, 82, .32); border-radius: 4px; }
     .uur.voorbij { opacity: .5; }
+    .uur.heel { border-top: 1px solid rgba(90, 60, 25, .25); }
+    .uur.heel .r small { line-height: 1.05; display: block; }
 
     /* spelen (uitleg) */
     .spelen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 40px; }
@@ -334,7 +336,7 @@
     <h2 style="margin-top:16px">Testtijd</h2>
     <div>Het scherm doet alsof het nu <span class="tijd" id="test-nu"></span> is.</div>
     <div class="rij"><button data-d="-60">− 1 uur</button><button data-d="-10">− 10 min</button><button data-d="10">+ 10 min</button><button data-d="60">+ 1 uur</button></div>
-    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T19:05:00">riddermaal</button><button data-t="2026-12-31T22:59:50">quiz</button>
+    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button><button data-t="2026-12-31T21:29:50">quiz</button>
       <button data-t="2026-12-31T23:59:35">vlak voor middernacht</button><button data-t="2027-01-01T00:00:01">vuurwerk</button></div>
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
     <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
@@ -742,7 +744,9 @@ function tekenGetijden() {
   const i = huidig(), voor = now() < CONFIG.start;
   $('#blad-getijden').innerHTML = CONFIG.program.map(([h, t, s, ic], k) => `<div class="uur${!voor && k === i ? ' nu' : ''}${!voor && k < i ? ' voorbij' : ''}">
     <div class="r"><b>${romeins(Math.floor(h % 24) || 24).toUpperCase()}</b><small>${fmtH(h)}</small></div><img src="feestje-img/kcd/${ic}.png" alt="">
-    <div><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div></div></div>`).join('');
+    <div><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div></div></div>`).join('')
+    + (CONFIG.heleAvond ? `<div class="uur heel"><div class="r"><small>de hele<br>avond</small></div><img src="feestje-img/kcd/${CONFIG.heleAvond[2]}.png" alt="">
+    <div><div class="t">${esc(CONFIG.heleAvond[0])}</div><div class="s">${esc(CONFIG.heleAvond[1])}</div></div></div>` : '');
 }
 
 /* ---------- de spelen ---------- */
@@ -812,15 +816,17 @@ function melding(kop, tekst, w, uid, { icoon = null, ms = 6000, soort = '' } = {
 /* ---------- aankondigingen volgens het programma, zoals de meldingen in het spel ----------
    [uur, kop, tekst, icoon]. Elke aankondiging verschijnt één keer, alleen als haar tijdstip net voorbij is
    (niet een hele rij tegelijk na herladen of na het verzetten van de testtijd). */
+// het wapenschilderen loopt tot het volgende onderdeel van het programma (nu het toernooi); dan is de keuring
+const WAPENS_TOT = CONFIG.program[1][0];
 const AANKONDIGINGEN = (() => {
   const A = [];
   for (const [h, naam, , ic] of CONFIG.program) {
     if (h === 24) continue;                                         // middernacht heeft zijn eigen aftelling en vuurwerk
-    if (h !== 18) A.push([h - 1 / 6, 'Nog tien minuten', h === CONFIG.program[0][0] ? 'en de poort gaat open' : `tot ${esc(naam)}`, ic]);   // om 17:50 gaat het over de wapens
+    if (h !== WAPENS_TOT) A.push([h - 1 / 6, 'Nog tien minuten', h === CONFIG.program[0][0] ? 'en de poort gaat open' : `tot ${esc(naam)}`, ic]);   // tien minuten voor het einde gaat het over de wapens
     A.push([h, h === CONFIG.program[0][0] ? 'De poort is open' : 'Het is zover', esc(naam), ic]);
   }
-  A.push([17 + 50 / 60, 'Nog tien minuten', 'om uw wapenschild af te maken', 'schild']);
-  A.push([18 - 1e-4, 'De tijd is om', 'Penselen neer! De wapens worden gekeurd.', 'schild']);
+  A.push([WAPENS_TOT - 1 / 6, 'Nog tien minuten', 'om uw wapenschild af te maken', 'schild']);
+  A.push([WAPENS_TOT - 1e-4, 'De tijd is om', 'Penselen neer! De wapens worden gekeurd.', 'schild']);
   A.push([23 + 50 / 60, 'Nog tien minuten', 'tot middernacht. Vul de bekers.', 'ster']);
   return A.sort((a, b) => a[0] - b[0]);
 })();
@@ -1076,12 +1082,12 @@ const QuizTV = (() => {
 })();
 
 function wapenModus() {
-  const t = now(), h = feestUur(t), aan = keuze ? keuze === 'wapens' : h >= CONFIG.partyFrom && h < 18 && t >= CONFIG.start;
+  const t = now(), h = feestUur(t), aan = keuze ? keuze === 'wapens' : h >= CONFIG.partyFrom && h < WAPENS_TOT && t >= CONFIG.start;
   $('#stage').classList.toggle('wapens', aan);
   if (!aan) return;
   if (!$('#initiaal-wk').innerHTML) { tekenInitiaal('W'); $('#initiaal-wk').innerHTML = $('#initiaal').innerHTML; tekenInitiaal(TABS[tab].letter); }
-  const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + 18 * 3600e3 - t) / 60000));
-  $('#wk-sub').innerHTML = `Keuring om <b>18:00</b>, nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>. De gouden regel: <b>nooit metaal op metaal, nooit kleur op kleur</b>.`;
+  const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + WAPENS_TOT * 3600e3 - t) / 60000));
+  $('#wk-sub').innerHTML = `Keuring om <b>${fmtH(WAPENS_TOT)}</b>, nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>. De gouden regel: <b>nooit metaal op metaal, nooit kleur op kleur</b>.`;
 }
 
 
