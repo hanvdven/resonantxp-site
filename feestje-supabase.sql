@@ -169,17 +169,19 @@ on conflict (id) do nothing;
 --    woord  vrij intypen; goed als het (zonder hoofdletters, spaties en accenten) in de lijst van goede antwoorden staat
 --           punten: als bij keuze
 --    getal  een schatting; wie het dichtst zit krijgt 100, dan 80, 60, 40, 20 (gelijke afstand = gelijke punten)
+--    meer   meerdere antwoorden (bv. de vier edelstenen van Mucha): 50 punten per verschillend juist antwoord
+--  Lidwoorden vooraan tellen niet ("de leeuw" = "leeuw"). De quizmaster kan elk antwoord achteraf goed- of afkeuren.
 --  De juiste antwoorden zijn voor spelers onleesbaar tot de quizmaster ze toont.
 --  Opnieuw draaien mag: de quiztabellen worden dan leeggemaakt en opnieuw aangelegd (de vragen laadt u daarna opnieuw).
 -- =====================================================================
 drop table if exists fj_antwoorden, fj_vragen, fj_quiz cascade;
 create table fj_vragen (
   nr         int  primary key,
-  soort      text not null default 'keuze' check (soort in ('keuze', 'woord', 'getal')),
+  soort      text not null default 'keuze' check (soort in ('keuze', 'woord', 'getal', 'meer')),
   vraag      text not null,
   afbeelding text,                                -- pad op de site, bv. 'feestje-img/quiz/komeet.webp' (alleen op de tv)
   antwoorden jsonb,                               -- keuze: ["…", "…", "…", "…"]
-  juist      jsonb not null                       -- keuze: 0–3 · woord: ["leeuw", "lion"] (vergeleken via fj_norm) · getal: 695
+  juist      jsonb not null                       -- keuze: 0–3 · woord: ["leeuw", "lion"] · getal: 695 · meer: [["topaas", "topaz"], ["robijn", "ruby"], …]
 );
 create table fj_quiz (
   id      int  primary key default 1 check (id = 1),
@@ -191,8 +193,9 @@ create table fj_antwoorden (
   nr        int    not null,
   ridder_id bigint not null references fj_ridders on delete cascade,
   keuze     int    check (keuze between 0 and 3),   -- keuze
-  waarde    text,                                   -- woord of getal, zoals ingetypt
+  waarde    text,                                   -- woord of getal, zoals ingetypt (meer: gescheiden door "|")
   punten    int    not null default 0,
+  oordeel   boolean,                                -- de quizmaster keurde het goed (true) of af (false); null = automatisch
   tijd      timestamptz not null default now(),
   primary key (nr, ridder_id)
 );
@@ -201,17 +204,33 @@ alter table fj_quiz       enable row level security;
 alter table fj_antwoorden enable row level security;
 insert into fj_quiz (id) values (1) on conflict (id) do nothing;
 
--- normaliseren: kleine letters, zonder accenten, spaties en leestekens ("Groš!" → "gros")
+-- uitbreiding (veilig op een bestaande database): soort 'meer' en het oordeel van de quizmaster
+alter table fj_vragen drop constraint if exists fj_vragen_soort_check;
+alter table fj_vragen add constraint fj_vragen_soort_check check (soort in ('keuze', 'woord', 'getal', 'meer'));
+alter table fj_antwoorden add column if not exists oordeel boolean;
+
+-- normaliseren: kleine letters, zonder accenten, zonder lidwoord vooraan, zonder spaties en leestekens
+-- ("Groš!" → "gros", "De Leeuw" → "leeuw", "een leeuw" → "leeuw", "the lion" → "lion")
 create or replace function fj_norm(t text) returns text
 language sql immutable as $$
-  select regexp_replace(lower(translate(coalesce(t, ''),
+  select regexp_replace(regexp_replace(lower(translate(trim(coalesce(t, '')),
     'áàâäãåčćçďéèêëěíìîïľĺňñóòôöõřŕšśťúùûüůýÿžźÁÀÂÄÃÅČĆÇĎÉÈÊËĚÍÌÎÏĽĹŇÑÓÒÔÖÕŘŔŠŚŤÚÙÛÜŮÝŸŽŹ',
-    'aaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzzaaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzz')), '[^a-z0-9]', '', 'g');
+    'aaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzzaaaaaacccdeeeeeiiiillnnooooorrsstuuuuuyyzz')),
+    '^(de|het|een|n|t|the|a|an|der|die|das|ein|eine|le|la|les|l|un|une)[^a-z0-9]+', ''), '[^a-z0-9]', '', 'g');
+$$;
+
+-- soort 'meer': hoeveel verschillende juiste antwoorden zitten er in een ingevulde lijst ("topaas|robijn|ruby")?
+create or replace function fj_quiz_meer(v fj_vragen, p_tekst text) returns int
+language sql immutable as $$
+  select count(*)::int from jsonb_array_elements(v.juist) as goed(varianten)
+  where exists (select 1 from regexp_split_to_table(coalesce(p_tekst, ''), '\|') as ingevuld(w), jsonb_array_elements_text(goed.varianten) as var(g)
+                where fj_norm(w) <> '' and fj_norm(w) = fj_norm(var.g));
 $$;
 
 -- het juiste antwoord om te tonen: keuze → het nummer, woord → het eerste goede woord, getal → het getal
 create or replace function fj_quiz_juist(v fj_vragen) returns jsonb
-language sql immutable as $$ select case when v.soort = 'woord' then v.juist->0 else v.juist end $$;
+language sql immutable as $$ select case when v.soort = 'woord' then v.juist->0
+  when v.soort = 'meer' then (select jsonb_agg(x->0) from jsonb_array_elements(v.juist) x) else v.juist end $$;
 
 -- wat iedereen mag zien (tv en spelers); het juiste antwoord pas in de fase 'uitslag'
 create or replace function fj_quiz_toestand() returns json
@@ -250,11 +269,14 @@ begin
   elsif v.soort = 'woord' then
     if fj_norm(p_tekst) = '' then return false; end if;
     if exists (select 1 from jsonb_array_elements_text(v.juist) g where fj_norm(g) = fj_norm(p_tekst)) then pt := 100 + snel; end if;
+  elsif v.soort = 'meer' then
+    if fj_norm(replace(p_tekst, '|', '')) = '' then return false; end if;
+    pt := 50 * fj_quiz_meer(v, p_tekst);
   else
     if p_tekst !~ '^\s*-?[0-9]+([.,][0-9]+)?\s*$' then return false; end if;
   end if;
   insert into fj_antwoorden (nr, ridder_id, keuze, waarde, punten)
-  values (q.nr, p_ridder, case when v.soort = 'keuze' then p_keuze end, case when v.soort <> 'keuze' then left(trim(p_tekst), 60) end, pt)
+  values (q.nr, p_ridder, case when v.soort = 'keuze' then p_keuze end, case when v.soort <> 'keuze' then left(trim(p_tekst), 200) end, pt)
   on conflict (nr, ridder_id) do nothing;
   return found;
 end $$;
@@ -307,9 +329,42 @@ begin
   select json_build_object('fase', q.fase, 'nr', q.nr, 'totaal', (select count(*) from fj_vragen), 'soort', v.soort, 'vraag', v.vraag,
     'afbeelding', v.afbeelding, 'antwoorden', v.antwoorden, 'juist', fj_quiz_juist(v),
     'verstreken', extract(epoch from now() - q.geopend), 'ridders', (select count(*) from fj_ridders),
-    'antwoorden_van', coalesce((select json_agg(a.ridder_id) from fj_antwoorden a where a.nr = q.nr), '[]'))
+    'antwoorden_van', coalesce((select json_agg(a.ridder_id) from fj_antwoorden a where a.nr = q.nr), '[]'),
+    'alle', coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten, 'oordeel', a.oordeel,
+                        'sec', round(extract(epoch from a.tijd - q.geopend)::numeric, 1)) order by a.tijd) from fj_antwoorden a where a.nr = q.nr), '[]'),
+    'volgende', (select json_build_object('nr', w.nr, 'soort', w.soort, 'vraag', w.vraag, 'afbeelding', w.afbeelding, 'antwoorden', w.antwoorden, 'juist', fj_quiz_juist(w))
+                 from fj_vragen w where w.nr = case when q.fase = 'uit' and q.nr = 0 then 1 else q.nr + 1 end))
   into uit from fj_quiz q left join fj_vragen v on v.nr = q.nr where q.id = 1;
   return uit;
+end $$;
+
+-- de quizmaster keurt een antwoord op de huidige vraag goed (true) of af (false); null = terug naar automatisch.
+-- Goed: 100 + de snelheidsbonus van dat antwoord (meer: het maximum, 50 per mogelijk antwoord). Getal: niet van toepassing.
+create or replace function fj_quiz_keur(p_pin text, p_ridder bigint, p_goed boolean) returns json
+language plpgsql security definer set search_path = public as $$
+declare q fj_quiz; v fj_vragen; a fj_antwoorden; snel int; auto int; quiz_spel bigint;
+begin
+  perform fj_eis_pin(p_pin);
+  select * into q from fj_quiz where id = 1;
+  select * into v from fj_vragen where nr = q.nr;
+  select * into a from fj_antwoorden where nr = q.nr and ridder_id = p_ridder;
+  if a.ridder_id is null or v.soort = 'getal' then return fj_quiz_meester(p_pin); end if;
+  snel := greatest(0, 30 - floor(extract(epoch from a.tijd - q.geopend)))::int;
+  auto := case v.soort when 'keuze' then case when a.keuze = (v.juist #>> '{}')::int then 100 + snel else 0 end
+                       when 'woord' then case when exists (select 1 from jsonb_array_elements_text(v.juist) g where fj_norm(g) = fj_norm(a.waarde)) then 100 + snel else 0 end
+                       else 50 * fj_quiz_meer(v, a.waarde) end;
+  update fj_antwoorden set oordeel = p_goed,
+    punten = case when p_goed is null then auto when p_goed then case when v.soort = 'meer' then 50 * jsonb_array_length(v.juist) else 100 + snel end else 0 end
+  where nr = q.nr and ridder_id = p_ridder;
+  if q.fase = 'uitslag' then           -- de tussenstand meteen bijwerken
+    select id into quiz_spel from fj_spelen where naam = 'Quiz';
+    if quiz_spel is not null then
+      insert into fj_punten (ridder_id, spel_id, punten)
+      select ridder_id, quiz_spel, sum(punten) from fj_antwoorden group by ridder_id
+      on conflict (ridder_id, spel_id) do update set punten = excluded.punten;
+    end if;
+  end if;
+  return fj_quiz_meester(p_pin);
 end $$;
 
 -- vragen laden (vervangt alle vragen en begint opnieuw):
@@ -327,10 +382,10 @@ begin
   return (select count(*) from fj_vragen);
 end $$;
 
-revoke execute on function fj_norm(text), fj_quiz_juist(fj_vragen), fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text),
-  fj_quiz_meester(text), fj_quiz_laad(text, jsonb) from public, anon, authenticated;
-grant execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_laad(text, jsonb)
-  to anon, authenticated;
+revoke execute on function fj_norm(text), fj_quiz_juist(fj_vragen), fj_quiz_meer(fj_vragen, text), fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text),
+  fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_keur(text, bigint, boolean), fj_quiz_laad(text, jsonb) from public, anon, authenticated;
+grant execute on function fj_quiz_toestand(), fj_quiz_antwoord(bigint, int, text), fj_quiz_stap(text, text), fj_quiz_meester(text), fj_quiz_keur(text, bigint, boolean),
+  fj_quiz_laad(text, jsonb) to anon, authenticated;
 
 -- =====================================================================
 --  Spotify koppelen via de gsm (zonder typen op de tv)

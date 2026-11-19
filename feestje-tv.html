@@ -192,6 +192,7 @@
     .qz .keuzes .aantal { font-size: 28px; color: var(--inkt-zacht); font-weight: 400; margin-left: 8px; }
     .qz .keuzes div { font-size: 40px; }
     .qz .vrij { font-size: 38px; color: var(--inkt-zacht); }
+    .qz .vrij.meer b { font-size: 64px; line-height: 1.15; }
     .qz .vrij b { display: block; font-family: "Maximilian", serif; font-weight: 400; font-size: 120px; line-height: 1; color: var(--rubriek); margin-top: 6px; }
     .qz .rechts { display: grid; align-content: start; justify-items: center; gap: 14px; min-height: 0; }
     .qz .rechts img.plaat { display: block; max-width: 620px; max-height: 500px; object-fit: contain; box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40,24,8,.45); }
@@ -1036,10 +1037,11 @@ const QuizTV = (() => {
     let links = `<p class="vraag">${esc(t.vraag)}</p>`;
     const hoeveel = i => (t.uitslag || []).filter(u => u.keuze === i).length;
     if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
-    else links += `<div class="vrij">${uitslag ? `Het juiste antwoord<b>${esc(t.juist)}</b>` : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : 'Typ het antwoord op je gsm.'}</div>`;
+    else links += `<div class="vrij${t.soort === 'meer' ? ' meer' : ''}">${uitslag ? `${t.soort === 'meer' ? 'De juiste antwoorden' : 'Het juiste antwoord'}<b>${Array.isArray(t.juist) ? t.juist.map(esc).join(' · ') : esc(t.juist)}</b>`
+      : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : t.soort === 'meer' ? 'Typ op je gsm zoveel antwoorden als je weet: 50 punten per juist antwoord.' : 'Typ het antwoord op je gsm.'}</div>`;
     if (uitslag) {
       const goed = (t.uitslag || []).filter(u => u.punten > 0).slice(0, 5);
-      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(u.waarde)}</span><b>+${u.punten}</b></div>`).join('')
+      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')
         || '<div><span></span><span>Niemand had het goed.</span></div>'}</div>`;
     }
     const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="">${uitslag ? '' : qr}` : qr;

@@ -1,7 +1,9 @@
 'use strict';
 /* De quizvragen: een voorstel, pas gerust aan. Laden in de database: /feestje-beheer → Quiz leiden → "Vragen laden".
    soort: 'keuze' (vier antwoorden; juist = 0, 1, 2 of 3), 'woord' (juist = lijst van goede antwoorden; hoofdletters,
-   accenten, spaties en leestekens tellen niet) of 'getal' (een schatting; juist = het getal; wie het dichtst zit wint).
+   accenten, spaties, leestekens en een lidwoord vooraan tellen niet), 'getal' (een schatting; juist = het getal; wie het
+   dichtst zit wint) of 'meer' (meerdere antwoorden; juist = per antwoord een lijst varianten; 50 punten per juist antwoord).
+   Als quizmaster kunt u elk antwoord achteraf goed- of afkeuren (✓ / ✗ in het beheer).
    afbeelding: verschijnt groot op de tv en klein op de gsm. Bronnen van de foto's staan in de afbeelding zelf.
    Let op: wie de broncode van de site leest, kan de antwoorden hier zien. Voor een feest aanvaardbaar. */
 const QUIZ_VRAGEN = [
@@ -23,6 +25,9 @@ const QUIZ_VRAGEN = [
     afbeelding: 'feestje-img/quiz/hus.webp', antwoorden: ['Jan Hus', 'Jan Žižka', 'Maarten Luther', 'John Wyclif'], juist: 0 },
   { soort: 'getal', vraag: 'Volgens het Wunderzeichenbuch vlogen er in 1533 boven Bohemen soms meer dan … draken tegelijk. Hoeveel?',
     afbeelding: 'feestje-img/wonder/f127.webp', juist: 400 },
+  { soort: 'meer', vraag: 'Alfons Mucha, de beroemdste Boheemse schilder, maakte in 1900 deze vier panelen: elk stelt een edelsteen voor. Welke? (Let op de kleuren.)',
+    afbeelding: 'feestje-img/quiz/mucha.webp',
+    juist: [['topaas', 'topaz', 'topase', 'topas'], ['robijn', 'ruby', 'rubis', 'rubin'], ['amethist', 'amethyst', 'amethyste', 'ametist'], ['smaragd', 'emerald', 'emeraude', 'smaragt']] },
   { soort: 'keuze', vraag: 'Uit welk beroemd getijdenboek komt deze miniatuur?',
     afbeelding: 'feestje-img/quiz/berry.webp', antwoorden: ['Het Book of Kells', 'De Très Riches Heures', 'De Codex Manesse', 'De Gutenbergbijbel'], juist: 1 },
   { soort: 'woord', vraag: 'Naar welke heilige is oudejaarsavond in veel landen genoemd?', juist: ['Silvester', 'Sylvester', 'Sint-Silvester', 'Sint-Sylvester', 'Silvestro'] },

@@ -64,9 +64,12 @@ const Db = (() => {
   const nextId = list => list.reduce((m, x) => Math.max(m, x.id), 0) + 1;
   const demoPin = pin => { if (String(pin) !== DEMO_PIN) throw new Error('Verkeerde pincode'); };
   // normaliseren zoals fj_norm in de database: kleine letters, zonder accenten, spaties en leestekens
-  const norm = t => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const norm = t => String(t ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/^(de|het|een|n|t|the|a|an|der|die|das|ein|eine|le|la|les|l|un|une)[^a-z0-9]+/, '').replace(/[^a-z0-9]/g, '');
+  // soort 'meer': hoeveel verschillende juiste antwoorden zitten er in "topaas|robijn|ruby"? (zoals fj_quiz_meer)
+  const meerGoed = (v, tekst) => { const w = String(tekst ?? '').split('|').map(norm).filter(Boolean); return v.juist.filter(vs => vs.some(g => w.includes(norm(g)))).length; };
   // het juiste antwoord om te tonen: keuze → nummer, woord → het eerste goede woord, getal → het getal
-  const toonJuist = v => v ? (v.soort === 'woord' ? v.juist[0] : v.juist) : null;
+  const toonJuist = v => v ? (v.soort === 'woord' ? v.juist[0] : v.soort === 'meer' ? v.juist.map(x => x[0]) : v.juist) : null;
   // de quiz in demomodus: dezelfde regels als de functies in de database (zie fj_quiz_* in feestje-supabase.sql)
   const Quiz = (() => {
     const QK = 'feestje.demo.quiz';
@@ -87,7 +90,12 @@ const Db = (() => {
         juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
         uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten }) => ({ ridder_id, keuze, waarde, punten })) : null,
         stand: q.fase === 'uitslag' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
-      if (meester) t.antwoorden_van = hier.map(a => a.ridder_id);
+      if (meester) {
+        t.antwoorden_van = hier.map(a => a.ridder_id);
+        t.alle = hier.map(({ ridder_id, keuze, waarde, punten, oordeel, tijd }) => ({ ridder_id, keuze, waarde, punten, oordeel: oordeel ?? null, sec: q.geopend && tijd ? Math.round((tijd - q.geopend) / 100) / 10 : null }));
+        const w = q.vragen[(q.fase === 'uit' && !q.nr) ? 0 : q.nr];
+        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, soort: soort(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
+      }
       return t;
     }
     function antwoord(ridder, keuze, tekst) {
@@ -98,8 +106,9 @@ const Db = (() => {
       let punten = 0;
       if (s === 'keuze') { if (!(keuze >= 0 && keuze <= 3)) return false; if (keuze === v.juist) punten = 100 + snel; }
       else if (s === 'woord') { if (!norm(tekst)) return false; if (v.juist.some(g => norm(g) === norm(tekst))) punten = 100 + snel; }
+      else if (s === 'meer') { if (!norm(String(tekst ?? '').replace(/\|/g, ''))) return false; punten = 50 * meerGoed(v, tekst); }
       else if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
-      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 60), punten });
+      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 200), punten, tijd: Date.now() });
       put(q); return true;
     }
     function stap(actie) {
@@ -124,7 +133,20 @@ const Db = (() => {
       put(q);
     }
     function laad(vragen) { put(Object.assign(leeg(), { vragen })); return vragen.length; }
-    return { toestand, antwoord, stap, laad };
+    // de quizmaster keurt bij (zoals fj_quiz_keur): true = goed, false = fout, null = automatisch
+    function keur(ridder, goed) {
+      const q = get(), v = q.vragen[q.nr - 1], s = soort(v), a = q.antwoorden.find(x => x.nr === q.nr && x.ridder_id === ridder);
+      if (!a || s === 'getal') return;
+      const snel = Math.max(0, 30 - Math.floor(((a.tijd || q.geopend) - q.geopend) / 1000));
+      const auto = s === 'keuze' ? (a.keuze === v.juist ? 100 + snel : 0) : s === 'woord' ? (v.juist.some(g => norm(g) === norm(a.waarde)) ? 100 + snel : 0) : 50 * meerGoed(v, a.waarde);
+      a.oordeel = goed; a.punten = goed == null ? auto : goed ? (s === 'meer' ? 50 * v.juist.length : 100 + snel) : 0;
+      if (q.fase === 'uitslag') {
+        const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
+        if (spel) { d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten }))); try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd'); }
+      }
+      put(q);
+    }
+    return { toestand, antwoord, stap, laad, keur };
   })();
 
   /* ---------- publieke API ---------- */
@@ -176,6 +198,7 @@ const Db = (() => {
     quizVoorbereid: vragen => vragen.map(v => ({ soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
     norm,
     quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
+    quizKeur: async (pin, ridder, goed) => live ? rpc('fj_quiz_keur', { p_pin: pin, p_ridder: ridder, p_goed: goed }) : (demoPin(pin), Quiz.keur(ridder, goed), Quiz.toestand(true)),
     quizLaad: async (pin, vragen) => live ? rpc('fj_quiz_laad', { p_pin: pin, p_vragen: vragen }) : (demoPin(pin), Quiz.laad(vragen)),
 
     /* Volg de stand: roept cb(stand) aan bij elke wijziging. Supabase: elke `ms` opvragen

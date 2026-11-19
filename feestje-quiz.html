@@ -130,7 +130,7 @@
       if (t.nr > 0 && t.stand?.length) return eindstand();
       app.innerHTML = `<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
         <div class="kaart"><b>Zo werkt het</b><br>Meerkeuze en woord: 100 punten voor een goed antwoord, plus 1 punt per seconde dat u sneller bent dan 30 seconden.
-        Schatting: wie het dichtst zit krijgt 100, de volgende 80, dan 60, 40 en 20.</div>`;
+        Schatting: wie het dichtst zit krijgt 100, de volgende 80, dan 60, 40 en 20. Meerdere antwoorden: 50 punten per juist antwoord.</div>`;
       return;
     }
     if (t.fase === 'wacht') {
@@ -140,22 +140,29 @@
     if (t.fase === 'open' && !mijn) {
       let invoer = '';
       if (t.soort === 'keuze') invoer = `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<button type="button" data-k="${i}"><b>${LETTERS[i]}</b><span>${esc(a)}</span></button>`).join('')}</div>`;
+      else if (t.soort === 'meer') invoer = `<form class="vrij" id="vrij">${[1, 2, 3, 4].map(i => `<input type="text" class="meer" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Antwoord ${i}" maxlength="40" aria-label="Antwoord ${i}">`).join('')}
+          <button class="knop">Inzenden</button><p class="stil">50 punten per juist antwoord. Vul in wat u weet; lege vakjes mogen.</p></form>`;
       else invoer = `<form class="vrij" id="vrij"><input ${t.soort === 'getal' ? 'inputmode="decimal" pattern="-?[0-9]+([.,][0-9]+)?"' : 'type="text" autocapitalize="off" autocomplete="off" spellcheck="false"'} id="tekst"
           placeholder="${t.soort === 'getal' ? 'Uw schatting (een getal)' : 'Uw antwoord'}" required maxlength="60"><button class="knop">Inzenden</button></form>`;
       app.innerHTML = `${vraag}<div class="tijd"><i id="balk"></i></div>${invoer}<div class="fout" id="fout"></div>`;
       app.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => zend(+b.dataset.k, null, b)));
-      $('#vrij')?.addEventListener('submit', e => { e.preventDefault(); const v = $('#tekst').value.trim(); if (v) zend(null, v); });
+      $('#vrij')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const v = t.soort === 'meer' ? [...app.querySelectorAll('input.meer')].map(x => x.value.replace(/\|/g, ' ').trim()).filter(Boolean).join('|') : $('#tekst').value.trim();
+        if (v) zend(null, v);
+      });
       tijdbalk();
       return;
     }
     // geantwoord, gesloten of uitslag
-    const mijnTekst = mijn ? (mijn.keuze != null ? `${LETTERS[mijn.keuze]}. ${esc(t.antwoorden?.[mijn.keuze])}` : esc(mijn.tekst)) : '';
+    const lijst = x => esc(String(x ?? '').split('|').filter(Boolean).join(', '));
+    const mijnTekst = mijn ? (mijn.keuze != null ? `${LETTERS[mijn.keuze]}. ${esc(t.antwoorden?.[mijn.keuze])}` : lijst(mijn.tekst)) : '';
     if (t.fase === 'uitslag') {
       const u = (t.uitslag || []).find(x => x.ridder_id === ridder), tot = (t.stand || []).find(x => x.ridder_id === ridder);
       const plaats = tot ? 1 + (t.stand || []).filter(x => x.punten > tot.punten).length : null;
-      const juist = t.soort === 'keuze' ? `${LETTERS[t.juist]}. ${esc(t.antwoorden?.[t.juist])}` : esc(t.juist);
+      const juist = t.soort === 'keuze' ? `${LETTERS[t.juist]}. ${esc(t.antwoorden?.[t.juist])}` : Array.isArray(t.juist) ? t.juist.map(esc).join(', ') : esc(t.juist);
       app.innerHTML = `${vraag}<div class="kaart">Het juiste antwoord: <b>${juist}</b><br>
-        ${u ? `Uw antwoord: ${mijnTekst || esc(u.waarde ?? (u.keuze != null ? LETTERS[u.keuze] : ''))} → <b>${u.punten}</b> punten` : 'U antwoordde niet.'}
+        ${u ? `Uw antwoord: ${mijnTekst || lijst(u.waarde ?? (u.keuze != null ? LETTERS[u.keuze] : ''))} → <b>${u.punten}</b> punten` : 'U antwoordde niet.'}
         ${tot ? `<br>Samen: ${tot.punten} punten, plaats ${romeins(plaats)}` : ''}</div>`;
       return;
     }
