@@ -50,7 +50,10 @@
     summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     .form { display: grid; gap: 10px; margin-top: 10px; }
     .form .w { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .form .naam3 { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; }
+    .form .naam3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .komt { font-size: 12px; color: #4a6b3c; font-weight: 700; white-space: nowrap; }
+    .pinherstel .rij2 { display: flex; gap: 8px; margin-top: 8px; }
+    .pinherstel input { flex: 1; letter-spacing: .3em; }
     .form .naamvb { font-family: "Maximilian", serif; font-size: 1.35rem; color: #a2302a; min-height: 1.4em; }
     .form .voorbeeld { display: flex; gap: 12px; align-items: center; }
     .form .voorbeeld svg { width: 60px; height: 72px; }
@@ -102,9 +105,7 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const app = $('#app');
-  // titels voor de riddernaam (er wordt er één geloot; kies gerust een andere)
-  const TITELS = ['Heer', 'Vrouwe', 'Ridder', 'Jonker', 'Jonkvrouw', 'Broeder', 'Zuster', 'Meester', 'Ritmeester', 'Burggraaf', 'Burggravin',
-    'Baljuw', 'Hofdame', 'Schildknaap', 'Kanselier', 'Pelgrim'];
+  // TITELS, riddernaam en naamDelen staan in feestje-wapen.js (gedeeld met de uitnodiging)
   if (!Db.live) $('#demo').hidden = false;
 
   let pin = sessionStorage.getItem('feestje.pin') || localStorage.getItem('feestje.pin') || '';
@@ -118,7 +119,7 @@
     const metaal = ['or', 'argent'], kleur = Object.keys(TINCT).filter(k => !metaal.includes(k));
     // heraldische regel: geen kleur op kleur, geen metaal op metaal
     const t1 = p(kleur), t2 = p(metaal);
-    return { t1, t2, div: p(Object.keys(DIVS)), ch: p(Object.keys(CHARGES).filter(k => k !== 'none')), c: p(metaal) };
+    return { t1, t2, div: p(Object.keys(DIVS)), ch: p(Object.keys(ALLE_STUKKEN).filter(k => k !== 'none')), c: p(metaal) };
   };
 
   /* ---------- 1. pincode ---------- */
@@ -142,7 +143,7 @@
     app.innerHTML = `<nav class="spelen" id="spelen" aria-label="Spel"></nav><div id="ridders"></div>
       <details id="nieuw"><summary>Ridder inschrijven</summary><form class="form" id="rform">
         <div class="naam3">
-          <select id="rtitel" aria-label="Titel">${TITELS.map(t => `<option>${t}</option>`).join('')}</select>
+          <input type="text" id="rtitel" list="rtitels" maxlength="30" aria-label="Titel (kies of verzin)" autocomplete="off" autocapitalize="words"><datalist id="rtitels">${TITELS.map(t => `<option value="${t}">`).join('')}</datalist>
           <input type="text" id="rvoor" placeholder="Voornaam" maxlength="20" required autocomplete="off" autocapitalize="words">
           <input type="text" id="rstad" placeholder="Geboortestad" maxlength="26" required autocomplete="off" autocapitalize="words">
         </div>
@@ -164,12 +165,12 @@
     zetWapen(willekeurigWapen());
     // de naam: titel + voornaam + "van" + geboortestad, bv. "Jonker Han van Leuven"
     const lotTitel = () => { $('#rtitel').value = TITELS[Math.floor(Math.random() * TITELS.length)]; };
-    const riddernaam = () => { const v = $('#rvoor').value.trim(), st = $('#rstad').value.trim(); return v && st ? `${$('#rtitel').value} ${v} van ${st}` : ''; };
-    const toonNaam = () => { $('#rnaam').textContent = riddernaam() || `${$('#rtitel').value} … van …`; };
+    const nieuweNaam = () => { const v = $('#rvoor').value.trim(), st = $('#rstad').value.trim(); return v && st ? riddernaam($('#rtitel').value.trim(), v, st) : ''; };
+    const toonNaam = () => { $('#rnaam').textContent = nieuweNaam() || `${$('#rtitel').value} … van …`; };
     lotTitel(); toonNaam();
     ['#rtitel', '#rvoor', '#rstad'].forEach(k => $(k).addEventListener('input', toonNaam));
     $('#rform').addEventListener('submit', async e => {
-      e.preventDefault(); const naam = riddernaam(); if (!naam) return;
+      e.preventDefault(); const naam = nieuweNaam(); if (!naam) return;
       try { await Db.voegRidder(pin, naam, leesWapen()); $('#rvoor').value = $('#rstad').value = ''; lotTitel(); toonNaam(); zetWapen(willekeurigWapen()); $('#rfout').textContent = ''; ververs(); }
       catch (err) { $('#rfout').textContent = err.message; }
     });
@@ -278,7 +279,7 @@
     if (box.dataset.k !== sleutel) {
       box.dataset.k = sleutel;
       box.innerHTML = rows.map(r => `<div class="rij" data-r="${r.id}"><button type="button" class="bew" aria-label="${esc(r.naam)} bewerken">${wapenSvg(r.wapen, 'b' + r.id)}<span aria-hidden="true">✎</span></button>
-        <div class="naam">${esc(r.naam)}<small></small></div>
+        <div class="naam">${esc(r.naam)}${r.aangemeld ? ' <span class="komt" title="Schreef zich zelf in via de uitnodiging">✓ komt</span>' : ''}<small></small></div>
         <div class="stepper"><button type="button" data-d="-1" aria-label="Eén punt minder voor ${esc(r.naam)}">−</button>
           <input inputmode="numeric" pattern="-?[0-9]*" data-r="${r.id}" aria-label="Punten voor ${esc(r.naam)}">
           <button type="button" data-d="1" aria-label="Eén punt meer voor ${esc(r.naam)}">+</button><span class="ok" aria-hidden="true"></span></div></div>`).join('');
@@ -342,9 +343,19 @@
       <input type="text" id="enaam" maxlength="60" required autocomplete="off" aria-label="Naam">
       ${kiezerHtml('e')}
       <div class="knoppen"><button class="knop" value="ok">Bewaren</button><button class="knop licht" value="" formnovalidate>Annuleren</button></div>
+      <details class="pinherstel"><summary>${r.pin ? 'Pincode vergeten? Nieuwe pincode instellen' : 'Pincode instellen (om zelf aan te passen op /feestje)'}</summary>
+        <div class="rij2"><input type="text" id="epin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6 cijfers" autocomplete="off" aria-label="Nieuwe pincode">
+          <button type="button" class="knop licht" id="epinzet">Instellen</button></div>
+        <p class="stil" style="font-size:14px">Geef de pincode door aan de gast. Op toestellen waar deze ridder aangemeld was, is hij daarna afgemeld.</p></details>
       <button type="button" class="verwijder" id="eweg">Uitschrijven…</button><div class="fout" id="efout" role="alert"></div></form>`;
     document.body.appendChild(dlg);
     const k = kiezer('e'); $('#enaam').value = r.naam; k.zet({ ...r.wapen });
+    $('#epinzet').addEventListener('click', async () => {
+      const nieuw = $('#epin').value.trim();
+      if (!/^[0-9]{6}$/.test(nieuw)) { $('#efout').textContent = 'De pincode moet uit 6 cijfers bestaan.'; return; }
+      try { await Db.ridderNieuwePin(pin, id, nieuw); $('#efout').textContent = `Nieuwe pincode ingesteld: ${nieuw}. Geef hem door.`; $('#epin').value = ''; ververs(); }
+      catch (err) { $('#efout').textContent = err.message; }
+    });
     $('#eweg').addEventListener('click', async () => {
       if (!confirm(`${r.naam} uitschrijven, met al zijn punten?`)) return;
       try { await Db.verwijderRidder(pin, id); dlg.close(); ververs(); } catch (err) { $('#efout').textContent = err.message; }
@@ -352,7 +363,9 @@
     $('#eform').addEventListener('submit', async e => {
       if (e.submitter?.value !== 'ok') return;
       e.preventDefault();
-      try { await Db.wijzigRidder(pin, id, $('#enaam').value.trim(), { ...r.wapen, ...k.lees() }); dlg.close(); ververs(); }
+      const w = { ...r.wapen, ...k.lees() };
+      if ($('#enaam').value.trim() !== r.naam) delete w.n;   // de naamdelen van de uitnodiging kloppen dan niet meer
+      try { await Db.wijzigRidder(pin, id, $('#enaam').value.trim(), w); dlg.close(); ververs(); }
       catch (err) { $('#efout').textContent = err.message; }
     });
     dlg.addEventListener('close', () => dlg.remove());

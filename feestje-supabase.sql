@@ -486,3 +486,134 @@ end $$;
 
 revoke execute on function fj_spotify_zet(text, text), fj_spotify_haal(text) from public, anon, authenticated;
 grant execute on function fj_spotify_zet(text, text), fj_spotify_haal(text) to anon, authenticated;
+
+-- =====================================================================
+--  Eigen ridders: gasten schrijven zich in op /feestje ("Ik kom!") met een pincode van 6 cijfers,
+--  en passen daarna zelf naam en wapen aan, ook op een ander toestel (naam kiezen + pincode).
+--  · De pincode (bcrypt) staat in een aparte tabel zonder leesrechten: fj_ridders mag iedereen lezen,
+--    en uit een hash van 6 cijfers is de pincode snel terug te rekenen.
+--  · Na het inloggen krijgt het toestel een sessiesleutel van 256 bits; de database bewaart alleen de sha256.
+--  · Een foute pincode kost 1 s, en per ridder gaan pogingen één voor één (select … for update);
+--    na 5 fouten is die ridder 15 minuten geblokkeerd. Herstel: de heraut zet een nieuwe pincode.
+-- =====================================================================
+alter table fj_ridders add column if not exists aangemeld timestamptz;   -- wanneer de gast zich zelf inschreef ("Ik kom!")
+create table if not exists fj_ridder_geheim (
+  ridder_id       bigint primary key references fj_ridders on delete cascade,
+  pin_hash        text   not null,
+  mislukt         int    not null default 0,
+  geblokkeerd_tot timestamptz
+);
+create table if not exists fj_sessies (
+  sleutel_hash text   primary key,                                  -- sha256 van de sessiesleutel
+  ridder_id    bigint not null references fj_ridders on delete cascade,
+  gemaakt      timestamptz not null default now()
+);
+alter table fj_ridder_geheim enable row level security;   -- geen policies: alleen via de functies hieronder
+alter table fj_sessies       enable row level security;
+revoke all on fj_ridder_geheim, fj_sessies from anon, authenticated;   -- dubbel slot: ook zonder RLS geen toegang
+
+-- de tussenstand vermeldt nu ook wie een pincode heeft (om in te loggen) en wie zich zelf aanmeldde
+create or replace function fj_stand() returns json
+language sql stable security definer set search_path = public as $$
+  select json_build_object(
+    'ridders', coalesce((select json_agg(json_build_object('id', r.id, 'naam', r.naam, 'wapen', r.wapen, 'aangemeld', r.aangemeld,
+                                                           'pin', exists (select 1 from fj_ridder_geheim g where g.ridder_id = r.id)) order by r.id) from fj_ridders r), '[]'),
+    'spelen',  coalesce((select json_agg(json_build_object('id', id, 'naam', naam, 'volgorde', volgorde) order by volgorde, id) from fj_spelen), '[]'),
+    'punten',  coalesce((select json_agg(json_build_object('ridder_id', ridder_id, 'spel_id', spel_id, 'punten', punten)) from fj_punten), '[]')
+  );
+$$;
+
+create or replace function fj_sessie_maak(p_ridder bigint) returns text            -- intern
+language plpgsql security definer set search_path = public, extensions as $$
+declare s text := encode(gen_random_bytes(32), 'hex');
+begin
+  insert into fj_sessies (sleutel_hash, ridder_id) values (encode(digest(s, 'sha256'), 'hex'), p_ridder);
+  return s;
+end $$;
+
+create or replace function fj_sessie_ridder(p_sessie text) returns bigint          -- intern
+language sql stable security definer set search_path = public, extensions as $$
+  select ridder_id from fj_sessies where sleutel_hash = encode(digest(coalesce(p_sessie, ''), 'sha256'), 'hex');
+$$;
+
+create or replace function fj_ridder_check(p_naam text, p_wapen jsonb, p_eigen bigint) returns void   -- intern
+language plpgsql security definer set search_path = public as $$
+begin
+  if char_length(trim(coalesce(p_naam, ''))) not between 3 and 60 then raise exception 'Kies een naam van 3 tot 60 tekens.'; end if;
+  if p_wapen is not null and (jsonb_typeof(p_wapen) <> 'object' or length(p_wapen::text) > 1000) then raise exception 'Dat wapen kan de heraut niet lezen.'; end if;
+  if exists (select 1 from fj_ridders where lower(naam) = lower(trim(p_naam)) and id is distinct from p_eigen) then
+    raise exception 'Die naam is al genomen. Kies een andere titel of stad.';
+  end if;
+end $$;
+
+-- "Ik kom!": een nieuwe ridder met een eigen pincode; geeft meteen een sessie terug
+create or replace function fj_ridder_maak(p_naam text, p_wapen jsonb, p_pin text) returns json
+language plpgsql security definer set search_path = public, extensions as $$
+declare nieuw bigint;
+begin
+  if coalesce(p_pin, '') !~ '^[0-9]{6}$' then raise exception 'De pincode moet uit 6 cijfers bestaan.'; end if;
+  perform fj_ridder_check(p_naam, p_wapen, null);
+  if (select count(*) from fj_ridders) >= 300 then raise exception 'Het register is vol. Vraag de heraut.'; end if;
+  insert into fj_ridders (naam, wapen, aangemeld) values (trim(p_naam), coalesce(p_wapen, '{}'), now()) returning id into nieuw;
+  insert into fj_ridder_geheim (ridder_id, pin_hash) values (nieuw, crypt(p_pin, gen_salt('bf', 8)));
+  return json_build_object('id', nieuw, 'sessie', fj_sessie_maak(nieuw));
+end $$;
+
+-- aanmelden op een (ander) toestel. Een foute pincode geeft {fout} terug in plaats van een exception:
+-- een exception draait de transactie terug, en dan telde de foute poging niet mee.
+create or replace function fj_ridder_login(p_ridder bigint, p_pin text) returns json
+language plpgsql security definer set search_path = public, extensions as $$
+declare g fj_ridder_geheim;
+begin
+  select * into g from fj_ridder_geheim where ridder_id = p_ridder for update;   -- pogingen op dezelfde ridder één voor één
+  if g.ridder_id is null then return json_build_object('fout', 'Deze ridder heeft (nog) geen pincode. Vraag de heraut.'); end if;
+  if g.geblokkeerd_tot > now() then return json_build_object('fout', 'Te veel foute pogingen. Probeer het over een kwartier opnieuw, of vraag de heraut.'); end if;
+  if g.pin_hash <> crypt(coalesce(p_pin, ''), g.pin_hash) then
+    perform pg_sleep(1);
+    update fj_ridder_geheim set mislukt = case when g.mislukt + 1 >= 5 then 0 else g.mislukt + 1 end,
+                                geblokkeerd_tot = case when g.mislukt + 1 >= 5 then now() + interval '15 minutes' end
+    where ridder_id = p_ridder;
+    return json_build_object('fout', 'Dat is niet de juiste pincode.');
+  end if;
+  update fj_ridder_geheim set mislukt = 0, geblokkeerd_tot = null where ridder_id = p_ridder;
+  return json_build_object('id', p_ridder, 'sessie', fj_sessie_maak(p_ridder));
+end $$;
+
+-- wie ben ik? (null: de sessie bestaat niet meer)
+create or replace function fj_ridder_ik(p_sessie text) returns json
+language sql stable security definer set search_path = public as $$
+  select json_build_object('id', r.id, 'naam', r.naam, 'wapen', r.wapen) from fj_ridders r where r.id = fj_sessie_ridder(p_sessie);
+$$;
+
+-- de gast past zelf naam en wapen aan
+create or replace function fj_ridder_zelf(p_sessie text, p_naam text, p_wapen jsonb) returns json
+language plpgsql security definer set search_path = public as $$
+declare mijn bigint := fj_sessie_ridder(p_sessie);
+begin
+  if mijn is null then raise exception 'U bent afgemeld. Meld u opnieuw aan met uw pincode.'; end if;
+  perform fj_ridder_check(p_naam, p_wapen, mijn);
+  update fj_ridders set naam = trim(p_naam), wapen = coalesce(p_wapen, wapen) where id = mijn;
+  return fj_ridder_ik(p_sessie);
+end $$;
+
+create or replace function fj_ridder_uit(p_sessie text) returns void
+language sql security definer set search_path = public, extensions as $$
+  delete from fj_sessies where sleutel_hash = encode(digest(coalesce(p_sessie, ''), 'sha256'), 'hex');
+$$;
+
+-- herstel door de heraut: een nieuwe pincode (ook voor ridders die de heraut zelf inschreef); oude sessies vervallen
+create or replace function fj_ridder_nieuwe_pin(p_pin text, p_ridder bigint, p_nieuw text) returns void
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  perform fj_eis_pin(p_pin);
+  if coalesce(p_nieuw, '') !~ '^[0-9]{6}$' then raise exception 'De pincode moet uit 6 cijfers bestaan.'; end if;
+  insert into fj_ridder_geheim (ridder_id, pin_hash) values (p_ridder, crypt(p_nieuw, gen_salt('bf', 8)))
+  on conflict (ridder_id) do update set pin_hash = excluded.pin_hash, mislukt = 0, geblokkeerd_tot = null;
+  delete from fj_sessies where ridder_id = p_ridder;
+end $$;
+
+revoke execute on function fj_sessie_maak(bigint), fj_sessie_ridder(text), fj_ridder_check(text, jsonb, bigint), fj_ridder_maak(text, jsonb, text),
+  fj_ridder_login(bigint, text), fj_ridder_ik(text), fj_ridder_zelf(text, text, jsonb), fj_ridder_uit(text), fj_ridder_nieuwe_pin(text, bigint, text)
+  from public, anon, authenticated;
+grant execute on function fj_ridder_maak(text, jsonb, text), fj_ridder_login(bigint, text), fj_ridder_ik(text), fj_ridder_zelf(text, text, jsonb),
+  fj_ridder_uit(text), fj_ridder_nieuwe_pin(text, bigint, text) to anon, authenticated;

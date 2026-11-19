@@ -324,6 +324,20 @@
     .mini svg { width: 100%; height: 100%; display: block; }
     .mini[aria-pressed="true"] { background: #f6ecd2; border: 2px solid var(--rubric); padding: 2px; }
     .herald-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .name-row.drie { max-width: 420px; flex-wrap: wrap; }
+    .name-row.drie input { flex: 1 1 120px; }
+    .name-row.drie #titel { flex-basis: 100%; }
+    /* het register van de heraut: "Ik kom!" met een pincode, aanmelden, wijzigingen bewaren */
+    .register { width: 100%; max-width: 420px; border: 3px double var(--ink); background: rgba(255,250,236,.45); padding: 16px 18px; display: grid; gap: 10px; scroll-margin-top: 20px; }
+    .register h3 { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); margin: 0; font-size: 1.35rem; text-align: center; }
+    .register p { margin: 0; font-size: .98rem; }
+    .register .rij { display: flex; gap: 8px; flex-wrap: wrap; }
+    .register input, .register select { flex: 1 1 120px; min-width: 0; font: inherit; font-size: 1.05rem; padding: 8px 12px; background: rgba(255,250,236,.75); border: 1px solid var(--ink); border-radius: 1px; color: var(--ink); }
+    .register input.pin:not(:placeholder-shown) { letter-spacing: .3em; font-variant-numeric: tabular-nums; }
+    .register .btn { justify-self: center; }
+    .register .link { background: none; border: 0; padding: 0; font: inherit; font-size: .95rem; color: var(--rubric); text-decoration: underline; cursor: pointer; justify-self: center; }
+    .register .fout { color: var(--rubric); font-weight: 600; min-height: 1.2em; text-align: center; }
+    .register .ok { text-align: center; }
 
     /* ---------- de getijden ---------- */
     .hours { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 0; }
@@ -801,7 +815,7 @@
         <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
         <dt>Opslaan</dt><dd>Er is geen autosave. Wie wil opslaan, drinkt om middernacht een Heilandsbrandewijn.</dd>
         <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin, en iets te eten of te drinken voor de gedeelde dis. Vastenspijs is welkom: dan kan iedereen ervan eten.</dd>
-        <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
+        <dt>Aanmelden</dt><dd id="rsvp-text">Schrijf uw ridder in het register van de heraut, bij <a href="#register">Kies uw stand</a>: naam, wapen en een pincode. Zo weten <span class="hosts-or">Han of Nele</span> dat u komt.</dd>
       </dl>
       <figure class="kaart">
         <div class="kaart-vak"><div class="kaart-scroll"><svg id="kaart" viewBox="0 0 1000 640" role="group" aria-label="Kaart van Leuven en Kessel-Lo, getekend als een middeleeuwse kaart"></svg></div>
@@ -810,7 +824,7 @@
       </figure>
       <div class="actions">
         <button class="btn" id="ics" type="button">Zet in uw agenda</button>
-        <a class="btn ghost" id="rsvp-btn" hidden>Ik kom!</a>
+        <a class="btn ghost" id="rsvp-btn" href="#register">Ik kom!</a>
       </div>
     </section>
 
@@ -837,10 +851,14 @@
         <div class="herald">
           <svg class="shield-big" id="shield" viewBox="0 0 200 292" role="img" aria-label="Uw wapenschild"></svg>
           <p class="herald-title" id="herald-title"></p>
-          <div class="name-row">
-            <label class="sr" for="naam">Uw naam</label>
-            <input id="naam" type="text" maxlength="22" placeholder="Uw naam" autocomplete="given-name" />
-            <button class="icon-btn" id="reroll-place" type="button" title="Een ander dorp" aria-label="Kies een ander dorp">↻</button>
+          <div class="name-row drie">
+            <label class="sr" for="titel">Titel: kies er een, of verzin uw eigen</label>
+            <input id="titel" type="text" list="titel-lijst" maxlength="30" placeholder="Titel (of verzin er een)" autocomplete="off" autocapitalize="words" /><datalist id="titel-lijst"></datalist>
+            <label class="sr" for="naam">Uw voornaam</label>
+            <input id="naam" type="text" maxlength="20" placeholder="Voornaam" autocomplete="given-name" autocapitalize="words" />
+            <label class="sr" for="stad">Uw geboortestad</label>
+            <input id="stad" type="text" maxlength="26" placeholder="Geboortestad" autocomplete="off" autocapitalize="words" />
+            <button class="icon-btn" id="reroll-place" type="button" title="Een Boheems dorp" aria-label="Kies een Boheems dorp">↻</button>
           </div>
           <div class="controls">
             <fieldset><legend>Veld</legend><div class="opts" id="opt-t1"></div></fieldset>
@@ -851,9 +869,10 @@
           </div>
           <div class="herald-actions">
             <button class="btn ghost" id="dice" type="button">⚄ Laat het lot beslissen</button>
-            <button class="btn" id="save-arms" type="button">Bewaar uw wapen</button>
+            <button class="btn" id="save-arms" type="button">Wapen als afbeelding</button>
           </div>
           <p class="muted" style="text-align:center;margin:0">Borduur, plak of schilder het op uw tuniek of schild.</p>
+          <div class="register" id="register" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -945,6 +964,7 @@
 
   <script src="feestje-config.js"></script>
   <script src="feestje-wapen.js"></script>
+  <script src="feestje-db.js"></script>
   <script src="feestje-hemel.js"></script>
   <script src="feestje-sterren.js"></script>
   <script src="feestje-dobbel.js"></script>
@@ -1486,11 +1506,12 @@
   // TINCT, DIVS, CHARGES, PLACES, SHIELD, chargeMarkup en shieldMarkup staan in feestje-wapen.js
 
   (function herald() {
-    const s = Object.assign({ stand: 'ridder', t1: 'azure', t2: 'or', div: 'plain', ch: 'ster', c: 'or', name: '', placeShift: 0 }, store.get('feestje.wapen', {}));
+    const s = Object.assign({ stand: 'ridder', t1: 'azure', t2: 'or', div: 'plain', ch: 'ster', c: 'or', name: '', placeShift: 0, titel: 'Heer', stad: '' }, store.get('feestje.wapen', {}));
     const hash = str => [...str.toLowerCase()].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
     const place = () => PLACES[(hash(s.name || 'gast') + s.placeShift) % PLACES.length];
     const nameOr = () => s.name.trim() || 'Gast';
-    const title = () => `${nameOr()} van ${place()}`;
+    // titel + voornaam + "van" + geboortestad; zonder stad een Boheems dorp (↻ kiest een ander)
+    const title = () => riddernaam(s.titel.trim(), nameOr(), s.stad.trim() || place());
 
     const box = $('#stands');
     for (const [id, name, short] of STANDS) {
@@ -1537,7 +1558,7 @@
       $('#shield').innerHTML = shieldMarkup(s, 'big', true, title(), true);
       $('#herald-title').innerHTML = `${title()}<small>${st[1].toLowerCase()}, ten jare MMXXVI</small>`;
       swatches($('#opt-t1'), 't1'); swatches($('#opt-t2'), 't2'); swatches($('#opt-c'), 'c');
-      minis($('#opt-div'), 'div', DIVS); minis($('#opt-ch'), 'ch', CHARGES);
+      minis($('#opt-div'), 'div', DIVS); minis($('#opt-ch'), 'ch', ALLE_STUKKEN);
       $('#fs-t2').hidden = s.div === 'plain';
       $('#fs-c').hidden = s.ch === 'none';
     }
@@ -1550,14 +1571,18 @@
       const t1metal = TINCT[s.t1][2];
       s.div = pick(Object.keys(DIVS));
       s.t2 = pick(t1metal ? colours : metals);
-      s.ch = pick(Object.keys(CHARGES).filter(k => k !== 'none'));
+      s.ch = pick(Object.keys(ALLE_STUKKEN).filter(k => k !== 'none'));
       s.c = s.div === 'plain' ? pick(t1metal ? colours : metals) : pick(keys.filter(k => k !== s.t1 && k !== s.t2));
       update();
     }
-    const input = $('#naam');
-    input.value = s.name;
+    const input = $('#naam'), stadIn = $('#stad'), titelIn = $('#titel');
+    $('#titel-lijst').innerHTML = TITELS.map(t => `<option value="${t}">`).join('');   // suggesties; een eigen titel mag ook
+    const vulVelden = () => { input.value = s.name; stadIn.value = s.stad; titelIn.value = s.titel; };
+    vulVelden();
     input.addEventListener('input', () => { s.name = input.value; update(); });
-    $('#reroll-place').addEventListener('click', () => { s.placeShift++; update(); });
+    stadIn.addEventListener('input', () => { s.stad = stadIn.value; update(); });
+    titelIn.addEventListener('input', () => { s.titel = titelIn.value; update(); });
+    $('#reroll-place').addEventListener('click', () => { s.stad = ''; stadIn.value = ''; s.placeShift++; update(); });
     let rolls = 0;
     $('#dice').addEventListener('click', () => {
       roll();
@@ -1590,7 +1615,102 @@
       } finally { URL.revokeObjectURL(url); }
     });
     update();
+    Register({ s, title, update, vulVelden });
   })();
+
+  /* =========================================================
+     HET REGISTER VAN DE HERAUT — "Ik kom!": de ridder hierboven inschrijven met een pincode van 6 cijfers,
+     later aanpassen (ook op een ander toestel: naam kiezen + pincode). De database (fj_ridder_*) bewaart de
+     pincode alleen als bcrypt-hash; dit toestel bewaart alleen een sessiesleutel. Kwijt? De heraut zet een nieuwe pincode.
+     ========================================================= */
+  function Register({ s, title, update, vulVelden }) {
+    const box = $('#register'), SLEUTEL = 'feestje.sessie';
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    // de naamdelen gaan mee in het wapen (n): met een eigen titel is "titel voornaam van stad" niet terug te ontleden
+    const wapenVan = () => ({ t1: s.t1, t2: s.t2, div: s.div, ch: s.ch, c: s.c, n: { titel: s.titel.trim(), voor: s.name.trim(), stad: s.stad.trim() } });
+    const huidig = () => JSON.stringify([title(), wapenVan()]);
+    let ik = null, bewaard = '', fout = '';
+    const fouttekst = e => String(e?.message || e).replace(/^Supabase antwoordde.*/, 'De heraut is even onbereikbaar. Probeer het straks opnieuw.');
+    const pinVeld = (id, label) => `<input class="pin" id="${id}" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="${id === 'rp-in' ? 'current-password' : 'new-password'}" placeholder="${label}" aria-label="${label}">`;
+    const zesCijfers = v => /^[0-9]{6}$/.test(v);
+
+    function nieuw() {
+      box.innerHTML = `<h3>Ik kom!</h3>
+        <p>Schrijf de ridder hierboven in het register van de heraut. Kies een pincode van 6 cijfers: daarmee past u uw naam en wapen later aan, ook op een ander toestel.</p>
+        <div class="rij">${pinVeld('rp-1', 'Pincode (6 cijfers)')}${pinVeld('rp-2', 'Nogmaals')}</div>
+        <button class="btn" id="rp-maak" type="button">Schrijf mij in</button>
+        <button class="link" id="rp-naar" type="button">Al ingeschreven? Meld u aan</button>
+        <p class="fout" id="rp-fout" role="alert">${fout}</p>`;
+      $('#rp-naar').addEventListener('click', () => { fout = ''; aanmelden(); });
+      $('#rp-maak').addEventListener('click', async () => {
+        const a = $('#rp-1').value, b = $('#rp-2').value;
+        if (!s.name.trim()) { $('#rp-fout').textContent = 'Vul eerst hierboven uw voornaam in.'; $('#naam').focus(); return; }
+        if (!zesCijfers(a)) { $('#rp-fout').textContent = 'De pincode moet uit 6 cijfers bestaan.'; return; }
+        if (a !== b) { $('#rp-fout').textContent = 'De twee pincodes verschillen.'; return; }
+        $('#rp-maak').disabled = true; $('#rp-fout').textContent = 'De heraut schrijft…';
+        try {
+          const uit = await Db.ridderMaak(title(), wapenVan(), a);
+          store.set(SLEUTEL, uit.sessie); ik = { id: uit.id, naam: title(), wapen: wapenVan() }; bewaard = huidig();
+          Toast('Ingeschreven', `Welkom in het register, ${title()}.`, { icon: 'schild' });
+          ingeschreven();
+        } catch (e) { $('#rp-fout').textContent = fouttekst(e); $('#rp-maak').disabled = false; }
+      });
+    }
+    async function aanmelden() {
+      box.innerHTML = `<h3>Aanmelden</h3><p>Kies uw ridder en tik uw pincode.</p>
+        <div class="rij"><select id="rp-wie" aria-label="Uw ridder"><option value="">Even geduld…</option></select>${pinVeld('rp-in', 'Pincode')}</div>
+        <button class="btn" id="rp-login" type="button">Aanmelden</button>
+        <button class="link" id="rp-terug" type="button">Nog niet ingeschreven? Ik kom!</button>
+        <p class="muted" style="text-align:center">Pincode vergeten? Vraag <span>${esc(CONFIG.hostsOr || 'de heraut')}</span> om een nieuwe.</p>
+        <p class="fout" id="rp-fout" role="alert"></p>`;
+      $('#rp-terug').addEventListener('click', nieuw);
+      try {
+        const st = await Db.stand();
+        const lijst = (st.ridders || []).filter(r => r.pin).sort((a, b) => a.naam.localeCompare(b.naam));
+        $('#rp-wie').innerHTML = lijst.length ? `<option value="">Kies uw ridder</option>${lijst.map(r => `<option value="${r.id}">${esc(r.naam)}</option>`).join('')}` : '<option value="">Nog niemand ingeschreven</option>';
+      } catch (e) { $('#rp-fout').textContent = fouttekst(e); }
+      $('#rp-login').addEventListener('click', async () => {
+        const id = +$('#rp-wie').value, pin = $('#rp-in').value;
+        if (!id) { $('#rp-fout').textContent = 'Kies eerst uw ridder.'; return; }
+        $('#rp-login').disabled = true; $('#rp-fout').textContent = 'Even controleren…';
+        try {
+          const uit = await Db.ridderLogin(id, pin); store.set(SLEUTEL, uit.sessie);
+          await laadIk(); if (ik) Toast('Aangemeld', `Welkom terug, ${ik.naam}.`, { icon: 'schild' });
+        } catch (e) { $('#rp-fout').textContent = fouttekst(e); $('#rp-login').disabled = false; }
+      });
+    }
+    function ingeschreven() {
+      const anders = huidig() !== bewaard;
+      box.innerHTML = `<h3>Ingeschreven ✓</h3>
+        <p class="ok">Het register kent u als <b>${esc(ik.naam)}</b>.${anders ? '<br>U veranderde naam of wapen hierboven.' : ' Pas hierboven uw naam of wapen aan, en bewaar.'}</p>
+        <button class="btn" id="rp-bewaar" type="button"${anders ? '' : ' disabled'}>Bewaar in het register</button>
+        <button class="link" id="rp-uit" type="button">Afmelden op dit toestel</button>
+        <p class="fout" id="rp-fout" role="alert"></p>`;
+      $('#rp-bewaar').addEventListener('click', async () => {
+        $('#rp-bewaar').disabled = true;
+        try { ik = await Db.ridderZelf(store.get(SLEUTEL, ''), title(), wapenVan()); bewaard = huidig(); Toast('Bewaard', 'De heraut paste het register aan.', { icon: 'schild' }); ingeschreven(); }
+        catch (e) { $('#rp-fout').textContent = fouttekst(e); $('#rp-bewaar').disabled = false; if (/afgemeld/.test(e.message)) { store.set(SLEUTEL, ''); ik = null; fout = e.message; nieuw(); } }
+      });
+      $('#rp-uit').addEventListener('click', async () => {
+        const sl = store.get(SLEUTEL, ''); store.set(SLEUTEL, ''); ik = null; nieuw();
+        try { await Db.ridderUit(sl); } catch {}
+      });
+      $('#rsvp-btn').textContent = 'Ingeschreven ✓';
+    }
+    // de ridder uit het register in de wapenmaker zetten (de database is de bron)
+    async function laadIk() {
+      const sl = store.get(SLEUTEL, '');
+      if (!sl) { nieuw(); return; }
+      try { ik = await Db.ridderIk(sl); } catch { ik = null; fout = 'De heraut is even onbereikbaar.'; nieuw(); return; }
+      if (!ik) { store.set(SLEUTEL, ''); fout = 'U bent afgemeld. Meld u opnieuw aan met uw pincode.'; nieuw(); return; }
+      const { n, ...w } = ik.wapen || {}, d = n || naamDelen(ik.naam);
+      Object.assign(s, { titel: d.titel ?? s.titel, name: d.voor ?? '', stad: d.stad ?? '' }, w.t1 ? w : {});
+      vulVelden(); update(); bewaard = huidig(); ingeschreven();
+    }
+    // na elke wijziging in de wapenmaker: de knop "Bewaar" aan of uit
+    document.addEventListener('wapen', () => { if (ik && $('#rp-bewaar')) { const anders = huidig() !== bewaard; if ($('#rp-bewaar').disabled === anders) ingeschreven(); } });
+    laadIk();
+  }
 
   /* =========================================================
      BOOGSCHIETEN — zonder vizier, zoals het hoort (bijna)
@@ -1956,10 +2076,6 @@
     $('#where').textContent = CONFIG.location + (CONFIG.locationNote ? '. ' + CONFIG.locationNote : '');
     if (CONFIG.kids) $('#kids-dd').textContent = CONFIG.kids;
     else { $('#kids-dt').hidden = true; $('#kids-dd').hidden = true; }
-    if (CONFIG.rsvp) {
-      const a = $('#rsvp-btn'); a.href = CONFIG.rsvp; a.hidden = false;
-      $('#rsvp-text').textContent = 'Laat even weten of u komt, liefst ruim voor oudejaarsdag.';
-    }
     $('#ics').addEventListener('click', () => {
       Toast('Taak bijgewerkt', 'Sta om 16:00 voor de poort in Kessel-Lo.', { icon: 'taak' });
       const z = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');

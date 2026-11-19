@@ -212,6 +212,9 @@
     if (!bezig) teken();
   }
   async function namen() { try { stand = await Db.stand(); toonWie(); } catch {} teken(); }
+  // aangemeld op /feestje (eigen ridder met pincode)? Dan hoeft u hier geen naam meer te kiezen.
+  const sessie = opslag.get('feestje.sessie');
+  if (!ridder && sessie) Db.ridderIk(sessie).then(ik => { if (ik && !ridder) { ridder = ik.id; opslag.zet('feestje.quiz.ridder', ridder); toonWie(); teken(true); } }).catch(() => {});
   namen(); setInterval(namen, 15000);
   ververs(); setInterval(ververs, 1500);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { namen(); ververs(); } });

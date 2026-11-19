@@ -62,6 +62,22 @@ const Db = (() => {
     return out;
   }
   const nextId = list => list.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+  // demo van de eigen ridders (zoals fj_ridder_*): pincode en sessies in de demo-opslag, zonder hash (alleen dit toestel)
+  function demoZelf(change) {
+    const d = demoGet(); d.geheim = d.geheim || {}; d.sessies = d.sessies || {};
+    const out = change(d);
+    try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {}
+    bc?.postMessage('veranderd');
+    return out;
+  }
+  function demoCheck(d, naam, eigen) {
+    naam = String(naam || '').trim();
+    if (naam.length < 3 || naam.length > 60) throw new Error('Kies een naam van 3 tot 60 tekens.');
+    if (d.ridders.some(r => r.naam.toLowerCase() === naam.toLowerCase() && r.id !== eigen)) throw new Error('Die naam is al genomen. Kies een andere titel of stad.');
+    return naam;
+  }
+  const demoSessie = (d, id) => { const s = [...crypto.getRandomValues(new Uint8Array(32))].map(b => b.toString(16).padStart(2, '0')).join(''); d.sessies[s] = id; return s; };
+  const zesCijfers = pin => { if (!/^[0-9]{6}$/.test(String(pin || ''))) throw new Error('De pincode moet uit 6 cijfers bestaan.'); };
   const demoPin = pin => { if (String(pin) !== DEMO_PIN) throw new Error('Verkeerde pincode'); };
   // normaliseren zoals fj_norm in de database: kleine letters, zonder accenten, spaties en leestekens
   const norm = t => String(t ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -191,6 +207,35 @@ const Db = (() => {
     verwijderRidder: async (pin, id) => live
       ? rpc('fj_verwijder_ridder', { p_pin: pin, p_id: id })
       : demoDo(pin, d => { d.ridders = d.ridders.filter(r => r.id !== id); d.punten = d.punten.filter(p => p.ridder_id !== id); }),
+    /* eigen ridders: inschrijven met een pincode, aanmelden, zelf aanpassen (zie fj_ridder_* in feestje-supabase.sql).
+       De sessiesleutel blijft op het toestel; de pincode zelf wordt nergens bewaard. */
+    ridderMaak: async (naam, wapen, pin) => live ? rpc('fj_ridder_maak', { p_naam: naam, p_wapen: wapen, p_pin: pin })
+      : demoZelf(d => { zesCijfers(pin); naam = demoCheck(d, naam, null); const id = nextId(d.ridders);
+          d.ridders.push({ id, naam, wapen: wapen || {}, aangemeld: new Date().toISOString(), pin: true }); d.geheim[id] = { pin: String(pin), mislukt: 0 };
+          return { id, sessie: demoSessie(d, id) }; }),
+    ridderLogin: async (id, pin) => {
+      const uit = live ? await rpc('fj_ridder_login', { p_ridder: id, p_pin: pin }) : demoZelf(d => {
+        const g = d.geheim[id];
+        if (!g) return { fout: 'Deze ridder heeft (nog) geen pincode. Vraag de heraut.' };
+        if (g.tot > Date.now()) return { fout: 'Te veel foute pogingen. Probeer het over een kwartier opnieuw, of vraag de heraut.' };
+        if (g.pin !== String(pin)) { if (++g.mislukt >= 5) { g.mislukt = 0; g.tot = Date.now() + 15 * 60e3; } return { fout: 'Dat is niet de juiste pincode.' }; }
+        g.mislukt = 0; g.tot = 0; return { id, sessie: demoSessie(d, id) };
+      });
+      if (uit?.fout) throw new Error(uit.fout);   // de database geeft een fout als antwoord terug (zie fj_ridder_login)
+      return uit;
+    },
+    ridderIk: async sessie => live ? rpc('fj_ridder_ik', { p_sessie: sessie })
+      : (() => { const d = demoGet(), id = d.sessies?.[sessie], r = d.ridders.find(x => x.id === id); return r ? { id: r.id, naam: r.naam, wapen: r.wapen } : null; })(),
+    ridderZelf: async (sessie, naam, wapen) => live ? rpc('fj_ridder_zelf', { p_sessie: sessie, p_naam: naam, p_wapen: wapen })
+      : demoZelf(d => { const id = d.sessies[sessie], r = d.ridders.find(x => x.id === id);
+          if (!r) throw new Error('U bent afgemeld. Meld u opnieuw aan met uw pincode.');
+          r.naam = demoCheck(d, naam, id); r.wapen = wapen || r.wapen; return { id, naam: r.naam, wapen: r.wapen }; }),
+    ridderUit: async sessie => live ? rpc('fj_ridder_uit', { p_sessie: sessie }) : demoZelf(d => { delete d.sessies[sessie]; }),
+    ridderNieuwePin: async (pin, id, nieuw) => live ? rpc('fj_ridder_nieuwe_pin', { p_pin: pin, p_ridder: id, p_nieuw: nieuw })
+      : (demoPin(pin), zesCijfers(nieuw), demoZelf(d => { d.geheim[id] = { pin: String(nieuw), mislukt: 0 };
+          const r = d.ridders.find(x => x.id === id); if (r) r.pin = true;
+          for (const [k, v] of Object.entries(d.sessies)) if (v === id) delete d.sessies[k]; })),
+
     wijzigPin: async (oud, nieuw) => {
       if (String(nieuw).length < 6) throw new Error('De nieuwe pincode moet minstens 6 tekens hebben');
       if (live) return rpc('fj_wijzig_pin', { p_oud: oud, p_nieuw: nieuw });
