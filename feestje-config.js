@@ -50,5 +50,6 @@ const UITLEG = [
 ];
 
 /* Spotify: "nu speelt" op het tv-scherm. Leeg = uit. Client ID van uw eigen app op developer.spotify.com
-   (niet geheim). Redirect URI daar: https://resonantxp.com/feestje-tv  (zie feestje-tv.html, Spotify). */
-const SPOTIFY = { clientId: '92040bfb176b435d93212aa09fa88051' };
+   (niet geheim). terug = de Redirect URI, letterlijk zo ingevuld in het Spotify-dashboard (en daar op Save gedrukt).
+   Vast adres, los van hoe de tv de pagina opende (www of niet, voorbeeld-URL): Spotify vergelijkt teken voor teken. */
+const SPOTIFY = { clientId: '92040bfb176b435d93212aa09fa88051', terug: 'https://resonantxp.com/feestje-tv' };
