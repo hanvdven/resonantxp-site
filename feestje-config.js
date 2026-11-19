@@ -11,16 +11,16 @@ const CONFIG = {
   location: 'Kessel-Lo',
   locationNote: 'Het precieze adres volgt per bode.',
   rsvp: '',   // bv. 'https://wa.me/32...' of 'mailto:...' (leeg = geen knop)
-  kids: 'Jonge schildknapen en jonkvrouwen zijn welkom van 16:00 tot 18:00, voor het wapenschilderen en het toernooi. Daarna is het feest voor volwassenen.', // leeg = regel verbergen
+  kids: 'Jonge schildknapen en jonkvrouwen zijn welkom, en mogen blijven zo lang ze willen.', // leeg = regel verbergen
   lat: 50.885, lon: 4.725, // Kessel-Lo, voor de zonnestand op de klok
   annoDomini: 1404,   // het nieuwe jaar zoals op de tv en de uitnodiging: Kingdom Come speelt in 1403, dus om middernacht wordt het 1404
   partyFrom: 16, partyTo: 25, // feestband op de klok, in uren (25 = 01:00 de volgende dag)
   // Het programma: vult "De getijden" én de ruitjes op de klok. Uren als getal (16.5 = 16:30, 24 = middernacht).
   program: [
-    [16,    'Wapenschilderen', 'De poort gaat open. Aan de lange tafel schildert u uw wapen op schild of tuniek: verf en karton liggen klaar. Daarna worden de wapens gekeurd, en het mooiste wint.', 'schild'],
+    [16,    'Wapenschilderen', 'De poort gaat open. Aan de lange tafel schildert u uw wapen op schild of tuniek: verf en karton liggen klaar. Ook voor jonge ridders. Daarna worden de wapens gekeurd, en het mooiste wint.', 'schild'],
     [18.5,  'Het toernooi', 'Wat er gestreden wordt, maakt de heraut later bekend.', 'arena'],
     [20,    'Het riddermaal', 'De grote ketel gaat open en uw meegebrachte schotels komen op de dis. Aan tafel: de prijs voor het beste kostuum.', 'eten'],
-    [21.5,  'De kennisproef', 'De grote Bohemen-quiz, op uw gsm: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
+    [21.5,  'De Kennisproef', 'De grote Bohemen-quiz, op uw gsm: van Trosky tot Kuttenberg. Prijs: eeuwige roem, en misschien een extra oliebol.', 'lezen'],
     [23,    'De proeverij', 'Een wedstrijd van de tong. Wat er geproefd wordt, blijft tot dan een verrassing.', 'honing'],
     [24,    'Middernacht en brandewijn', 'De klokken luiden het jaar 1404 in. Een heilandsbrandewijn om het spel op te slaan, en oliebollen voor iedereen.', 'brandewijn'],
   ],
