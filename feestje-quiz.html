@@ -47,6 +47,18 @@
     .tijd { height: 8px; background: #dcc79a; border-radius: 4px; overflow: hidden; margin: 4px 0 14px; }
     .tijd i { display: block; height: 100%; background: var(--rood); width: 100%; transition: width 1s linear; }
     .vrij { display: grid; gap: 10px; }
+    /* het eigen schild: valt binnen bij het welkom; springt op bij een goed antwoord, schudt bij een fout */
+    .mijnschild { display: block; margin: 6px auto 10px; width: 96px; }
+    .mijnschild svg { width: 96px; height: 115px; display: block; filter: drop-shadow(0 4px 5px rgba(40, 24, 8, .35)); }
+    .mijnschild.in { animation: schildIn .8s cubic-bezier(.3, 1.4, .6, 1) both; }
+    .mijnschild.goed { animation: schildGoed 1s ease-out both; }
+    .mijnschild.fout { animation: schildFout .6s ease-in-out both; }
+    @keyframes schildIn { from { transform: translateY(-80px) rotate(-14deg) scale(.5); opacity: 0; } 60% { transform: translateY(8px) rotate(4deg) scale(1.06); opacity: 1; } to { transform: none; } }
+    @keyframes schildGoed { 0% { transform: scale(.8); } 35% { transform: translateY(-22px) scale(1.15) rotate(-6deg); } 60% { transform: translateY(0) scale(1) rotate(3deg); } to { transform: none; } }
+    @keyframes schildFout { 0%, 100% { transform: none; } 20% { transform: translateX(-10px) rotate(-6deg); } 40% { transform: translateX(10px) rotate(6deg); } 60% { transform: translateX(-6px) rotate(-3deg); } 80% { transform: translateX(6px) rotate(3deg); } }
+    @media (prefers-reduced-motion: reduce) { .mijnschild { animation: none !important; } }
+    .vrij .meervak { display: grid; grid-template-columns: 4.5em 1fr; align-items: center; gap: 10px; }
+    .vrij .meervak span { font-weight: 600; }
     .kaart { background: #ead7ab; border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
     .kaart b { font-family: "Maximilian", serif; font-weight: 400; font-size: 28px; }
     .ridders { display: grid; gap: 8px; margin-top: 10px; }
@@ -92,7 +104,7 @@
   let stand = null, t = null, getekend = '', bezig = false;
   const naam = id => stand?.ridders.find(r => r.id === id)?.naam || 'Onbekende ridder';
   // wat deze gsm al antwoordde, per vraag (zodat herladen het antwoord niet vergeet)
-  const sleutel = () => `${t.nr}|${t.vraag}`;
+  const sleutel = () => `${ridder}|${t.nr}|${t.vraag}`;   // per speler: op één gsm kan van speler gewisseld worden
   const mijnAntwoord = () => (opslag.get('feestje.quiz.antw') || {})[sleutel()];
   const bewaarAntwoord = a => { const m = opslag.get('feestje.quiz.antw') || {}; m[sleutel()] = a; opslag.zet('feestje.quiz.antw', m); };
 
@@ -126,12 +138,14 @@
     const kop = t.nr ? `<div class="nr">${ri ? `Ronde ${romeins(ri.nr)} · ${esc(ri.naam)} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`}</div>` : '';
     const plaat = t.afbeelding ? `<img class="plaat" src="${esc(t.afbeelding)}" alt="" onerror="this.remove()">` : '';
     const vraag = `${kop}<p class="vraag">${esc(t.vraag)}</p>${plaat}`;
+    const mijnW = stand.ridders.find(r => r.id === ridder)?.wapen;
+    const mijnSchild = klas => `<span class="mijnschild ${klas}">${wapenSvg(mijnW, 'mijn')}</span>`;
 
     if (t.fase === 'stand') return eindstand(ri ? `De tussenstand na ${esc(ri.naam)}` : 'De tussenstand');
-    if (t.fase === 'uit') {
-      if (t.nr > 0 && t.stand?.length) return eindstand();
-      app.innerHTML = `<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
-        <div class="kaart"><b>Zo werkt het</b><br>Meerkeuze en woord: 100 punten voor een goed antwoord, plus 1 punt per seconde dat u sneller bent dan 30 seconden.
+    if (t.fase === 'uit' || t.fase === 'intro') {
+      if (t.fase === 'uit' && t.nr > 0 && t.stand?.length) return eindstand();
+      app.innerHTML = `${mijnSchild('in')}<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
+        <div class="kaart"><b>Zo werkt het</b><br>U hebt 30 seconden per vraag (soms meer); daarna verschijnt het antwoord. Meerkeuze en woord: 100 punten voor een goed antwoord, plus 1 punt per seconde dat u sneller bent dan 30 seconden.
         Schatting: hoe dichter bij het juiste getal, hoe meer punten (tot 130); wie er een factor drie naast zit, krijgt niets. Meerdere antwoorden: 50 punten per juist antwoord.</div>`;
       return;
     }
@@ -142,8 +156,11 @@
     if (t.fase === 'open' && !mijn) {
       let invoer = '';
       if (t.soort === 'keuze') invoer = `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<button type="button" data-k="${i}"><b>${LETTERS[i]}</b><span>${esc(a)}</span></button>`).join('')}</div>`;
-      else if (t.soort === 'meer') invoer = `<form class="vrij" id="vrij">${[1, 2, 3, 4].map(i => `<input type="text" class="meer" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Antwoord ${i}" maxlength="40" aria-label="Antwoord ${i}">`).join('')}
+      else if (t.soort === 'meer') {   // de vakjes heten zoals in de vraag (bv. geel, rood, roze, groen); anders Antwoord 1–4
+        const vakken = Array.isArray(t.antwoorden) && t.antwoorden.length ? t.antwoorden : [1, 2, 3, 4].map(i => `Antwoord ${i}`);
+        invoer = `<form class="vrij" id="vrij">${vakken.map(v => `<label class="meervak"><span>${esc(v)}</span><input type="text" class="meer" autocapitalize="off" autocomplete="off" spellcheck="false" maxlength="40"></label>`).join('')}
           <button class="knop">Inzenden</button><p class="stil">50 punten per juist antwoord. Vul in wat u weet; lege vakjes mogen.</p></form>`;
+      }
       else invoer = `<form class="vrij" id="vrij"><input ${t.soort === 'getal' ? 'inputmode="decimal" pattern="-?[0-9]+([.,][0-9]+)?"' : 'type="text" autocapitalize="off" autocomplete="off" spellcheck="false"'} id="tekst"
           placeholder="${t.soort === 'getal' ? 'Uw schatting (een getal)' : 'Uw antwoord'}" required maxlength="60"><button class="knop">Inzenden</button></form>`;
       app.innerHTML = `${vraag}<div class="tijd"><i id="balk"></i></div>${invoer}<div class="fout" id="fout"></div>`;
@@ -163,7 +180,7 @@
       const u = (t.uitslag || []).find(x => x.ridder_id === ridder), tot = (t.stand || []).find(x => x.ridder_id === ridder);
       const plaats = tot ? 1 + (t.stand || []).filter(x => x.punten > tot.punten).length : null;
       const juist = t.soort === 'keuze' ? `${LETTERS[t.juist]}. ${esc(t.antwoorden?.[t.juist])}` : Array.isArray(t.juist) ? t.juist.map(esc).join(', ') : esc(t.juist);
-      app.innerHTML = `${vraag}<div class="kaart">Het juiste antwoord: <b>${juist}</b><br>
+      app.innerHTML = `${vraag}${u ? mijnSchild(u.punten > 0 ? 'goed' : 'fout') : ''}<div class="kaart">Het juiste antwoord: <b>${juist}</b><br>
         ${u ? `Uw antwoord: ${mijnTekst || lijst(u.waarde ?? (u.keuze != null ? LETTERS[u.keuze] : ''))} → <b>${u.punten}</b> punten` : 'U antwoordde niet.'}
         ${tot ? `<br>Samen: ${tot.punten} punten, plaats ${romeins(plaats)}` : ''}</div>`;
       return;
@@ -176,7 +193,7 @@
   }
   function tijdbalk() {
     const b = $('#balk'); if (!b || t.fase !== 'open') return;
-    b.style.width = Math.max(0, 100 - (t.verstreken || 0) / 30 * 100) + '%';
+    b.style.width = Math.max(0, 100 - (t.verstreken || 0) / (t.tijd || 30) * 100) + '%';
   }
   async function zend(keuze, tekst, knop) {
     if (bezig) return; bezig = true;
@@ -184,14 +201,14 @@
     try {
       const ok = await Db.quizAntwoord(ridder, keuze, tekst);
       if (ok) bewaarAntwoord({ keuze, tekst });
-      else { $('#fout').textContent = t.soort === 'getal' ? 'Dat is geen getal, of de vraag is al dicht.' : 'Te laat: de vraag is al dicht (of u antwoordde al).'; bezig = false; await ververs(); return; }
+      else { $('#fout').textContent = t.soort === 'getal' ? 'Dat is geen getal, of de vraag is al dicht.' : 'Te laat: de tijd is om (of u antwoordde al).'; bezig = false; await ververs(); return; }
     } catch (e) { $('#fout').textContent = 'Niet verstuurd: ' + e.message; app.querySelectorAll('button, input').forEach(x => x.disabled = false); bezig = false; return; }
     bezig = false; await ververs(); teken(true);
   }
 
   /* ---------- volgen: de quiz elke 1,5 s, de namen elke 15 s ---------- */
   async function ververs() {
-    try { t = await Db.quizToestand(); if (t.verstreken != null) t.verstreken = Math.max(0, t.verstreken); } catch (e) { /* volgende keer */ }
+    try { t = await Db.quizToestand(ridder ? +ridder : null); if (t.verstreken != null) t.verstreken = Math.max(0, t.verstreken); } catch (e) { /* volgende keer */ }
     if (!bezig) teken();
   }
   async function namen() { try { stand = await Db.stand(); toonWie(); } catch {} teken(); }

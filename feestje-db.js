@@ -82,12 +82,30 @@ const Db = (() => {
       const som = new Map(); q.antwoorden.forEach(a => som.set(a.ridder_id, (som.get(a.ridder_id) || 0) + a.punten));
       return [...som].map(([ridder_id, punten]) => ({ ridder_id, punten })).sort((a, b) => b.punten - a.punten);
     }
-    function toestand(meester) {
+    // de klok, zoals fj_quiz_klok: na de bedenktijd van de vraag (standaard 30 s) vanzelf de uitslag
+    const bedenktijd = v => v?.tijd || 30;
+    function naarStand(q) {
+      const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
+      if (!spel) return;
+      d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
+    }
+    const aanwezig = q => Object.keys(q.spelers || {}).filter(id => Date.now() - q.spelers[id] < 15000).map(Number);   // gsm de laatste 15 s gezien
+    function klok() {
+      const q = get(), v = q.vragen[q.nr - 1];
+      if (!(q.fase === 'open' || q.fase === 'dicht') || !q.geopend) return;
+      const hier = q.antwoorden.filter(a => a.nr === q.nr), iedereen = hier.length && aanwezig(q).every(id => hier.some(a => a.ridder_id === id));
+      if (Date.now() - q.geopend >= bedenktijd(v) * 1000 || iedereen) { q.fase = 'uitslag'; put(q); naarStand(q); }
+    }
+    function toestand(meester, ridder) {
+      if (ridder) { const q = get(); q.spelers = { ...(q.spelers || {}), [ridder]: Date.now() }; put(q); }
+      klok();
       const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr), zie = q.fase !== 'uit' || meester;
       const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, ronde: v?.ronde || null, rondes: q.vragen.map(w => w.ronde || ''),
         soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
-        afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null,
-        verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
+        afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null, tijd: bedenktijd(v),
+        verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length, spelers: aanwezig(q).length, aanwezig: aanwezig(q).sort((x, y) => x - y),
+        van: q.fase === 'open' || q.fase === 'dicht' ? hier.map(a => a.ridder_id) : null,
         juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
         uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten, tijd }) => ({ ridder_id, keuze, waarde, punten, sec: tijd && q.geopend ? Math.floor((tijd - q.geopend) / 1000) : null })) : null,
         stand: q.fase === 'uitslag' || q.fase === 'stand' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
@@ -95,11 +113,12 @@ const Db = (() => {
         t.antwoorden_van = hier.map(a => a.ridder_id);
         t.alle = hier.map(({ ridder_id, keuze, waarde, punten, oordeel, tijd }) => ({ ridder_id, keuze, waarde, punten, oordeel: oordeel ?? null, sec: q.geopend && tijd ? Math.round((tijd - q.geopend) / 100) / 10 : null }));
         const w = q.vragen[(q.fase === 'uit' && !q.nr) ? 0 : q.nr];
-        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, ronde: w.ronde || null, soort: soort(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
+        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, ronde: w.ronde || null, soort: soort(w), tijd: bedenktijd(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
       }
       return t;
     }
     function antwoord(ridder, keuze, tekst) {
+      klok();
       const q = get(); if (q.fase !== 'open') return false;
       if (q.antwoorden.some(a => a.nr === q.nr && a.ridder_id === ridder)) return false;
       if (!demoGet().ridders.some(r => r.id === ridder)) return false;
@@ -114,20 +133,16 @@ const Db = (() => {
         if (g > 0 && a > 0) punten = Math.round((100 + snel) * Math.max(0, 1 - Math.abs(Math.log(g / a))));
       }
       q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 200), punten, tijd: Date.now() });
-      put(q); return true;
+      put(q); klok(); return true;
     }
     function stap(actie) {
+      klok();
       const q = get(), v = q.vragen[q.nr - 1];
-      if (actie === 'start' && q.vragen.length) Object.assign(q, { nr: 1, fase: 'wacht', geopend: null });
+      if (actie === 'start' && q.vragen.length) Object.assign(q, { nr: 0, fase: 'intro', geopend: null });   // eerst het beginscherm
       else if (actie === 'open' && q.fase === 'wacht') Object.assign(q, { fase: 'open', geopend: Date.now() });
       else if (actie === 'sluit' && q.fase === 'open') q.fase = 'dicht';
       else if (actie === 'toon' && (q.fase === 'open' || q.fase === 'dicht')) {
-        q.fase = 'uitslag';
-        const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
-        if (spel) {
-          d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));
-          try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
-        }
+        q.fase = 'uitslag'; put(q); naarStand(q);
       } else if (actie === 'volgende') {
         const w = q.vragen[q.nr];   // de volgende vraag
         if (q.fase === 'uitslag' && w && v?.ronde && w.ronde !== v.ronde) q.fase = 'stand';   // einde van een ronde: eerst de tussenstand
@@ -138,13 +153,14 @@ const Db = (() => {
       put(q);
     }
     function laad(vragen) { put(Object.assign(leeg(), { vragen })); return vragen.length; }
-    // de quizmaster keurt bij (zoals fj_quiz_keur): true = goed, false = fout, null = automatisch
-    function keur(ridder, goed) {
+    // de quizmaster beoordeelt (zoals fj_quiz_keur): 1 = goed, 0.5 = half, 0 = fout, null = automatisch
+    function keur(ridder, oordeel) {
       const q = get(), v = q.vragen[q.nr - 1], s = soort(v), a = q.antwoorden.find(x => x.nr === q.nr && x.ridder_id === ridder);
       if (!a || s === 'getal') return;
       const snel = Math.max(0, 30 - Math.floor(((a.tijd || q.geopend) - q.geopend) / 1000));
       const auto = s === 'keuze' ? (a.keuze === v.juist ? 100 + snel : 0) : s === 'woord' ? (v.juist.some(g => norm(g) === norm(a.waarde)) ? 100 + snel : 0) : 50 * meerGoed(v, a.waarde);
-      a.oordeel = goed; a.punten = goed == null ? auto : goed ? (s === 'meer' ? 50 * v.juist.length : 100 + snel) : 0;
+      const max = s === 'meer' ? 50 * v.juist.length : 100 + snel;
+      a.oordeel = oordeel; a.punten = oordeel == null ? auto : Math.round(max * oordeel);
       if (q.fase === 'uitslag' || q.fase === 'stand') {
         const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
         if (spel) { d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten }))); try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd'); }
@@ -195,15 +211,16 @@ const Db = (() => {
     },
 
     /* ---------- de quiz (zie fj_quiz_* in feestje-supabase.sql; de demo doet hetzelfde in localStorage) ---------- */
-    quizToestand: async () => live ? rpc('fj_quiz_toestand') : Quiz.toestand(false),
+    // ridder: de gsm van een speler meldt zich mee (wie meespeelt; zie fj_quiz_spelers)
+    quizToestand: async ridder => live ? rpc('fj_quiz_toestand', ridder ? { p_ridder: ridder } : {}) : Quiz.toestand(false, ridder),
     quizMeester: async pin => live ? rpc('fj_quiz_meester', { p_pin: pin }) : (demoPin(pin), Quiz.toestand(true)),
     // keuze: 0–3 bij een keuzevraag, anders null; tekst: het woord of het getal, anders null
     quizAntwoord: async (ridder, keuze, tekst = null) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze, p_tekst: tekst }) : Quiz.antwoord(ridder, keuze, tekst),
     // de vragen zoals de database ze wil (soort ingevuld; de database normaliseert de woorden zelf bij het vergelijken)
-    quizVoorbereid: vragen => vragen.map(v => ({ ronde: v.ronde || null, soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
+    quizVoorbereid: vragen => vragen.map(v => ({ ronde: v.ronde || null, soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, tijd: v.tijd || 30, juist: v.juist })),
     norm,
     quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
-    quizKeur: async (pin, ridder, goed) => live ? rpc('fj_quiz_keur', { p_pin: pin, p_ridder: ridder, p_goed: goed }) : (demoPin(pin), Quiz.keur(ridder, goed), Quiz.toestand(true)),
+    quizKeur: async (pin, ridder, oordeel) => live ? rpc('fj_quiz_keur', { p_pin: pin, p_ridder: ridder, p_oordeel: oordeel }) : (demoPin(pin), Quiz.keur(ridder, oordeel), Quiz.toestand(true)),
     quizLaad: async (pin, vragen) => live ? rpc('fj_quiz_laad', { p_pin: pin, p_vragen: vragen }) : (demoPin(pin), Quiz.laad(vragen)),
 
     /* Volg de stand: roept cb(stand) aan bij elke wijziging. Supabase: elke `ms` opvragen
