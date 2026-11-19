@@ -64,9 +64,12 @@ const Db = (() => {
   const nextId = list => list.reduce((m, x) => Math.max(m, x.id), 0) + 1;
   const demoPin = pin => { if (String(pin) !== DEMO_PIN) throw new Error('Verkeerde pincode'); };
   // normaliseren zoals fj_norm in de database: kleine letters, zonder accenten, spaties en leestekens
-  const norm = t => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const norm = t => String(t ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/^(de|het|een|n|t|the|a|an|der|die|das|ein|eine|le|la|les|l|un|une)[^a-z0-9]+/, '').replace(/[^a-z0-9]/g, '');
+  // soort 'meer': hoeveel verschillende juiste antwoorden zitten er in "topaas|robijn|ruby"? (zoals fj_quiz_meer)
+  const meerGoed = (v, tekst) => { const w = String(tekst ?? '').split('|').map(norm).filter(Boolean); return v.juist.filter(vs => vs.some(g => w.includes(norm(g)))).length; };
   // het juiste antwoord om te tonen: keuze → nummer, woord → het eerste goede woord, getal → het getal
-  const toonJuist = v => v ? (v.soort === 'woord' ? v.juist[0] : v.juist) : null;
+  const toonJuist = v => v ? (v.soort === 'woord' ? v.juist[0] : v.soort === 'meer' ? v.juist.map(x => x[0]) : v.juist) : null;
   // de quiz in demomodus: dezelfde regels als de functies in de database (zie fj_quiz_* in feestje-supabase.sql)
   const Quiz = (() => {
     const QK = 'feestje.demo.quiz';
@@ -81,13 +84,19 @@ const Db = (() => {
     }
     function toestand(meester) {
       const q = get(), v = q.vragen[q.nr - 1], hier = q.antwoorden.filter(a => a.nr === q.nr), zie = q.fase !== 'uit' || meester;
-      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
+      const t = { fase: q.fase, nr: q.nr, totaal: q.vragen.length, ronde: v?.ronde || null, rondes: q.vragen.map(w => w.ronde || ''),
+        soort: zie && v ? soort(v) : null, vraag: zie ? v?.vraag : null,
         afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null,
         verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
         juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
-        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten }) => ({ ridder_id, keuze, waarde, punten })) : null,
-        stand: q.fase === 'uitslag' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
-      if (meester) t.antwoorden_van = hier.map(a => a.ridder_id);
+        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten, tijd }) => ({ ridder_id, keuze, waarde, punten, sec: tijd && q.geopend ? Math.floor((tijd - q.geopend) / 1000) : null })) : null,
+        stand: q.fase === 'uitslag' || q.fase === 'stand' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
+      if (meester) {
+        t.antwoorden_van = hier.map(a => a.ridder_id);
+        t.alle = hier.map(({ ridder_id, keuze, waarde, punten, oordeel, tijd }) => ({ ridder_id, keuze, waarde, punten, oordeel: oordeel ?? null, sec: q.geopend && tijd ? Math.round((tijd - q.geopend) / 100) / 10 : null }));
+        const w = q.vragen[(q.fase === 'uit' && !q.nr) ? 0 : q.nr];
+        t.volgende = w ? { nr: q.vragen.indexOf(w) + 1, ronde: w.ronde || null, soort: soort(w), vraag: w.vraag, afbeelding: w.afbeelding || null, antwoorden: w.antwoorden || null, juist: toonJuist({ ...w, soort: soort(w) }) } : null;
+      }
       return t;
     }
     function antwoord(ridder, keuze, tekst) {
@@ -98,8 +107,13 @@ const Db = (() => {
       let punten = 0;
       if (s === 'keuze') { if (!(keuze >= 0 && keuze <= 3)) return false; if (keuze === v.juist) punten = 100 + snel; }
       else if (s === 'woord') { if (!norm(tekst)) return false; if (v.juist.some(g => norm(g) === norm(tekst))) punten = 100 + snel; }
-      else if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
-      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 60), punten });
+      else if (s === 'meer') { if (!norm(String(tekst ?? '').replace(/\|/g, ''))) return false; punten = 50 * meerGoed(v, tekst); }
+      else {   // schatting: (100 + snelheid) · max(0, 1 − |ln(g / a)|), zoals in fj_quiz_antwoord
+        if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
+        const g = parseFloat(String(tekst).trim().replace(',', '.')), a = +v.juist;
+        if (g > 0 && a > 0) punten = Math.round((100 + snel) * Math.max(0, 1 - Math.abs(Math.log(g / a))));
+      }
+      q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 200), punten, tijd: Date.now() });
       put(q); return true;
     }
     function stap(actie) {
@@ -109,22 +123,35 @@ const Db = (() => {
       else if (actie === 'sluit' && q.fase === 'open') q.fase = 'dicht';
       else if (actie === 'toon' && (q.fase === 'open' || q.fase === 'dicht')) {
         q.fase = 'uitslag';
-        if (soort(v) === 'getal') {   // schatting: rangorde op afstand, gelijke afstand = gelijke plaats (zoals rank() in SQL)
-          const hier = q.antwoorden.filter(a => a.nr === q.nr), af = a => Math.abs(parseFloat(a.waarde.replace(',', '.')) - v.juist);
-          hier.forEach(a => { const plaats = 1 + hier.filter(b => af(b) < af(a)).length; a.punten = Math.max(0, 100 - 20 * (plaats - 1)); });
-        }
         const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
         if (spel) {
           d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));
           try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd');
         }
-      } else if (actie === 'volgende') { if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit'; }
+      } else if (actie === 'volgende') {
+        const w = q.vragen[q.nr];   // de volgende vraag
+        if (q.fase === 'uitslag' && w && v?.ronde && w.ronde !== v.ronde) q.fase = 'stand';   // einde van een ronde: eerst de tussenstand
+        else if (q.nr < q.vragen.length) Object.assign(q, { nr: q.nr + 1, fase: 'wacht', geopend: null }); else q.fase = 'uit';
+      }
       else if (actie === 'stop') q.fase = 'uit';
       else if (actie === 'reset') Object.assign(q, { nr: 0, fase: 'uit', geopend: null, antwoorden: [] });
       put(q);
     }
     function laad(vragen) { put(Object.assign(leeg(), { vragen })); return vragen.length; }
-    return { toestand, antwoord, stap, laad };
+    // de quizmaster keurt bij (zoals fj_quiz_keur): true = goed, false = fout, null = automatisch
+    function keur(ridder, goed) {
+      const q = get(), v = q.vragen[q.nr - 1], s = soort(v), a = q.antwoorden.find(x => x.nr === q.nr && x.ridder_id === ridder);
+      if (!a || s === 'getal') return;
+      const snel = Math.max(0, 30 - Math.floor(((a.tijd || q.geopend) - q.geopend) / 1000));
+      const auto = s === 'keuze' ? (a.keuze === v.juist ? 100 + snel : 0) : s === 'woord' ? (v.juist.some(g => norm(g) === norm(a.waarde)) ? 100 + snel : 0) : 50 * meerGoed(v, a.waarde);
+      a.oordeel = goed; a.punten = goed == null ? auto : goed ? (s === 'meer' ? 50 * v.juist.length : 100 + snel) : 0;
+      if (q.fase === 'uitslag' || q.fase === 'stand') {
+        const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
+        if (spel) { d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten }))); try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} bc?.postMessage('veranderd'); }
+      }
+      put(q);
+    }
+    return { toestand, antwoord, stap, laad, keur };
   })();
 
   /* ---------- publieke API ---------- */
@@ -173,9 +200,10 @@ const Db = (() => {
     // keuze: 0–3 bij een keuzevraag, anders null; tekst: het woord of het getal, anders null
     quizAntwoord: async (ridder, keuze, tekst = null) => live ? rpc('fj_quiz_antwoord', { p_ridder: ridder, p_keuze: keuze, p_tekst: tekst }) : Quiz.antwoord(ridder, keuze, tekst),
     // de vragen zoals de database ze wil (soort ingevuld; de database normaliseert de woorden zelf bij het vergelijken)
-    quizVoorbereid: vragen => vragen.map(v => ({ soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
+    quizVoorbereid: vragen => vragen.map(v => ({ ronde: v.ronde || null, soort: v.soort || 'keuze', vraag: v.vraag, afbeelding: v.afbeelding || null, antwoorden: v.antwoorden || null, juist: v.juist })),
     norm,
     quizStap: async (pin, actie) => live ? rpc('fj_quiz_stap', { p_pin: pin, p_actie: actie }) : (demoPin(pin), Quiz.stap(actie), Quiz.toestand(true)),
+    quizKeur: async (pin, ridder, goed) => live ? rpc('fj_quiz_keur', { p_pin: pin, p_ridder: ridder, p_goed: goed }) : (demoPin(pin), Quiz.keur(ridder, goed), Quiz.toestand(true)),
     quizLaad: async (pin, vragen) => live ? rpc('fj_quiz_laad', { p_pin: pin, p_vragen: vragen }) : (demoPin(pin), Quiz.laad(vragen)),
 
     /* Volg de stand: roept cb(stand) aan bij elke wijziging. Supabase: elke `ms` opvragen
@@ -214,4 +242,15 @@ function ranglijst(stand) {
   let plaats = 0, vorige = null;
   rows.forEach((r, i) => { if (r.totaal !== vorige) { plaats = i + 1; vorige = r.totaal; } r.plaats = plaats; });
   return rows;
+}
+
+/* Rondes: uit de lijst rondenamen (één per vraag, in volgorde) en het vraagnummer: de hoeveelste ronde, de naam,
+   de hoeveelste vraag binnen die ronde en hoeveel vragen ze telt. Zonder rondes: null. */
+function rondeInfo(rondes, nr) {
+  if (!rondes?.length || !nr || !rondes[nr - 1]) return null;
+  let r = 0, start = 0;
+  for (let i = 0; i < nr; i++) if (i === 0 || rondes[i] !== rondes[i - 1]) { r++; start = i; }
+  let eind = start; while (eind + 1 < rondes.length && rondes[eind + 1] === rondes[start]) eind++;
+  let aantal = 0; rondes.forEach((x, i) => { if (i === 0 || x !== rondes[i - 1]) aantal++; });
+  return { nr: r, naam: rondes[nr - 1], inRonde: nr - start, rondeTotaal: eind - start + 1, aantal, laatste: nr - 1 === eind };
 }

@@ -335,6 +335,8 @@
     .hours h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
     .hours .pi { width: 34px; height: 34px; object-fit: contain; margin: -6px 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
     .hours p { margin: .1em 0 0; }
+    .hours li.heel { border-top: 1px solid rgba(42,31,22,.22); }
+    .hours li.heel .when small { line-height: 1.1; display: block; }
     .hours li.now { background: linear-gradient(90deg, rgba(162,48,42,.12), transparent 80%); }
     .hours li.now h3::after { content: " · nu"; color: var(--rubric); }
 
@@ -485,6 +487,19 @@
     .kaart { margin: 10px 0 6px; }
     .kaart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 9px solid #5f7f48; border-image: repeating-linear-gradient(55deg, #3f5a33 0 3px, #8daa66 3px 6px, #5f7f48 6px 8px, #2f4527 8px 9px) 9; outline: 1.5px solid var(--ink); }
     .kaart svg { width: 100%; min-width: 720px; height: auto; display: block; background: #d6cf9c; }
+    /* op een smal scherm schuift de kaart: schaduw aan de kanten waar nog kaart is, en een label "veeg" tot u veegt */
+    .kaart-vak { position: relative; }
+    .kaart-vak::before, .kaart-vak::after { content: ""; position: absolute; top: 9px; bottom: 9px; width: 34px; pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 1; }
+    .kaart-vak::before { left: 9px; background: linear-gradient(90deg, rgba(42,31,22,.45), transparent); }
+    .kaart-vak::after { right: 9px; background: linear-gradient(-90deg, rgba(42,31,22,.45), transparent); }
+    .kaart-vak.links::before, .kaart-vak.rechts::after { opacity: 1; }
+    .kaart-vak .veeg { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 2; display: none; pointer-events: none;
+      padding: 7px 16px; border-radius: 20px; background: rgba(42,31,22,.82); color: #f1e6cf; font-family: var(--sc); font-variant-caps: small-caps;
+      font-weight: 700; letter-spacing: .08em; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(0,0,0,.35); white-space: nowrap; }
+    .kaart-vak .veeg span { display: inline-block; animation: veeg 1.6s ease-in-out infinite; }
+    .kaart-vak .veeg span:last-child { animation-direction: reverse; }
+    @keyframes veeg { 50% { transform: translateX(-5px); } }
+    .kaart-vak.schuift:not(.geveegd) .veeg { display: block; }
     .kaart .place { cursor: pointer; }
     .kaart .place:hover image, .kaart .place:focus-visible image { filter: drop-shadow(0 0 6px #fff3c4); }
     .kaart .place:focus { outline: none; }
@@ -755,6 +770,52 @@
 
     <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
 
+    <!-- ===================== PRAKTISCH ===================== -->
+    <section class="panel" id="praktisch" aria-labelledby="praktisch-h">
+      <div class="head">
+        <div>
+          <p class="eyebrow">Voor wie liever geen raadsels leest</p>
+          <h2 id="praktisch-h">Wat, wanneer, waar</h2>
+        </div>
+        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
+          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round">
+            <path d="M58,10 V2" /><path d="M58,2 l18,5 l-18,5 Z" fill="#a2302a" stroke-width="1.4" />
+            <path d="M44,34 L58,10 L72,34 Z" fill="#a2302a" />
+            <rect x="44" y="34" width="28" height="74" fill="#d8c8a4" />
+            <path d="M16,54 h8 v-6 h8 v6 h8 v-6 h4 V108 H16 Z" fill="#cdbb94" />
+            <path d="M72,54 v-6 h8 v6 h8 v-6 h8 v6 h8 V108 H72 Z" fill="#cdbb94" />
+            <path d="M48,108 V86 Q58,72 68,86 V108" fill="#2a1f16" />
+            <path d="M50,92 H66 M50,98 H66 M54,86 V108 M58,82 V108 M62,86 V108" stroke="#c4943c" stroke-width="1.2" />
+            <rect x="54" y="46" width="8" height="12" rx="4" fill="#2a1f16" />
+            <rect x="24" y="66" width="6" height="10" rx="3" fill="#2a1f16" /><rect x="90" y="66" width="6" height="10" rx="3" fill="#2a1f16" />
+            <path d="M6,108 H114" stroke-width="2.4" />
+          </g>
+        </svg>
+      </div>
+      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
+      <dl class="facts">
+        <dt>Wanneer</dt><dd>Donderdag 31 december 2026, vanaf <b>16:00</b> tot ver na middernacht</dd>
+        <dt>Waar</dt><dd><span id="where">Kessel-Lo</span></dd>
+        <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
+        <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
+        <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
+        <dt>Opslaan</dt><dd>Er is geen autosave. Wie wil opslaan, drinkt om middernacht een Heilandsbrandewijn.</dd>
+        <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin, en iets te eten of te drinken voor de gedeelde dis. Vastenspijs is welkom: dan kan iedereen ervan eten.</dd>
+        <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
+      </dl>
+      <figure class="kaart">
+        <div class="kaart-vak"><div class="kaart-scroll"><svg id="kaart" viewBox="0 0 1000 640" role="group" aria-label="Kaart van Leuven en Kessel-Lo, getekend als een middeleeuwse kaart"></svg></div>
+          <span class="veeg" aria-hidden="true"><span>⟵</span> veeg <span>⟶</span></span></div>
+        <figcaption>Niet op schaal, en ook niet helemaal op de juiste plek. Tik op een icoon voor wat uitleg.</figcaption>
+      </figure>
+      <div class="actions">
+        <button class="btn" id="ics" type="button">Zet in uw agenda</button>
+        <a class="btn ghost" id="rsvp-btn" hidden>Ik kom!</a>
+      </div>
+    </section>
+
+    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
+
     <!-- ===================== STAND & WAPEN ===================== -->
     <section class="panel" id="stand" aria-labelledby="stand-h">
       <div class="head">
@@ -768,7 +829,7 @@
         <div>
           <p>In Bohemen weet iedereen wie u bent aan wat u draagt. Kies uw stand, dan fluisteren wij wat u kunt aantrekken.
             Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe. Op de dag zelf schildert u het echt,
-            van 16:00 tot 18:00: het mooiste wapen wint. Het beste kostuum krijgt een prijs bij het riddermaal.</p>
+            van 16u tot 18u30: het mooiste wapen wint. Het beste kostuum krijgt een prijs bij het riddermaal.</p>
           <div class="stands" id="stands" role="group" aria-label="Stand"></div>
           <p class="dracht" id="dracht" aria-live="polite"></p>
           <figure class="minia side"><div class="fr"><img src="feestje-img/manesse-wolfram.jpg" width="560" height="850" alt="Middeleeuwse miniatuur: een ridder met helm, wapenrok en schild in dezelfde kleuren, met zijn paard en een schildknaap." loading="lazy" decoding="async" /></div><figcaption>Wolfram von Eschenbach in vol ornaat: helm, wapenrok, schild en paard in dezelfde kleuren. Zo doet u het. <cite>Codex Manesse</cite>, ca. 1300–1340.</figcaption></figure>
@@ -820,44 +881,10 @@
         </svg>
       </div>
       <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met oliebollen. De uren staan ook als
-        ruitjes op de klok bovenaan.</p>
+      <p>Een getijdenboek verdeelt de dag in heilige uren. Wij doen hetzelfde, maar dan met oliebollen.</p>
       <ol class="hours" id="hours"></ol>
     </section>
 
-    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
-
-    <!-- ===================== TOERNOOI ===================== -->
-    <section class="panel" id="toernooi" aria-labelledby="toernooi-h">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Ridderspelen · voor jong en oud</p>
-          <h2 id="toernooi-h">Het toernooi</h2>
-        </div>
-      </div>
-      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <figure class="minia wide"><div class="fr"><img src="feestje-img/velislav-ruiters.jpg" width="960" height="520" alt="Middeleeuwse pentekening met waterverf: twee groepen geharnaste ruiters stormen met zwaarden op elkaar af." loading="lazy" decoding="async" /></div><figcaption>Boheemse ruiters in het gevecht, getekend in Praag rond 1340. <cite>Velislav-bijbel</cite>, Nationale Bibliotheek van Tsjechië.</figcaption></figure>
-      <div class="tourney">
-        <div>
-          <p>Op het erf wordt om eer gestreden, bij het laatste daglicht. Geen echte zwaarden en geen echte paarden, maar wel echte roem.</p>
-          <ul class="disciplines">
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Het zwaardgevecht.</b> Zacht van schuim, hard van wil. Meesteraanvallen toegestaan. Wie verliest, ligt erbij als Hendrik na zijn eerste gevecht met Runt.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Boogschieten.</b> Zonder vizier, zoals het hoort. Oefen hiernaast.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Dobbelen om groschen.</b> Zes stenen, één kans, geen genade. Verzwaarde stenen van de Duivel worden in beslag genomen.</li>
-            <li><span class="pilcrow" aria-hidden="true">¶</span><b>Kennis van het rijk.</b> Wie weet het meest over Bohemen, bier en boerenwijsheid?</li>
-          </ul>
-          <figure class="minia side"><div class="fr"><img src="feestje-img/luttrell-boogschutters.jpg" width="720" height="489" alt="Middeleeuwse miniatuur: boogschutters in kleurige kappen schieten op een schietschijf." loading="lazy" decoding="async" /></div><figcaption>Oefenen op de schijf, zoals elke zondag verplicht was. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
-        </div>
-        <div class="range">
-          <canvas id="boog" width="640" height="360" tabindex="0"
-                  aria-label="Boogschietbaan. Houd ingedrukt (of houd de spatiebalk vast) om de boog te spannen, laat los om te schieten."></canvas>
-          <div class="range-row">
-            <p class="range-msg" id="range-msg" aria-live="polite">Houd ingedrukt om te spannen, laat los om te schieten. Vijf pijlen.</p>
-            <button class="btn ghost" id="range-reset" type="button">Nieuwe ronde</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
 
@@ -898,68 +925,7 @@
       </details>
     </section>
 
-    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
 
-    <!-- ===================== DE DIS ===================== -->
-    <section class="panel" id="gastmaal" aria-labelledby="gastmaal-h">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Riddersnacks · samen gedekt</p>
-          <h2 id="gastmaal-h">De dis</h2>
-        </div>
-      </div>
-      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <figure class="minia wide"><div class="fr"><img src="feestje-img/luttrell-maaltijd.jpg" width="960" height="549" alt="Middeleeuwse miniatuur: een heer en zijn gezelschap aan een lange gedekte tafel, met bedienden die eten aandragen." loading="lazy" decoding="async" /></div><figcaption>Sir Geoffrey Luttrell aan tafel, met familie, monniken en een knielende bediende. <cite>Luttrell Psalter</cite>, ca. 1325–1340.</figcaption></figure>
-      <p>Een gastmaal zoals in de herberg van Kuttenberg: de waard zorgt voor de ketel, de gasten voor de rest van de dis. Draai een kaart om.</p>
-      <div class="menu" id="menu"></div>
-      <p class="muted" style="margin-top:22px"><span class="hosts-or">Han of Nele</span> zorgen voor de grote ketel en de oliebollen.
-        De rest komt van u: neem iets te eten of te drinken mee, en laat even weten wat. Dan staan er straks geen zeven potten linzen.</p>
-    </section>
-
-    <div class="fries tussen" aria-hidden="true"><svg width="100%" height="100%"><rect width="100%" height="100%" fill="url(#fries-rozet)" /></svg></div>
-
-    <!-- ===================== PRAKTISCH ===================== -->
-    <section class="panel" id="praktisch" aria-labelledby="praktisch-h">
-      <div class="head">
-        <div>
-          <p class="eyebrow">Voor wie liever geen raadsels leest</p>
-          <h2 id="praktisch-h">Wat, wanneer, waar</h2>
-        </div>
-        <svg class="vignet" viewBox="0 0 120 120" aria-hidden="true">
-          <g filter="url(#inky)" stroke="#2a1f16" stroke-width="2" stroke-linejoin="round">
-            <path d="M58,10 V2" /><path d="M58,2 l18,5 l-18,5 Z" fill="#a2302a" stroke-width="1.4" />
-            <path d="M44,34 L58,10 L72,34 Z" fill="#a2302a" />
-            <rect x="44" y="34" width="28" height="74" fill="#d8c8a4" />
-            <path d="M16,54 h8 v-6 h8 v6 h8 v-6 h4 V108 H16 Z" fill="#cdbb94" />
-            <path d="M72,54 v-6 h8 v6 h8 v-6 h8 v6 h8 V108 H72 Z" fill="#cdbb94" />
-            <path d="M48,108 V86 Q58,72 68,86 V108" fill="#2a1f16" />
-            <path d="M50,92 H66 M50,98 H66 M54,86 V108 M58,82 V108 M62,86 V108" stroke="#c4943c" stroke-width="1.2" />
-            <rect x="54" y="46" width="8" height="12" rx="4" fill="#2a1f16" />
-            <rect x="24" y="66" width="6" height="10" rx="3" fill="#2a1f16" /><rect x="90" y="66" width="6" height="10" rx="3" fill="#2a1f16" />
-            <path d="M6,108 H114" stroke-width="2.4" />
-          </g>
-        </svg>
-      </div>
-      <svg class="flourish" aria-hidden="true"><use href="#flourish" /></svg>
-      <dl class="facts">
-        <dt>Wanneer</dt><dd>Donderdag 31 december 2026, vanaf <b>16:00</b> tot ver na middernacht</dd>
-        <dt>Waar</dt><dd><span id="where">Kessel-Lo</span></dd>
-        <dt>Dresscode</dt><dd>Middeleeuws, Boheems of iets wat daar vaag op lijkt. Een cape, een riem en een houten beker doen wonderen.</dd>
-        <dt id="kids-dt">Kinderen</dt><dd id="kids-dd"></dd>
-        <dt>Vervoer</dt><dd>Te voet, per fiets, per trein of te paard. Wie naar zijn paard fluit: reken op tien minuten voor het door het struikgewas komt aanzetten.</dd>
-        <dt>Opslaan</dt><dd>Er is geen autosave. Wie wil opslaan, drinkt om middernacht een Heilandsbrandewijn.</dd>
-        <dt>Meenemen</dt><dd>Uw wapen (op stof, karton of hart), goede zin, en iets te eten of te drinken voor de gedeelde dis. Vastenspijs is welkom: dan kan iedereen ervan eten.</dd>
-        <dt>Aanmelden</dt><dd id="rsvp-text">Laat <span class="hosts-or">Han of Nele</span> weten of u komt. Een duif, een bode of een berichtje volstaat.</dd>
-      </dl>
-      <figure class="kaart">
-        <div class="kaart-scroll"><svg id="kaart" viewBox="0 0 1000 640" role="group" aria-label="Kaart van Leuven en Kessel-Lo, in de stijl van de regiokaarten uit KCD2"></svg></div>
-        <figcaption>Niet op schaal, en ook niet helemaal op de juiste plek. Tik op een icoon, of veeg om de kaart te verschuiven.</figcaption>
-      </figure>
-      <div class="actions">
-        <button class="btn" id="ics" type="button">Zet in uw agenda</button>
-        <a class="btn ghost" id="rsvp-btn" hidden>Ik kom!</a>
-      </div>
-    </section>
   </main>
 
   <button class="hare-ind" id="hare" type="button" aria-label="Gedragsindicator: niemand let op u">
@@ -1421,12 +1387,20 @@
   /* =========================================================
      DE GETIJDEN
      ========================================================= */
+  // 16 → "16u", 18.5 → "18u30", 24 → "00u"
+  const uurKort = h => { const u = Math.floor(h % 24), m = Math.round(h % 1 * 60); return `${u || '00'}u${m ? String(m).padStart(2, '0') : ''}`; };
   (function hours() {
     const ol = $('#hours');
     for (const [h, title, desc, icon] of CONFIG.program) {
       const li = document.createElement('li');
       li.dataset.h = h;
-      li.innerHTML = `<div class="when"><b>${toRoman(Math.floor(h))}</b><small>${fmtH(h)}</small></div><div><h3>${icon ? `<img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">` : ''}${title}</h3><p>${desc}</p></div>`;
+      li.innerHTML = `<div class="when"><b>${uurKort(h)}</b>${h % 24 === 0 ? `<small>${CONFIG.annoDomini}</small>` : ''}</div><div><h3>${icon ? `<img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">` : ''}${title}</h3><p>${desc}</p></div>`;
+      ol.appendChild(li);
+    }
+    if (CONFIG.heleAvond) {   // wat er de hele avond is, zonder uur
+      const [title, desc, icon] = CONFIG.heleAvond, li = document.createElement('li');
+      li.className = 'heel';
+      li.innerHTML = `<div class="when"><small>de hele<br>avond</small></div><div><h3><img class="pi" src="feestje-img/kcd/${icon}.png" alt="" width="34" height="34">${title}</h3><p>${desc}</p></div>`;
       ol.appendChild(li);
     }
   })();
@@ -1622,6 +1596,7 @@
      BOOGSCHIETEN — zonder vizier, zoals het hoort (bijna)
      ========================================================= */
   (function archery() {
+    if (!$('#boog')) return;                       // het hoofdstuk "Het toernooi" staat niet (meer) op de pagina
     const cv = $('#boog'), ctx = cv.getContext('2d');
     const W = 640, H = 360, TX = 430, TY = 168, TR = 100, SHOTS = 5, BOW = [78, 300];
     const INK = '#2a1f16';
@@ -1954,6 +1929,7 @@
       ['Iets van uzelf', 'Het recept van uw grootmoeder, of wat u in een herberg in Kuttenberg zou bestellen. Liefst vastenspijs, dan kan iedereen ervan eten.', 'gast'],
     ];
     const box = $('#menu');
+    if (!box) return;                              // het hoofdstuk "De dis" staat niet (meer) op de pagina
     DISHES.forEach(([name, desc, who], i) => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'dish'; b.setAttribute('aria-pressed', 'false');
@@ -2016,7 +1992,7 @@
         io.unobserve(e.target);
       }
     }, { threshold: .35 });
-    Object.keys(map).forEach(id => io.observe(document.getElementById(id)));
+    Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
   })();
 
   /* ---------- slapen & wachten ---------- */
@@ -2089,7 +2065,7 @@
       const SCENES = [
         ['janvier.jpg', 'U droomt van een lange tafel, vol stoofpot en oliebollen…'],
         ['luttrell-maaltijd.jpg', '…van bekers die nooit leeg raken…'],
-        ['velislav-ruiters.jpg', '…van ruiters, zwaarden van schuim en eeuwige roem…'],
+        ['velislav-ruiters.jpg', '…van ruiters, zwaarden en eeuwige roem…'],
         ['luttrell-boogschutters.jpg', '…van een pijl, precies in de roos…'],
         ['manesse-wolfram.jpg', who ? `…van uzelf, ${who}, in vol ornaat…` : '…van uzelf, in vol ornaat…'],
         [null, '…en van klokken die om middernacht het nieuwe jaar inluiden.'],
@@ -2154,9 +2130,12 @@
   /* ---------- de kaart van Leuven, naar de regiokaarten van KCD2 (Trosky, Kuttenberg) ---------- */
   (function kaart() {
     const svg = $('#kaart'), W = 1000, H = 640, rnd = seeded(1425); // 1425: stichting van de universiteit
-    const INK = '#2a1f16';
+    const INK = '#3b2817';                               // sepia-inkt
     const g = (attrs, html = '') => { const el = svgEl('g', attrs, svg); el.innerHTML = html; return el; };
     const f1 = n => n.toFixed(1);
+    // met de hand getrokken: elke hoek een beetje verschoven, zoals met een ganzenveer
+    const wob = (pts, j = 1.6, dicht = true) => 'M' + pts.map(([x, y]) => `${f1(x + (rnd() - .5) * j * 2)},${f1(y + (rnd() - .5) * j * 2)}`).join(' L') + (dicht ? ' Z' : '');
+    const draai = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a); return [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c]; };
     // geografie (vrij, noorden boven): Leuven binnen de ring, de Dijle van zuid naar noord, Kessel-Lo oostelijk
     const C = [400, 300], R = 140;                       // de stadsring (oude tweede stadsomwalling)
     const dijle = [[330, 660], [345, 560], [318, 500], [352, 430], [372, 360], [392, 300], [368, 240], [380, 170], [352, 100], [366, 20], [350, -20]];
@@ -2164,14 +2143,17 @@
     const inCity = (x, y) => Math.hypot(x - C[0], y - C[1]) < R - 8;
     const nearRiver = (x, y, d) => dijle.some(([rx, ry]) => Math.hypot(x - rx, y - ry) < d);
 
-    // 1. ondergrond en akkers (lappendeken, zoals rond Trosky)
-    let fields = `<rect width="${W}" height="${H}" fill="#d6cf9c"/>`;
-    const tints = ['#c9c98c', '#d9c98a', '#bfc489', '#ccb87c', '#c5cf96', '#d4c286'];
+    // 1. ondergrond: perkament; akkers als lichte waterverf met een beverige inktrand en arcering
+    let fields = `<rect width="${W}" height="${H}" fill="#eadcb4"/>`;
+    const tints = ['#c9c17c', '#d8bd7a', '#b6bd7e', '#cfae72', '#bccb8a', '#d6c27e'];
     for (let y = -20; y < H; y += 46) for (let x = -30; x < W; x += 64 + rnd() * 30) {
-      const w = 60 + rnd() * 50, h = 40 + rnd() * 22, a = (rnd() - .5) * 30;
-      if (Math.hypot(x + w / 2 - C[0], y + h / 2 - C[1]) < R + 30) continue;
-      fields += `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" fill="${tints[(rnd() * tints.length) | 0]}" stroke="${INK}" stroke-opacity=".18" transform="rotate(${f1(a)} ${f1(x + w / 2)} ${f1(y + h / 2)})"/>`;
-      if (rnd() < .5) for (let k = 1; k < 4; k++) fields += `<line x1="${f1(x + 4)}" y1="${f1(y + k * h / 4)}" x2="${f1(x + w - 4)}" y2="${f1(y + k * h / 4)}" stroke="${INK}" stroke-opacity=".12" transform="rotate(${f1(a)} ${f1(x + w / 2)} ${f1(y + h / 2)})"/>`;
+      const w = 60 + rnd() * 50, h = 40 + rnd() * 22, a = (rnd() - .5) * .5, cx = x + w / 2, cy = y + h / 2;
+      if (Math.hypot(cx - C[0], cy - C[1]) < R + 30) continue;
+      const hoek = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]].map(([px, py]) => draai(px, py, cx, cy, a));
+      fields += `<path d="${wob(hoek, 2.2)}" fill="${tints[(rnd() * tints.length) | 0]}" fill-opacity=".5" stroke="${INK}" stroke-opacity=".35" stroke-width=".9"/>`;
+      if (rnd() < .65) { const n = 3 + (rnd() * 4 | 0); for (let k = 1; k < n; k++) {      // arcering: ploegvoren
+        const [x1, y1] = draai(x + 5, y + k * h / n, cx, cy, a), [x2, y2] = draai(x + w - 5, y + k * h / n, cx, cy, a);
+        fields += `<path d="${wob([[x1, y1], [x2, y2]], .9, false)}" stroke="${INK}" stroke-opacity=".22" stroke-width=".8" fill="none"/>`; } }
     }
     g({}, fields);
 
@@ -2184,8 +2166,13 @@
     const forest = (cx, cy, rx, ry, n) => { for (let i = 0; i < n; i++) {
       const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()), x = cx + Math.cos(a) * rx * r, y = cy + Math.sin(a) * ry * r, z = 6 + rnd() * 5;
       if (inCity(x, y) || nearRiver(x, y, 18)) continue;
-      trees += rnd() < .45 ? `<path d="M${f1(x)},${f1(y)} l${f1(-z * .6)},${f1(z * 1.4)} h${f1(z * 1.2)} Z" fill="#5d7a45"/>`
-        : `<line x1="${f1(x)}" y1="${f1(y + z * .6)}" x2="${f1(x)}" y2="${f1(y + z * 1.4)}"/><circle cx="${f1(x)}" cy="${f1(y + z * .3)}" r="${f1(z * .72)}" fill="#6f8b4f"/>`;
+      if (rnd() < .3) { trees += `<path d="${wob([[x, y - z * .2], [x - z * .65, y + z * 1.3], [x + z * .65, y + z * 1.3]], .5)}" fill="#6f8a52" fill-opacity=".8"/>`; continue; }
+      // loofboom: een stam en een kroon met schulpen, groen gewassen en met inkt omlijnd
+      const rk = z * .75, n = 7 + (rnd() * 3 | 0); let kroon = '';
+      for (let k = 0; k <= n; k++) { const a = k / n * Math.PI * 2 - Math.PI / 2, b = (k + .5) / n * Math.PI * 2 - Math.PI / 2, rr = rk * (1 + (rnd() - .5) * .15);
+        kroon += k ? ` Q${f1(x + Math.cos(b - Math.PI / n) * rr * 1.35)},${f1(y + Math.sin(b - Math.PI / n) * rr * 1.35)} ${f1(x + Math.cos(a) * rr)},${f1(y + Math.sin(a) * rr)}` : `M${f1(x + Math.cos(a) * rr)},${f1(y + Math.sin(a) * rr)}`; }
+      trees += `<line x1="${f1(x)}" y1="${f1(y + rk * .5)}" x2="${f1(x + (rnd() - .5))}" y2="${f1(y + z * 1.5)}"/><path d="${kroon} Z" fill="${rnd() < .5 ? '#7d9a5b' : '#6a8a4c'}" fill-opacity=".85"/>`
+        + `<path d="M${f1(x - rk * .4)},${f1(y + rk * .2)} q${f1(rk * .3)},${f1(-rk * .3)} ${f1(rk * .6)},0" fill="none" stroke-opacity=".5"/>`;
     } };
     forest(330, 600, 170, 50, 120);   // Heverleebos
     forest(860, 120, 120, 70, 70);    // richting Kesselberg
@@ -2193,7 +2180,7 @@
     forest(120, 120, 110, 60, 55);
     forest(100, 470, 90, 90, 60);
     forest(640, 560, 80, 40, 35);
-    g({ stroke: INK, 'stroke-width': .9 }, trees);
+    g({ stroke: INK, 'stroke-width': .8 }, trees);
 
     // 4. wegen (gestippeld) vanuit de stadspoorten
     const road = d => `<path d="${d}" fill="none" stroke="#8a6a3a" stroke-width="3" stroke-dasharray="7 6" stroke-linecap="round"/>`;
@@ -2219,8 +2206,9 @@
     g({}, rail);
 
     // 7. de stad: ringmuur met torens en poorten, daarbinnen dicht opeen rode daken
-    let city = `<circle cx="${C[0]}" cy="${C[1]}" r="${R}" fill="#e2d4a8" stroke="${INK}" stroke-width="7" opacity=".95"/>
-      <circle cx="${C[0]}" cy="${C[1]}" r="${R}" fill="none" stroke="#b9a77a" stroke-width="3.5"/>`;
+    const muur = wob(Array.from({ length: 60 }, (_, i) => [C[0] + Math.cos(i / 60 * Math.PI * 2) * R, C[1] + Math.sin(i / 60 * Math.PI * 2) * R]), 1.4);
+    let city = `<path d="${muur}" fill="#e6d6a6" stroke="${INK}" stroke-width="6.5" stroke-linejoin="round" opacity=".95"/>
+      <path d="${muur}" fill="none" stroke="#c4ae7c" stroke-width="3"/>`;
     for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2, x = C[0] + Math.cos(a) * R, y = C[1] + Math.sin(a) * R; city += `<circle cx="${f1(x)}" cy="${f1(y)}" r="5.5" fill="#cdbb94" stroke="${INK}" stroke-width="1.4"/>`; }
     for (let i = 0; i < 260; i++) {
       const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * (R - 16), x = C[0] + Math.cos(a) * r, y = C[1] + Math.sin(a) * r;
@@ -2258,12 +2246,23 @@
     g({ transform: 'translate(740,440) scale(.9)' }, `<g fill="#8a6a46" stroke="${INK}" stroke-width="1.2"><path d="M-14,0 C-20,-2 -22,-12 -14,-18 C-6,-24 8,-22 12,-14 C14,-10 13,-4 10,0 Z"/><path d="M8,-15 C10,-22 18,-24 22,-19 C25,-15 22,-10 16,-10 C13,-10 10,-12 8,-15 Z"/><path d="M15,-21 C13,-30 13,-38 17,-41 C19,-36 19,-28 18,-21 Z"/><path d="M18,-21 C19,-30 22,-36 25,-37 C25,-31 22,-25 20,-20 Z"/></g>`);
 
     // 10. titelcartouche, schaal en windroos
-    g({}, `<path d="M24,22 H330 V96 H24 Z" fill="#efe6cf" stroke="${INK}" stroke-width="1.6"/><path d="M30,28 H324 V90 H30 Z" fill="none" stroke="#a2302a" stroke-width="1"/>
-      <text x="44" y="80" font-family="Maximilian, serif" font-size="56" fill="#a2302a">L</text>
-      <text x="82" y="76" font-family="Maximilian, serif" font-size="42" fill="${INK}">euven</text>
-      <text x="212" y="76" font-family="Grenze, serif" font-size="17" fill="${INK}">&amp; Kessel-Lo</text>`);
-    g({ transform: 'translate(930,580)' }, `<circle r="34" fill="#efe6cf" stroke="${INK}"/><path d="M0,-32 L7,0 L0,32 L-7,0 Z" fill="#a2302a" stroke="${INK}"/><path d="M-32,0 L0,7 L32,0 L0,-7 Z" fill="${INK}" opacity=".75"/><text y="-40" text-anchor="middle" font-family="Grenze, serif" font-size="15">N</text>`);
-    g({ transform: 'translate(40,610)' }, `<path d="M0,0 h120" stroke="${INK}" stroke-width="3"/><path d="M0,0 h30 M60,0 h30" stroke="#efe6cf" stroke-width="1.6"/><text y="-8" font-family="Grenze, serif" font-style="italic" font-size="14">één mijl, ongeveer</text>`);
+    // de titel op een lint met omgekrulde uiteinden
+    g({}, `<path d="M40,34 L18,30 L30,58 L16,86 L52,80 Z" fill="#c9b384" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M466,34 L488,30 L476,58 L490,86 L454,80 Z" fill="#c9b384" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="${wob([[34, 24], [472, 24], [472, 86], [34, 86]], 1.2)}" fill="#f1e6c8" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M42,31 H464 M42,79 H464" stroke="#a2302a" stroke-width="1"/>
+      <text x="52" y="76" font-family="Maximilian, serif" font-size="56" fill="#a2302a">L</text>
+      <text x="90" y="72" font-family="Maximilian, serif" font-size="42" fill="${INK}">euven &amp; Kessel-Lo</text>`);
+    // windroos: een achtpuntige ster zoals op de muren van Malešov, met de lelie naar het noorden
+    const roos = (r1, r2, n, rot) => { let d = ''; for (let i = 0; i < n * 2; i++) { const a = i / n * Math.PI + rot, r = i % 2 ? r2 : r1; d += (i ? 'L' : 'M') + f1(Math.sin(a) * r) + ',' + f1(-Math.cos(a) * r); } return d + 'Z'; };
+    g({ transform: 'translate(926,574)', stroke: INK, 'stroke-width': 1.1, 'stroke-linejoin': 'round' }, `<circle r="36" fill="#f1e6c8"/><circle r="30" fill="none" stroke-opacity=".5"/>
+      <path d="${roos(30, 9, 4, Math.PI / 4)}" fill="#c9b384"/><path d="${roos(36, 8, 4, 0)}" fill="#a2302a"/><circle r="4" fill="#d9a23e"/>
+      <path d="M0,-38 c-6,-4 -8,-10 -3,-14 c2,4 3,6 3,9 c0,-3 1,-5 3,-9 c5,4 3,10 -3,14 Z" fill="#d9a23e"/>
+      <text y="-56" text-anchor="middle" font-family="Maximilian, serif" font-size="18" fill="${INK}" stroke="none">N</text>`);
+    // en in de hoek, zoals het hoort: hier zijn draken
+    g({ transform: 'translate(120,560)' }, `<image href="feestje-img/wonder/draak-groot1.webp" x="-80" y="-40" width="160" height="77" opacity=".9"/>
+      <text y="52" text-anchor="middle" font-family="Grenze, serif" font-style="italic" font-size="15" fill="${INK}" style="paint-order:stroke" stroke="#eadcb4" stroke-width="4">hic sunt dracones</text>`);
+    g({ transform: 'translate(230,622)' }, `<path d="M0,0 h120" stroke="${INK}" stroke-width="3"/><path d="M0,0 h30 M60,0 h30" stroke="#efe6cf" stroke-width="1.6"/><text y="-8" font-family="Grenze, serif" font-style="italic" font-size="14">één mijl, ongeveer</text>`);
 
     // 11. het wapen van de bezoeker, zoals de ridder met zijn schild op de kaart van Trosky
     const arms = g({ transform: 'translate(870,140)' });
@@ -2276,6 +2275,12 @@
     };
     drawArms();
     document.addEventListener('wapen', drawArms);
+
+    // 12a. perkament: vlekken en korrel over de hele kaart (vooraf berekende texturen; onder de plaatsen, zodat die scherp blijven)
+    g({ 'pointer-events': 'none' }, `<defs><pattern id="k-vlek" width="600" height="600" patternUnits="userSpaceOnUse"><image href="feestje-img/textuur/vlekken.webp" width="600" height="600"/></pattern>
+      <pattern id="k-korrel" width="220" height="220" patternUnits="userSpaceOnUse"><image href="feestje-img/textuur/korrel.webp" width="220" height="220"/></pattern>
+      <radialGradient id="k-rand"><stop offset=".62" stop-color="#5a3c1a" stop-opacity="0"/><stop offset="1" stop-color="#5a3c1a" stop-opacity=".28"/></radialGradient></defs>
+      <rect width="${W}" height="${H}" fill="url(#k-vlek)" opacity=".55"/><rect width="${W}" height="${H}" fill="url(#k-korrel)" opacity=".5"/><rect width="${W}" height="${H}" fill="url(#k-rand)"/>`);
 
     // 12. aanklikbare plaatsen met de iconen uit de game
     const PLACES = [
@@ -2292,11 +2297,33 @@
       const pl = g({ class: 'place', role: 'button', tabindex: 0, 'aria-label': name + ': ' + text, transform: `translate(${x},${y})` },
         `${main ? `<circle r="44" fill="#a2302a" opacity=".14"/><circle r="44" fill="none" stroke="#a2302a" stroke-width="2.4" stroke-dasharray="5 4"/><image href="feestje-img/kcd/taak.png" x="16" y="-56" width="32" height="32"/>` : ''}
         <image href="feestje-img/kcd/${icon}.png" x="-20" y="-24" width="40" height="40"/>
-        <text y="${main ? 34 : 30}" text-anchor="middle" font-family="${name === 'Leuven' ? 'Maximilian' : 'Grenze'}, serif" font-size="${name === 'Leuven' ? 26 : 17}" fill="${INK}" style="paint-order:stroke" stroke="#efe6cf" stroke-width="4">${name}</text>`);
+        <text y="${main ? 36 : 32}" text-anchor="middle" font-family="Maximilian, serif" font-size="${name === 'Leuven' ? 30 : 19}" fill="${main ? '#a2302a' : INK}" style="paint-order:stroke" stroke="#eadcb4" stroke-width="4">${name}</text>`);
       const go = () => Toast(name, text, { icon, ms: 4400 });
       pl.addEventListener('click', go);
       pl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     }
+  })();
+
+  /* ---------- de kaart op een smal scherm: in het midden beginnen, tonen dat ze schuift ---------- */
+  (function kaartSchuift() {
+    const vak = $('.kaart-vak'), sc = $('.kaart-scroll'); if (!vak || !sc) return;
+    const kanten = () => {
+      const kan = sc.scrollWidth > sc.clientWidth + 4;
+      vak.classList.toggle('schuift', kan);
+      vak.classList.toggle('links', kan && sc.scrollLeft > 4);
+      vak.classList.toggle('rechts', kan && sc.scrollLeft < sc.scrollWidth - sc.clientWidth - 4);
+    };
+    // beginnen met Leuven en het gastmaal in beeld (x ≈ 400–640 van 1000)
+    const midden = () => { if (sc.scrollWidth > sc.clientWidth) sc.scrollLeft = sc.scrollWidth * .52 - sc.clientWidth / 2; kanten(); };
+    midden(); addEventListener('resize', midden);
+    let zelf = false;
+    sc.addEventListener('scroll', () => { kanten(); if (zelf) vak.classList.add('geveegd'); }, { passive: true });
+    ['pointerdown', 'touchstart', 'wheel'].forEach(e => sc.addEventListener(e, () => { zelf = true; }, { passive: true }));
+    // de eerste keer in beeld: een klein duwtje heen en terug, zodat het oog ziet dat de kaart beweegt
+    if (!reduceMotion) new IntersectionObserver((es, io) => {
+      if (!es[0].isIntersecting || !vak.classList.contains('schuift')) return; io.disconnect();
+      const start = sc.scrollLeft; setTimeout(() => { sc.scrollTo({ left: start + 70, behavior: 'smooth' }); setTimeout(() => sc.scrollTo({ left: start, behavior: 'smooth' }), 650); }, 500);
+    }, { threshold: .6 }).observe(vak);
   })();
 
   /* ---------- de haas (gedragsindicator) ---------- */

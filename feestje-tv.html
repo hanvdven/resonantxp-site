@@ -93,7 +93,9 @@
     /* getijden (het programma) */
     /* Wunderzeichen: een plaat uit het Augsburger Wunderzeichenbuch (ca. 1552) met een Nederlands bijschrift */
     .wonder { margin: 0; height: 100%; display: flex; flex-direction: column; gap: 18px; }
-    .wonder img { display: block; width: 100%; height: 400px; object-fit: cover; border-radius: 2px;
+    .wonder > img { flex: none; }
+    /* de hele plaat, nooit bijgesneden: zo groot als past binnen 890 × 400 */
+    .wonder img { display: block; width: auto; height: auto; max-width: 100%; max-height: 400px; margin: 0 auto; border-radius: 2px;
       box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40, 24, 8, .45); transition: opacity .6s ease; }
     .wonder img.laadt { opacity: 0; }
     .wonder .nav { display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin: -6px 0 -10px; }
@@ -113,6 +115,8 @@
     .uur .s { font-size: 24px; color: var(--inkt-zacht); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .uur.nu { background: rgba(233, 190, 82, .32); border-radius: 4px; }
     .uur.voorbij { opacity: .5; }
+    .uur.heel { border-top: 1px solid rgba(90, 60, 25, .25); }
+    .uur.heel .r small { line-height: 1.05; display: block; }
 
     /* spelen (uitleg) */
     .spelen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 40px; }
@@ -180,6 +184,8 @@
     .qz { display: grid; grid-template-columns: 1fr 620px; gap: 0 48px; min-height: 0; margin-top: 18px; position: relative; }
     .qz.zonder { grid-template-columns: 1fr 360px; }
     .qz .vraag { font-size: 48px; line-height: 1.15; margin: 0 0 26px; }
+    .qz .vraag em { font-style: normal; color: var(--rubriek); }
+    .qz .nieuweronde { font-family: "Maximilian", serif; font-size: 54px; line-height: 1; color: var(--rubriek); margin: 0 0 18px; }
     .qz .keuzes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 26px; }
     .qz .keuzes div { display: grid; grid-template-columns: 70px 1fr; gap: 18px; align-items: center; font-size: 36px; line-height: 1.1; transition: opacity .6s; }
     .qz .keuzes svg { width: 66px; height: 79px; }
@@ -188,6 +194,10 @@
     .qz .keuzes .aantal { font-size: 28px; color: var(--inkt-zacht); font-weight: 400; margin-left: 8px; }
     .qz .keuzes div { font-size: 40px; }
     .qz .vrij { font-size: 38px; color: var(--inkt-zacht); }
+    .qz .formule { margin: 10px 0 4px; font-size: 26px; color: var(--inkt-zacht); font-variant-numeric: lining-nums; }
+    .qz .formule i { font-style: italic; }
+    .qz .formule span { font-size: 24px; }
+    .qz .vrij.meer b { font-size: 64px; line-height: 1.15; }
     .qz .vrij b { display: block; font-family: "Maximilian", serif; font-weight: 400; font-size: 120px; line-height: 1; color: var(--rubriek); margin-top: 6px; }
     .qz .rechts { display: grid; align-content: start; justify-items: center; gap: 14px; min-height: 0; }
     .qz .rechts img.plaat { display: block; max-width: 620px; max-height: 500px; object-fit: contain; box-shadow: 0 0 0 3px #3a2810, 0 0 0 6px #c9a24a, 0 0 0 8px #3a2810, 0 10px 24px rgba(40,24,8,.45); }
@@ -316,7 +326,7 @@
 
   <section id="wapenkunde" class="sleet" aria-label="Wapenkunde"></section>
   <section id="quizscherm" class="sleet" aria-label="Quiz"><svg id="rand-qz" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg>
-    <h1><span><svg id="initiaal-qz" viewBox="0 0 92 92" aria-hidden="true" style="width:86px;height:86px;vertical-align:bottom"></svg>ennis van het rijk</span><small id="qz-nr"></small></h1>
+    <h1><span><svg id="initiaal-qz" viewBox="0 0 92 92" aria-hidden="true" style="width:86px;height:86px;vertical-align:bottom"></svg>ennisproef</span><small id="qz-nr"></small></h1>
     <div class="qz" id="qz"></div>
     <div class="qvoet" id="qz-voet"></div></section>
 
@@ -332,7 +342,7 @@
     <h2 style="margin-top:16px">Testtijd</h2>
     <div>Het scherm doet alsof het nu <span class="tijd" id="test-nu"></span> is.</div>
     <div class="rij"><button data-d="-60">− 1 uur</button><button data-d="-10">− 10 min</button><button data-d="10">+ 10 min</button><button data-d="60">+ 1 uur</button></div>
-    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button>
+    <div class="rij"><button data-t="2026-12-31T12:00:00">31 dec, middag</button><button data-t="2026-12-31T15:59:40">vlak voor de poort</button><button data-t="2026-12-31T16:20:00">wapenschilderen</button><button data-t="2026-12-31T20:05:00">riddermaal</button><button data-t="2026-12-31T21:29:50">quiz</button>
       <button data-t="2026-12-31T23:59:35">vlak voor middernacht</button><button data-t="2027-01-01T00:00:01">vuurwerk</button></div>
     <div class="rij"><input type="datetime-local" id="test-in" step="1" aria-label="Kies een tijdstip"><button id="test-echt">Echte tijd</button></div>
     <div class="rij"><button id="sp-gsm">Spotify koppelen via gsm</button><a id="sp-koppel" class="knop" href="#">Inloggen op de tv</a><span id="sp-staat" style="align-self:center"></span></div>
@@ -740,7 +750,9 @@ function tekenGetijden() {
   const i = huidig(), voor = now() < CONFIG.start;
   $('#blad-getijden').innerHTML = CONFIG.program.map(([h, t, s, ic], k) => `<div class="uur${!voor && k === i ? ' nu' : ''}${!voor && k < i ? ' voorbij' : ''}">
     <div class="r"><b>${romeins(Math.floor(h % 24) || 24).toUpperCase()}</b><small>${fmtH(h)}</small></div><img src="feestje-img/kcd/${ic}.png" alt="">
-    <div><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div></div></div>`).join('');
+    <div><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div></div></div>`).join('')
+    + (CONFIG.heleAvond ? `<div class="uur heel"><div class="r"><small>de hele<br>avond</small></div><img src="feestje-img/kcd/${CONFIG.heleAvond[2]}.png" alt="">
+    <div><div class="t">${esc(CONFIG.heleAvond[0])}</div><div class="s">${esc(CONFIG.heleAvond[1])}</div></div></div>` : '');
 }
 
 /* ---------- de spelen ---------- */
@@ -810,15 +822,17 @@ function melding(kop, tekst, w, uid, { icoon = null, ms = 6000, soort = '' } = {
 /* ---------- aankondigingen volgens het programma, zoals de meldingen in het spel ----------
    [uur, kop, tekst, icoon]. Elke aankondiging verschijnt één keer, alleen als haar tijdstip net voorbij is
    (niet een hele rij tegelijk na herladen of na het verzetten van de testtijd). */
+// het wapenschilderen loopt tot het volgende onderdeel van het programma (nu het toernooi); dan is de keuring
+const WAPENS_TOT = CONFIG.program[1][0];
 const AANKONDIGINGEN = (() => {
   const A = [];
   for (const [h, naam, , ic] of CONFIG.program) {
     if (h === 24) continue;                                         // middernacht heeft zijn eigen aftelling en vuurwerk
-    if (h !== 18) A.push([h - 1 / 6, 'Nog tien minuten', h === CONFIG.program[0][0] ? 'en de poort gaat open' : `tot ${esc(naam)}`, ic]);   // om 17:50 gaat het over de wapens
+    if (h !== WAPENS_TOT) A.push([h - 1 / 6, 'Nog tien minuten', h === CONFIG.program[0][0] ? 'en de poort gaat open' : `tot ${esc(naam)}`, ic]);   // tien minuten voor het einde gaat het over de wapens
     A.push([h, h === CONFIG.program[0][0] ? 'De poort is open' : 'Het is zover', esc(naam), ic]);
   }
-  A.push([17 + 50 / 60, 'Nog tien minuten', 'om uw wapenschild af te maken', 'schild']);
-  A.push([18 - 1e-4, 'De tijd is om', 'Penselen neer! De wapens worden gekeurd.', 'schild']);
+  A.push([WAPENS_TOT - 1 / 6, 'Nog tien minuten', 'om uw wapenschild af te maken', 'schild']);
+  A.push([WAPENS_TOT - 1e-4, 'De tijd is om', 'Penselen neer! De wapens worden gekeurd.', 'schild']);
   A.push([23 + 50 / 60, 'Nog tien minuten', 'tot middernacht. Vul de bekers.', 'ster']);
   return A.sort((a, b) => a[0] - b[0]);
 })();
@@ -1011,35 +1025,47 @@ const QuizTV = (() => {
     const aan = zichtbaar() && !$('#stage').classList.contains('nacht');
     $('#stage').classList.toggle('quiz', !!aan);
     if (!aan) return;
-    const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' ? t.stand : null, (stand?.ridders || []).length]);
+    const staat = JSON.stringify([t.fase, t.nr, t.vraag, t.aantal, t.ridders, t.uitslag, t.fase === 'uit' || t.fase === 'stand' ? t.stand : null, (stand?.ridders || []).length]);
     if (staat !== getekend) { getekend = staat; inhoud(); }
     voet();
   }
   function inhoud() {
-    $('#qz-nr').textContent = t.nr && t.fase !== 'uit' ? `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}` : '';
+    const ri = rondeInfo(t.rondes, t.nr);
+    $('#qz-nr').textContent = !t.nr || t.fase === 'uit' ? '' : t.fase === 'stand' ? (ri ? `Na ronde ${romeins(ri.nr)} van ${romeins(ri.aantal)}` : '')
+      : ri ? `Ronde ${romeins(ri.nr)} · ${ri.naam} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`;
     const qr = `<div class="qr"><img src="feestje-img/quiz/qr.svg" alt=""><div>Speel mee op je gsm:<br><b>resonantxp.com/feestje-quiz</b></div></div>`;
-    if (t.fase === 'uit') {          // de eindstand
+    if (t.fase === 'uit' || t.fase === 'stand') {          // de eindstand, of de tussenstand na een ronde
       const rij = (t.stand || []).slice(0, 10).map(x => `<div><i>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</i><span>${esc(naam(x.ridder_id))}</span><span></span><b>${x.punten}</b></div>`).join('');
+      const kop = t.fase === 'uit' ? 'De eindstand' : `De tussenstand${ri ? ` na <em>${esc(ri.naam)}</em>` : ''}`;
       $('#qz').className = 'qz zonder';
-      $('#qz').innerHTML = `<div><p class="vraag">De eindstand</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts"></div>`;
+      $('#qz').innerHTML = `<div><p class="vraag">${kop}</p><div class="lijst">${rij || '<div>Niemand antwoordde.</div>'}</div></div><div class="rechts">${t.fase === 'stand' ? qr : ''}</div>`;
       return;
     }
     const uitslag = t.fase === 'uitslag', plaat = t.afbeelding;
-    let links = `<p class="vraag">${esc(t.vraag)}</p>`;
+    // de eerste vraag van een ronde: de naam van de ronde groot erboven
+    let links = (ri && ri.inRonde === 1 && t.fase === 'wacht' ? `<p class="nieuweronde">Ronde ${romeins(ri.nr)} · ${esc(ri.naam)}</p>` : '') + `<p class="vraag">${esc(t.vraag)}</p>`;
     const hoeveel = i => (t.uitslag || []).filter(u => u.keuze === i).length;
     if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
-    else links += `<div class="vrij">${uitslag ? `Het juiste antwoord<b>${esc(t.juist)}</b>` : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : 'Typ het antwoord op je gsm.'}</div>`;
+    else links += `<div class="vrij${t.soort === 'meer' ? ' meer' : ''}">${uitslag ? `${t.soort === 'meer' ? 'De juiste antwoorden' : 'Het juiste antwoord'}<b>${Array.isArray(t.juist) ? t.juist.map(esc).join(' · ') : esc(t.juist)}</b>`
+      : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : t.soort === 'meer' ? 'Typ op je gsm zoveel antwoorden als je weet: 50 punten per juist antwoord.' : 'Typ het antwoord op je gsm.'}</div>`;
+    if (uitslag && t.soort === 'getal') {   // voor de nerds: de formule, met de beste gok als voorbeeld
+      const b = (t.uitslag || []).find(u => u.punten > 0), getal = x => String(x).replace('.', ',');
+      const ln = b ? Math.log(parseFloat(String(b.waarde).replace(',', '.')) / +t.juist) : 0, f = n => n.toFixed(3).replace('.', ',');
+      links += `<div class="formule">punten = (100 + max(0, 30 − <i>t</i>)) · max(0, 1 − |ln(<i>g</i> / <i>a</i>)|)
+        ${b ? `<br><span>${esc(naam(b.ridder_id))}: <i>g</i> = ${esc(getal(b.waarde))}, <i>a</i> = ${esc(getal(t.juist))}, <i>t</i> = ${b.sec ?? '?'} s →
+        (100 + ${Math.max(0, 30 - (b.sec ?? 30))}) · (1 − ${f(Math.abs(ln))}) = ${b.punten}</span>` : ''}</div>`;
+    }
     if (uitslag) {
       const goed = (t.uitslag || []).filter(u => u.punten > 0).slice(0, 5);
-      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(u.waarde)}</span><b>+${u.punten}</b></div>`).join('')
+      links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')
         || '<div><span></span><span>Niemand had het goed.</span></div>'}</div>`;
     }
-    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="">${uitslag ? '' : qr}` : qr;
+    const rechts = plaat ? `<img class="plaat${/\.svg$/.test(plaat) ? ' svg' : ''}" src="${esc(plaat)}" alt="" onerror="this.remove()">${uitslag ? '' : qr}` : qr;
     $('#qz').className = 'qz' + (plaat ? '' : ' zonder');
     $('#qz').innerHTML = `<div>${links}</div><div class="rechts">${rechts}</div>`;
   }
   function voet() {
-    if (!t || t.fase === 'uit') { $('#qz-voet').innerHTML = ''; return; }
+    if (!t || t.fase === 'uit' || t.fase === 'stand') { $('#qz-voet').innerHTML = ''; return; }
     const sec = t.fase === 'open' ? (t.verstreken || 0) + (performance.now() - opgehaald) / 1000 : 0;
     const rest = Math.max(0, 30 - sec);
     const tekst = { wacht: 'Lees de vraag. De quizmaster opent ze zo.', open: rest > 0 ? `nog ${Math.ceil(rest)} s voor de snelheidsbonus` : 'De bonus is op; antwoorden mag nog.',
@@ -1074,12 +1100,12 @@ const QuizTV = (() => {
 })();
 
 function wapenModus() {
-  const t = now(), h = feestUur(t), aan = keuze ? keuze === 'wapens' : h >= CONFIG.partyFrom && h < 18 && t >= CONFIG.start;
+  const t = now(), h = feestUur(t), aan = keuze ? keuze === 'wapens' : h >= CONFIG.partyFrom && h < WAPENS_TOT && t >= CONFIG.start;
   $('#stage').classList.toggle('wapens', aan);
   if (!aan) return;
   if (!$('#initiaal-wk').innerHTML) { tekenInitiaal('W'); $('#initiaal-wk').innerHTML = $('#initiaal').innerHTML; tekenInitiaal(TABS[tab].letter); }
-  const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + 18 * 3600e3 - t) / 60000));
-  $('#wk-sub').innerHTML = `Keuring om <b>18:00</b>, nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>. De gouden regel: <b>nooit metaal op metaal, nooit kleur op kleur</b>.`;
+  const m = Math.max(0, Math.ceil((dayStart(new Date(CONFIG.start)).getTime() + WAPENS_TOT * 3600e3 - t) / 60000));
+  $('#wk-sub').innerHTML = `Keuring om <b>${fmtH(WAPENS_TOT)}</b>, nog <b>${m >= 60 ? Math.floor(m / 60) + ' u ' : ''}${m % 60} min</b>. De gouden regel: <b>nooit metaal op metaal, nooit kleur op kleur</b>.`;
 }
 
 

@@ -66,6 +66,24 @@
     .qtijd { font-family: "Maximilian", serif; font-size: 34px; }
     .qwie { font-size: 16px; color: #7a5a30; }
     .qklein { display: flex; gap: 18px; }
+    .qkaart { display: grid; gap: 8px; }
+    .qkaart img { width: 100%; max-height: 180px; object-fit: contain; background: #e6d3a6; border-radius: 4px; }
+    .qkeuzes { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 16px; }
+    .qkeuzes li.ok { font-weight: 700; color: #4a6b3c; }
+    .qkeuzes b { display: inline-block; width: 1.4em; color: var(--rood); }
+    .qalle { width: 100%; border-collapse: collapse; font-size: 16px; }
+    .qalle td { padding: 6px 4px; border-bottom: 1px solid #dcc79a; vertical-align: middle; }
+    .qalle td.w { color: #2a1f16; word-break: break-word; }
+    .qalle td.p { text-align: right; font-variant-numeric: tabular-nums; width: 3em; }
+    .qalle tr.goed td.p { color: #4a6b3c; font-weight: 700; }
+    .qalle tr.fout td.p { color: var(--rood); }
+    .qalle tr.hand td.p::after { content: " ✎"; font-size: 12px; color: #7a5a30; }
+    .qalle td.k { white-space: nowrap; width: 92px; text-align: right; }
+    .qalle td.k button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #b59a64; background: #fffaf0; font-size: 18px; cursor: pointer; margin-left: 4px; }
+    .qalle td.k button[data-g="1"][aria-pressed=true] { background: #4a6b3c; color: #fff; border-color: #4a6b3c; }
+    .qalle td.k button[data-g="0"][aria-pressed=true] { background: var(--rood); color: #fff; border-color: var(--rood); }
+    .qvolg { margin-top: 4px; background: #e3cf9f; }
+    .qvolg summary { font-weight: 600; }
   </style>
 </head>
 <body>
@@ -180,38 +198,62 @@
   const LETTERS = ['A', 'B', 'C', 'D'];
   const romeinsK = n => { let o = ''; for (const [v, r] of [[100, 'c'], [90, 'xc'], [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i']]) while (n >= v) { o += r; n -= v; } return o; };
   let qStaat = '';
-  async function quiz(actie) {
+  const SOORT = { keuze: 'meerkeuze', woord: 'woord', getal: 'schatting', meer: 'meerdere antwoorden' };
+  const juistTekst = v => v.soort === 'keuze' ? `${LETTERS[v.juist]}. ${esc(v.antwoorden?.[v.juist])}`
+    : Array.isArray(v.juist) ? v.juist.map(esc).join(', ') : esc(v.juist);
+  // een vraag zoals op de tv: klein beeld, de vraag, (keuzes) en het juiste antwoord
+  const vraagKaart = (v, kop) => `<div class="qkaart">${kop}${v.afbeelding ? `<img src="${esc(v.afbeelding)}" alt="">` : ''}
+    <p class="qvraag">${esc(v.vraag)}</p>${v.soort === 'keuze' ? `<ol class="qkeuzes">${(v.antwoorden || []).map((x, i) => `<li${i === v.juist ? ' class="ok"' : ''}><b>${LETTERS[i]}</b> ${esc(x)}</li>`).join('')}</ol>` : ''}
+    <p class="qjuist">Juist: <b>${juistTekst(v)}</b></p></div>`;
+  async function quiz(actie, extra) {
     const box = $('#qbox'); if (!box) return;
     let m;
     try {
       if (actie === 'laad') { const n = await Db.quizLaad(pin, Db.quizVoorbereid(QUIZ_VRAGEN)); $('#qfout').textContent = `${n} vragen geladen.`; }
-      m = actie && actie !== 'laad' ? await Db.quizStap(pin, actie) : await Db.quizMeester(pin);
+      m = actie === 'keur' ? await Db.quizKeur(pin, extra.ridder, extra.goed)
+        : actie && actie !== 'laad' ? await Db.quizStap(pin, actie) : await Db.quizMeester(pin);
       if (actie && actie !== 'laad') $('#qfout').textContent = '';
     } catch (e) { $('#qfout').textContent = e.message; return; }
     const naamVan = id => esc(stand?.ridders.find(r => r.id === id)?.naam.split(' van ')[0] || '?');
-    const staat = JSON.stringify([m.fase, m.nr, m.totaal, m.antwoorden_van, m.fase === 'open' ? Math.floor(m.verstreken || 0) : 0]);
+    const staat = JSON.stringify([m.fase, m.nr, m.totaal, m.alle, m.fase === 'open' ? Math.floor(m.verstreken || 0) : 0]);
     if (staat === qStaat && !actie) return; qStaat = staat;
     const k = (a, label, extra = '') => `<button type="button" class="knop ${extra}" data-a="${a}">${label}</button>`;
-    const juist = m.soort === 'keuze' ? `${LETTERS[m.juist]}. ${esc(m.antwoorden?.[m.juist])}` : esc(m.juist);
-    const vraag = m.nr ? `<p class="qnr">Vraag ${romeinsK(m.nr)} van ${romeinsK(m.totaal)} · ${m.soort === 'keuze' ? 'meerkeuze' : m.soort === 'woord' ? 'woord' : 'schatting'}</p>
-      <p class="qvraag">${esc(m.vraag)}</p><p class="qjuist">Juist: <b>${juist}</b></p>` : '';
-    const wie = m.antwoorden_van?.length ? `<p class="qwie">${m.antwoorden_van.length} van ${m.ridders} geantwoord: ${m.antwoorden_van.map(naamVan).join(', ')}</p>` : `<p class="qwie">Nog niemand geantwoord (${m.ridders} ridders).</p>`;
+    const ri = rondeInfo(m.rondes, m.nr), rv = m.volgende ? rondeInfo(m.rondes, m.volgende.nr) : null;
+    const rondeTekst = r => r ? `Ronde ${romeinsK(r.nr)} · ${esc(r.naam)} · vraag ${romeinsK(r.inRonde)} van ${romeinsK(r.rondeTotaal)}` : '';
+    const vraag = m.nr ? vraagKaart(m, `<p class="qnr">${ri ? rondeTekst(ri) : `Vraag ${romeinsK(m.nr)} van ${romeinsK(m.totaal)}`} · ${SOORT[m.soort] || ''}</p>`) : '';
+    // alle antwoorden, met ✓ / ✗ om bij te keuren (niet bij een schatting: daar beslist de afstand)
+    const tekstVan = a => a.keuze != null ? `${LETTERS[a.keuze]}. ${esc(m.antwoorden?.[a.keuze] ?? '')}` : esc(String(a.waarde ?? '').split('|').filter(Boolean).join(', '));
+    const keurbaar = m.soort !== 'getal';
+    const alle = (m.alle || []).length ? `<table class="qalle"><tbody>${m.alle.map(a => `<tr class="${a.punten > 0 ? 'goed' : 'fout'}${a.oordeel != null ? ' hand' : ''}">
+        <td>${naamVan(a.ridder_id)}</td><td class="w">${tekstVan(a)}</td><td class="p">${m.soort === 'getal' && m.fase !== 'uitslag' ? '' : a.punten}</td>
+        ${keurbaar ? `<td class="k"><button type="button" data-r="${a.ridder_id}" data-g="1" aria-pressed="${a.oordeel === true}" aria-label="Goed">✓</button><button type="button" data-r="${a.ridder_id}" data-g="0" aria-pressed="${a.oordeel === false}" aria-label="Fout">✗</button></td>` : ''}</tr>`).join('')}</tbody></table>
+        <p class="qwie">${m.alle.length} van ${m.ridders} geantwoord.${keurbaar ? ' Tik ✓ of ✗ om bij te keuren; nog eens tikken = weer automatisch.' : ''}</p>`
+      : `<p class="qwie">Nog niemand geantwoord (${m.ridders} ridders).</p>`;
+    const volgende = m.volgende ? `<details class="qvolg"${m.fase === 'uitslag' || m.fase === 'stand' || (m.fase === 'uit' && !m.nr) ? ' open' : ''}><summary>Volgende vraag bekijken</summary>${vraagKaart(m.volgende, `<p class="qnr">${rv ? rondeTekst(rv) : `Vraag ${romeinsK(m.volgende.nr)}`} · ${SOORT[m.volgende.soort] || ''}</p>`)}</details>` : '';
     let knoppen = '';
     if (m.fase === 'uit' && !m.nr) knoppen = `<p>${m.totaal ? `${m.totaal} vragen klaar.` : 'Nog geen vragen geladen.'} Spelers gaan naar <b>resonantxp.com/feestje-quiz</b> (QR-code op de tv).</p>
-      ${k('laad', `Vragen laden (${QUIZ_VRAGEN.length} uit feestje-quiz-vragen.js)`, 'licht')}${m.totaal ? k('start', 'Start de quiz') : ''}`;
+      ${k('laad', `Vragen laden (${QUIZ_VRAGEN.length} uit feestje-quiz-vragen.js)`, 'licht')}${m.totaal ? k('start', 'Start de quiz') : ''}${m.totaal ? volgende : ''}`;
     else if (m.fase === 'uit') knoppen = `<p>De quiz is gedaan. De punten staan in de tussenstand onder Quiz.</p>${k('reset', 'Alles wissen en opnieuw', 'licht')}`;
-    else if (m.fase === 'wacht') knoppen = `${vraag}<p>De vraag staat op de tv. Open hem als iedereen hem gelezen heeft.</p>${k('open', 'Open de vraag')}`;
-    else if (m.fase === 'open') knoppen = `${vraag}<p class="qtijd">${Math.floor(m.verstreken || 0)} s</p>${wie}${k('sluit', 'Sluit de vraag', 'licht')}${k('toon', 'Toon het antwoord')}`;
-    else if (m.fase === 'dicht') knoppen = `${vraag}${wie}${k('toon', 'Toon het antwoord')}`;
-    else if (m.fase === 'uitslag') knoppen = `${vraag}${wie}${k('volgende', m.nr < m.totaal ? 'Volgende vraag' : 'Einde: eindstand op de tv')}`;
+    else if (m.fase === 'wacht') knoppen = `${vraag}<p>De vraag staat op de tv. Open hem als iedereen hem gelezen heeft.</p>${k('open', 'Open de vraag')}${volgende}`;
+    else if (m.fase === 'open') knoppen = `${vraag}<p class="qtijd">${Math.floor(m.verstreken || 0)} s</p>${alle}${k('sluit', 'Sluit de vraag', 'licht')}${k('toon', 'Toon het antwoord')}${volgende}`;
+    else if (m.fase === 'dicht') knoppen = `${vraag}${alle}${k('toon', 'Toon het antwoord')}${volgende}`;
+    else if (m.fase === 'uitslag') knoppen = `${vraag}${alle}${k('volgende', m.nr >= m.totaal ? 'Einde: eindstand op de tv' : ri?.laatste ? `Tussenstand na ${esc(ri.naam)}` : 'Volgende vraag')}${volgende}`;
+    else if (m.fase === 'stand') knoppen = `<p>De tussenstand na <b>${esc(ri?.naam || '')}</b> staat op de tv en op de gsm's.</p>${k('volgende', `Volgende ronde${rv ? `: ${esc(rv.naam)}` : ''}`)}${volgende}`;
     if (m.fase !== 'uit') knoppen += `<div class="qklein"><button type="button" class="verwijder" data-a="stop">Quiz stoppen</button> <button type="button" class="verwijder" data-a="reset">Alles wissen</button></div>`;
+    const open = box.querySelector('.qvolg')?.open;          // het voorbeeld open houden als u het zelf opende
     box.innerHTML = knoppen;
+    if (open != null && box.querySelector('.qvolg')) box.querySelector('.qvolg').open = open;
     box.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => {
       const a = b.dataset.a;
       if (a === 'reset' && !confirm('Alle antwoorden en quizpunten wissen?')) return;
       if (a === 'laad' && m.totaal && !confirm('De vragen opnieuw laden? Dit wist ook de antwoorden.')) return;
       if (a === 'stop' && !confirm('De quiz stoppen? (Antwoorden blijven bewaard.)')) return;
       box.querySelectorAll('button').forEach(x => x.disabled = true); quiz(a);
+    }));
+    box.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => {
+      const goed = b.dataset.g === '1', al = b.getAttribute('aria-pressed') === 'true';
+      box.querySelectorAll('[data-r]').forEach(x => x.disabled = true);
+      quiz('keur', { ridder: +b.dataset.r, goed: al ? null : goed });   // nog eens tikken: terug naar automatisch
     }));
   }
   const ververs = async () => { try { stand = await Db.stand(); teken(); } catch {} };

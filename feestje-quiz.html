@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#101c45" />
-  <title>Kennis van het rijk · de quiz</title>
+  <title>De Kennisproef · de quiz</title>
   <!-- De spelerskant van de quiz: kies je ridder, antwoord op je gsm. De quizmaster stuurt vanuit /feestje-beheer,
        de vraag en de afbeelding staan groot op /feestje-tv. Regels en punten: zie fj_quiz_* in feestje-supabase.sql. -->
   <style>
@@ -64,7 +64,7 @@
 <body>
   <header>
     <svg viewBox="0 0 200 240" aria-hidden="true"><path d="M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z" fill="#a2302a" stroke="#e9be52" stroke-width="10"/><text x="100" y="150" font-size="120" text-anchor="middle" fill="#e9be52" font-family="Maximilian, serif">?</text></svg>
-    <div><h1>Kennis van het rijk</h1><p>De grote Bohemen-quiz</p></div>
+    <div><h1>De Kennisproef</h1><p>De grote Bohemen-quiz</p></div>
     <button type="button" class="wie" id="wie" hidden></button>
   </header>
   <div class="demo" id="demo" hidden>Demomodus: de quiz loopt alleen op dit toestel. Open /feestje-beheer (pincode 1403) in een ander tabblad om hem te sturen.</div>
@@ -119,18 +119,20 @@
     if (!t) return;
     const mijn = mijnAntwoord();
     // opnieuw tekenen alleen als er iets veranderde (anders verdwijnt wat u aan het typen bent)
-    const staat = [t.fase, t.nr, t.vraag, JSON.stringify(mijn), t.fase === 'uitslag' ? JSON.stringify(t.uitslag) : '', t.fase === 'uit' ? JSON.stringify(t.stand) : ''].join('§');
+    const staat = [t.fase, t.nr, t.vraag, JSON.stringify(mijn), t.fase === 'uitslag' ? JSON.stringify(t.uitslag) : '', t.fase === 'uit' || t.fase === 'stand' ? JSON.stringify(t.stand) : ''].join('§');
     if (staat === getekend && !forceer) { tijdbalk(); return; }
     getekend = staat;
-    const kop = t.nr ? `<div class="nr">Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}</div>` : '';
-    const plaat = t.afbeelding ? `<img class="plaat" src="${esc(t.afbeelding)}" alt="">` : '';
+    const ri = rondeInfo(t.rondes, t.nr);
+    const kop = t.nr ? `<div class="nr">${ri ? `Ronde ${romeins(ri.nr)} · ${esc(ri.naam)} · vraag ${romeins(ri.inRonde)} van ${romeins(ri.rondeTotaal)}` : `Vraag ${romeins(t.nr)} van ${romeins(t.totaal)}`}</div>` : '';
+    const plaat = t.afbeelding ? `<img class="plaat" src="${esc(t.afbeelding)}" alt="" onerror="this.remove()">` : '';
     const vraag = `${kop}<p class="vraag">${esc(t.vraag)}</p>${plaat}`;
 
+    if (t.fase === 'stand') return eindstand(ri ? `De tussenstand na ${esc(ri.naam)}` : 'De tussenstand');
     if (t.fase === 'uit') {
       if (t.nr > 0 && t.stand?.length) return eindstand();
       app.innerHTML = `<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
         <div class="kaart"><b>Zo werkt het</b><br>Meerkeuze en woord: 100 punten voor een goed antwoord, plus 1 punt per seconde dat u sneller bent dan 30 seconden.
-        Schatting: wie het dichtst zit krijgt 100, de volgende 80, dan 60, 40 en 20.</div>`;
+        Schatting: hoe dichter bij het juiste getal, hoe meer punten (tot 130); wie er een factor drie naast zit, krijgt niets. Meerdere antwoorden: 50 punten per juist antwoord.</div>`;
       return;
     }
     if (t.fase === 'wacht') {
@@ -140,30 +142,37 @@
     if (t.fase === 'open' && !mijn) {
       let invoer = '';
       if (t.soort === 'keuze') invoer = `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<button type="button" data-k="${i}"><b>${LETTERS[i]}</b><span>${esc(a)}</span></button>`).join('')}</div>`;
+      else if (t.soort === 'meer') invoer = `<form class="vrij" id="vrij">${[1, 2, 3, 4].map(i => `<input type="text" class="meer" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Antwoord ${i}" maxlength="40" aria-label="Antwoord ${i}">`).join('')}
+          <button class="knop">Inzenden</button><p class="stil">50 punten per juist antwoord. Vul in wat u weet; lege vakjes mogen.</p></form>`;
       else invoer = `<form class="vrij" id="vrij"><input ${t.soort === 'getal' ? 'inputmode="decimal" pattern="-?[0-9]+([.,][0-9]+)?"' : 'type="text" autocapitalize="off" autocomplete="off" spellcheck="false"'} id="tekst"
           placeholder="${t.soort === 'getal' ? 'Uw schatting (een getal)' : 'Uw antwoord'}" required maxlength="60"><button class="knop">Inzenden</button></form>`;
       app.innerHTML = `${vraag}<div class="tijd"><i id="balk"></i></div>${invoer}<div class="fout" id="fout"></div>`;
       app.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => zend(+b.dataset.k, null, b)));
-      $('#vrij')?.addEventListener('submit', e => { e.preventDefault(); const v = $('#tekst').value.trim(); if (v) zend(null, v); });
+      $('#vrij')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const v = t.soort === 'meer' ? [...app.querySelectorAll('input.meer')].map(x => x.value.replace(/\|/g, ' ').trim()).filter(Boolean).join('|') : $('#tekst').value.trim();
+        if (v) zend(null, v);
+      });
       tijdbalk();
       return;
     }
     // geantwoord, gesloten of uitslag
-    const mijnTekst = mijn ? (mijn.keuze != null ? `${LETTERS[mijn.keuze]}. ${esc(t.antwoorden?.[mijn.keuze])}` : esc(mijn.tekst)) : '';
+    const lijst = x => esc(String(x ?? '').split('|').filter(Boolean).join(', '));
+    const mijnTekst = mijn ? (mijn.keuze != null ? `${LETTERS[mijn.keuze]}. ${esc(t.antwoorden?.[mijn.keuze])}` : lijst(mijn.tekst)) : '';
     if (t.fase === 'uitslag') {
       const u = (t.uitslag || []).find(x => x.ridder_id === ridder), tot = (t.stand || []).find(x => x.ridder_id === ridder);
       const plaats = tot ? 1 + (t.stand || []).filter(x => x.punten > tot.punten).length : null;
-      const juist = t.soort === 'keuze' ? `${LETTERS[t.juist]}. ${esc(t.antwoorden?.[t.juist])}` : esc(t.juist);
+      const juist = t.soort === 'keuze' ? `${LETTERS[t.juist]}. ${esc(t.antwoorden?.[t.juist])}` : Array.isArray(t.juist) ? t.juist.map(esc).join(', ') : esc(t.juist);
       app.innerHTML = `${vraag}<div class="kaart">Het juiste antwoord: <b>${juist}</b><br>
-        ${u ? `Uw antwoord: ${mijnTekst || esc(u.waarde ?? (u.keuze != null ? LETTERS[u.keuze] : ''))} → <b>${u.punten}</b> punten` : 'U antwoordde niet.'}
+        ${u ? `Uw antwoord: ${mijnTekst || lijst(u.waarde ?? (u.keuze != null ? LETTERS[u.keuze] : ''))} → <b>${u.punten}</b> punten` : 'U antwoordde niet.'}
         ${tot ? `<br>Samen: ${tot.punten} punten, plaats ${romeins(plaats)}` : ''}</div>`;
       return;
     }
     app.innerHTML = `${vraag}<div class="kaart">${mijn ? `Uw antwoord: <b>${mijnTekst}</b><br>Ontvangen. Wacht op de uitslag.` : 'Deze vraag is gesloten.'}</div>`;
   }
-  function eindstand() {
-    const rij = t.stand.map((x, i) => `<li class="${x.ridder_id === ridder ? 'ik' : ''}"><span>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</span><span>${esc(naam(x.ridder_id))}</span><span>${x.punten}</span></li>`).join('');
-    app.innerHTML = `<p class="groot">De eindstand</p><ol class="stand">${rij}</ol><p class="stil">De punten staan ook in de tussenstand, onder Quiz.</p>`;
+  function eindstand(titel = 'De eindstand') {
+    const rij = (t.stand || []).map((x, i) => `<li class="${x.ridder_id === ridder ? 'ik' : ''}"><span>${romeins(1 + t.stand.filter(y => y.punten > x.punten).length)}</span><span>${esc(naam(x.ridder_id))}</span><span>${x.punten}</span></li>`).join('');
+    app.innerHTML = `<p class="groot">${titel}</p><ol class="stand">${rij}</ol><p class="stil">${titel === 'De eindstand' ? 'De punten staan ook in de tussenstand, onder Quiz.' : 'De volgende ronde begint zo.'}</p>`;
   }
   function tijdbalk() {
     const b = $('#balk'); if (!b || t.fase !== 'open') return;
