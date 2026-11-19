@@ -130,7 +130,7 @@
       if (t.nr > 0 && t.stand?.length) return eindstand();
       app.innerHTML = `<p class="groot">Welkom, ${esc(naam(ridder).split(' van ')[0])}.</p><p class="stil">De quiz begint straks. Houd deze pagina open: de vragen verschijnen vanzelf.</p>
         <div class="kaart"><b>Zo werkt het</b><br>Meerkeuze en woord: 100 punten voor een goed antwoord, plus 1 punt per seconde dat u sneller bent dan 30 seconden.
-        Schatting: wie het dichtst zit krijgt 100, de volgende 80, dan 60, 40 en 20. Meerdere antwoorden: 50 punten per juist antwoord.</div>`;
+        Schatting: hoe dichter bij het juiste getal, hoe meer punten (tot 130); wie er een factor drie naast zit, krijgt niets. Meerdere antwoorden: 50 punten per juist antwoord.</div>`;
       return;
     }
     if (t.fase === 'wacht') {

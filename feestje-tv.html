@@ -192,6 +192,9 @@
     .qz .keuzes .aantal { font-size: 28px; color: var(--inkt-zacht); font-weight: 400; margin-left: 8px; }
     .qz .keuzes div { font-size: 40px; }
     .qz .vrij { font-size: 38px; color: var(--inkt-zacht); }
+    .qz .formule { margin: 10px 0 4px; font-size: 26px; color: var(--inkt-zacht); font-variant-numeric: lining-nums; }
+    .qz .formule i { font-style: italic; }
+    .qz .formule span { font-size: 24px; }
     .qz .vrij.meer b { font-size: 64px; line-height: 1.15; }
     .qz .vrij b { display: block; font-family: "Maximilian", serif; font-weight: 400; font-size: 120px; line-height: 1; color: var(--rubriek); margin-top: 6px; }
     .qz .rechts { display: grid; align-content: start; justify-items: center; gap: 14px; min-height: 0; }
@@ -1039,6 +1042,13 @@ const QuizTV = (() => {
     if (t.soort === 'keuze') links += `<div class="keuzes">${(t.antwoorden || []).map((a, i) => `<div class="${uitslag ? (i === t.juist ? 'goed' : 'mis') : ''}">${letterSchild(i)}<span>${esc(a)}${uitslag ? ` <small class="aantal">${hoeveel(i)}×</small>` : ''}</span></div>`).join('')}</div>`;
     else links += `<div class="vrij${t.soort === 'meer' ? ' meer' : ''}">${uitslag ? `${t.soort === 'meer' ? 'De juiste antwoorden' : 'Het juiste antwoord'}<b>${Array.isArray(t.juist) ? t.juist.map(esc).join(' · ') : esc(t.juist)}</b>`
       : t.soort === 'getal' ? 'Schat: typ een getal op je gsm. Wie het dichtst zit, wint.' : t.soort === 'meer' ? 'Typ op je gsm zoveel antwoorden als je weet: 50 punten per juist antwoord.' : 'Typ het antwoord op je gsm.'}</div>`;
+    if (uitslag && t.soort === 'getal') {   // voor de nerds: de formule, met de beste gok als voorbeeld
+      const b = (t.uitslag || []).find(u => u.punten > 0), getal = x => String(x).replace('.', ',');
+      const ln = b ? Math.log(parseFloat(String(b.waarde).replace(',', '.')) / +t.juist) : 0, f = n => n.toFixed(3).replace('.', ',');
+      links += `<div class="formule">punten = (100 + max(0, 30 − <i>t</i>)) · max(0, 1 − |ln(<i>g</i> / <i>a</i>)|)
+        ${b ? `<br><span>${esc(naam(b.ridder_id))}: <i>g</i> = ${esc(getal(b.waarde))}, <i>a</i> = ${esc(getal(t.juist))}, <i>t</i> = ${b.sec ?? '?'} s →
+        (100 + ${Math.max(0, 30 - (b.sec ?? 30))}) · (1 − ${f(Math.abs(ln))}) = ${b.punten}</span>` : ''}</div>`;
+    }
     if (uitslag) {
       const goed = (t.uitslag || []).filter(u => u.punten > 0).slice(0, 5);
       links += `<div class="lijst">${goed.map((u, i) => `<div><i>${romeins(i + 1)}</i><span>${esc(naam(u.ridder_id))}</span><span class="w">${t.soort === 'keuze' ? '' : esc(String(u.waarde ?? '').split('|').filter(Boolean).join(', '))}</span><b>+${u.punten}</b></div>`).join('')

@@ -168,7 +168,8 @@ on conflict (id) do nothing;
 --           punten: 100 voor goed + 1 per seconde sneller dan 30 s (klok van de database, niet van de gsm's)
 --    woord  vrij intypen; goed als het (zonder hoofdletters, spaties en accenten) in de lijst van goede antwoorden staat
 --           punten: als bij keuze
---    getal  een schatting; wie het dichtst zit krijgt 100, dan 80, 60, 40, 20 (gelijke afstand = gelijke punten)
+--    getal  een schatting; punten = (100 + max(0, 30 − t)) · max(0, 1 − |ln(g / a)|), met g = gok, a = antwoord,
+--           t = seconden; de log-afstand maakt "dubbel zo veel" even erg als "half zo veel", en vanaf een factor e ernaast: 0
 --    meer   meerdere antwoorden (bv. de vier edelstenen van Mucha): 50 punten per verschillend juist antwoord
 --  Lidwoorden vooraan tellen niet ("de leeuw" = "leeuw"). De quizmaster kan elk antwoord achteraf goed- of afkeuren.
 --  De juiste antwoorden zijn voor spelers onleesbaar tot de quizmaster ze toont.
@@ -245,7 +246,8 @@ language sql stable security definer set search_path = public as $$
     'aantal', (select count(*) from fj_antwoorden a where a.nr = q.nr),
     'ridders', (select count(*) from fj_ridders),
     'juist', case when q.fase = 'uitslag' then fj_quiz_juist(v) end,
-    'uitslag', case when q.fase = 'uitslag' then coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten)
+    'uitslag', case when q.fase = 'uitslag' then coalesce((select json_agg(json_build_object('ridder_id', a.ridder_id, 'keuze', a.keuze, 'waarde', a.waarde, 'punten', a.punten,
+                                                           'sec', floor(extract(epoch from a.tijd - q.geopend)))
                                                            order by a.punten desc, a.tijd) from fj_antwoorden a where a.nr = q.nr), '[]') end,
     'stand', case when q.fase = 'uitslag' or (q.fase = 'uit' and q.nr > 0) then coalesce((select json_agg(json_build_object('ridder_id', t.ridder_id, 'punten', t.som) order by t.som desc)
                                                            from (select ridder_id, sum(punten) som from fj_antwoorden group by ridder_id) t), '[]') end)
@@ -253,10 +255,10 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- een speler antwoordt (één keer per vraag; alleen terwijl de vraag open staat).
--- p_keuze voor keuzevragen, p_tekst voor woord en getal. Een getal krijgt zijn punten pas bij 'toon' (rangorde).
+-- p_keuze voor keuzevragen, p_tekst voor woord, getal en meer.
 create or replace function fj_quiz_antwoord(p_ridder bigint, p_keuze int, p_tekst text) returns boolean
 language plpgsql security definer set search_path = public as $$
-declare q fj_quiz; v fj_vragen; sec numeric; snel int; pt int := 0;
+declare q fj_quiz; v fj_vragen; sec numeric; snel int; pt int := 0; g numeric; a numeric;
 begin
   select * into q from fj_quiz where id = 1;
   if q.fase <> 'open' then return false; end if;
@@ -274,6 +276,8 @@ begin
     pt := 50 * fj_quiz_meer(v, p_tekst);
   else
     if p_tekst !~ '^\s*-?[0-9]+([.,][0-9]+)?\s*$' then return false; end if;
+    g := replace(trim(p_tekst), ',', '.')::numeric; a := (v.juist #>> '{}')::numeric;
+    if g > 0 and a > 0 then pt := round((100 + snel) * greatest(0, 1 - abs(ln(g / a)))); end if;   -- log-afstand
   end if;
   insert into fj_antwoorden (nr, ridder_id, keuze, waarde, punten)
   values (q.nr, p_ridder, case when v.soort = 'keuze' then p_keuze end, case when v.soort <> 'keuze' then left(trim(p_tekst), 200) end, pt)
@@ -295,12 +299,6 @@ begin
   elsif p_actie = 'sluit' and q.fase = 'open' then update fj_quiz set fase = 'dicht' where id = 1;
   elsif p_actie = 'toon' and q.fase in ('open', 'dicht') then
     update fj_quiz set fase = 'uitslag' where id = 1;
-    if v.soort = 'getal' then        -- schatting: rangorde op afstand (gelijke afstand = gelijke plaats)
-      update fj_antwoorden a set punten = greatest(0, 100 - 20 * (r.plaats - 1))
-      from (select ridder_id, rank() over (order by abs(replace(waarde, ',', '.')::numeric - (v.juist #>> '{}')::numeric)) plaats
-            from fj_antwoorden where nr = q.nr) r
-      where a.nr = q.nr and a.ridder_id = r.ridder_id;
-    end if;
     -- de punten van alle vragen samen naar de kolom Quiz van de tussenstand
     select id into quiz_spel from fj_spelen where naam = 'Quiz';
     if quiz_spel is not null then

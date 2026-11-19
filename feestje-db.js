@@ -88,7 +88,7 @@ const Db = (() => {
         afbeelding: zie ? v?.afbeelding || null : null, antwoorden: zie ? v?.antwoorden || null : null,
         verstreken: q.geopend ? (Date.now() - q.geopend) / 1000 : null, aantal: hier.length, ridders: demoGet().ridders.length,
         juist: q.fase === 'uitslag' || meester ? toonJuist(v && { ...v, soort: soort(v) }) : null,
-        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten }) => ({ ridder_id, keuze, waarde, punten })) : null,
+        uitslag: q.fase === 'uitslag' ? hier.slice().sort((a, b) => b.punten - a.punten).map(({ ridder_id, keuze, waarde, punten, tijd }) => ({ ridder_id, keuze, waarde, punten, sec: tijd && q.geopend ? Math.floor((tijd - q.geopend) / 1000) : null })) : null,
         stand: q.fase === 'uitslag' || (q.fase === 'uit' && q.nr > 0) ? stand(q) : null };
       if (meester) {
         t.antwoorden_van = hier.map(a => a.ridder_id);
@@ -107,7 +107,11 @@ const Db = (() => {
       if (s === 'keuze') { if (!(keuze >= 0 && keuze <= 3)) return false; if (keuze === v.juist) punten = 100 + snel; }
       else if (s === 'woord') { if (!norm(tekst)) return false; if (v.juist.some(g => norm(g) === norm(tekst))) punten = 100 + snel; }
       else if (s === 'meer') { if (!norm(String(tekst ?? '').replace(/\|/g, ''))) return false; punten = 50 * meerGoed(v, tekst); }
-      else if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
+      else {   // schatting: (100 + snelheid) · max(0, 1 − |ln(g / a)|), zoals in fj_quiz_antwoord
+        if (!/^\s*-?\d+([.,]\d+)?\s*$/.test(tekst || '')) return false;
+        const g = parseFloat(String(tekst).trim().replace(',', '.')), a = +v.juist;
+        if (g > 0 && a > 0) punten = Math.round((100 + snel) * Math.max(0, 1 - Math.abs(Math.log(g / a))));
+      }
       q.antwoorden.push({ nr: q.nr, ridder_id: ridder, keuze: s === 'keuze' ? keuze : null, waarde: s === 'keuze' ? null : String(tekst).trim().slice(0, 200), punten, tijd: Date.now() });
       put(q); return true;
     }
@@ -118,10 +122,6 @@ const Db = (() => {
       else if (actie === 'sluit' && q.fase === 'open') q.fase = 'dicht';
       else if (actie === 'toon' && (q.fase === 'open' || q.fase === 'dicht')) {
         q.fase = 'uitslag';
-        if (soort(v) === 'getal') {   // schatting: rangorde op afstand, gelijke afstand = gelijke plaats (zoals rank() in SQL)
-          const hier = q.antwoorden.filter(a => a.nr === q.nr), af = a => Math.abs(parseFloat(a.waarde.replace(',', '.')) - v.juist);
-          hier.forEach(a => { const plaats = 1 + hier.filter(b => af(b) < af(a)).length; a.punten = Math.max(0, 100 - 20 * (plaats - 1)); });
-        }
         const d = demoGet(), spel = d.spelen.find(x => x.naam === 'Quiz');
         if (spel) {
           d.punten = d.punten.filter(x => x.spel_id !== spel.id).concat(stand(q).map(({ ridder_id, punten }) => ({ ridder_id, spel_id: spel.id, punten })));

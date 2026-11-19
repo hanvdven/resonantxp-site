@@ -1,8 +1,8 @@
 'use strict';
 /* De quizvragen: een voorstel, pas gerust aan. Laden in de database: /feestje-beheer → Quiz leiden → "Vragen laden".
    soort: 'keuze' (vier antwoorden; juist = 0, 1, 2 of 3), 'woord' (juist = lijst van goede antwoorden; hoofdletters,
-   accenten, spaties, leestekens en een lidwoord vooraan tellen niet), 'getal' (een schatting; juist = het getal; wie het
-   dichtst zit wint) of 'meer' (meerdere antwoorden; juist = per antwoord een lijst varianten; 50 punten per juist antwoord).
+   accenten, spaties, leestekens en een lidwoord vooraan tellen niet), 'getal' (een schatting; juist = het getal; punten =
+   (100 + max(0, 30 − t)) · max(0, 1 − |ln(gok / antwoord)|)) of 'meer' (meerdere antwoorden; juist = per antwoord een lijst varianten; 50 punten per juist antwoord).
    Als quizmaster kunt u elk antwoord achteraf goed- of afkeuren (✓ / ✗ in het beheer).
    afbeelding: verschijnt groot op de tv en klein op de gsm. Bronnen van de foto's staan in de afbeelding zelf.
    Let op: wie de broncode van de site leest, kan de antwoorden hier zien. Voor een feest aanvaardbaar. */
