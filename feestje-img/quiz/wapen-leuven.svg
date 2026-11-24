@@ -1,2 +1,0 @@
-<svg class="sch" viewBox="0 0 200 240" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="400" height="480"><defs><clipPath id="cx-q6"><path d="M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z"></path></clipPath></defs>
-    <g clip-path="url(#cx-q6)"><rect width="200" height="240" fill="#a2302a"></rect><rect x="0" y="86" width="200" height="56" fill="#efe8d8"></rect></g><path d="M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z" fill="none" stroke="#2a1f16" stroke-width="6" stroke-linejoin="round"></path></svg>

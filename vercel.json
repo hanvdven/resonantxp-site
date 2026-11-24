@@ -1,6 +1,7 @@
 {
   "cleanUrls": true,
   "redirects": [
-    { "source": "/boodschappen", "destination": "https://boodschappen.resonantxp.com/", "permanent": true }
+    { "source": "/boodschappen", "destination": "https://boodschappen.resonantxp.com/", "permanent": true },
+    { "source": "/feestje:rest(.*)", "destination": "https://hannepan.com/feestje:rest", "permanent": false }
   ]
 }
