@@ -302,6 +302,9 @@
     .stand span { font-size: .88rem; color: var(--ink-soft); line-height: 1.3; display: block; }
     .stand[aria-pressed="true"] { background: #f6ecd2; border-color: var(--rubric); box-shadow: inset 0 0 0 2px #f6ecd2, inset 0 0 0 3px var(--rubric); }
     .stand[aria-pressed="true"] b { color: var(--rubric); }
+    .stand.eigen { border-style: dashed; }
+    .eigen-stand { display: flex; gap: 8px; flex-wrap: wrap; margin: -4px 0 12px; }
+    .eigen-stand input { flex: 1 1 160px; min-width: 0; font: inherit; font-size: 1rem; padding: 7px 10px; background: rgba(255,250,236,.65); border: 1px solid var(--ink); border-radius: 1px; color: var(--ink); }
     .dracht { border-left: 3px double var(--rubric); padding: 6px 0 6px 16px; margin: 6px 0 0; font-size: 1.04rem; min-height: 3.2em; }
     .dracht b { font-family: var(--sc); font-variant-caps: small-caps; color: var(--rubric); }
     .herald { display: grid; gap: 16px; justify-items: center; }
@@ -845,6 +848,10 @@
             Een ridder zonder wapenschild is maar een man in een gordijn, dus ernaast ontwerpt u meteen het uwe. Op de dag zelf schildert u het echt,
             van 16u tot 18u30: het mooiste wapen wint. Het beste kostuum krijgt een prijs bij het riddermaal.</p>
           <div class="stands" id="stands" role="group" aria-label="Stand"></div>
+          <div class="eigen-stand" id="eigen-stand" hidden>
+            <label class="sr" for="eigen-naam">Naam van uw stand</label><input id="eigen-naam" type="text" maxlength="24" placeholder="Uw stand, bv. Alchemist" autocapitalize="sentences">
+            <label class="sr" for="eigen-kort">Kort, wat u draagt</label><input id="eigen-kort" type="text" maxlength="32" placeholder="Kort, bv. Kolven en zwavel" autocapitalize="sentences">
+          </div>
           <p class="dracht" id="dracht" aria-live="polite"></p>
           <figure class="minia side"><div class="fr"><img src="feestje-img/manesse-wolfram.jpg" width="560" height="850" alt="Middeleeuwse miniatuur: een ridder met helm, wapenrok en schild in dezelfde kleuren, met zijn paard en een schildknaap." loading="lazy" decoding="async" /></div><figcaption>Wolfram von Eschenbach in vol ornaat: helm, wapenrok, schild en paard in dezelfde kleuren. Zo doet u het. <cite>Codex Manesse</cite>, ca. 1300–1340.</figcaption></figure>
         </div>
@@ -1499,12 +1506,14 @@
   ];
   // In de game bepalen je kleren je charisma (en vieze of bebloede kleren verlagen het). Hier ook.
   const CHARISMA = {
+    eigen: ['+2', 'Eigenzinnigheid +1'],
     ridder: ['+3', 'Dreiging +2'], edel: ['+4', 'Prijzen bij handelaars −10%'], boer: ['+1', 'Niemand let op u'],
     kruid: ['+2', 'Alchemie +1'], monnik: ['+2', 'Vrijstelling van de preek'], rover: ['−1', 'Wacht: verdacht'],
     speelman: ['+3', 'Elk lied wordt meegezongen'], smid: ['+2', 'Uw zwaard is altijd geslepen'],
   };
   // TINCT, DIVS, CHARGES, PLACES, SHIELD, chargeMarkup en shieldMarkup staan in feestje-wapen.js
 
+  const escH = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   (function herald() {
     const s = Object.assign({ stand: 'ridder', t1: 'azure', t2: 'or', div: 'plain', ch: 'ster', c: 'or', name: '', placeShift: 0, titel: 'Heer', stad: '' }, store.get('feestje.wapen', {}));
     const hash = str => [...str.toLowerCase()].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -1525,6 +1534,21 @@
       });
       box.appendChild(b);
     }
+    // de eigen stand: een negende tegel; de naam en een korte omschrijving vult de gast zelf in
+    const eigenB = document.createElement('button');
+    eigenB.type = 'button'; eigenB.className = 'stand eigen'; eigenB.dataset.id = 'eigen';
+    eigenB.addEventListener('click', () => {
+      const eerst = s.stand !== 'eigen'; s.stand = 'eigen'; update();
+      if (eerst) { $('#eigen-naam').focus(); Toast('Uitrusting aangetrokken', `${s.eigen.naam || 'Eigen stand'}: Charisma ${CHARISMA.eigen[0]} · ${CHARISMA.eigen[1]}`, { icon: 'charisma' }); }
+    });
+    box.appendChild(eigenB);
+    s.eigen = Object.assign({ naam: '', kort: '' }, s.eigen);
+    $('#eigen-naam').value = s.eigen.naam; $('#eigen-kort').value = s.eigen.kort;
+    $('#eigen-naam').addEventListener('input', e => { s.eigen.naam = e.target.value; update(); });
+    $('#eigen-kort').addEventListener('input', e => { s.eigen.kort = e.target.value; update(); });
+    const standVan = () => s.stand === 'eigen'
+      ? ['eigen', s.eigen.naam.trim() || 'Eigen stand', s.eigen.kort.trim() || 'Verzin uw eigen', 'Uw eigen stand: kies een dracht die erbij past, en vertel het verhaal erachter aan de dis.']
+      : STANDS.find(x => x[0] === s.stand) || STANDS[0];
     function swatches(el, key) {
       el.textContent = '';
       for (const [k, [name, hex, metal]] of Object.entries(TINCT)) {
@@ -1552,11 +1576,13 @@
       store.set('feestje.wapen', s);
       store.set('feestje.titel', s.name.trim() ? title() : '');
       document.dispatchEvent(new CustomEvent('wapen')); // de kaart tekent het wapen mee
-      const st = STANDS.find(x => x[0] === s.stand) || STANDS[0];
+      const st = standVan();
       for (const b of box.children) b.setAttribute('aria-pressed', b.dataset.id === s.stand);
-      $('#dracht').innerHTML = `<b>${st[1]}.</b> ${st[3]}`;
+      eigenB.innerHTML = `<b>${escH(s.stand === 'eigen' && s.eigen.naam.trim() ? s.eigen.naam.trim() : 'Eigen stand…')}</b><span>${escH(s.eigen.kort.trim() || 'Verzin uw eigen')}</span>`;
+      $('#eigen-stand').hidden = s.stand !== 'eigen';
+      $('#dracht').innerHTML = `<b>${escH(st[1])}.</b> ${escH(st[3])}`;
       $('#shield').innerHTML = shieldMarkup(s, 'big', true, title(), true);
-      $('#herald-title').innerHTML = `${title()}<small>${st[1].toLowerCase()}, ten jare MMXXVI</small>`;
+      $('#herald-title').innerHTML = `${escH(title())}<small>${escH(st[1].toLowerCase())}, ten jare MMXXVI</small>`;
       swatches($('#opt-t1'), 't1'); swatches($('#opt-t2'), 't2'); swatches($('#opt-c'), 'c');
       minis($('#opt-div'), 'div', DIVS); minis($('#opt-ch'), 'ch', ALLE_STUKKEN);
       $('#fs-t2').hidden = s.div === 'plain';
@@ -1627,7 +1653,8 @@
     const box = $('#register'), SLEUTEL = 'feestje.sessie';
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     // de naamdelen gaan mee in het wapen (n): met een eigen titel is "titel voornaam van stad" niet terug te ontleden
-    const wapenVan = () => ({ t1: s.t1, t2: s.t2, div: s.div, ch: s.ch, c: s.c, n: { titel: s.titel.trim(), voor: s.name.trim(), stad: s.stad.trim() } });
+    const wapenVan = () => ({ t1: s.t1, t2: s.t2, div: s.div, ch: s.ch, c: s.c, n: { titel: s.titel.trim(), voor: s.name.trim(), stad: s.stad.trim() },
+      stand: s.stand, ...(s.stand === 'eigen' ? { eigen: { naam: s.eigen.naam.trim(), kort: s.eigen.kort.trim() } } : {}) });
     const huidig = () => JSON.stringify([title(), wapenVan()]);
     let ik = null, bewaard = '', fout = '';
     const fouttekst = e => String(e?.message || e).replace(/^Supabase antwoordde.*/, 'De heraut is even onbereikbaar. Probeer het straks opnieuw.');
@@ -1703,8 +1730,10 @@
       if (!sl) { nieuw(); return; }
       try { ik = await Db.ridderIk(sl); } catch { ik = null; fout = 'De heraut is even onbereikbaar.'; nieuw(); return; }
       if (!ik) { store.set(SLEUTEL, ''); fout = 'U bent afgemeld. Meld u opnieuw aan met uw pincode.'; nieuw(); return; }
-      const { n, ...w } = ik.wapen || {}, d = n || naamDelen(ik.naam);
+      const { n, stand, eigen, ...w } = ik.wapen || {}, d = n || naamDelen(ik.naam);
       Object.assign(s, { titel: d.titel ?? s.titel, name: d.voor ?? '', stad: d.stad ?? '' }, w.t1 ? w : {});
+      if (stand) { s.stand = stand; if (eigen) s.eigen = { naam: eigen.naam || '', kort: eigen.kort || '' }; }
+      $('#eigen-naam').value = s.eigen.naam; $('#eigen-kort').value = s.eigen.kort;
       vulVelden(); update(); bewaard = huidig(); ingeschreven();
     }
     // na elke wijziging in de wapenmaker: de knop "Bewaar" aan of uit
