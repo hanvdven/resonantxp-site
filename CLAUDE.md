@@ -17,3 +17,11 @@ Static site, no build step. `main` deploys via GitHub Pages (`.github/workflows/
 
 The shopping-list app lives in its own repo since 2026-11-09: `hanvdven/boodschappen`, served at
 `boodschappen.resonantxp.com`. `vercel.json` here only redirects `/boodschappen` there (308). Do not add app files back.
+
+## feestje — moved out
+
+The party pages (`/feestje`, `/feestje-tv`, `/feestje-beheer`, `/feestje-quiz`, `/feestje-spotify`,
+`/feestje-sjablonen/` and all `feestje-*` assets) live in `hanvdven/hannepan-public` since 2026-11-24, served at
+`hannepan.com/feestje…` with identical paths. `vercel.json` here redirects every `/feestje…` path there (307 for now,
+so it can still be rolled back before the party; may become 308 afterwards). The Supabase data (`fj_*` tables) stays in
+this project's Supabase. Do not add feestje files back.
