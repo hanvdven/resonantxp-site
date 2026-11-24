@@ -13,7 +13,7 @@ const TINCT = {
 const DIVS = { plain: 'Effen', pale: 'Gedeeld', fess: 'Doorsneden', bend: 'Geschuind', quarterly: 'Gevierendeeld', chevron: 'Keper' };
 const CHARGES = { none: 'Geen', ster: 'Ster', kruis: 'Kruis', maan: 'Maan', zwaard: 'Zwaard', kroon: 'Kroon', roos: 'Roos', beker: 'Beker' };
 const PLACES = ['Skalice', 'Rataje', 'Talmberk', 'Sázava', 'Úžice', 'Ledečko', 'Mrchojedy', 'Samopše', 'Kutná Hora', 'Pirkštejn', 'Sedlec', 'Zbořený Kostelec', 'Malešov', 'Rataje nad Sázavou'];
-const MEER_STUKKEN = { poes: 'Slapende poes', solsleutel: 'Solsleutel', zon: 'Zon', schelp: 'Jakobsschelp', hoorn: 'Jachthoorn', boom: 'Boom', lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl', leeuw: 'Leeuw', adelaar: 'Adelaar', dubbeladelaar: 'Dubbele adelaar', michiel: 'Sint-Michiel', iris: 'Iris' };
+const MEER_STUKKEN = { poes: 'Benji, de slapende poes', kattenoog: 'Kattenoog', solsleutel: 'Solsleutel', zon: 'Zon', schelp: 'Jakobsschelp', hoorn: 'Jachthoorn', boom: 'Boom', lelie: 'Lelie', toren: 'Toren', sleutel: 'Sleutel', hart: 'Hart', ruit: 'Ruit', bol: 'Bezant', pijl: 'Pijl', leeuw: 'Leeuw', adelaar: 'Adelaar', dubbeladelaar: 'Dubbele adelaar', michiel: 'Sint-Michiel', iris: 'Iris' };
 const ALLE_STUKKEN = { ...CHARGES, ...MEER_STUKKEN };   // alle stukken: de wapenmaker op /feestje, het beheer en het tv-scherm
 const SHIELD = 'M10,10 H190 V112 C190,176 142,212 100,234 C58,212 10,176 10,112 Z';
 // de riddernaam: titel + voornaam + "van" + geboortestad, bv. "Jonker Han van Leuven" (beheer én uitnodiging)
@@ -47,18 +47,37 @@ function chargeMarkup(ch, fill) {
     }
     case 'beker': return `<path d="M-30,-44 H30 C30,-6 14,4 5,8 V30 H20 V42 H-20 V30 H-5 V8 C-14,4 -30,-6 -30,-44 Z" ${st}/>`;
     // meer stukken (MEER_STUKKEN)
-    // de slapende poes: opgerold, de staart om zich heen, ogen dicht (en twee z'tjes)
+    // Benji, de slapende poes: opgerold als een broodje, de kop omlaag naar rechts, de gevouwen oortjes van een
+    // Scottish fold (kleine ronde flapjes plat op de kop), een licht snuitje, de staart om zich heen (en twee z'tjes)
     case 'poes': {
-      const ink = '#2a1f16';
-      const staart = 'M40,14 C48,36 20,46 -4,44 C-22,43 -36,38 -40,30';
-      return `<g stroke="${ink}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
-        <ellipse cx="4" cy="12" rx="44" ry="27" fill="${fill}"/>
-        <path d="M-40,-12 L-38,-32 L-26,-19 Z M-20,-20 L-10,-34 L-8,-15 Z" fill="${fill}"/>
-        <circle cx="-25" cy="-2" r="18" fill="${fill}"/>
-        <path d="${staart}" fill="none" stroke="${ink}" stroke-width="13"/><path d="${staart}" fill="none" stroke="${fill}" stroke-width="8"/>
-        <path d="M-34,-3 q4,4 8,0 M-21,-3 q4,4 8,0" fill="none" stroke-width="2.2"/>
-        <path d="M-27,5 l-2,3 l4,0 Z" fill="${ink}" stroke-width="1.2"/>
-        <path d="M14,-30 h9 l-9,9 h9 M28,-46 h11 l-11,11 h11" fill="none" stroke-width="2.6"/></g>`;
+      const ink = '#2a1f16', licht = '#f1e6cf';
+      const staart = 'M-46,26 C-42,46 6,50 26,38';
+      return `<g transform="translate(-4,0) scale(1.2)" stroke="${ink}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M-50,28 C-56,2 -38,-24 -4,-24 C22,-24 38,-10 40,10 C40,30 26,38 -6,38 C-32,38 -47,35 -50,28 Z" fill="${fill}"/>
+        <path d="M-32,-10 C-20,-18 -2,-20 12,-15" fill="none" stroke-width="1.4" opacity=".45"/>
+        <path d="${staart}" fill="none" stroke="${ink}" stroke-width="12"/><path d="${staart}" fill="none" stroke="${fill}" stroke-width="7.5"/>
+        <ellipse cx="30" cy="16" rx="23" ry="20" transform="rotate(24 30 16)" fill="${fill}"/>
+        <path d="M14,-2 C13,-12 26,-15 30,-6 C26,-3 19,-2 14,-2 Z M34,-1 C37,-10 49,-8 49,2 C45,4 39,3 34,-1 Z" fill="${fill}" stroke-width="2"/>
+        <path d="M18,-4 C21,-8 25,-8 27,-5 M37,-2 C40,-6 44,-5 46,-1" fill="none" stroke-width="1.3" opacity=".6"/>
+        <path d="M23,13 q5,5 11,3" fill="none" stroke-width="2"/>
+        <ellipse cx="42" cy="31" rx="7" ry="5" transform="rotate(30 42 31)" fill="${licht}" stroke-width="1.4"/>
+        <path d="M44,27 l3,3 l-4,1 Z" fill="${ink}" stroke-width="1"/>
+        <path d="M38,32 l-12,5 M39,35 l-9,9 M47,33 l10,6 M46,36 l6,10" fill="none" stroke-width="1" opacity=".7"/>
+        <path d="M40,-30 h7 l-7,7 h7 M49,-42 h5 l-5,5 h5" fill="none" stroke-width="2.2"/></g>`;
+    }
+    // het kattenoog (Benji): amandelvormig, de iris vult de hele hoogte, een spleetpupil en een lichtvlekje
+    case 'kattenoog': {
+      const ink = '#2a1f16', amandel = 'M-54,0 C-36,-30 36,-30 54,0 C36,30 -36,30 -54,0 Z';
+      let stralen = '';
+      for (let i = 0; i < 24; i++) { const a = i / 24 * 2 * Math.PI; stralen += `M${(10 * Math.cos(a)).toFixed(1)},${(10 * Math.sin(a)).toFixed(1)} L${(21 * Math.cos(a)).toFixed(1)},${(21 * Math.sin(a)).toFixed(1)} `; }
+      return `<g stroke="${ink}" stroke-linejoin="round">
+        <path d="${amandel}" fill="${fill}" stroke-width="2.5"/>
+        <circle r="22.5" fill="${fill}" stroke-width="2.2"/>
+        <path d="${stralen}" fill="none" stroke-width="1.1" opacity=".35"/>
+        <ellipse rx="6.5" ry="19" fill="${ink}" stroke="none"/>
+        <circle cx="8" cy="-9" r="4.5" fill="#fff" stroke="none" opacity=".9"/>
+        <path d="${amandel}" fill="none" stroke-width="3.5"/>
+        <path d="M-58,-4 C-40,-38 40,-38 58,-4" fill="none" stroke-width="2.5"/></g>`;
     }
     // de solsleutel (G-sleutel): één lijn, in de kleur van het stuk met een donkere omlijning
     case 'solsleutel': {
